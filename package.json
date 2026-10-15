@@ -1,0 +1,35 @@
+{
+  "name": "java-to-javascript-course",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.22.0",
+    "npm": "11.19.1"
+  },
+  "packageManager": "npm@11.19.1",
+  "scripts": {
+    "dev": "astro dev",
+    "setup:diagrams": "bash scripts/setup-diagrams.sh",
+    "diagrams": "bash scripts/build-diagrams.sh",
+    "sync:roadmap": "node scripts/sync-roadmap.mjs",
+    "check": "astro check",
+    "build": "npm run sync:roadmap && npm run diagrams && astro build && npm run check:build",
+    "check:build": "node scripts/check-build.mjs",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.42.6",
+    "@astrojs/markdown-remark": "7.3.2",
+    "astro": "7.3.8"
+  },
+  "overrides": {
+    "postcss-nested": {
+      "postcss-selector-parser": "7.1.6"
+    }
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "typescript": "6.0.3"
+  }
+}

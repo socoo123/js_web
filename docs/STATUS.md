@@ -4,6 +4,7 @@
 
 ## 最新用户要求
 
+- 最新要求：**将现有内容提交到 GitHub 并部署 Pages；以后每次生成文章后自动提交并推送远端。** 已授权，无需每篇再次询问提交/推送。此前 C01 单篇写作范围已完成；本次提前建站和部署，不额外编写 C02。
 - 会 Java，按有编程基础的前端初学者讲解，用中文。
 - 从 JS 历史到当前规范、数据结构、异步、Node/npm/Yarn/Bun，补充 pnpm。
 - React 要详细；讲 SAP UI5 与流行开源组件。
@@ -23,31 +24,47 @@
 - 写入 AGENTS.md 与项目规则，使关键词恢复依赖仓库文件。
 - 通过 48 课号连续性、24 天每日两课、Markdown 本地链接与 Git 空白检查；独立审阅确认 React/UI5 关键边界。
 
-计划文件已纳入本轮 Git 提交。远端同步的实际状态以 `git status -sb`、`git log -1` 和 `git ls-remote origin refs/heads/main` 为准，避免在文件里写入自引用的提交 hash。
+P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git status -sb`、`git log -1` 和 `git ls-remote origin refs/heads/main` 为准，避免在文件里写入自引用的提交 hash。本次将 C01 与网站基础一并提交和推送，具体 Pages 结果见下节。
+
+## C01 已完成：文章、练习与生态图
+
+- 正文：[C01 JavaScript 的故事与生态地图](../src/content/docs/01-history-web/c01-story-ecosystem.md)。包含目标与时间、历史转折、Java 对照、语言/引擎/宿主/包管理/界面库、Web 基础起点、旧代码背景、标准与提案边界、错误定位、必做练习和折叠答案。
+- 练习：[examples/c01/README.md](../examples/c01/README.md)，无第三方依赖。浏览器 Console 为必做，Node 与 Java 为选做对照；代码块与示例文件已逐一核对一致。
+- 首图：[D2 源码](../diagrams/c01-ecosystem.d2) → [SVG](../src/assets/diagrams/c01-ecosystem.svg)。固定 D2 0.9.0、Dagre 与 Noto Sans SC 字体提交及 SHA-256；保留字体许可，并在 SVG 内嵌所需字形与许可。重建见 [图说明](../diagrams/README.md)。
+- 实际验证（2026-10-15）：Chrome 155.0.8059.40 的独立 headless 页面、Node 23.11.0、JDK 21.0.2；库存计算、环境探针、同步回调、CommonJS 加载、预期 ReferenceError、练习答案及售出为 0 的变体均符合预期。
+- 图编译和中文渲染已检查；独立静态 Markdown 预览检查了 360px 正文宽度、图像加载、5 个答案/提示折叠区。预览使用临时阅读样式，不能替代未来 Starlight 主题与 Astro 生产构建验收。
+- 重新核对官方历史、ECMAScript 2026 与 TC39 状态；实际验证环境与 Node 24 LTS 的后续工程计划分开记录，未把资料核对或作者机器版本当成网站依赖安装。
+
+## 网站基础与提前 Pages 部署
+
+当前：**本地验收完成；Pages 工作流已创建，待本次推送后的线上验收。** 不把本地通过写成已上线。
+
+- 固定 Node **24.22.0 LTS**、npm **11.19.1**、Astro **7.3.8**、Starlight **0.42.6**；直接依赖固定具体版本，根级唯一 `package-lock.json`。React islands 尚无实际需求，未预装 React。
+- 已创建静态网站配置、中文根语言、首页、4 周/8 周路线、48 课目录、自动课程导航、代码高亮/复制、原生练习折叠区、Pagefind 搜索。目录在构建时从大纲和已存在正文生成，当前 **1 / 48** 课，未写课程显示「待发布」。
+- `npm run setup:diagrams` 按固定摘要准备 D2/字体；`npm run build` 串行同步目录、编译 D2、生成静态 HTML/搜索索引并检查 `/js_web/` 内部链接与资源。工具保存在忽略目录，未全局安装。
+- 工作流：[deploy.yml](../.github/workflows/deploy.yml)，推送 `main` 自动构建并部署；部署目标为 `https://socoo123.github.io/js_web/`。固定 Actions commit，构建只读、部署取得 Pages/OIDC 权限。
+- 已把“文章完成后验证 → 更新目录/进度 → 提交并推送 → 核查 Pages”写入 [AGENTS.md](../AGENTS.md) 和项目规则；维护步骤见 [DEPLOYMENT](DEPLOYMENT.md)。用户明确要求仅本地草稿时按当次范围处理。
+- 本地实际验证（2026-10-15）：固定 Node/npm 下 `npm ci`、D2 准备/编译、`npm run check`（0 errors/0 warnings）、`npm run build` 与生产输出检查通过。构建生成首页、路线页、C01 与 404；Starlight 自定义 404 与内部通配路由有一条优先级提示，实际采用 404.html，不影响发布。
+- Chrome 155.0.8059.40 生产预览验收：1280px/360px 首页、路线页与课程无整页横向溢出；亮暗模式截图与 D2 图中文正常；5 个折叠答案含正文并能展开；禁用站点 JS 后正文与折叠内容仍在 HTML 中。
+- 搜索实际执行「浏览器」「库存」「npm」均返回带 `/js_web/` 的结果；搜索弹窗能检索 C01 与段落链接。浏览器未捕获资源 HTTP 错误或未处理异常。
+- 安装时的间接 PostCSS 解析器告警已通过限定的依赖覆盖修复；锁文件重新 `npm ci` 及 `npm audit` 通过，报告为 0 漏洞。核查依据见 [SOURCES](SOURCES.md)。
 
 ## 尚未实施
 
-- 未创建 Astro/Starlight 网站、课程正文或完整练习代码。
-- 未安装依赖；本机查询未发现 D2 CLI。
-- 未创建 Pages Actions；查询 Pages 配置时返回未配置。
-- 尚未部署，`https://socoo123.github.io/js_web/` 只是未来目标地址。
-- 来源中所列版本是核查状态，不是已安装/已运行的示例版本。
+- C02–C48 正文、配套练习和后续关键 D2 图仍未编写；当前只发布 C01。
+- 学习者 localStorage 完成进度/导入导出、少量 React islands 与相关综合示例仍未实现。目录中的已发布数量是课程建设状态，不是个人学习进度。
+- 完整 M1 仍缺 C02 示范课；提前上线不代表整个 M1、M6 或 48 课课程全部完成。
 
-## 下一项任务：M1 网站基础与示范课
+## 下一项未完成：C02 Web 基础与第一个调试现场
 
-用户清理上下文后发送 JS_WEB_START 并要求开始时，执行下面步骤：
+继续单篇写作时按 `CURRICULUM.md` 和 `CONTENT_GUIDE.md` 生成 C02：HTML 语义/表单/DOM，CSS 选择器、盒模型、Flex/Grid 与响应式，URL/HTTP/页面加载，商品卡片 HTML/CSS/JS 与 DevTools 断点、Console、Elements、Sources 跟做。给必要文件、操作步骤、预期结果与排错题；执行后准确记录验证状态。
 
-1. 先读本文件与 AGENTS.md；检查 Git 状态与已有文件，保留用户后续改动。
-2. 读取 PLAN、CURRICULUM、ARCHITECTURE、CONTENT_GUIDE、DEBUG_TESTING、SOURCES；无需重做本轮规划。
-3. 核查兼容的 Node 24 LTS、npm、Astro/Starlight/React 依赖，固定具体版本与根锁文件。
-4. 建立静态站骨架，设置 GitHub 项目子路径 `/js_web/`。
-5. 首页展示 4 周/8 周路线、课程目录、课程建设进度。
-6. 写完整 C01/C02 示范课，遵循 Java 对照、自己尝试、验证状态、Debug 入门规范。
-7. 固定 D2，创建生态关系首图，构建 SVG 并检查中文布局。
-8. 构建并预览生产输出；验证首页、示范课、资源子路径与静态阅读。
-9. 更新本文件，记录真正完成内容、验证结果与下一步 M2。
+1. 先读 STATUS、AGENTS；检查 Git 与现有站点。保留 C01 和已上线架构，不重做规划/脚手架。
+2. 核查 C02 所用动态文档，编写正文与练习，必要机制图使用 D2。
+3. 同步目录，更新本文件与来源；运行必要示例、`npm run check`、`npm run build`，检查新课的真实生产页面。
+4. 按已授权规则提交并推送 GitHub；等待 Pages Actions 成功并核对 C02 深层 URL，报告实际结果。
 
-M1 交付网站骨架与示范课，不同时装入所有组件库。M6 才配置和部署 Pages；用户若明确提前要求预览部署，按新的范围推进并标注课程建设状态。
+用户若要求完整 M1，完成 C02 后按总计划的验收标准收尾；其余内容分阶段推进。
 
 ## 已定的教学与技术方向
 

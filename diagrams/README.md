@@ -1,0 +1,51 @@
+# D2 教学图
+
+当前为 C01 生态关系图。源码为 `c01-ecosystem.d2`，产物为 `../src/assets/diagrams/c01-ecosystem.svg`。已接入网站 npm 构建与 Pages Actions；编译失败会阻止发布。
+
+固定工具：**D2 0.9.0**（根目录 `.d2-version`）、免费 Dagre 布局。字体使用 Noto Sans SC，固定到 Google Fonts 仓库提交 `a85815a42757630ce188fdad368c2dfc444d4773`。字体文件保存在被 Git 忽略的 `.cache/tools/`，脚本核对 SHA-256；SVG 内嵌使用到的字形及完整 OFL 许可，不需要浏览器下载字体。
+
+## 准备与生成
+
+操作方式：维护者本地构建。验证状态：下列 macOS arm64 路径已于 **2026-10-15** 实际执行；Linux/Windows 安装路径尚未执行。学习者阅读 C01 不需要安装 D2。
+
+推荐在固定 Node/npm 环境下执行：
+
+```sh
+npm run setup:diagrams
+npm run diagrams
+```
+
+准备脚本支持 macOS/Linux 的 arm64 与 x64，按官方发布资产的固定 SHA-256 校验归档后解压，再核对字体。Windows 可在 WSL 中执行，原生 Windows 路径尚未验证。Linux 的实际 CI 结果见 [STATUS](../docs/STATUS.md)。
+
+以下命令工作目录均为**仓库根目录**。需要 Bash、curl、tar、Python 3 和 `shasum` 或 `sha256sum`。
+
+```sh
+mkdir -p .cache/tools
+curl -fL --max-time 120 https://github.com/d2lang/d2/releases/download/v0.9.0/d2-v0.9.0-macos-arm64.tar.gz -o .cache/tools/d2-v0.9.0-macos-arm64.tar.gz
+tar -xzf .cache/tools/d2-v0.9.0-macos-arm64.tar.gz -C .cache/tools
+curl -fL --max-time 120 'https://raw.githubusercontent.com/google/fonts/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf' -o .cache/tools/NotoSansSC.ttf
+bash scripts/build-diagrams.sh
+```
+
+其他平台从 [D2 固定版本发布页](https://github.com/d2lang/d2/releases/tag/v0.9.0) 选择对应资产，或按官方安装方式安装 **0.9.0**，再准备同一字体。脚本依次选择 `D2_BIN` 指定的可执行文件、仓库本地二进制、PATH 中的 `d2`。例如在仓库根目录执行：
+
+```sh
+D2_BIN=/absolute/path/to/d2 bash scripts/build-diagrams.sh
+```
+
+字体 SHA-256：
+
+```text
+a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da
+```
+
+缺少 D2、版本不匹配、缺少字体、字体校验失败或 D2 编译失败，脚本都会以非零状态退出。脚本不会自动下载或更新工具；准备完成后生成 SVG 可离线执行。
+
+## 验证边界
+
+- D2 编译成功；SVG 能解析，包含全部中文标签和文字。
+- 在 Chrome 155.0.8059.40 中检查图的中文与连线布局。图采用自带浅色背景，可在深色正文中保持对比。
+- 图附近有 alt 与独立的文字解释；环境表格重复列出重要信息，不能只靠图读懂课程。
+- 已接入 Astro 资产处理与 `/js_web/` 子路径构建检查；最终主题/线上图像的实际验证结果见 [STATUS](../docs/STATUS.md)。
+
+依据（2026-10-15 核查）：[D2 CLI](https://d2lang.com/tour/man/)、[D2 字体配置](https://d2lang.com/tour/fonts/)、[SVG 导出](https://www.d2lang.com/tour/exports/)、[Noto Sans SC 来源](https://github.com/google/fonts/tree/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc)。字体许可原文保存在 [NotoSansSC-OFL.txt](NotoSansSC-OFL.txt)。

@@ -1,6 +1,6 @@
 # 静态网站架构与部署规划
 
-状态：技术方向已定，尚未安装依赖或创建网站代码。实施时先核查实际版本，再固定依赖。
+状态：C01、Astro/Starlight 静态骨架、首页/路线页、D2 npm 管线与 Pages Actions 已实现；用户要求提前部署。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。React islands、学习进度和 C02 起的正文待后续实施。
 
 ## 技术选择
 
@@ -45,7 +45,7 @@ React islands 默认仍会在构建期预渲染。`client:load` 只决定客户�
 
 ## 目录草图
 
-以下是实施后预计目录，当前仅有规划文件：
+以下为总体目录方向；当前已有网站配置、首页、路线页、C01、示例、图构建与 Pages 工作流；React 组件、其他课正文和持久化学习进度待实施：
 
 ```text
 js_web/
@@ -84,7 +84,7 @@ js_web/
 ├── package.json
 ├── package-lock.json
 ├── .node-version
-└── .github/workflows/         # M6 创建 Pages 工作流
+└── .github/workflows/         # 用户提前要求部署，已创建 Pages 工作流
 ```
 
 课程示例用 `.js/.jsx`，站点工程可使用适量 TypeScript。读者不需要先掌握复杂泛型才能开始学习。
@@ -135,11 +135,11 @@ lastReviewed: 2026-10-15
 5. 中文字体、布局、文字大小和亮暗模式实际渲染检查；统一风格，避免图内塞长代码。
 6. 每图有 alt/邻近文字解释；流程即使不看图也能理解。
 
-依据：[D2 导出](https://www.d2lang.com/tour/exports/)、[D2 CLI](https://d2lang.com/tour/man/)。本轮本机尚无 D2，安装和图渲染在 M1 执行。
+依据：[D2 导出](https://www.d2lang.com/tour/exports/)、[D2 CLI](https://d2lang.com/tour/man/)。C01 使用 D2 0.9.0 + Dagre；`npm run setup:diagrams` 准备并校验工具/字体，`npm run build` 先执行图构建。字体来源、SHA-256 与复现命令见 [diagrams/README.md](../diagrams/README.md)。工具在被忽略的 `.cache/` 中，未全局安装；Astro 产物检查校验带 `/js_web/` 的 SVG 资产路径。
 
 ## Pages 子路径与路由
 
-预计 Astro 配置方向：
+已实现的 Astro 配置：
 
 ```js
 site: 'https://socoo123.github.io',
@@ -159,9 +159,9 @@ trailingSlash: 'always'
 
 ## 依赖与命令规划
 
-初始核心依赖：astro、@astrojs/starlight、@astrojs/mdx、@astrojs/react、react、react-dom。仅在实际需要时增加示例/验证依赖。
+当前核心依赖：astro、@astrojs/starlight、@astrojs/markdown-remark；检查依赖为 @astrojs/check 与 TypeScript 6。Starlight 自带 MDX 集成；没有 React island 时不预装 React，后续按实际示例接入 @astrojs/react、react、react-dom。
 
-Node 24 LTS 为查询所见基线；M1 核对并固定具体补丁。本地与 CI 使用同一版本。网站工程统一 npm、一份根级 `package-lock.json`；其他管理器实验在独立目录，不混用根锁文件。
+本地与 CI 固定 Node 24.22.0 + npm 11.19.1，网站工程统一 npm、一份根级 `package-lock.json`；其他管理器实验在独立目录，不混用根锁文件。实际命令与文章提交约定见 [DEPLOYMENT](DEPLOYMENT.md)。
 
 预计脚本：
 

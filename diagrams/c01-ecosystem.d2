@@ -1,0 +1,27 @@
+# C01：箭头表示标注的关系，不表示执行时间顺序。
+direction: down
+
+*.style.font-size: 20
+*.style.border-radius: 10
+
+standard: ECMAScript 标准\n定义语言规则
+code: JavaScript 程序\n业务代码与所用的库
+
+standard -> code: 代码遵循规则
+
+packages: npm / Yarn / pnpm\n管理项目依赖
+library: React 等库\n提供可复用能力
+packages -> library: 安装到项目
+library -> code: 供代码使用
+
+hosts: 运行环境 = 引擎 + 宿主能力 {
+  grid-columns: 1
+  browser: 浏览器\n引擎 + 页面 DOM 等能力
+  node: Node.js\nV8 + 文件、网络等能力
+  bun: Bun 运行时\nJavaScriptCore + 文件、网络等能力
+  browser.style.font-size: 20
+  node.style.font-size: 20
+  bun.style.font-size: 20
+}
+
+code -> hosts: 选择对应环境执行

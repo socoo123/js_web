@@ -99,3 +99,27 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 4. 对核心新特性检查目标浏览器/运行时支持；必要时给兼容写法。
 5. 实际执行后记录命令、结果和日期；未执行者保持 reviewed/unverified，练习类型另行标注。
 6. 将影响课程结论的更新写进 STATUS 与对应课程，不只在来源文件里修改数字。
+
+## C01 编写时的重新核查与实际验证
+
+日期：**2026-10-15**。本次按用户范围只交付 C01，未实施 Astro 依赖基线。
+
+- 重新读取 Ecma 标准页，确认 ECMAScript 2026 / 第 17 版 / 2026-06；读取 ES2015 与 ES2017 正式版入口，对照现代语法的年度归属。
+- 重新读取 TC39 流程与提案列表；Temporal 为 Stage 4，完成表预计 2027；Decorators 在进行中列表为 Stage 2.7。C01 均标明核查日期，并与实际环境支持分开讲解。
+- 历史依据使用 [设计者与标准工作者的论文全文](https://www.wirfs-brock.com/allen/jshopl.pdf)，核对原型、命名、兼容背景及 Node/CommonJS 转折；正文原创讲解。
+- Node、Bun、npm、Yarn、pnpm、React、UI5 家族定位使用对应官方文档核对；本课没有新增其安装命令或第三方依赖。
+- 实际执行环境：Chrome 155.0.8059.40、Node 23.11.0、JDK 21.0.2。Node 23 是本机验证环境，不改动后续工程选择 Node 24 LTS 的计划。执行项和命令见 [C01 练习记录](../examples/c01/README.md)。
+- 固定并实际运行 [D2 0.9.0](https://github.com/d2lang/d2/releases/tag/v0.9.0)，使用 Dagre。中文字体固定到 [Google Fonts Noto Sans SC 提交](https://github.com/google/fonts/tree/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc)，原始 TTF 的 SHA-256、许可和重建方法见 [图说明](../diagrams/README.md)。SVG 内嵌字形和许可，无在线字体依赖。
+- 静态 Markdown 预览及图渲染通过；未执行 Astro 构建、Pages 子路径或部署验证。
+
+## 网站与提前 Pages 部署的核查
+
+日期：**2026-10-15**。本次用户要求部署现有 C01，并授权后续每次文章完成后提交、推送与自动更新 Pages；不扩写 C02。
+
+- 官方 Node 发布索引确认 **24.22.0 LTS**，自带 **npm 11.19.1**；下载对应 macOS arm64 归档，按官方 `SHASUMS256.txt` 校验后在项目忽略目录使用。本地与 CI 版本一致。
+- npm 官方 registry 元数据与包 engines/peerDependencies 核对：Astro **7.3.8**、Starlight **0.42.6**（要求 Astro ^7.2.10）、@astrojs/markdown-remark **7.3.2**、@astrojs/check **0.9.10**、TypeScript **6.0.3**。固定直接依赖与根级锁文件；TypeScript 仅用于网站工程检查，不改变课程 JS 主线。
+- [Starlight 手动设置](https://starlight.astro.build/manual-setup/)、[配置参考](https://starlight.astro.build/reference/configuration/)、[侧栏 API](https://starlight.astro.build/guides/sidebar/) 和 [搜索](https://starlight.astro.build/guides/site-search/) 用于中文根语言、内容集合、自动导航与 Pagefind；按当前 API 把 autogenerate 放进分组的 items 数组。
+- [Astro Pages 部署](https://docs.astro.build/en/guides/deploy/github/) 与 [GitHub 自定义 Pages 工作流](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) 用于静态子路径与最小任务权限。Actions 版本从对应官方仓库标签解析，并固定到 commit SHA。
+- 固定 D2 各平台发布归档摘要来源于官方 v0.9.0 的 GitHub release API，字体仍采用 C01 固定提交与摘要；本地自动准备脚本已执行。
+- 安装时 npm audit 发现 PostCSS 解析器的间接依赖告警；依据 [官方审定公告](https://github.com/advisories/GHSA-rj75-hqrm-r3gf)，仅在 postcss-nested 依赖下覆盖到修复版 **postcss-selector-parser 7.1.6**，随后安装、锁文件复现与生产构建通过，audit 为 0 漏洞。该包用于可信源码的构建期解析，覆盖规则待上游依赖修复后再评估移除。
+- 生产页面、浏览器和线上验证的实际结果见 [STATUS](STATUS.md)；此前 C01 小节记录的是建站前的历史交付范围，不表示本次仍未建站。

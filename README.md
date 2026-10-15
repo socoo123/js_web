@@ -2,7 +2,19 @@
 
 面向会 Java、尚未系统学习前端的开发者，用中文从 JavaScript 的历史讲到现代语言、数据结构、Node 与包管理、React、SAP UI5 和开源组件。
 
-当前阶段：**规划完成，网站尚未搭建，GitHub Pages 尚未部署。**
+当前阶段：**C01 正文、练习与 D2 生态图已完成；Astro + Starlight 网站、首页、课程目录与 Pages 自动部署流程已搭建。课程逐篇发布，线上部署验证结果见 [STATUS](docs/STATUS.md)。**
+
+- 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
+- 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)
+- [本地构建与自动提交/部署说明](docs/DEPLOYMENT.md)
+
+## 已完成课程
+
+- [C01 JavaScript 的故事与生态地图](src/content/docs/01-history-web/c01-story-ecosystem.md)：历史、Java 对照、生态分层、Console 练习与答案。
+- [C01 练习与验证记录](examples/c01/README.md)：浏览器主线，Node/Java 选做对照。
+- [D2 生态图与构建说明](diagrams/README.md)：保留源码、SVG 与固定工具/字体信息。
+
+后续课程仍为大纲；C02 正文尚未编写。
 
 ## 清理上下文后如何继续
 
@@ -41,5 +53,6 @@
 - 仓库：<https://github.com/socoo123/js_web>
 - Git 远程：`origin` → `https://github.com/socoo123/js_web.git`
 - 主分支：`main`
-- 未来 Pages 地址：`https://socoo123.github.io/js_web/`，当前尚未上线。
-- 技术方向：Astro + Starlight + Markdown/MDX + React 演示；D2 在构建时生成 SVG。
+- Pages 地址：<https://socoo123.github.io/js_web/>，实际发布状态见 [STATUS](docs/STATUS.md)。
+- 技术栈：Astro + Starlight 静态站；D2 在构建时生成 SVG，React islands 按后续示例需要接入。
+- 每次生成文章后按已授权流程验证、提交并推送 `main`；推送触发 GitHub Actions 自动部署 Pages。
