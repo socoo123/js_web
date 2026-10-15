@@ -2,11 +2,11 @@
 
 适用读者：会 Java、初学前端。主节奏为每天 3–4 小时、每日 2 课、每周 6 天；8 周路线每天 1 课。
 
-课号 C01–C48 是稳定 ID，网站网址和学习进度均应与之对应。下面是写作大纲；目前 [C01](../src/content/docs/01-history-web/c01-story-ecosystem.md)、[C02](../src/content/docs/01-history-web/c02-web-debugging.md)、[C03](../src/content/docs/02-language-data/c03-values-types.md)、[C04](../src/content/docs/02-language-data/c04-scope-control.md)、[C05](../src/content/docs/02-language-data/c05-objects-json.md) 正文已完成，其余课程尚未写完。网站骨架已搭建；构建时从本大纲与已有正文自动生成线上路线页，未发布课程不生成占位文章。
+课号 C01–C48 是稳定 ID，网站网址和学习进度都与它对应。哪些课已经发布，以 [STATUS](STATUS.md) 为准。构建时 `scripts/sync-roadmap.mjs` 会从本文件的表格生成线上路线页，所以表格的列格式不要改，标题里不要出现 `|`。
 
-所有需要操作的任务在正式课程中标注 **「自己尝试 · 环境」**，并给出完整必要文件、命令、操作步骤、预期结果和常见失败原因。无需将所有例子变成在线应用。
+怎么写看 [写作规范](CONTENT_GUIDE.md)。表格中的「必须讲清的内容」是范围的上限，不是必须逐项展开的清单。每周表格下面的「写作范围」进一步写明每课讲到哪里为止；写不下的内容放进选修。
 
-贯穿业务：库存管理。采用同一组商品数据，在 JS、React、普通组件库、OpenUI5 和 UI5 React 中复用。
+贯穿业务是库存管理。从 C06 开始统一使用 [PLAN §3](PLAN.md) 的固定样例数据和项目阶段目录。
 
 ## 第 1 周：历史、语言、结构与浏览器
 
@@ -21,30 +21,52 @@
 | 4 | C07 this、原型与 class | this 由调用方式决定；箭头函数的词法 this；call/apply/bind；属性查找与原型链；class/private 字段、组合；与 Java 类/继承的不同 | 预测方法脱离对象后的结果；用函数和 class 两种方式建模；解释实例为何能访问原型方法 |
 | 4 | C08 Array 与业务数据处理 | 遍历、map/filter/find/some/every/reduce；sort 默认规则、比较器、稳定性；修改/非修改 API；toSorted 等现代写法；稀疏数组 | 商品筛选、数字排序、统计库存、分组；避免修改输入，比较 Java Stream 和数组操作 |
 | 5 | C09 Object、Map、Set 与弱集合 | 字典选择、键类型、插入顺序、对象身份；Map/Set 操作；WeakMap/WeakSet 的用途与不可枚举性；分组与去重；迭代协议入门 | 去重标签、建立商品 ID 索引、按分类分组；解释两个内容相同对象为何是不同 Map 键 |
-| 5 | C10 栈、队列、树与复杂度 | Big O 入门；Array 与 Java ArrayList 的类比边界；栈、带头索引队列、链表概览；树 DFS/BFS；图的邻接表概览；递归深度 | 栈实现撤销、队列处理任务、树生成分类导航；比较 shift 和头索引方案；复杂度不承诺所有引擎内部实现 |
+| 5 | C10 栈、队列、树与复杂度 | 只讲 JS 写法和代价：Array 当栈（push/pop）；shift 的代价与头索引队列；嵌套对象表示树、递归 DFS 与队列 BFS；递归深度与改写成循环；图的邻接表用 Map 一段带过 | 撤销栈、任务队列、从分类树生成导航；用 console.time 比较 shift 和头索引在 10 万条数据上的量级差 |
 | 6 | C11 DOM、事件、表单与页面调试 | 查询/更新节点、文本与 HTML；冒泡/捕获/委托；表单与基础校验；DOM/CSS 调试、事件断点、可访问性；最小化直接操作 | 为商品列表增加筛选和编辑；用事件断点定位重复触发；用 DOM 断点定位意外删除 |
 | 6 | C12 从回调到 Promise：执行顺序 | 同步调用栈、任务/微任务、渲染概念；Promise 状态/链、异常传播、finally；异步不等于线程；浏览器与 Node 的宿主差异 | 预测一段输出顺序并用断点/日志验证；修复嵌套回调和漏 return；本周库存数据模块验收 |
 
-第 1 周验收：能解释类型/闭包/原型的常见错误，并独立处理库存数据。Web 基础只要求够理解与调试，后续持续补充 CSS、布局与可访问性。
+第 1 周验收：能解释类型、闭包、原型的常见错误；项目阶段 1 运行 `node demo.js`，输出与 PLAN §3.1 的参考值一致。
+
+第 1 周写作范围：
+
+- C06：开头用 5 行左右给出安装 Node 24 LTS 的步骤，此后纯语言的例子默认用 `node` 运行。闭包用 Sources 的 Scope 面板观察；循环捕获的 bug 用 `var` 和 `let` 对比。
+- C07：this 的四种调用方式各给一个短例子；不讲 `__proto__` 的历史和 `setPrototypeOf` 的性能；class 私有字段只讲用法。
+- C08：只挑 12 个左右常用数组方法，用一张表列出哪些修改原数组、哪些不修改；`sort` 默认按字符串排序必须单独演示。
+- C09：WeakMap/WeakSet 只讲一个用途示例，以及为什么不能遍历。
+- C10：不从头讲 Big O 和数据结构概念（Java 已学过），时间测量只看量级。
+- C11：`innerHTML` 与 `textContent` 的安全差异必须给一个 XSS 例子；事件委托用商品列表演示。
+- C12：事件循环只讲浏览器模型，Node 的差异用一段话说明，详细内容在 C17。
 
 ## 第 2 周：现代 JS、运行时、工具与 React 起步
 
 | 日 | 课号与标题 | 必须讲清的内容 | 自己尝试与验收 |
 | --- | --- | --- | --- |
-| 7 | C13 async/await、请求与 Network | 串行/并发、Promise.all/allSettled/race/any；forEach(async) 陷阱；fetch 状态与 HTTP 错误、AbortController、竞态；Network 看 Headers/Payload/Response/Timing；CORS | 请求静态商品 JSON，显示加载/空/错态；模拟慢网和失败；旧结果不能覆盖新搜索 |
+| 7 | C13 async/await、请求与 Network | async/await 与 Promise 的对应；串行与 Promise.all 并发、allSettled 处理部分失败；forEach(async) 陷阱；fetch 遇到 404 不抛异常、response.ok、JSON 解析失败；AbortController 取消上一次搜索；Network 看状态码/Response/Timing 与慢网模拟；CORS 只讲现象与原因 | 请求静态 products.json，显示加载/空/错三种状态；用 Network 模拟慢网和 404，页面提示正确 |
 | 7 | C14 原生页面、存储与错误处理 | localStorage/JSON、防损坏、导入导出；事件与渲染组织；try/catch 与用户错误提示；Application 面板、浏览器存储和刷新行为 | 完成原生库存页面 v1；损坏存储时可恢复；区分服务器数据与当前浏览器本地状态 |
-| 8 | C15 ES2015 到 ES2026：如何读更新 | ES2015 核心转折；async/await、可选链、空值合并、现代集合/数组、迭代能力；年度速查；规范/提案/实际支持；TC39 0/1/2/2.7/3/4 | 将旧写法迁移为现代写法；检查两个新 API 的目标环境支持；不把所有 Stage 4 都写成同一年度特性 |
-| 8 | C16 模块、依赖与组织代码 | ESM import/export、静态/动态导入、模块作用域、循环依赖概念；浏览器 URL 解析 vs 包解析；CommonJS require/module.exports 与边界 | 将库存逻辑拆为 ESM 文件；修复导出/路径/加载错误；读懂一个 CommonJS 示例 |
+| 8 | C15 CSS 布局与响应式：排版库存页 | box-sizing 与盒模型复习；Flex 做工具栏、Grid 做商品卡片网格（repeat/minmax/auto-fill）；gap 与对齐；移动优先与媒体查询；CSS 变量；focus-visible 与对比度；DevTools 的 Flex/Grid 叠加层、设备模式、Computed 查样式来源；与 Swing/JavaFX 布局管理器类比 | 原生库存页 v1 在 360px 单列、768px 两列、1280px 四列，没有横向滚动；用 DevTools 找出并修复一处溢出 |
+| 8 | C16 模块、依赖与组织代码 | ESM import/export、静态/动态导入、模块作用域、循环依赖概念；浏览器 URL 解析与包解析；CommonJS require/module.exports；怎样判断新特性能否使用（MDN 兼容表、Node 版本、TC39 阶段） | 把库存逻辑拆成 ESM 文件，并复用阶段 1 的 inventory.js；修复导出/路径/加载错误；读懂一个 CommonJS 示例；查两个新 API 的环境支持 |
 | 9 | C17 Node 与浏览器的边界 | Node 运行 JS 的模型、V8、系统 I/O 与线程池概览；process/path/fs/promises/Buffer/基础 stream；环境变量、ESM；Node --inspect | 本地读取库存 JSON 并生成报告；调试文件路径/异步异常；解释为何浏览器没有 fs，而 Node 没有 DOM |
 | 9 | C18 npm：项目、版本与可复现安装 | package.json、scripts、dependencies/devDependencies/peerDependencies；semver、registry、install/ci、exec/npx；lockfile；Maven 类比的边界 | 建立两个脚本、阅读依赖树和锁文件；在独立练习目录验证清单/锁不一致时 npm ci 失败 |
 | 10 | C19 Yarn、pnpm、Bun 的职责与选择 | Yarn Classic/Modern、PnP/node-modules linker、workspaces；pnpm 存储/链接与隐藏依赖；Bun runtime/package manager/test/bundler；Corepack 状态；兼容性 | 选两种工具在隔离目录尝试同一小项目，记录锁文件与解析差异；主站继续只用 npm |
-| 10 | C20 构建工具与第一次 UT | Vite、转译/打包/类型检查区别、开发服务与静态产物、source maps；Vitest 基本用法、describe/it/expect、AAA、边界数据；TS 桥接概要 | 给库存统计写正常/空值/非法输入测试，先观察失败再修复；构建页面并从映射回源码；TS 深入选修 |
+| 10 | C20 构建工具与第一次 UT | Vite、转译/打包/类型检查的区别、开发服务与静态产物、source maps；Vitest 基本用法、describe/it/expect、AAA、边界数据；TypeScript 只写一节桥接（类型注解长什么样、Vite 不做类型检查），深入见 X02 | 给库存统计写正常/空值/非法输入测试，先观察失败再修复；构建页面并通过 source map 回到源码 |
 | 11 | C21 React 来由、JSX 与第一个组件 | 声明式 UI；函数组件、createRoot、JSX/Fragment、表达式/样式；React 与 DOM 的关系；Vite 练习项目；不用 CRA 开新项目 | 手写商品卡片组件，比较原生 DOM 更新；检查 JSX 的报错与编译后结构 |
 | 11 | C22 Props、组合与渲染模型 | props、children、组件拆分、单向流、纯渲染；render/commit 区分；条件渲染；React DevTools Components 查看树/props | 拆分列表/卡片/工具栏；从组件树定位错误 props；避免修改输入 props |
 | 12 | C23 useState：状态快照与更新队列 | Hooks 调用规则；事件函数；每次 render 的 state 快照、批处理、函数式更新、闭包；连续更新与延时回调；状态不等于 Java 可变字段 | 修复“加三次只加一次”和延时读取旧值；解释修复而非只背函数式写法 |
 | 12 | C24 数组更新、key 与派生数据 | 不可变对象/数组更新、map/filter；列表 key 与组件身份；派生数据/排序/过滤；状态最小化 | 商品增删改查与过滤；证明索引 key 导致编辑错位；不把过滤结果另存一份 state |
 
 第 2 周验收：原生页面与 Node 工具可自行完成；读懂 npm 工程；React 列表/状态能正确变化；能写一个发现业务 bug 的单测。
+
+第 2 周写作范围：
+
+- C13：竞态只演示「用 AbortController 取消上一次搜索」，过期响应与清理时序放到 C30。
+- C14：存储只用 localStorage，sessionStorage 和 IndexedDB 各一句话。
+- C15：只讲做出库存页需要的布局，动画、预处理器、CSS 框架都不讲（见 X01）。
+- C16：ES 各年度的特性列表不写进正文，放到参考页「ES 版本速查」。
+- C17：只讲 fs/promises、path、process.argv/env 和 `--inspect`；stream 和 Buffer 各一段。
+- C18：不讲发布 npm 包（见 X06）；`npm ci` 失败的练习在 `examples/c18/` 的隔离目录里做。
+- C19：每个工具一张定位表，加一个隔离目录的实验；不讲 Yarn PnP 的配置细节。
+- C21：用 Vite 创建 React 项目，写之前核对官方当前推荐的命令。
+- C23、C24：遵守下文「React 16 课的写作深度要求」。
 
 ## 第 3 周：详细 React
 
@@ -72,6 +94,7 @@ React 16 课的写作深度要求：
 - C33 拆为核心现代用法与更新附录；不强迫初学者掌握所有新 API。
 - C34 先测量，再优化；不能讲成每个函数都需要 useCallback。
 - C35 至少包括一个真实业务回归和一个异步失败用例，解释为什么要选这个测试层级。
+- React 各课的代码都在项目阶段 `04-react/` 上推进；正文只展示改动的组件，完整文件放在阶段目录中。
 
 ## 第 4 周：开源组件、SAP UI5 与交付
 
@@ -90,6 +113,14 @@ React 16 课的写作深度要求：
 | 24 | C47 综合项目与测试选择 | 补齐库存应用；以风险选择 UT/集成/E2E；Vitest 核心函数与 reducer、RTL 表单/请求、Playwright 冒烟 | 写测试计划并补 3–5 个有价值的回归用例；完成键盘/手机/数据恢复手工检查 |
 | 24 | C48 总复盘与后续路线 | 从历史到生态回顾；Java↔JS 常见差异；语言→数据→UI→工具→静态交付；阅读新版本的方法；个人补缺表 | 不看答案讲清 10 个核心机制；展示项目与排错/测试记录；选择下一阶段学习方向 |
 
+第 4 周写作范围：
+
+- C37：只比较定位、可访问性、主题、维护状况和许可，不写市场排名。
+- C38：只用 Ant Design 完整实现一次，MUI 等只放一张对照表。
+- C39–C42：OpenUI5 的引导方式（CDN bootstrap 或 UI5 CLI）、V2 MockServer 的当前状态，写之前核对官方文档。
+- C43、C44：React 19 原生支持 Custom Elements，不沿用旧版 React 的自定义事件写法。
+- C45–C47：在阶段 `04-react/` 上做排错、部署和测试，不新开项目。
+
 ## 数据结构覆盖边界
 
 | 层次 | 内容 | 学习深度 |
@@ -101,9 +132,9 @@ React 16 课的写作深度要求：
 
 复杂度讲抽象操作和示例算法；例如标准并不承诺 Map 总是某一种具体哈希表实现。
 
-## 现代标准附录
+## 现代标准附录：参考页「ES 版本速查」
 
-设置一页按 ES2015→ES2026 的“解决了什么问题”速查，再设目标环境支持列。ES2026 查询所见新增组包括 Map/WeakMap Upsert、JSON 源文本访问、Iterator Sequencing、Uint8Array Base64/Hex、Math.sumPrecise、Error.isError、Array.fromAsync；正式写课前逐项核对规范、API 名称和目标环境。
+原 C15 的内容改为参考页 `reference/es-versions.md`，在 C16 发布后编写。按 ES2015→ES2026 列出每个特性「解决了什么问题」，加一列目标环境支持，并链接到首次讲解它的课。ES2026 查询所见新增组包括 Map/WeakMap Upsert、JSON 源文本访问、Iterator Sequencing、Uint8Array Base64/Hex、Math.sumPrecise、Error.isError、Array.fromAsync；正式写课前逐项核对规范、API 名称和目标环境。
 
 TC39 完成提案表查询所见将 Temporal、Explicit Resource Management 列为预计进入 2027，不能标成 ES2026。规范年份、提案阶段与环境支持是三件事；以 [来源文件](SOURCES.md) 指向的官方资料为准。
 

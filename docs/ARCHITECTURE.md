@@ -76,8 +76,11 @@ js_web/
 │   ├── assets/diagrams/       # D2 构建生成 SVG
 │   └── styles/
 ├── diagrams/                  # D2 源文件
-├── examples/                  # 独立练习；自己的 README/必要依赖
-├── scripts/                   # D2 构建、课程/链接检查
+├── examples/
+│   ├── cNN/                   # 每课的独立例子、.expected.txt 与 README
+│   ├── shared/                # PLAN §3.1 固定样例数据
+│   └── inventory/             # 贯穿项目的 7 个阶段目录（PLAN §3.2）
+├── scripts/                   # D2 构建、路线同步、产物检查；T0 加 lint-lessons、run-examples
 ├── public/                    # 静态数据与可下载练习资料
 ├── tests/                     # 必要的站点关键行为验收
 ├── astro.config.mjs
@@ -91,9 +94,9 @@ js_web/
 
 ## 内容模型
 
-Starlight 标准字段与自定义字段分开；扩展 schema 后再写入自定义数据，避免 frontmatter 被静默丢弃或构建报错。
+**当前约定**：课程 frontmatter 只用 `title`、`description`、`sidebar.order`；课号、周次、前置、时间写在页首信息行（见 CONTENT_GUIDE §3），验证明细写在 examples README。下面的扩展字段是备选设计，没有实施。如果以后需要（例如学习进度要读取课程元数据），先扩展 `src/content.config.ts` 的 schema，再批量写入。
 
-建议每课记录：
+备选的扩展字段：
 
 ```yaml
 title: C23 useState：状态快照与更新队列

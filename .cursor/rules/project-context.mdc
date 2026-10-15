@@ -5,15 +5,13 @@ alwaysApply: true
 
 # Java → JavaScript 学习网站
 
-本规则适用于整个项目；项目的完整约定在根目录 AGENTS.md。
+本规则适用于整个项目；完整约定在根目录 AGENTS.md。
 
-- 先读取 AGENTS.md；续做关键词为 JS_WEB_START。
-- 续做时先读取 docs/STATUS.md，按下一项未完成任务推进。
-- 总计划在 docs/PLAN.md，48 课大纲在 docs/CURRICULUM.md。
-- 读者会 Java，初学前端；中文教学、可运行代码、Java 对照、练习与答案。
-- 每天 3–4 小时，4 周主线，8 周慢速与深化版。
-- 图只用 D2；静态站最终发布到 GitHub Pages 的 /js_web/ 子路径。
-- 不要求所有示例在线运行；需学员操作的内容标注「自己尝试」，必须覆盖调试工具与 UT。
-- 当前阶段以 docs/STATUS.md 为准；不要把未搭建、未验证或未上线的工作标为完成。
-- 每完成一个实施里程碑更新 docs/STATUS.md，记录验证与下一步。
-- 每次生成文章后，按 AGENTS.md 的已授权流程验证、更新目录与进度、提交并推送到 socoo123/js_web；检查 Pages 自动部署结果，无需重复请求提交/推送许可。
+- 续做关键词为 JS_WEB_START。依次读 docs/STATUS.md → docs/PLAN.md → docs/CONTENT_GUIDE.md → docs/CURRICULUM.md 中本课那一行。
+- 写或改任何课程前必须读完 docs/CONTENT_GUIDE.md，遵守其中的篇幅上限、模板和禁用写法；`npm run lint:lessons` 报 error 不能发布。
+- 正文写给学员：验证过程、作者环境、补丁版本号、内部编号不进正文，明细写在 examples/cNN/README.md。
+- 库存数据用 PLAN §3.1 的固定数据，项目按 PLAN §3.2 的阶段目录推进。
+- 读者会 Java、初学前端；中文教学，可运行代码、Java 对照、练习与答案；需要动手的内容标「自己尝试」；必须覆盖调试工具与 UT。
+- 图只用 D2；静态站发布到 GitHub Pages 的 /js_web/ 子路径。
+- 当前阶段以 docs/STATUS.md 为准；不要把未完成、未验证或未上线的工作标为完成。
+- 每篇文章完成后按 PLAN §6 的每课门禁验证，更新 STATUS，提交并推送到 socoo123/js_web，确认 Pages 部署成功。全套视觉验收每周做一次。

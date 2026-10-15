@@ -33,14 +33,14 @@ npm run preview
 
 ## 每次生成文章后的同步
 
-用户已授权自动提交和推送，完整约定在 [AGENTS.md](../AGENTS.md)。执行者每次完成文章后：
+用户已授权自动提交和推送，完整约定在 [AGENTS.md](../AGENTS.md)，门禁定义在 [PLAN §6](PLAN.md)。执行者每次完成文章后：
 
-1. 核查官方来源；执行必要示例，准确记录「已验证/已核对/未验证」。
-2. 同步课程目录，更新 `docs/STATUS.md`、来源和相关说明。
-3. 运行检查与生产构建，检查新文章、图片、答案折叠区和子路径。
-4. 审阅 Git 差异，只提交本次文章、配套示例、图和相关网站改动；不提交缓存、凭据或用户无关工作。
-5. 检查远端，再正常提交并推送到 `origin/main`，例如 `docs: publish C02 Web foundations lesson`。不强制推送。
-6. 等待对应 Actions 完成，核查新文章线上直达地址；失败时继续修复，或如实报告具体阻塞。
+1. 运行 `npm run examples -- cNN`、`npm run lint:lessons`、`npm run check`、`npm run build`（前两项在 T0 完成后可用）。验证细节写进 `examples/cNN/README.md`。
+2. 在 `docs/STATUS.md` 的「已发布课程」加一行，更新「下一步」。路线页由构建自动同步。
+3. 审阅 Git 差异，只提交本次的文章、配套示例、图和相关网站改动；不提交缓存、凭据或用户无关的工作。
+4. 检查远端，再正常提交并推送到 `origin/main`，例如 `docs: publish C06 functions and closures lesson`。不强制推送。
+5. 等对应的 Actions 完成，确认新文章线上地址返回 200；失败时继续修复，或如实报告具体的阻塞。
+6. 全套视觉验收（宽度、亮暗模式、搜索、禁用 JS）按 PLAN §6 每周做一次。
 
 这是执行者的项目约定。仅编辑并保存一个文件不会自行创建 Git 提交；提交并推送到 `main` 后，Pages 工作流会自动部署。用户当次要求「仅本地草稿」或「暂不发布」时遵循该要求。
 
