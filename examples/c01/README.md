@@ -71,4 +71,4 @@ java -cp .cache/qa/java Stock
 
 浏览器验证在同一本课 HTML 页面上下文自动执行相同代码并核对日志、异常和 DOM 结果；没有把这项自动验证写成手动 DevTools 点击测试。操作路径已核对 [Chrome 官方文档](https://developer.chrome.com/docs/devtools/console/javascript)。Edge、Bun 没有实际执行，概念题与旧代码背景为资料核对。
 
-本文是复现记录，不引入测试运行器。课程中的 Vitest/RTL 等 UT 教学从后续课程开始。站点尚无 Astro 工程，当前静态 Markdown 预览检查不能代替 Astro 生产构建。
+本文是示例复现记录，不引入测试运行器。课程中的 Vitest/RTL 等 UT 教学从后续课程开始。C01 初稿曾单独检查静态 Markdown 预览；随后已完成 Astro/Starlight 生产构建与 Pages 上线验证，站点验收见 [STATUS](../../docs/STATUS.md)，不改变本表所列示例执行环境。

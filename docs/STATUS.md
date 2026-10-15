@@ -24,7 +24,7 @@
 - 写入 AGENTS.md 与项目规则，使关键词恢复依赖仓库文件。
 - 通过 48 课号连续性、24 天每日两课、Markdown 本地链接与 Git 空白检查；独立审阅确认 React/UI5 关键边界。
 
-P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git status -sb`、`git log -1` 和 `git ls-remote origin refs/heads/main` 为准，避免在文件里写入自引用的提交 hash。本次将 C01 与网站基础一并提交和推送，具体 Pages 结果见下节。
+P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git status -sb`、`git log -1` 和 `git ls-remote origin refs/heads/main` 为准，避免在文件里写入自引用的提交 hash。C01 与网站基础已一并提交和推送，具体 Pages 结果见下节。
 
 ## C01 已完成：文章、练习与生态图
 
@@ -37,7 +37,7 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 
 ## 网站基础与提前 Pages 部署
 
-当前：**本地验收完成；Pages 工作流已创建，待本次推送后的线上验收。** 不把本地通过写成已上线。
+当前：**已提交推送，并成功部署 GitHub Pages（2026-10-15）。** [首页](https://socoo123.github.io/js_web/) · [C01](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) · [学习路线](https://socoo123.github.io/js_web/roadmap/)。
 
 - 固定 Node **24.22.0 LTS**、npm **11.19.1**、Astro **7.3.8**、Starlight **0.42.6**；直接依赖固定具体版本，根级唯一 `package-lock.json`。React islands 尚无实际需求，未预装 React。
 - 已创建静态网站配置、中文根语言、首页、4 周/8 周路线、48 课目录、自动课程导航、代码高亮/复制、原生练习折叠区、Pagefind 搜索。目录在构建时从大纲和已存在正文生成，当前 **1 / 48** 课，未写课程显示「待发布」。
@@ -48,6 +48,9 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 - Chrome 155.0.8059.40 生产预览验收：1280px/360px 首页、路线页与课程无整页横向溢出；亮暗模式截图与 D2 图中文正常；5 个折叠答案含正文并能展开；禁用站点 JS 后正文与折叠内容仍在 HTML 中。
 - 搜索实际执行「浏览器」「库存」「npm」均返回带 `/js_web/` 的结果；搜索弹窗能检索 C01 与段落链接。浏览器未捕获资源 HTTP 错误或未处理异常。
 - 安装时的间接 PostCSS 解析器告警已通过限定的依赖覆盖修复；锁文件重新 `npm ci` 及 `npm audit` 通过，报告为 0 漏洞。核查依据见 [SOURCES](SOURCES.md)。
+- 首次远端验收：[Actions run 38662138819](https://github.com/socoo123/js_web/actions/runs/38662138819) 的 build/deploy 全部成功；Ubuntu 24.04 的锁文件安装、固定 Node、Linux x64 D2/字体准备、内容检查、静态构建、Pages 配置/上传/发布均实际执行通过。Pages Source 为 GitHub Actions，HTTPS 已启用。
+- 线上首页、路线页、C01 深层地址均 HTTP 200。Chrome 对真实 Pages 重做 1280px/360px、亮暗模式、图加载、5 个折叠区、禁用站点 JS 的静态阅读与「浏览器/库存/npm」搜索验收，全部通过，未捕获资源 HTTP 错误或未处理异常。
+- 工作流有上游 Actions 内部 Node 20 声明的兼容提示；GitHub runner 已强制使用 Node 24，本次构建/上传均通过。后续升级 Actions 时复核该提示，不把提示当成失败或影响网站运行。
 
 ## 尚未实施
 

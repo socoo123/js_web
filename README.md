@@ -2,7 +2,7 @@
 
 面向会 Java、尚未系统学习前端的开发者，用中文从 JavaScript 的历史讲到现代语言、数据结构、Node 与包管理、React、SAP UI5 和开源组件。
 
-当前阶段：**C01 正文、练习与 D2 生态图已完成；Astro + Starlight 网站、首页、课程目录与 Pages 自动部署流程已搭建。课程逐篇发布，线上部署验证结果见 [STATUS](docs/STATUS.md)。**
+当前阶段：**C01 正文、练习与 D2 生态图已完成；Astro + Starlight 网站已上线 GitHub Pages，自动部署通过。课程逐篇发布，当前 1 / 48 课，验证记录见 [STATUS](docs/STATUS.md)。**
 
 - 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
 - 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)

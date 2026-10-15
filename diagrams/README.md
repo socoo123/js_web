@@ -6,7 +6,7 @@
 
 ## 准备与生成
 
-操作方式：维护者本地构建。验证状态：下列 macOS arm64 路径已于 **2026-10-15** 实际执行；Linux/Windows 安装路径尚未执行。学习者阅读 C01 不需要安装 D2。
+操作方式：维护者构建。验证状态：macOS arm64 的准备/构建路径和 Pages Actions 的 Ubuntu 24.04/Linux x64 路径均于 **2026-10-15** 实际执行通过；macOS x64、Linux arm64 和原生 Windows 路径尚未执行。学习者阅读 C01 不需要安装 D2。
 
 推荐在固定 Node/npm 环境下执行：
 
@@ -46,6 +46,6 @@ a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da
 - D2 编译成功；SVG 能解析，包含全部中文标签和文字。
 - 在 Chrome 155.0.8059.40 中检查图的中文与连线布局。图采用自带浅色背景，可在深色正文中保持对比。
 - 图附近有 alt 与独立的文字解释；环境表格重复列出重要信息，不能只靠图读懂课程。
-- 已接入 Astro 资产处理与 `/js_web/` 子路径构建检查；最终主题/线上图像的实际验证结果见 [STATUS](../docs/STATUS.md)。
+- 已接入 Astro 资产处理与 `/js_web/` 子路径构建检查；本地生产预览和线上 Pages 在 Chrome 的 1280px/360px、亮暗模式下均正常加载中文 SVG，实际验证结果见 [STATUS](../docs/STATUS.md)。
 
 依据（2026-10-15 核查）：[D2 CLI](https://d2lang.com/tour/man/)、[D2 字体配置](https://d2lang.com/tour/fonts/)、[SVG 导出](https://www.d2lang.com/tour/exports/)、[Noto Sans SC 来源](https://github.com/google/fonts/tree/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc)。字体许可原文保存在 [NotoSansSC-OFL.txt](NotoSansSC-OFL.txt)。

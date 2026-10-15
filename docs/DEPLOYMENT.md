@@ -1,6 +1,6 @@
 # 本地构建、文章同步与 GitHub Pages
 
-固定部署目标：仓库 [socoo123/js_web](https://github.com/socoo123/js_web)，项目网站 `https://socoo123.github.io/js_web/`。Astro 的 `site`、`base`、静态输出与结尾斜杠已在 [配置](../astro.config.mjs) 中指定。Pages 使用 GitHub Actions 发布 `dist/`。
+已上线：仓库 [socoo123/js_web](https://github.com/socoo123/js_web)，项目网站 [Java → JavaScript 学习站](https://socoo123.github.io/js_web/)。Astro 的 `site`、`base`、静态输出与结尾斜杠已在 [配置](../astro.config.mjs) 中指定。Pages 使用 GitHub Actions 发布 `dist/`。
 
 ## 本地准备
 
