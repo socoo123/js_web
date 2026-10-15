@@ -1,6 +1,6 @@
 # 静态网站架构与部署规划
 
-状态：C01/C02、Astro/Starlight 静态骨架、首页/路线页、D2 npm 管线与 Pages Actions 已实现；用户要求逐篇发布。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。React islands、学习进度和 C03 起的正文待后续实施。
+状态：C01–C05、Astro/Starlight 静态骨架、首页/路线页、D2 npm 管线与 Pages Actions 已实现；用户要求逐篇发布。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。React islands、学习进度和 C06 起的正文待后续实施。
 
 ## 技术选择
 
@@ -45,7 +45,7 @@ React islands 默认仍会在构建期预渲染。`client:load` 只决定客户�
 
 ## 目录草图
 
-以下为总体目录方向；当前已有网站配置、首页、路线页、C01、示例、图构建与 Pages 工作流；React 组件、其他课正文和持久化学习进度待实施：
+以下为总体目录方向；当前已有网站配置、首页、路线页、C01–C05、示例、图构建与 Pages 工作流；React 组件、其他课正文和持久化学习进度待实施：
 
 ```text
 js_web/
@@ -163,7 +163,7 @@ trailingSlash: 'always'
 
 本地与 CI 固定 Node 24.22.0 + npm 11.19.1，网站工程统一 npm、一份根级 `package-lock.json`；其他管理器实验在独立目录，不混用根锁文件。实际命令与文章提交约定见 [DEPLOYMENT](DEPLOYMENT.md)。
 
-预计脚本：
+当前脚本与后续测试入口：
 
 | 命令 | 用途 |
 | --- | --- |
@@ -175,11 +175,11 @@ trailingSlash: 'always'
 | npm run test | 有价值的站点业务测试，按实施需要配置 |
 | npm run test:e2e | 关键路径浏览器验收，按实施需要配置 |
 
-以上是待创建的命令，本轮不能执行。课程用的 UT 练习与网站自身测试分开组织，避免把“教框架”误当成“给每个静态段落写测试”。
+`dev`、`diagrams`、`check`、`build`、`preview` 已实现；`test` 与 `test:e2e` 尚未配置，按后续实际需求创建。课程用的 UT 练习与网站自身测试分开组织，避免把“教框架”误当成“给每个静态段落写测试”。
 
 ## GitHub Actions 部署计划
 
-M6 执行部署，不在本轮创建或触发发布：
+Pages 已按用户提前部署的要求实现；M6 仍负责完整课程的最终交付验收：
 
 1. 仓库 Pages Source 设为 GitHub Actions。
 2. PR 只做检查与构建；main 推送/手动触发执行发布。
@@ -188,7 +188,7 @@ M6 执行部署，不在本轮创建或触发发布：
 5. 采用 GitHub 官方 Pages actions，实施时核对版本并固定完整 commit SHA；无需在仓库提交长期 PAT。
 6. 设置部署 concurrency，记录成功部署的提交与 URL。
 
-未来站点地址：`https://socoo123.github.io/js_web/`。当前仓库未配置 Pages，不能将这个地址报告为已上线。
+当前站点地址：`https://socoo123.github.io/js_web/`。各批文章是否已经部署及实际线上验收以 STATUS 为准。
 
 依据：[GitHub Pages 自定义工作流](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)。
 

@@ -1,0 +1,12 @@
+# C05：纵向只表示身份关系，不模拟实际内存地址或 GC 布局。
+direction: down
+
+*.style.font-size: 20
+*.style.border-radius: 10
+
+original: original\nalias\n同一外层 A
+draft: draft\n新外层 B
+shared: warehouse\n同一仓库 W\ncity = 杭州
+
+original -> shared
+draft -> shared

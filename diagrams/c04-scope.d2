@@ -1,0 +1,14 @@
+# C04：图中的箭头表示查找外层绑定，不表示执行顺序。
+direction: down
+
+*.style.font-size: 20
+*.style.border-radius: 10
+
+read: 内层代码读取 warehouse
+inner: 先找当前块\n有绑定即停止外查
+outer: 当前块没有才找外层\n逐层按代码嵌套查找
+end: 到最外层仍无绑定\n读取时抛 ReferenceError
+
+read -> inner
+inner -> outer: 没有绑定
+outer -> end: 始终没有找到

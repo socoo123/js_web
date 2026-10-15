@@ -612,7 +612,7 @@ restockButton.addEventListener("click", handleRestock);
 4. 为什么 head 中的脚本用 `defer`，而不是用 `async` 解决节点不存在？
 5. 如何用一个请求 URL、一个状态码和一次重新操作，证明路径故障被修复？
 
-下一课 **C03 值、类型、转换与比较（待发布）** 会解释这节用到的 `Number`、字符串、比较与无效输入。已发布内容见[课程目录](../../roadmap/)。
+下一课 [C03 值、类型、转换与比较](../../02-language-data/c03-values-types/) 会解释这节用到的 `Number`、字符串、比较与无效输入。已发布内容见[课程目录](../../roadmap/)。
 
 ## 12. 资料与验证记录
 

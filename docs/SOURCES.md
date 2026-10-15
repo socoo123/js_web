@@ -136,3 +136,14 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - [Chrome Console](https://developer.chrome.com/docs/devtools/console/javascript)、[CSS](https://developer.chrome.com/docs/devtools/css/)、[Network](https://developer.chrome.com/docs/devtools/network/)、[Sources](https://developer.chrome.com/docs/devtools/javascript/)、[设备模式](https://developer.chrome.com/docs/devtools/device-mode/)：面板操作已核对；自动化验证与手动面板点击分别标注。
 - [Python 静态服务](https://docs.python.org/3/library/http.server.html#command-line-interface)、[Windows 启动器](https://docs.python.org/3.11/using/windows.html#python-launcher-for-windows)：主线使用已有 Python 3 提供本机文件服务，不引入 npm 安装步骤；Windows 写法未执行。
 - 实际环境：Chrome **155.0.8059.40**、Python **3.11.8**；验证驱动使用固定 Node **24.22.0**。已执行正常表单、无效值/超卖/售完、Enter、路径404、漏defer、协议断点与单步、360px/1280px、补货组合答案和禁用页面JS。完整结果见 [C02 练习记录](../examples/c02/README.md)；站点生产/线上验收另见 [STATUS](STATUS.md)。
+
+## C03–C05 语言基础的核查
+
+日期：**2026-10-15**。本批使用已定稿的基础语言能力；引用 [ECMAScript 2026 固定版本](https://tc39.es/ecma262/2026/multipage/)，与持续更新的编辑草案区分。站点依赖和根级锁文件不变。
+
+- C03 对照类型、Number/BigInt、显式转换和比较算法，区分 `typeof` 的历史返回值与实际类型；库存与金额转换后再校验安全整数。Java 对照以 Java 规范和 BigDecimal 文档为依据，直接链接见正文。
+- C04 对照[声明与控制流](https://tc39.es/ecma262/2026/multipage/ecmascript-language-statements-and-declarations.html)、[环境记录](https://tc39.es/ecma262/2026/multipage/executable-code-and-execution-contexts.html#sec-environment-records)，明确 TDZ 中的绑定不回退外层查找，`var` 的初始化和赋值不是同一步。
+- 数组越界例子使用未改原型的普通数组；依据[普通对象属性读取](https://tc39.es/ecma262/2026/multipage/ordinary-and-exotic-objects-behaviours.html#sec-ordinary-object-internal-methods-and-internal-slots-get-p-receiver)解释缺失下标得到 `undefined`，没有把 `NaN` 当成抛出的异常。
+- C04 的[Chrome 断点](https://developer.chrome.com/docs/devtools/javascript/breakpoints)与[调试参考](https://developer.chrome.com/docs/devtools/javascript/reference)用于手动操作路径核对；[V8 堆栈说明](https://v8.dev/docs/stack-trace-api)用于说明 `error.stack` 的格式边界。
+- C05 对照对象属性、浅复制、JSON、String 和 Date；使用明确的 ISO 时间偏移和 UTC 输出，并实际切换时区验证，避免将作者本机时区当成读者环境。JSON 语法解析与业务数据校验分别教学；参数传值与重新绑定使用运行结果解释。
+- 逐课实际版本、命令、输出及未验证范围见 [C03](../examples/c03/README.md)、[C04](../examples/c04/README.md)、[C05](../examples/c05/README.md)。本批没有新增运行时或第三方库安装命令，不据此宣称其他浏览器与操作系统已通过。

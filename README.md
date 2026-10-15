@@ -2,7 +2,7 @@
 
 面向会 Java、尚未系统学习前端的开发者，用中文从 JavaScript 的历史讲到现代语言、数据结构、Node 与包管理、React、SAP UI5 和开源组件。
 
-当前阶段：**C01/C02 正文、练习与 D2 教学图已完成；Astro + Starlight 网站使用 GitHub Pages 自动部署。课程逐篇发布，当前 2 / 48 课，实际部署与验证记录见 [STATUS](docs/STATUS.md)。**
+当前阶段：**C01–C05 正文与练习已完成，关键机制配套 D2 教学图；Astro + Starlight 网站使用 GitHub Pages 自动部署。课程逐篇发布，当前 5 / 48 课，实际部署与验证记录见 [STATUS](docs/STATUS.md)。**
 
 - 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
 - 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)
@@ -15,9 +15,15 @@
 - [C01 练习与验证记录](examples/c01/README.md)：浏览器主线，Node/Java 选做对照。
 - [C02 Web 基础与第一个调试现场](src/content/docs/01-history-web/c02-web-debugging.md)：HTML/CSS/DOM、页面加载、商品卡片和 DevTools 排错。
 - [C02 练习与验证记录](examples/c02/README.md)：三个独立文件、手机布局、路径/加载故障与补货答案。
+- [C03 值、类型、转换与比较](src/content/docs/02-language-data/c03-values-types.md)：数值精度、类型转换、比较和库存默认值。
+- [C03 练习与验证记录](examples/c03/README.md)。
+- [C04 变量、作用域与控制流](src/content/docs/02-language-data/c04-scope-control.md)：作用域、循环统计和断点排错。
+- [C04 练习与验证记录](examples/c04/README.md)。
+- [C05 对象、引用与数据交换](src/content/docs/02-language-data/c05-objects-json.md)：别名与浅复制、JSON 导入、日期与字符串。
+- [C05 练习与验证记录](examples/c05/README.md)。
 - [D2 教学图与构建说明](diagrams/README.md)：保留源码、SVG 与固定工具/字体信息。
 
-后续 C03–C48 仍为大纲，下一篇为 C03 值、类型、转换与比较。
+后续 C06–C48 仍为大纲，下一篇为 C06 函数、闭包与高阶操作。
 
 ## 清理上下文后如何继续
 

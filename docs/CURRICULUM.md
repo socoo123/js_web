@@ -2,7 +2,7 @@
 
 适用读者：会 Java、初学前端。主节奏为每天 3–4 小时、每日 2 课、每周 6 天；8 周路线每天 1 课。
 
-课号 C01–C48 是稳定 ID，网站网址和学习进度均应与之对应。下面是写作大纲；目前 [C01 正文](../src/content/docs/01-history-web/c01-story-ecosystem.md)、[C02 正文](../src/content/docs/01-history-web/c02-web-debugging.md) 已完成，其余课程尚未写完。网站骨架已搭建；构建时从本大纲与已有正文自动生成线上路线页，未发布课程不生成占位文章。
+课号 C01–C48 是稳定 ID，网站网址和学习进度均应与之对应。下面是写作大纲；目前 [C01](../src/content/docs/01-history-web/c01-story-ecosystem.md)、[C02](../src/content/docs/01-history-web/c02-web-debugging.md)、[C03](../src/content/docs/02-language-data/c03-values-types.md)、[C04](../src/content/docs/02-language-data/c04-scope-control.md)、[C05](../src/content/docs/02-language-data/c05-objects-json.md) 正文已完成，其余课程尚未写完。网站骨架已搭建；构建时从本大纲与已有正文自动生成线上路线页，未发布课程不生成占位文章。
 
 所有需要操作的任务在正式课程中标注 **「自己尝试 · 环境」**，并给出完整必要文件、命令、操作步骤、预期结果和常见失败原因。无需将所有例子变成在线应用。
 

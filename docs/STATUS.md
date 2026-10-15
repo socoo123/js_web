@@ -4,7 +4,7 @@
 
 ## 最新用户要求
 
-- 最新要求：**JS_WEB_START：生成 C02 文章。** 本次只完成 C02；沿用“每次文章完成后自动验证、提交、推送并核查 Pages”的授权，无需再次询问。用户此前询问并行能力时明确暂不启动多 agent，本次也未启动子 agent。
+- 最新要求：**使用三个子 agent，并行生成接下来的 C03、C04、C05，完成后提交 GitHub。** 三个子 agent 各负责一课及示例，主 agent 统一审阅、验证、更新目录与进度，再提交推送并检查 Pages。此次授权取代此前暂不启动多 agent 的要求。
 - 会 Java，按有编程基础的前端初学者讲解，用中文。
 - 从 JS 历史到当前规范、数据结构、异步、Node/npm/Yarn/Bun，补充 pnpm。
 - React 要详细；讲 SAP UI5 与流行开源组件。
@@ -40,7 +40,7 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 当前：**已提交推送，并成功部署 GitHub Pages（2026-10-15）。** [首页](https://socoo123.github.io/js_web/) · [C01](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) · [学习路线](https://socoo123.github.io/js_web/roadmap/)。
 
 - 固定 Node **24.22.0 LTS**、npm **11.19.1**、Astro **7.3.8**、Starlight **0.42.6**；直接依赖固定具体版本，根级唯一 `package-lock.json`。React islands 尚无实际需求，未预装 React。
-- 已创建静态网站配置、中文根语言、首页、4 周/8 周路线、48 课目录、自动课程导航、代码高亮/复制、原生练习折叠区、Pagefind 搜索。目录在构建时从大纲和已存在正文生成，提前建站时为 **1 / 48** 课；本次 C02 后为 **2 / 48**，未写课程显示「待发布」。
+- 已创建静态网站配置、中文根语言、首页、4 周/8 周路线、48 课目录、自动课程导航、代码高亮/复制、原生练习折叠区、Pagefind 搜索。目录在构建时从大纲和已存在正文生成，提前建站时为 **1 / 48** 课；C02 发布后为 **2 / 48**，未写课程显示「待发布」。
 - `npm run setup:diagrams` 按固定摘要准备 D2/字体；`npm run build` 串行同步目录、编译 D2、生成静态 HTML/搜索索引并检查 `/js_web/` 内部链接与资源。工具保存在忽略目录，未全局安装。
 - 工作流：[deploy.yml](../.github/workflows/deploy.yml)，推送 `main` 自动构建并部署；部署目标为 `https://socoo123.github.io/js_web/`。固定 Actions commit，构建只读、部署取得 Pages/OIDC 权限。
 - 已把“文章完成后验证 → 更新目录/进度 → 提交并推送 → 核查 Pages”写入 [AGENTS.md](../AGENTS.md) 和项目规则；维护步骤见 [DEPLOYMENT](DEPLOYMENT.md)。用户明确要求仅本地草稿时按当次范围处理。
@@ -54,7 +54,7 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 
 ## C02 已完成：Web 基础、卡片与调试现场
 
-当前：**已提交推送，并成功部署 GitHub Pages（2026-10-15）。** [线上 C02](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/) · [课程目录 2/48](https://socoo123.github.io/js_web/roadmap/)。
+当前：**已提交推送，并成功部署 GitHub Pages（2026-10-15）。** [线上 C02](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/) · [课程目录](https://socoo123.github.io/js_web/roadmap/)。
 
 - 正文：[C02 Web 基础与第一个调试现场](../src/content/docs/01-history-web/c02-web-debugging.md)。覆盖 HTML 语义/标签/表单与 DOM，CSS 选择器/层叠/盒模型/Flex/Grid/响应式，URL/HTTP/路径与页面加载；解释 defer、内存数据与 DOM、源码与临时编辑的边界。
 - 配套：[examples/c02](../examples/c02/README.md)。三个完整 HTML/CSS/JS 文件，无第三方依赖；已有 Python 3 提供本地服务，不要求提前安装 Node/npm。包含原生输入约束、正整数/超卖校验、售完禁用、Enter 提交、补货增量答案；操作方式与验证状态逐项分开。
@@ -66,20 +66,35 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 - 远端首发：[Actions run 38663909240](https://github.com/socoo123/js_web/actions/runs/38663909240) build/deploy 全部成功；Ubuntu 24.04 实际执行锁文件安装、D2/字体准备、检查、静态构建和 Pages 发布。C02 深层地址 HTTP 200；真实 Pages 的1280px/360px、亮暗正文与D2图、5个折叠区、禁用站点JS阅读、搜索弹窗及“defer/盒模型/补货”检索全部通过，没有资源HTTP错误或未处理异常。上游Actions内部Node20声明提示与此前相同，runner使用Node24并执行成功。
 - 已同步课程目录2/48、C01→C02链接、README、来源与架构；生产输出检查新增C02。M1的网站基础与两篇示范课验收条件已满足；后续学习功能和46课并未因此完成。
 
+## C03–C05 并行编写与统一验收
+
+当前：**C03–C05 正文、示例、两张 D2 图已完成，本地检查与生产阅读验收通过；尚待本批提交推送与 Pages 发布。** 三个子 agent 各负责一课，主 agent 已逐篇审阅与统一集成。
+
+- C03：[值、类型、转换与比较](../src/content/docs/02-language-data/c03-values-types.md)，承接 C02 的表单字符串、Number 转换与库存默认值。
+- C04：[变量、作用域与控制流](../src/content/docs/02-language-data/c04-scope-control.md)，包括循环统计、TDZ、越界与错误堆栈，配套作用域 D2 图。
+- C05：[对象、引用与数据交换](../src/content/docs/02-language-data/c05-objects-json.md)，包括别名/浅复制、JSON 校验导入、显式时区日期与字符串，配套引用关系 D2 图。
+- 已实际执行：Chrome **155.0.8059.40** 独立页面逐个运行本批 20 个 JS 文件；正常示例与答案未出现未预期异常，BigInt 混算故障文件按设计抛 TypeError。C03 答案库存 0、补货 3、总价 30 分；C04 统计 22/空数组 0；C05 别名、浅复制和参数重新绑定符合预期，日期例子切换 UTC/Asia/Shanghai 输出不变。学习者不用安装用于作者验收的 CDP 工具。
+- 逐课执行补充：C03 的 17 个库存/金额边界变体在 Node **24.22.0** 通过；C04 的 Java **21.0.2** 对照输出 22/0，Chrome 本地 HTTP 页第 6 行断点四轮单步正确，故障第五轮 `index=4, quantity=undefined, total=22→NaN`，空数组故障与恢复后 22/0/0 均验证；C05 六文件 Node/Chrome 日志一致，另验 10 条导入边界与浅复制故障，UTC/Honolulu 输出一致。各课 README 给出命令、实际输出与未执行平台。
+- 统一审阅修复：删除 C03 与大纲不符的后续课号预告；C04 明确每次 S01 前刷新独立页面，块只隔离 let/const。同一 Chrome 上下文实测首次 `var-before undefined`、复跑 `var-before 12`，避免把清空日志误当变量重置；正文与源码注释同步。
+- 固定 Node **24.22.0** / npm **11.19.1**：`npm run check` 为 0 errors/0 warnings/0 hints；`npm run build` 生成 8 个 HTML、4 张 D2 图与 Pagefind 索引。C01–C05 链接/资源、中文语言、源码与产物折叠区数量检查通过；保留已记录的 Starlight 404 路由优先级提示，实际 404.html 正常。
+- Chrome 本地生产预览：1280px/360px 首页、路线与 C01–C05 无整页横向溢出；新课亮暗正文正常，C04/C05 中文 SVG 清晰；C03/C04/C05 分别 4/5/5 个提示答案区完整可展开。禁用站点 JS 后三篇正文与答案仍存在；“安全整数”“TDZ”“浅复制”命中对应新课，搜索弹窗与旧查询正常，新课首个代码块复制到剪贴板的内容逐字正确，无资源 HTTP 错误或未处理异常。
+- 已同步课程目录 **5/48**、C02→C03 链接、README、来源、架构和构建输出检查。下一篇为 C06；个人学习进度功能仍未实施。
+
+
 ## 尚未实施
 
-- C03–C48 正文、练习与后续D2图尚未编写；本次只新增C02。
-- 学习者localStorage完成进度/导入导出、少量React islands及综合示例待实施。目录的2/48是建设状态，不是个人学习进度。
-- Pages首发与后续建设进度以各节实际结果为准，提前上线不代表M6或48课全部完成。
+- C06–C48 正文、练习与后续 D2 图尚未编写；本批范围为 C03–C05。
+- 学习者 localStorage 完成进度/导入导出、少量 React islands 及综合示例待实施。目录的已发布课数是建设状态，不是个人学习进度。
+- Pages 首发与后续建设进度以各节实际结果为准，提前上线不代表 M6 或 48 课全部完成。
 
-## 下一项未完成：C03 值、类型、转换与比较
+## 下一项未完成：C06 函数、闭包与高阶操作
 
-按 `CURRICULUM.md` 和 `CONTENT_GUIDE.md` 继续单篇C03：7种原始类型与对象、typeof、Number/BigInt、浮点与整数精度、null/undefined、truthy、===/==/Object.is、??/||。衔接C02的输入value字符串与Number转换，使用价格/库存/默认值例子，给Java整数除法/BigDecimal对照、预测/修错练习、完整答案与准确验证状态。
+先确认本批 C03–C05 的提交与 Pages 结果，再按 `CURRICULUM.md` 和 `CONTENT_GUIDE.md` 继续 C06：函数是值，声明/表达式/箭头函数，参数、默认值与 rest，词法作用域与闭包，高阶函数，Java lambda 类比及边界。库存筛选工厂与独立计数器是主练习；用 Scope 面板观察闭包，修复循环捕获错误。C04 的作用域图只讲绑定查找，C06 再延伸到函数保留的词法环境。
 
-1. 先读STATUS与AGENTS，检查Git与已有站点，保留已上线的C01/C02及架构。
-2. 核对本课使用的规范与目标环境；不扩大为C04或提前引入复杂工程。
-3. 执行核心例子，更新来源、目录和本文件，运行 `npm run check` / `npm run build`，验收新课生产页。
-4. 按授权正常提交推送main，检查对应Pages Actions及新课深层线上URL；不强推，不把失败记为已上线。
+1. 先读 STATUS 与 AGENTS，检查 Git 与现有站点，保留 C01–C05 和静态架构。
+2. 核对本课使用的官方规范与目标环境，不提前扩大为 C07。
+3. 执行核心例子与答案，更新来源、目录和本文件，运行 `npm run check` / `npm run build`，验收新课生产页。
+4. 按授权正常提交推送 main，检查对应 Pages Actions 及新课线上直达 URL；不强推，不把失败记为已上线。
 
 ## 已定的教学与技术方向
 
