@@ -1,0 +1,18 @@
+---
+description: JS_WEB_START 项目的课程要求、规划入口和上下文恢复
+alwaysApply: true
+---
+
+# Java → JavaScript 学习网站
+
+本规则适用于整个项目；项目的完整约定在根目录 AGENTS.md。
+
+- 先读取 AGENTS.md；续做关键词为 JS_WEB_START。
+- 续做时先读取 docs/STATUS.md，按下一项未完成任务推进。
+- 总计划在 docs/PLAN.md，48 课大纲在 docs/CURRICULUM.md。
+- 读者会 Java，初学前端；中文教学、可运行代码、Java 对照、练习与答案。
+- 每天 3–4 小时，4 周主线，8 周慢速与深化版。
+- 图只用 D2；静态站最终发布到 GitHub Pages 的 /js_web/ 子路径。
+- 不要求所有示例在线运行；需学员操作的内容标注「自己尝试」，必须覆盖调试工具与 UT。
+- 本轮为规划阶段；不要把未搭建、未验证或未上线的工作标为完成。
+- 每完成一个实施里程碑更新 docs/STATUS.md，记录验证与下一步。
