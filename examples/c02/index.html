@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>C02 库存商品卡片</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <p class="eyebrow">库存管理 · C02</p>
+        <h1>商品库存</h1>
+        <p>先观察页面，再用开发者工具解释每一次变化。</p>
+      </header>
+
+      <div class="product-grid">
+        <article class="product-card" aria-labelledby="product-name">
+          <div class="card-heading">
+            <h2 id="product-name">键盘</h2>
+            <span class="badge">外设</span>
+          </div>
+          <p>商品编号：KB-001</p>
+          <p class="stock-line">剩余库存：<strong id="stock">12</strong> 件</p>
+
+          <form id="sale-form">
+            <label for="quantity">售出数量</label>
+            <div class="sale-controls">
+              <input id="quantity" name="quantity" type="number"
+                min="1" step="1" value="3" required>
+              <button id="sell-button" type="submit" disabled>确认售出</button>
+            </div>
+          </form>
+          <p id="feedback" role="status">加载完成后可以登记售出。</p>
+          <noscript><p>交互需要 JavaScript；商品信息仍可阅读。</p></noscript>
+        </article>
+      </div>
+
+      <footer><p>数据只在本页内存中；刷新会恢复为 12 件。</p></footer>
+    </main>
+  </body>
+</html>

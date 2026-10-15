@@ -1,6 +1,6 @@
 # D2 教学图
 
-当前为 C01 生态关系图。源码为 `c01-ecosystem.d2`，产物为 `../src/assets/diagrams/c01-ecosystem.svg`。已接入网站 npm 构建与 Pages Actions；编译失败会阻止发布。
+当前有 C01 生态关系图与 C02 页面加载关系图。源码为 `c01-ecosystem.d2`、`c02-page-flow.d2`，产物分别为 `../src/assets/diagrams/c01-ecosystem.svg`、`../src/assets/diagrams/c02-page-flow.svg`。已接入网站 npm 构建与 Pages Actions；编译失败会阻止发布。C02 的图展示资源与处理阶段的依赖，不是精确请求瀑布时间线。
 
 固定工具：**D2 0.9.0**（根目录 `.d2-version`）、免费 Dagre 布局。字体使用 Noto Sans SC，固定到 Google Fonts 仓库提交 `a85815a42757630ce188fdad368c2dfc444d4773`。字体文件保存在被 Git 忽略的 `.cache/tools/`，脚本核对 SHA-256；SVG 内嵌使用到的字形及完整 OFL 许可，不需要浏览器下载字体。
 

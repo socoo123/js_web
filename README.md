@@ -2,7 +2,7 @@
 
 面向会 Java、尚未系统学习前端的开发者，用中文从 JavaScript 的历史讲到现代语言、数据结构、Node 与包管理、React、SAP UI5 和开源组件。
 
-当前阶段：**C01 正文、练习与 D2 生态图已完成；Astro + Starlight 网站已上线 GitHub Pages，自动部署通过。课程逐篇发布，当前 1 / 48 课，验证记录见 [STATUS](docs/STATUS.md)。**
+当前阶段：**C01/C02 正文、练习与 D2 教学图已完成；Astro + Starlight 网站使用 GitHub Pages 自动部署。课程逐篇发布，当前 2 / 48 课，实际部署与验证记录见 [STATUS](docs/STATUS.md)。**
 
 - 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
 - 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)
@@ -12,9 +12,11 @@
 
 - [C01 JavaScript 的故事与生态地图](src/content/docs/01-history-web/c01-story-ecosystem.md)：历史、Java 对照、生态分层、Console 练习与答案。
 - [C01 练习与验证记录](examples/c01/README.md)：浏览器主线，Node/Java 选做对照。
-- [D2 生态图与构建说明](diagrams/README.md)：保留源码、SVG 与固定工具/字体信息。
+- [C02 Web 基础与第一个调试现场](src/content/docs/01-history-web/c02-web-debugging.md)：HTML/CSS/DOM、页面加载、商品卡片和 DevTools 排错。
+- [C02 练习与验证记录](examples/c02/README.md)：三个独立文件、手机布局、路径/加载故障与补货答案。
+- [D2 教学图与构建说明](diagrams/README.md)：保留源码、SVG 与固定工具/字体信息。
 
-后续课程仍为大纲；C02 正文尚未编写。
+后续 C03–C48 仍为大纲，下一篇为 C03 值、类型、转换与比较。
 
 ## 清理上下文后如何继续
 

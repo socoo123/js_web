@@ -1,0 +1,16 @@
+# C02：聚焦脚本交互路径，资源请求和初始绘制可重叠。
+direction: down
+
+*.style.font-size: 20
+*.style.border-radius: 10
+
+request: 浏览器请求并读取 HTML
+parse: 解析 HTML，逐步建 DOM\n发现 CSS 与 defer 脚本
+ready: 脚本就绪且 HTML 解析完成\n执行脚本，注册提交监听
+event: 用户提交表单\nJS 校验并修改 DOM
+view: 浏览器结合 DOM 与样式\n更新布局与绘制
+
+request -> parse
+parse -> ready: 下载与解析可以重叠
+ready -> event: 等待用户操作
+event -> view: 等待渲染机会

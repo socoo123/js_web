@@ -123,3 +123,16 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 固定 D2 各平台发布归档摘要来源于官方 v0.9.0 的 GitHub release API，字体仍采用 C01 固定提交与摘要；本地自动准备脚本已执行。
 - 安装时 npm audit 发现 PostCSS 解析器的间接依赖告警；依据 [官方审定公告](https://github.com/advisories/GHSA-rj75-hqrm-r3gf)，仅在 postcss-nested 依赖下覆盖到修复版 **postcss-selector-parser 7.1.6**，随后安装、锁文件复现与生产构建通过，audit 为 0 漏洞。该包用于可信源码的构建期解析，覆盖规则待上游依赖修复后再评估移除。
 - 生产页面、浏览器和线上验证的实际结果见 [STATUS](STATUS.md)；此前 C01 小节记录的是建站前的历史交付范围，不表示本次仍未建站。
+
+## C02 Web 基础与调试的核查
+
+日期：**2026-10-15**。沿用站点已固定的依赖与工具，不新增第三方示例依赖。
+
+- [HTML 语义](https://html.spec.whatwg.org/multipage/semantics.html)、[表单](https://html.spec.whatwg.org/multipage/forms.html)、[按钮](https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element)、[脚本处理](https://html.spec.whatwg.org/multipage/scripting.html#attr-script-defer)：核对元素、原生约束、布尔属性、普通外部脚本的 defer/async 差异；未把下载并行称为 JS 多线程。
+- [DOM 标准](https://dom.spec.whatwg.org/)：核对 querySelector、textContent、事件注册与 preventDefault；区分文件源码、当前 DOM 和业务变量。
+- [CSS 盒模型](https://www.w3.org/TR/css-box-3/)、[尺寸](https://www.w3.org/TR/css-sizing-3/)、[层叠](https://www.w3.org/TR/css-cascade-5/)、[Flex](https://www.w3.org/TR/css-flexbox-1/)、[Grid](https://www.w3.org/TR/css-grid-1/)、[媒体查询](https://www.w3.org/TR/mediaqueries-4/)：讲解 border-box、选择器冲突、布局与按视口调整；未把隐藏横向滚动当作修复。
+- [web.dev 响应式基础](https://web.dev/articles/responsive-web-design-basics)：核对 viewport meta 与 CSS 像素；辅助技术状态提示对照 [WAI-ARIA status](https://www.w3.org/TR/wai-aria-1.2/#status)，未声称实际使用屏幕阅读器验收。
+- [URL 标准](https://url.spec.whatwg.org/)、[HTTP 状态](https://httpwg.org/specs/rfc9110.html#status.codes)：核对相对路径、根路径、查询/片段与200/304/404；提示 Pages 的 /js_web/ 子路径。
+- [Chrome Console](https://developer.chrome.com/docs/devtools/console/javascript)、[CSS](https://developer.chrome.com/docs/devtools/css/)、[Network](https://developer.chrome.com/docs/devtools/network/)、[Sources](https://developer.chrome.com/docs/devtools/javascript/)、[设备模式](https://developer.chrome.com/docs/devtools/device-mode/)：面板操作已核对；自动化验证与手动面板点击分别标注。
+- [Python 静态服务](https://docs.python.org/3/library/http.server.html#command-line-interface)、[Windows 启动器](https://docs.python.org/3.11/using/windows.html#python-launcher-for-windows)：主线使用已有 Python 3 提供本机文件服务，不引入 npm 安装步骤；Windows 写法未执行。
+- 实际环境：Chrome **155.0.8059.40**、Python **3.11.8**；验证驱动使用固定 Node **24.22.0**。已执行正常表单、无效值/超卖/售完、Enter、路径404、漏defer、协议断点与单步、360px/1280px、补货组合答案和禁用页面JS。完整结果见 [C02 练习记录](../examples/c02/README.md)；站点生产/线上验收另见 [STATUS](STATUS.md)。

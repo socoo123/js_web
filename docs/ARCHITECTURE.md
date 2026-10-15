@@ -1,6 +1,6 @@
 # 静态网站架构与部署规划
 
-状态：C01、Astro/Starlight 静态骨架、首页/路线页、D2 npm 管线与 Pages Actions 已实现；用户要求提前部署。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。React islands、学习进度和 C02 起的正文待后续实施。
+状态：C01/C02、Astro/Starlight 静态骨架、首页/路线页、D2 npm 管线与 Pages Actions 已实现；用户要求逐篇发布。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。React islands、学习进度和 C03 起的正文待后续实施。
 
 ## 技术选择
 

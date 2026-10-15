@@ -4,7 +4,7 @@
 
 ## 最新用户要求
 
-- 最新要求：**将现有内容提交到 GitHub 并部署 Pages；以后每次生成文章后自动提交并推送远端。** 已授权，无需每篇再次询问提交/推送。此前 C01 单篇写作范围已完成；本次提前建站和部署，不额外编写 C02。
+- 最新要求：**JS_WEB_START：生成 C02 文章。** 本次只完成 C02；沿用“每次文章完成后自动验证、提交、推送并核查 Pages”的授权，无需再次询问。用户此前询问并行能力时明确暂不启动多 agent，本次也未启动子 agent。
 - 会 Java，按有编程基础的前端初学者讲解，用中文。
 - 从 JS 历史到当前规范、数据结构、异步、Node/npm/Yarn/Bun，补充 pnpm。
 - React 要详细；讲 SAP UI5 与流行开源组件。
@@ -40,7 +40,7 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 当前：**已提交推送，并成功部署 GitHub Pages（2026-10-15）。** [首页](https://socoo123.github.io/js_web/) · [C01](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) · [学习路线](https://socoo123.github.io/js_web/roadmap/)。
 
 - 固定 Node **24.22.0 LTS**、npm **11.19.1**、Astro **7.3.8**、Starlight **0.42.6**；直接依赖固定具体版本，根级唯一 `package-lock.json`。React islands 尚无实际需求，未预装 React。
-- 已创建静态网站配置、中文根语言、首页、4 周/8 周路线、48 课目录、自动课程导航、代码高亮/复制、原生练习折叠区、Pagefind 搜索。目录在构建时从大纲和已存在正文生成，当前 **1 / 48** 课，未写课程显示「待发布」。
+- 已创建静态网站配置、中文根语言、首页、4 周/8 周路线、48 课目录、自动课程导航、代码高亮/复制、原生练习折叠区、Pagefind 搜索。目录在构建时从大纲和已存在正文生成，提前建站时为 **1 / 48** 课；本次 C02 后为 **2 / 48**，未写课程显示「待发布」。
 - `npm run setup:diagrams` 按固定摘要准备 D2/字体；`npm run build` 串行同步目录、编译 D2、生成静态 HTML/搜索索引并检查 `/js_web/` 内部链接与资源。工具保存在忽略目录，未全局安装。
 - 工作流：[deploy.yml](../.github/workflows/deploy.yml)，推送 `main` 自动构建并部署；部署目标为 `https://socoo123.github.io/js_web/`。固定 Actions commit，构建只读、部署取得 Pages/OIDC 权限。
 - 已把“文章完成后验证 → 更新目录/进度 → 提交并推送 → 核查 Pages”写入 [AGENTS.md](../AGENTS.md) 和项目规则；维护步骤见 [DEPLOYMENT](DEPLOYMENT.md)。用户明确要求仅本地草稿时按当次范围处理。
@@ -52,22 +52,33 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 - 线上首页、路线页、C01 深层地址均 HTTP 200。Chrome 对真实 Pages 重做 1280px/360px、亮暗模式、图加载、5 个折叠区、禁用站点 JS 的静态阅读与「浏览器/库存/npm」搜索验收，全部通过，未捕获资源 HTTP 错误或未处理异常。
 - 工作流有上游 Actions 内部 Node 20 声明的兼容提示；GitHub runner 已强制使用 Node 24，本次构建/上传均通过。后续升级 Actions 时复核该提示，不把提示当成失败或影响网站运行。
 
+## C02 已完成：Web 基础、卡片与调试现场
+
+当前：**正文与配套文件完成，本地验证通过，待本次提交推送并核查 Pages。** 线上状态将在发布后更新，不把本地预览写成已上线。
+
+- 正文：[C02 Web 基础与第一个调试现场](../src/content/docs/01-history-web/c02-web-debugging.md)。覆盖 HTML 语义/标签/表单与 DOM，CSS 选择器/层叠/盒模型/Flex/Grid/响应式，URL/HTTP/路径与页面加载；解释 defer、内存数据与 DOM、源码与临时编辑的边界。
+- 配套：[examples/c02](../examples/c02/README.md)。三个完整 HTML/CSS/JS 文件，无第三方依赖；已有 Python 3 提供本地服务，不要求提前安装 Node/npm。包含原生输入约束、正整数/超卖校验、售完禁用、Enter 提交、补货增量答案；操作方式与验证状态逐项分开。
+- 调试：Console 表达式、Elements/Computed、Network 路径404、Sources断点/单步/调用帧，漏defer故障、360px固定宽度故障、分步提示与折叠答案。面板路径是资料核对；浏览器协议执行与手动面板操作没有混淆。
+- 图：[D2 源码](../diagrams/c02-page-flow.d2) → [SVG](../src/assets/diagrams/c02-page-flow.svg)。沿用固定 D2 0.9.0、Dagre 与内嵌中文字体/许可。纵向图聚焦脚本交互更新，明确初始绘制不必等用户操作，不冒充准确瀑布图。
+- 实际示例验证（2026-10-15）：macOS arm64、Chrome **155.0.8059.40**、Python **3.11.8**；浏览器协议驱动使用 Node **24.22.0**。12→9、超卖不变、售完0并禁用、刷新12、Enter、空值/0/1.5的原生与JS校验、404与漏defer、DOM临时99/样式32px恢复、补货12→17→0→5→2、禁用页面JS均符合预期。实际断点在app.js第23行，单步前stock=12/quantity=3，单步后remaining=9/stock=12。
+- 站点验证：固定 Node **24.22.0** / npm **11.19.1** 的 `npm run check` 为0 errors/0 warnings；`npm run build` 生成5个HTML、两张D2图和搜索索引，`/js_web/` 内部链接/资源、C01/C02各5个有内容的折叠区检查通过。保留此前已记录的404路由优先级提示，不影响实际404.html。
+- Chrome生产预览：1280px/360px 首页、路线、C01/C02无整页溢出；C02亮暗正文、中文图与5个折叠区正常，禁用站点JS仍有正文与答案。搜索“defer”“盒模型”“补货”均命中C02，旧查询与搜索弹窗正常，资源无HTTP错误、无未处理异常。图首次窄屏检查后已简化为纵向并重新构建验收；Edge、Windows、真实手机与屏幕阅读器未执行。
+- 已同步课程目录2/48、C01→C02链接、README、来源与架构；生产输出检查新增C02。M1的网站基础与两篇示范课验收条件已满足；后续学习功能和46课并未因此完成。
+
 ## 尚未实施
 
-- C02–C48 正文、配套练习和后续关键 D2 图仍未编写；当前只发布 C01。
-- 学习者 localStorage 完成进度/导入导出、少量 React islands 与相关综合示例仍未实现。目录中的已发布数量是课程建设状态，不是个人学习进度。
-- 完整 M1 仍缺 C02 示范课；提前上线不代表整个 M1、M6 或 48 课课程全部完成。
+- C03–C48 正文、练习与后续D2图尚未编写；本次只新增C02。
+- 学习者localStorage完成进度/导入导出、少量React islands及综合示例待实施。目录的2/48是建设状态，不是个人学习进度。
+- Pages首发与后续建设进度以各节实际结果为准，提前上线不代表M6或48课全部完成。
 
-## 下一项未完成：C02 Web 基础与第一个调试现场
+## 下一项未完成：C03 值、类型、转换与比较
 
-继续单篇写作时按 `CURRICULUM.md` 和 `CONTENT_GUIDE.md` 生成 C02：HTML 语义/表单/DOM，CSS 选择器、盒模型、Flex/Grid 与响应式，URL/HTTP/页面加载，商品卡片 HTML/CSS/JS 与 DevTools 断点、Console、Elements、Sources 跟做。给必要文件、操作步骤、预期结果与排错题；执行后准确记录验证状态。
+按 `CURRICULUM.md` 和 `CONTENT_GUIDE.md` 继续单篇C03：7种原始类型与对象、typeof、Number/BigInt、浮点与整数精度、null/undefined、truthy、===/==/Object.is、??/||。衔接C02的输入value字符串与Number转换，使用价格/库存/默认值例子，给Java整数除法/BigDecimal对照、预测/修错练习、完整答案与准确验证状态。
 
-1. 先读 STATUS、AGENTS；检查 Git 与现有站点。保留 C01 和已上线架构，不重做规划/脚手架。
-2. 核查 C02 所用动态文档，编写正文与练习，必要机制图使用 D2。
-3. 同步目录，更新本文件与来源；运行必要示例、`npm run check`、`npm run build`，检查新课的真实生产页面。
-4. 按已授权规则提交并推送 GitHub；等待 Pages Actions 成功并核对 C02 深层 URL，报告实际结果。
-
-用户若要求完整 M1，完成 C02 后按总计划的验收标准收尾；其余内容分阶段推进。
+1. 先读STATUS与AGENTS，检查Git与已有站点，保留已上线的C01/C02及架构。
+2. 核对本课使用的规范与目标环境；不扩大为C04或提前引入复杂工程。
+3. 执行核心例子，更新来源、目录和本文件，运行 `npm run check` / `npm run build`，验收新课生产页。
+4. 按授权正常提交推送main，检查对应Pages Actions及新课深层线上URL；不强推，不把失败记为已上线。
 
 ## 已定的教学与技术方向
 
