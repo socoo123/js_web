@@ -34,9 +34,9 @@
 
 ## 已发布课程
 
-| 课 | 线上 | 示例与验证记录 | 首次部署 |
+| 课 | 线上 | 示例与验证记录 | 部署记录 |
 | --- | --- | --- | --- |
-| C01 JavaScript 的故事与生态地图 | [打开](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) | [examples/c01](../examples/c01/README.md) | 首次：[run 38662138819](https://github.com/socoo123/js_web/actions/runs/38662138819)；本次重构待部署 |
+| C01 JavaScript 的故事与生态地图 | [打开](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) | [examples/c01](../examples/c01/README.md) | 首次：[run 38662138819](https://github.com/socoo123/js_web/actions/runs/38662138819)；重构：[run 38755041902](https://github.com/socoo123/js_web/actions/runs/38755041902) |
 | C02 Web 基础与第一个调试现场 | [打开](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/) | [examples/c02](../examples/c02/README.md) | [run 38663909240](https://github.com/socoo123/js_web/actions/runs/38663909240) |
 | C03 值、类型、转换与比较 | [打开](https://socoo123.github.io/js_web/02-language-data/c03-values-types/) | [examples/c03](../examples/c03/README.md) | 范例重写：[run 38752272921](https://github.com/socoo123/js_web/actions/runs/38752272921) |
 | C04 变量、作用域与控制流 | [打开](https://socoo123.github.io/js_web/02-language-data/c04-scope-control/) | [examples/c04](../examples/c04/README.md) | 同上 |
@@ -58,7 +58,7 @@
 
 完整队列见 PLAN §8。
 
-P1 与 C03 范例重写已上线。C01 重构完成：正文约 7,700 字符、16 个代码块；内容规则、Node 10/10、Chrome/Java、`check`/`build` 通过，T0 尚未实现；部署待核对。
+P1、C03 范例与 C01 重构已上线。C01 正文约 7,700 字符、16 个代码块；临时内容规则、Node 10/10、Chrome/Java、`check`/`build` 通过（T0 尚未实现）；Pages 成功，文章与新版 D2 返回 200，图与本地构建一致。
 
 1. **T0 工具门禁**：按 PLAN §8 实现 `lint:lessons`、`examples`，让 check-build 自动发现课程，创建 `examples/shared/products.*`，修改侧栏名称。完成标准：C01、C03 零 error，C02、C04、C05 只有 warning，`npm run examples -- c03` 12/12 通过，`npm run build` 通过。
 2. **C06 函数、闭包与高阶操作**：目录 `02-language-data/c06-functions-closures.md`。内容与范围见 CURRICULUM 第 3 天和第 1 周写作范围，结构和语气对照 C03。项目从 `examples/inventory/01-core/inventory.js` 开始，写筛选工厂 `createCategoryFilter(category)`。属于难点课，正文上限 10,000 字。发布后**停下，请用户确认风格**，再做 R1。
