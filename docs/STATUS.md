@@ -21,8 +21,9 @@
 - 初始化本地 `main`，关联 `origin = https://github.com/socoo123/js_web.git`，验证远端读取。
 - 写入总计划、48 课大纲、架构、教学规范、Debug/UT 路线、官方来源。
 - 写入 AGENTS.md 与项目规则，使关键词恢复依赖仓库文件。
+- 通过 48 课号连续性、24 天每日两课、Markdown 本地链接与 Git 空白检查；独立审阅确认 React/UI5 关键边界。
 
-计划文件会作为本轮初始提交同步远端。提交/同步的实际状态以 `git status -sb`、`git log -1` 和 `git ls-remote origin refs/heads/main` 为准，避免在文件里写入自引用的提交 hash。
+计划文件已纳入本轮 Git 提交。远端同步的实际状态以 `git status -sb`、`git log -1` 和 `git ls-remote origin refs/heads/main` 为准，避免在文件里写入自引用的提交 hash。
 
 ## 尚未实施
 

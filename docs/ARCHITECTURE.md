@@ -41,6 +41,8 @@ VitePress 同样能生成静态文档，但默认主题基于 Vue，本项目要
 
 少量 React 演示按需加载，避免在首页或每篇文章加载所有组件库。经典 UI5/大型组件库示例可以独立构建或只作为本地练习资料。
 
+React islands 默认仍会在构建期预渲染。`client:load` 只决定客户端加载/水合时机，不会跳过预渲染；`window`、`localStorage` 等浏览器 API 放在客户端 Effect/事件中。确实依赖 DOM 注册的 UI5 示例按需用 `client:only="react"`，并提供静态说明或 fallback，不让示例妨碍正文构建与阅读。依据：[Astro client directives](https://docs.astro.build/en/reference/directives-reference/#clientonly)。
+
 ## 目录草图
 
 以下是实施后预计目录，当前仅有规划文件：
