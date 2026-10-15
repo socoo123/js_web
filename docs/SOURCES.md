@@ -155,3 +155,8 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 2026-10-15：重新核对 [Ecma 正式标准页](https://ecma-international.org/publications-and-standards/standards/ecma-262/)，当前为 ECMAScript 2026 / 第 17 版；按 [TC39 流程](https://tc39.es/process-document/)区分 Stage 4、年度归属与环境支持，正文移除具体在研提案的易过时快照。
 - 同日：按 [Node 环境差异](https://nodejs.org/en/learn/getting-started/differences-between-nodejs-and-the-browser)、[CommonJS](https://nodejs.org/api/modules.html)、[npm](https://docs.npmjs.com/about-npm/)、[Bun](https://bun.com/docs)及 Yarn/pnpm、React/UI5 官方文档重核职责与文中命令，无新增安装命令或依赖。
 - 同日：[Chrome Console](https://developer.chrome.com/docs/devtools/console/javascript)与 [JS 历史论文](https://www.wirfs-brock.com/allen/jshopl.pdf)用于操作路径与年代背景；实际运行记录移至 [examples/c01](../examples/c01/README.md)。
+
+## C02 按新版规范重构
+
+- 2026-10-15：重新核对 [Python http.server](https://docs.python.org/3/library/http.server.html#command-line-interface) 的端口与 `--bind` 命令，主线继续使用已有 Python 或编辑器静态服务，无新增安装命令。
+- 同日：依 [MDN script](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/script)、[表单](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Extensions/Forms/Your_first_form)及 Chrome 的 [Sources](https://developer.chrome.com/docs/devtools/javascript/)、[Network](https://developer.chrome.com/docs/devtools/network/)、[CSS](https://developer.chrome.com/docs/devtools/css/) 核对脚本时机与面板步骤；实际验证记录见 [examples/c02](../examples/c02/README.md)。

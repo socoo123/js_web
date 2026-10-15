@@ -1,16 +1,30 @@
-# C02：聚焦脚本交互路径，资源请求和初始绘制可重叠。
+# C02：箭头表示脚本连接页面到处理提交的顺序；初始绘制不在这条交互路径中。
 direction: down
 
-*.style.font-size: 20
-*.style.border-radius: 10
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
 
-request: 浏览器请求并读取 HTML
-parse: 解析 HTML，逐步建 DOM\n发现 CSS 与 defer 脚本
-ready: 脚本就绪且 HTML 解析完成\n执行脚本，注册提交监听
-event: 用户提交表单\nJS 校验并修改 DOM
-view: 浏览器结合 DOM 与样式\n更新布局与绘制
+parse: 解析 HTML · 建立 DOM\n发现并下载 CSS 与 app.js
+ready: HTML 解析完成 + 脚本就绪\n执行 defer 脚本，查找节点
 
-request -> parse
-parse -> ready: 下载与解析可以重叠
-ready -> event: 等待用户操作
-event -> view: 等待渲染机会
+interaction: 页面交互 {
+  style.font-size: 18
+  style.fill: "#f4f8ff"
+  style.stroke-dash: 4
+
+  listen: 注册 submit 监听\n等待用户操作
+  submit: 提交表单\n读取输入 · 计算库存
+  update: 更新 DOM\n写回文本与按钮状态
+  listen -> submit: 用户提交
+  submit -> update
+}
+
+view: 浏览器结合 DOM 与 CSS\n安排后续布局与绘制 {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+
+parse -> ready: 下载与解析可重叠
+ready -> interaction.listen
+interaction.update -> view: 等待渲染机会
