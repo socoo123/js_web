@@ -1,6 +1,6 @@
 # 写作规范（硬约束）
 
-适用于 C06 起的所有新课，以及 C01、C02、C04、C05 的整改（PLAN 任务 R1）。写任何课程前必须读完本文件。
+适用于所有新课和按本规范重构的课程，以及 C05 的整改（PLAN 任务 R1）。写任何课程前必须读完本文件。
 
 **范例**：[C03 值、类型、转换与比较](../src/content/docs/02-language-data/c03-values-types.md) 已按本规范整篇重写，配套 [examples/c03](../examples/c03/README.md) 和 [D2 源码](../diagrams/c03-value-boundary.d2)。本文件的规则说「写什么」，C03 示范「写成什么样」：开头场景、Java 对照表、一段代码一个概念、「先猜一猜」、按六步写的调试、带验收条件的练习、只在 examples README 留验证记录。两者冲突时以本文件为准，并修正 C03。
 

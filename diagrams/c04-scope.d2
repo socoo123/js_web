@@ -1,14 +1,34 @@
-# C04：图中的箭头表示查找外层绑定，不表示执行顺序。
+# C04：箭头表示绑定查找与初始化检查，不表示语句的执行顺序。
 direction: down
 
-*.style.font-size: 20
-*.style.border-radius: 10
+**.style.font-size: 22
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 20
 
-read: 内层代码读取 warehouse
-inner: 先找当前块\n有绑定即停止外查
-outer: 当前块没有才找外层\n逐层按代码嵌套查找
-end: 到最外层仍无绑定\n读取时抛 ReferenceError
+read: 读取 warehouse
+search: 按词法作用域\n从内向外找绑定
+found: 找到了？ {
+  shape: diamond
+}
+initialized: 已初始化？ {
+  shape: diamond
+}
+missing: 未声明\nReferenceError {
+  style.fill: "#fff1f0"
+  style.stroke: "#cf1322"
+}
+tdz: TDZ\nReferenceError {
+  style.fill: "#fff1f0"
+  style.stroke: "#cf1322"
+}
+value: 读取值 {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
 
-read -> inner
-inner -> outer: 没有绑定
-outer -> end: 始终没有找到
+read -> search
+search -> found
+found -> missing: 没找到
+found -> initialized: 找到，停止外查
+initialized -> tdz: 否
+initialized -> value: 是

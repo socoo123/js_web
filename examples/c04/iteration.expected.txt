@@ -1,0 +1,6 @@
+of 12 number
+of 0 number
+of 7 number
+in 0 string
+in 1 string
+in 2 string

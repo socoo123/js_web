@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-15（C02 按 C03 范例重构）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-15（C04 按 C03 范例重构）。
 
 ## 续做时按这个顺序读
 
@@ -20,6 +20,7 @@
 - **2026-10-15：用户要求按新规范整篇重构 C03（文字和图），给其他 AI 当参考。** 已完成：正文约 7,500 字，新增 D2 图 c03-value-boundary，示例改用固定样例数据并全部带 `.expected.txt`。C03 不再属于 R1。
 - **2026-10-15：用户要求在最新计划与 C03 基础上重构 C01。** 已完成正文、示例与 D2，C01 提前移出 R1。
 - **2026-10-15：用户要求在最新计划与 C03 基础上重构 C02。** 正文、示例与 D2 按普通课上限整课重构，C02 提前移出 R1；T0、C06 原队列保留。
+- **2026-10-15：用户要求在最新计划与 C03 基础上重构 C04。** 正文、示例与 D2 整课重构，按普通课 ≤ 8,000；C04 提前移出 R1，T0、C06 队列保留。
 
 ## 当前状态
 
@@ -27,7 +28,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 5 / 48（C01–C05）。C01–C03 已按新规范重构；C04、C05 等待 R1 整改 |
+| 已发布 | 5 / 48（C01–C05）。C01–C04 已按新规范重构；C05 等待 R1 整改 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 5 张图：c01-ecosystem、c02-page-flow、c03-value-boundary、c04-scope、c05-alias-copy |
 | 自动门禁 | `lint:lessons`、`examples` 未实现（T0） |
 | 学习进度功能 | 未实施（F1） |
@@ -59,11 +60,11 @@
 
 完整队列见 PLAN §8。
 
-P1 与 C01–C03 重构已上线。C02 正文约 7,800 字符、15 个代码块；临时内容规则、Node 1/1、Chrome 交互与故障复现、`check`/`build` 通过（T0 尚未实现）；Pages 成功，文章与新版 D2 返回 200、均与本地构建一致。
+P1 与 C01–C03 重构已上线。C04 重构的正文约 7,900 字符、16 个代码块；临时内容规则、Node 15/15、Java 对照、Chrome 断点与异常验证、`check`/`build` 通过（T0 尚未实现）；本次 Pages 发布待推送后确认。
 
-1. **T0 工具门禁**：按 PLAN §8 实现 `lint:lessons`、`examples`，让 check-build 自动发现课程，创建 `examples/shared/products.*`，修改侧栏名称。完成标准：C01–C03 零 error，C04、C05 只有 warning，`npm run examples -- c03` 12/12 通过，`npm run build` 通过。
+1. **T0 工具门禁**：按 PLAN §8 实现 `lint:lessons`、`examples`，让 check-build 自动发现课程，创建 `examples/shared/products.*`，修改侧栏名称。完成标准：C01–C04 零 error，C05 只有 warning，`npm run examples -- c03` 12/12 通过，`npm run build` 通过。
 2. **C06 函数、闭包与高阶操作**：目录 `02-language-data/c06-functions-closures.md`。内容与范围见 CURRICULUM 第 3 天和第 1 周写作范围，结构和语气对照 C03。项目从 `examples/inventory/01-core/inventory.js` 开始，写筛选工厂 `createCategoryFilter(category)`。属于难点课，正文上限 10,000 字。发布后**停下，请用户确认风格**，再做 R1。
-3. **R1 整改 C04、C05**：按 PLAN §8 只做减法。
+3. **R1 整改 C05**：按 PLAN §8 只做减法。
 
 ## 本文件的更新规则
 

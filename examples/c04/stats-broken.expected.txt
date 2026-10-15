@@ -1,0 +1,3 @@
+total NaN
+empty NaN
+zero NaN

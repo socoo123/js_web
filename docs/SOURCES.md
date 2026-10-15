@@ -160,3 +160,8 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 
 - 2026-10-15：重新核对 [Python http.server](https://docs.python.org/3/library/http.server.html#command-line-interface) 的端口与 `--bind` 命令，主线继续使用已有 Python 或编辑器静态服务，无新增安装命令。
 - 同日：依 [MDN script](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/script)、[表单](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Extensions/Forms/Your_first_form)及 Chrome 的 [Sources](https://developer.chrome.com/docs/devtools/javascript/)、[Network](https://developer.chrome.com/docs/devtools/network/)、[CSS](https://developer.chrome.com/docs/devtools/css/) 核对脚本时机与面板步骤；实际验证记录见 [examples/c02](../examples/c02/README.md)。
+
+## C04 按新版规范重构
+
+- 2026-10-15：重新核对 MDN 的 [let / TDZ](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/let)、[const](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/const)、[var](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/var)、[switch](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/switch)、[for-of](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/for...of)、[for-in](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/for...in)与 [try/catch](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/try...catch)。正文改为短例子与固定库存数据，规范只放在延伸阅读，D2 补全「未声明」和「TDZ」两个错误出口。
+- 同日：重核 [Chrome 单步、Scope 与 Call Stack](https://developer.chrome.com/docs/devtools/javascript/reference)、[异常断点](https://developer.chrome.com/docs/devtools/javascript/breakpoints)和 [Python 本地服务命令](https://docs.python.org/3/library/http.server.html#command-line-interface)。未增加安装命令或第三方依赖；运行与断点实测明细见 [examples/c04](../examples/c04/README.md)。

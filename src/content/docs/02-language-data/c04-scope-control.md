@@ -1,293 +1,208 @@
 ---
 title: C04 变量、作用域与控制流
-description: 从 Java 库存统计迁移到 JavaScript，分清 let、const、var 与 TDZ，掌握分支和循环，并用断点查出越界后的 NaN。
+description: 选对 let 与 const，讲清作用域、提升和 TDZ，把 Java 库存统计迁到 JS，并用断点找到越界产生 NaN 的那一轮。
 sidebar:
   order: 4
 ---
 
-> **课号 C04 · 第 1 周 / 第 2 天 · 必修**  
-> 前置：[C03 值、类型、转换与比较](../c03-values-types/)，以及 C02 的 Console、Sources 基础；熟悉 Java 的变量、分支和循环。  
-> 时间：阅读与跟做约 50 分钟，独立练习约 40 分钟。4 周路线与 C03 同一天，8 周路线单独一天。  
-> 资料核查：2026-10-15。正文例子为标准语言能力，不要求提前安装 Node 或包管理器；逐项验证见课尾。
+> **第 1 周 · 第 2 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C03 · 运行：浏览器 Console 或 Node 24 · 示例已运行验证
 
-## 1. Java 代码看起来能照搬，为什么总数变成了 NaN？
+## 这一课解决什么问题
 
-现在要统计四种商品的库存 `[12, 0, 7, 3]`，正确总数是 22。你把 Java 的 `for` 循环迁过来，却把边界写成 `index <= quantities.length`：程序没有像 Java 数组那样立即抛出越界异常，最后只得到 `NaN`。与此同时，写在 `if` 里的消息变量在块外读不到，改成 `var` 虽然能读到，又掩盖了变量应该属于哪一段代码的问题。
+现在要统计前四件商品的库存：`[12, 0, 7, 3]`，总数应该是 22。你把 Java 的循环迁到 JS，不小心把 `<` 写成 `<=`，结果没有数组越界异常，最后只打印了 `NaN`。
 
-这节把三件事连起来：**名字绑定到什么值、在哪一段代码能访问、下一条执行什么**。学完应能：
+另一个地方，消息明明在 `if` 里赋过值，出了花括号却提示 `message is not defined`。把 `const` 改成 `let` 也没用。
 
-1. 为不需要重新赋值的绑定选 `const`，为累计量选 `let`；看懂旧代码中的 `var`。
-2. 用代码的嵌套关系解释块作用域、遮蔽和暂时性死区 TDZ。
-3. 选择 `if`、`switch`、普通 `for` 或 `for...of`，避免用 `for...in` 累加数组元素。
-4. 在循环断点中找到第一个错误值，区分 `undefined`、`NaN` 和真正抛出的异常。
-5. 顺着错误堆栈定位触发点，并用原输入与边界输入确认修复。
+这一课沿着库存统计，把声明、作用域与控制流连起来。
 
-| Java 经验 | 可以借用的部分 | JS 中要重新确认的边界 |
+学完你能：
+
+- 为累计量选 `let`，为当前元素和固定绑定选 `const`，读懂旧代码里的 `var`
+- 沿代码的嵌套关系查找变量，解释遮蔽、提升和暂时性死区 TDZ
+- 区分 `for...of` 的元素与 `for...in` 的属性名，把 Java 统计方法迁到 JS
+- 在 Sources 的 Scope 和 Call Stack 中找到错误证据，分清 `NaN` 与异常
+
+例子在仓库的 [examples/c04](https://github.com/socoo123/js_web/tree/main/examples/c04)。和 C03 一样，在 Chrome 的 Console 粘贴完整代码块即可；重复声明报错时刷新页面再运行。已有 Node 的话，可以在该目录运行 `node stats.js`。
+
+## Java 程序员先看这里
+
+| Java | JavaScript | 差异 |
 | --- | --- | --- |
-| 局部变量与 `final` | 先明确变量是否需要重新赋值 | `const` 限制绑定重新赋值，不冻结对象；变量没有 Java 的声明类型 |
-| 花括号与局部变量 | `let` / `const` 在块内建立局部绑定 | `var` 不以普通 `if` / `for` 块为作用域边界 |
-| 数组下标从 0 开始 | 普通 `for` 的有效下标同样小于 length | 本课普通数组缺失下标读到 `undefined`，不会自动抛 Java 式越界异常 |
-| `try` / `catch` / `finally` | 捕获异常、查看调用链、必要时收尾 | JS 没有 Java 的受检异常声明；`NaN` 本身也不是异常 |
+| 局部变量、`final` 引用 | `let`、`const` | `const` 限制重新赋值，对象属性仍可修改 |
+| 块内的局部变量 | `let` / `const` 块作用域 | JS 允许在内层块声明同名变量，遮蔽外层 |
+| 声明前使用局部变量编译失败 | `var` 提前读到 `undefined`；`let` / `const` 抛异常 | 要区分绑定已建立和已初始化 |
+| 增强 `for` 遍历元素 | `for...of` | `for...in` 遍历的是字符串属性名 |
+| 越界抛异常；受检异常要声明或捕获 | 缺失下标读到 `undefined`；无受检异常机制 | `NaN` 是一个值，`try/catch` 捕获不到它 |
 
-## 2. let、const、var：先分清绑定与值
+## 1. let 和 const：限制的是重新赋值
 
-**操作方式：自己尝试 · 浏览器 Console，S01。**  
-**验证状态：已验证；Node 24.22.0 与 Chrome 155 的实际结果见课尾。**
+默认用 [`const`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/const)；一个名字后面还要重新赋值，才用 `let`。这里的「绑定」就是变量名与值的关联。
 
-在自己的空白页或 C02 本地网页打开 Console，**每次运行前先刷新页面，或使用新的独立页面**，再把下面整段复制执行。也可取得[仓库 examples/c04](https://github.com/socoo123/js_web/tree/main/examples/c04) 的 `bindings.js`。示例中的块隔离 `let` / `const`，但不会隔离 `var`；不重建页面上下文就再次运行，原来的 `legacy` 仍为 12，`var-before` 就会打印 12，而不是下面首次运行的 `undefined`。清空日志不会重置绑定。Console 最后显示的额外 `undefined` 可能是本次输入的求值结果，不是额外一条日志。
+**先猜一猜：** 为什么下面两次库存修改都成功，最后一次却报错？
 
 ```js title="bindings.js"
-// S01：每次运行前刷新页面；块隔离 let/const，不隔离 var。
-{
-  let stock = 12;
-  const sold = 3;
-  stock = stock - sold;
-  console.log("binding", stock, sold);
+let stock = 12; // P001 机械键盘，售出 3 件
+const sold = 3;
+stock = stock - sold;
+console.log(stock); // → 9
 
-  const product = { stock: 12 };
-  product.stock = 9;
-  console.log("property", product.stock);
-  try {
-    product = { stock: 0 };
-  } catch (error) {
-    console.log("reassign", error.name);
+const product = { id: "P001", stock: 12 };
+product.stock = product.stock - sold;
+console.log(product.stock); // → 9
+try {
+  product = { id: "P002", stock: 0 };
+} catch (error) {
+  console.log(error.name); // → TypeError
+}
+```
+
+输出依次是 `9`、`9`、`TypeError`。`stock = stock - sold` 给变量重新赋值，`stock` 要用 `let`。`sold` 始终是 3，用 `const` 表达这个约定。
+
+`product.stock = ...` 改的是对象属性，`product` 仍绑定到原来的对象；`product = ...` 才是把这个名字换绑到另一个对象，所以抛出 `TypeError`。`try/catch` 让例子打印错误名称后继续运行，第 5 节再讲它。
+
+这与 Java 的 `final Product product` 相似：引用不能替换，对象的可变字段仍能改。JS 的 `const` 也不会给值加上 Java 式的静态类型。
+
+普通的 `const` 声明必须立刻给值。
+
+## 2. 作用域与 TDZ：先找到绑定，再看能不能读
+
+### 花括号建立块作用域
+
+`let` 和 `const` 声明在块内，就只在这个块及其内部可见。读取一个名字时，先找当前作用域，没有再找外层。
+
+```js title="scope.js"
+const warehouse = "默认仓";
+{
+  const warehouse = "杭州仓";
+  const quantity = 12;
+  {
+    console.log(warehouse, quantity); // → 杭州仓 12
   }
 }
+console.log(warehouse); // → 默认仓
+```
 
-{
-  console.log("var-before", legacy);
-  var legacy = 12;
+输出是 `杭州仓 12`、`默认仓`。最里面的块没有自己的 `warehouse`，向外一层找到「杭州仓」，查找就停了。离开这层块后，读到的仍是外层的「默认仓」。
+
+两个 `warehouse` 是两个独立绑定，内层同名绑定**遮蔽**了外层。它没有修改外层的值。`quantity` 只属于内层块，块外读取它会抛 `ReferenceError`。
+
+按代码嵌套关系确定查找路径的规则叫**词法作用域**。Java 的普通局部变量块不允许这样重声明同名变量，JS 允许。
+
+### var：函数作用域，声明前可以读
+
+旧教程常见的 [`var`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/var) 不受普通 `if` 块限制。在函数内，它的作用域是整个函数。
+
+这里先用最少的函数语法：`function showLegacy() { ... }` 定义一段有名字的代码，`showLegacy()` 执行它。
+
+```js title="var.js"
+function showLegacy() {
+  console.log(legacy); // → undefined
   if (true) {
-    var visibleOutsideIf = legacy;
+    var legacy = 12;
   }
-  console.log("var-block", visibleOutsideIf);
+  console.log(legacy); // → 12
 }
-
-try {
-  console.log(early);
-  let early = 12;
-} catch (error) {
-  console.log("tdz", error.name);
-}
-
-{
-  const warehouse = "默认仓";
-  {
-    const warehouse = "杭州仓";
-    const stock = 12;
-    console.log("inner", warehouse, stock);
-  }
-  console.log("outer", warehouse);
-}
-
-try {
-  const label = "外层";
-  {
-    console.log(label);
-    const label = "内层";
-  }
-} catch (error) {
-  console.log("shadow-tdz", error.name);
-}
-
-try {
-  console.log(typeof waiting);
-  let waiting;
-} catch (error) {
-  console.log("typeof-tdz", error.name);
-}
-
-{
-  let pending;
-  console.log("initialized", pending);
-}
+showLegacy();
 ```
 
-预期日志，顺序如下；`try/catch` 暂且理解为“记录预期错误后继续”，第 8 节再讲它的结构：
+两行分别打印 `undefined`、`12`。进入函数时，`legacy` 的绑定已建立，并初始化为 `undefined`；执行到 `var legacy = 12` 才赋值为 12。`if` 结束后仍能读到它，因为这个绑定属于函数。
 
-```text
-binding 9 3
-property 9
-reassign TypeError
-var-before undefined
-var-block 12
-tdz ReferenceError
-inner 杭州仓 12
-outer 默认仓
-shadow-tdz ReferenceError
-typeof-tdz ReferenceError
-initialized undefined
+这叫**提升**：声明的效果提前可见，赋值仍在原来的位置。源码并没有真的搬家。
+
+### let / const：初始化前处于暂时性死区
+
+`let` / `const` 的绑定也会提前建立，但执行到声明并初始化之前不能读取。这段时间叫 **Temporal Dead Zone，暂时性死区（TDZ）**。
+
+**先猜一猜：** 外层已经有 `label`，下面是打印「外层」，还是抛异常？
+
+```js title="tdz.js"
+const label = "外层";
+try {
+  console.log(label);
+  const label = "内层";
+} catch (error) {
+  console.log(error.name); // → ReferenceError
+}
+let pending;
+console.log(pending); // → undefined
 ```
 
-### 2.1 const 约束名字，不约束整个对象
+输出是 `ReferenceError`、`undefined`。`try` 的花括号里有自己的 `const label`，所以查找在内层停止。但执行 `console.log(label)` 时，它还没初始化，读取就抛异常，后面的赋值也没机会执行。
 
-`const sold = 3` 建立一个不能重新赋值的绑定；`let stock = 12` 允许之后执行 `stock = 9`。两者都没有给变量加上 Java 的 `int` 类型。即使 `let` 允许换成字符串，业务上也应保持清楚的类型约定，避免统计中无意出现字符串拼接。
+**找到未初始化的绑定，会直接报错，不会退回外层。** 内层绑定已经影响了前面的读取。
 
-`const product = { stock: 12 }` 把名字 `product` 绑定到一个对象值。`product.stock = 9` 修改该对象的属性，**没有重新给 product 赋值**；`product = { stock: 0 }` 才是在替换绑定，所以抛 `TypeError`。这与 Java 的 `final` 引用不能重新指向另一对象、字段仍可能可变有相似之处；`const` 不是深层不可变，也不等于 Java 的编译期常量。
+最后的 `let pending;` 已经执行完声明，把变量初始化为 `undefined`，因此可以读取。`undefined` 是一个可读取的值，TDZ 则是尚不能读取的状态。
 
-本课先看清“重新赋值”和“修改属性”两种操作。对象别名、浅复制在 C05 展开；不要因此把对象传参叫作“按引用传参”：JS 传的是值，传入对象引用值的副本可能仍指向同一个对象，重新给形参赋值不会替换调用者的绑定。
+![作用域查找流程：从当前作用域寻找 warehouse，找不到就沿外层继续；找到后检查初始化状态，已初始化就读取，未初始化就因 TDZ 抛 ReferenceError。所有外层都没有绑定时，也抛 ReferenceError。](../../../assets/diagrams/c04-scope.svg)
 
-### 2.2 选择规则与旧代码
+箭头表示查找路径：未声明与 TDZ 是两个不同的报错出口。
 
-| 声明 | 本课使用的作用域规则 | 声明前读取 | 适合本课的用途 |
-| --- | --- | --- | --- |
-| `const` | 块作用域 | 初始化前为 TDZ，读取抛 `ReferenceError` | 输入数组、当前元素、固定配置；普通声明必须给初始值 |
-| `let` | 块作用域 | 初始化前为 TDZ，读取抛 `ReferenceError` | 累计总数、循环下标、需要在分支中赋值的结果 |
-| `var` | 函数作用域；函数外属于相应的脚本或模块环境 | 绑定通常已初始化为 `undefined`，初始化表达式仍在原处执行 | 读懂旧代码；本课新实现不用它 |
+C03 的 `typeof notDeclared` 返回 `"undefined"`，针对的是没有声明过的名字。对 TDZ 中的 `label` 使用 `typeof label`，仍会抛 `ReferenceError`。可以把例子中的 `console.log(label)` 改成 `console.log(typeof label)` 试一下。
 
-`var visibleOutsideIf` 在 `if` 结束后仍能读到，因为 `if` 不是它的作用域边界。它仍会受到外层函数或模块等边界限制，不能概括成“var 到处可见”。浏览器普通脚本顶层、模块顶层和 Node 文件的顶层规则也不同；C16 学模块时再细分，不把任何顶层变量都等同于 `window` 属性。
+## 3. 分支：先确定结果要被谁读取
 
-同一块中重复写两个 `let stock` 或两个 `const stock` 会产生 `SyntaxError`。嵌套块中的同名声明则建立另一个绑定。这一点与 Java 局部变量的重声明限制不同；Console 对多次独立输入还可能有专门行为，练习应以完整代码块或源文件为准。
+`if` 的结构和 Java 相同。库存状态按三条互斥规则处理：0 件售罄，1–5 件低库存，其余可售。先判断 0，再判断上限 5。
 
-## 3. 作用域查找、提升与 TDZ
-
-![读取 warehouse 时从当前块开始查找名字；当前块没有才继续查外层；到最外层仍找不到，读取抛出 ReferenceError。找到绑定即停止向外查找，尚未初始化的绑定触发 TDZ 错误。](../../../assets/diagrams/c04-scope.svg)
-
-图的箭头表示**查找外层绑定**，不表示代码执行顺序。实际在哪一层建立绑定，取决于声明的种类和代码结构。对本课 `let` / `const` 的块嵌套，先找当前块，再逐层找包含它的外层；外层不能反过来读取只在内层声明的局部变量。JS 采用词法作用域：代码写在哪里形成的嵌套关系决定这条查找路径，不是每次调用时临时按调用者拼出路径。函数和闭包在 C06 继续。
-
-S01 的两个 `warehouse` 是两个绑定：内层打印“杭州仓”，离开内层块后外层仍是“默认仓”，称为**遮蔽**。遮蔽容易让读者误判修改了哪一个值；业务代码通常应优先用更有意义的不同名字。
-
-再看 `label`：内层已经声明了同名绑定，所以内层 `console.log(label)` 找到的就是内层绑定；但它的 `const label = "内层"` 还没执行到，因此抛 `ReferenceError`，**不会退回去读取外层的“外层”**。图中“找到绑定即停止外查”包含这个限制。
-
-### “提升”不代表把源码搬到最前面
-
-进入相应环境时，JS 会先建立声明对应的绑定，再执行语句。`var` 的绑定会先初始化为 `undefined`，所以 `var-before` 能打印它；`legacy = 12` 的赋值仍在原来的执行位置。不能把 `var legacy = 12` 整条都想象成提前执行了。
-
-`let` / `const` 的绑定也会先建立，但在执行到声明初始化前不可读取，这段时间叫 **Temporal Dead Zone，暂时性死区**。因此不要用“let/const 完全没有提升”解释它们；更有用的是问“绑定是否存在、是否已初始化”。
-
-- `console.log(early); let early = 12;`：声明初始化之前读取，抛 `ReferenceError`。
-- `let pending; console.log(pending);`：已经执行声明，无显式初始值的 `let` 初始化为 `undefined`。
-- `typeof waiting` 遇到本块尚未初始化的 `let waiting`，同样抛 `ReferenceError`。C03 中 `typeof` 对未声明名字的特殊行为，不能推广成“typeof 永不报错”。
-
-这些基础规则已对照 [ECMAScript 2026 的声明](https://tc39.es/ecma262/2026/multipage/ecmascript-language-statements-and-declarations.html#sec-let-and-const-declarations)与[环境记录](https://tc39.es/ecma262/2026/multipage/executable-code-and-execution-contexts.html#sec-environment-records)核对。这里不依赖未完成提案。
-
-## 4. if、switch 和循环：让每条执行路径都有理由
-
-**操作方式：自己尝试 · 浏览器 Console，S02。验证状态：已验证。** 先预测每个块的输出，再执行完整 `controls.js`；两个块也可以分开复制。
-
-```js title="controls.js"
-// S02：条件与循环；每块可以单独复制到 Console。
-{
-  const stock = 0;
-  if (stock === 0) {
-    console.log("if", "售完");
-  } else if (stock < 5) {
-    console.log("if", "库存偏低");
+```js title="branches.js"
+for (const currentStock of [0, 3, 12]) {
+  let status;
+  if (currentStock === 0) {
+    status = "售罄";
+  } else if (currentStock <= 5) {
+    status = "低库存";
   } else {
-    console.log("if", "可售");
+    status = "可售";
   }
-
-  const action = "restock";
-  let message;
-  switch (action) {
-    case "sell": {
-      message = "执行售出";
-      break;
-    }
-    case "restock": {
-      message = "执行补货";
-      break;
-    }
-    default: {
-      message = "未知操作";
-    }
-  }
-  console.log("switch", message);
-
-  switch ("0") {
-    case 0:
-      console.log("case-number");
-      break;
-    default:
-      console.log("case-default");
-  }
+  console.log(currentStock, status); // → 0 售罄 / 3 低库存 / 12 可售
 }
+```
 
-{
-  const quantities = [12, 0, 7];
-  for (const quantity of quantities) {
-    console.log("of", quantity);
-  }
-  for (const key in quantities) {
-    console.log("in", key, typeof key);
-  }
+三行输出是 `0 售罄`、`3 低库存`、`12 可售`。进入一个分支后，后面的 `else if`、`else` 就不再执行；因此检查 `<= 5` 时，0 已经被前一条排除了。
 
-  let attempts = 0;
-  while (attempts < 2) {
-    attempts = attempts + 1;
-  }
-  console.log("while", attempts);
+`let status` 放在 `if` 前，分支内赋值，分支后读取。若漏写 `else`，库存 12 的那条路径就会留下 `undefined`。
 
-  let checks = 0;
-  do {
-    checks = checks + 1;
-  } while (false);
-  console.log("do", checks);
+和 Java 的差别是：JS 的条件会做 truthy / falsy 转换。沿用 C03 的规则，明确写 `currentStock === 0` 或 `currentStock > 0`，库存 0 就不会被误当成「没返回数据」。
 
-  let firstAvailable = 0;
-  for (const quantity of [0, 7, 3]) {
-    if (quantity === 0) {
-      continue;
-    }
-    firstAvailable = quantity;
+### switch 匹配固定值
+
+按「售出 / 补货」这类固定操作分派时，可以用 [`switch`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/switch)。
+
+```js title="switch.js"
+const action = "restock";
+switch (action) {
+  case "sell": {
+    const message = "执行售出";
+    console.log(message);
     break;
   }
-  console.log("first", firstAvailable);
+  case "restock": {
+    const message = "执行补货";
+    console.log(message); // → 执行补货
+    break;
+  }
+  default: {
+    console.log("未知操作");
+  }
 }
 ```
 
-预期日志：
+输出 `执行补货`。`case` 按严格相等规则匹配，字符串 `"0"` 与数字 `0` 不匹配。匹配后从那里向下执行；遗漏 `break` 会继续执行后面的分支。
 
-```text
-if 售完
-switch 执行补货
-case-default
-of 12
-of 0
-of 7
-in 0 string
-in 1 string
-in 2 string
-while 2
-do 1
-first 7
-```
+`case` 标签本身不建立块作用域。这里每个分支都加 `{ ... }`，所以两处 `const message` 各属于自己的块，可以同名。`default` 则把未知操作变成明确的结果。
 
-### 4.1 分支：判条件与匹配固定值
+## 4. 循环：先选值，再决定要不要下标
 
-`if` / `else if` 依次检查条件；第一个成立的分支执行后，不再检查后面的分支。JS 会把条件转换为布尔值，Java 则要求条件本身是 boolean。这里写 `stock === 0`，明确表达“库存等于 0”，而不是让 `if (stock)` 同时承担类型、有效性和业务含义。
+### 把 Java 统计方法迁过来
 
-`switch` 适合按固定值分派，`case` 的匹配不做 `==` 那样的隐式转换，所以字符串 `"0"` 不匹配数字 `0`。匹配后从该处向下执行；忘记 `break` 会贯穿到后续分支，即使后面 `case` 的值不同。`default` 处理没有匹配的情形，应该明确输出或处理未知操作。
-
-`case` 标签本身不创建独立的块；例子在每个分支写 `{ ... }`，以后需要局部 `const` 时也各有块作用域。不要在同一个 switch 作用域的多个 case 中随意重复声明同名 `let` / `const`。
-
-### 4.2 循环：先选元素值，再决定是否需要下标
-
-| 写法 | 每轮拿到什么 / 何时判断 | 本课建议 |
-| --- | --- | --- |
-| `for (let index = 0; index < length; index = index + 1)` | 初始化一次；每轮先判条件，执行体后更新下标 | 需要观察下标或控制边界时使用 |
-| `for (const quantity of quantities)` | 数组按迭代规则给出的元素值 | 只需顺序读取元素时优先使用；类似 Java 的增强 for |
-| `for (const key in quantities)` | 可枚举的字符串属性名，可能包括继承来的属性 | 不是数组值循环，不用于本课库存累计 |
-| `while (condition)` | 每轮执行前判断 | 次数由过程决定时，确保有走向终止的变化 |
-| `do { ... } while (condition)` | 先执行一次，再判断 | 确实要求至少一次才用 |
-
-`for...in` 本例拿到字符串 `"0"`、`"1"`、`"2"`；如果直接把 key 加到数字总数，容易变成字符串拼接。数组还能附加属性，原型也会影响枚举；C05/C08/C09 再展开对象和集合。这里先避免把 `in` 当成 Java 增强 for 的对应物。
-
-`for (const quantity of quantities)` 能遍历多个值，并不违反 `const`：每轮是新的绑定，不是对同一个 `const` 反复赋值。普通计数循环中的 `index` 却需要更新，因此使用 `let`，不能把 `for (let index...)` 机械替换为 `const`。
-
-`continue` 跳过当前这轮剩余部分，进入下一轮；`break` 退出最内层循环或 switch。本例跳过 0，找到 7 后退出，所以 `first` 是 7。`return` 则是离开当前函数，范围不同。[ECMAScript 的循环与跳转语句](https://tc39.es/ecma262/2026/multipage/ecmascript-language-statements-and-declarations.html#sec-iteration-statements)
-
-## 5. 从 Java 统计方法迁移一份可运行的 JS
-
-**操作方式：讲解示例 · Java 对照 J01；验证状态：已用 JDK 21.0.2 执行。** 会 Java 的读者先看这份熟悉的代码；本课浏览器练习不要求安装 JDK。
+先看熟悉的 Java。数组中放的是 P001–P004 的库存，统计方法只负责把它们加起来。
 
 ```java title="StockStats.java"
 public class StockStats {
     static int sumStock(int[] quantities) {
         int total = 0;
         for (int index = 0; index < quantities.length; index++) {
-            int quantity = quantities[index];
-            total = total + quantity;
+            total = total + quantities[index];
         }
         return total;
     }
@@ -295,19 +210,133 @@ public class StockStats {
     public static void main(String[] args) {
         System.out.println("total " + sumStock(new int[] {12, 0, 7, 3}));
         System.out.println("empty " + sumStock(new int[] {}));
+        System.out.println("zero " + sumStock(new int[] {0}));
     }
 }
 ```
 
-以下是完整 JS 文件，不需要定义类，也不需要 `public static void main`：
+输出 `total 22`、`empty 0`、`zero 0`。已有 JDK 的话，在示例目录运行 `java StockStats.java` 即可。
 
-**操作方式：自己尝试 · 浏览器 Console，S03；验证状态：已验证。** 这份文件有顶层 `const quantities`，在 Console 重复复制前先刷新页面重建上下文；清空日志不会删除原来的绑定。
+JS 可以直接定义函数，省去类和 `main`，循环结构保持不变：
 
 ```js title="stats.js"
-// S03：本文件可在浏览器普通脚本或 Node 中直接运行。
 function sumStock(quantities) {
   let total = 0;
-  for (let index = 0; index < quantities.length; index = index + 1) {
+  for (let index = 0; index < quantities.length; index++) {
+    const quantity = quantities[index];
+    total = total + quantity;
+  }
+  return total;
+}
+
+const quantities = [12, 0, 7, 3]; // P001–P004 的库存
+console.log("total", sumStock(quantities)); // → total 22
+console.log("empty", sumStock([]));         // → empty 0
+console.log("zero", sumStock([0]));         // → zero 0
+```
+
+输出仍是 `total 22`、`empty 0`、`zero 0`。`quantities` 是函数的输入参数；`return total` 把结果交回调用处并结束函数。
+
+函数接收已校验的非负整数数组。`[12, 0, 7, 3]` 长度为 4，下标从 0 到 3，条件是 `index < quantities.length`。
+
+`total` 在循环外初始化一次，每轮累加；若把它移进循环体，每轮都会从 0 开始。`index++` 会更新下标，所以 `index` 用 `let`。`quantity` 每轮只取一次当前值，用 `const`。
+
+空数组长度为 0，第一次检查 `0 < 0` 就失败，直接返回初始总数 0。
+
+### for...of 拿值，for...in 拿属性名
+
+只需要元素、不需要下标时，优先用 [`for...of`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/for...of)，相当于 Java 的增强 `for`。
+
+**先猜一猜：** 把 `of` 换成 `in`，每轮拿到的值和类型会怎样变化？
+
+```js title="iteration.js"
+const values = [12, 0, 7]; // P001–P003 的库存
+for (const quantity of values) {
+  console.log("of", quantity, typeof quantity);
+}
+// → of 12 number / of 0 number / of 7 number
+for (const key in values) {
+  console.log("in", key, typeof key);
+}
+// → in 0 string / in 1 string / in 2 string
+```
+
+前一组打印库存数字 12、0、7；后一组打印字符串属性名 `"0"`、`"1"`、`"2"`。`for...in` 还可能枚举数组的附加属性和继承来的可枚举属性，因此遍历数组元素选 `of`。
+
+把 `sumStock` 的计数循环改成 `for (const quantity of quantities) { total = total + quantity; }`，结果相同，还省去了维护下标。这里 `const quantity` 每轮建立新绑定。
+
+### continue 跳过一轮，break 结束循环
+
+找第一件有货商品时，遇到 0 应该继续找，找到非零库存后才结束：
+
+```js title="search.js"
+let firstAvailable = null;
+for (const quantity of [0, 7, 3]) { // P002–P004 的库存
+  if (quantity === 0) continue;
+  firstAvailable = quantity;
+  break;
+}
+console.log(firstAvailable); // → 7
+```
+
+输出是 `7`。`continue` 跳过本轮剩余部分，`break` 退出最内层循环；把 `continue` 换成 `break`，遇到第一个 0 就结束，结果会留下 `null`。
+
+`while (条件)` 先判断再执行，`do { ... } while (条件)` 先执行一次再判断，都和 Java 相同。次数由过程决定时用它们，遍历数组先选 `for...of`。
+
+## 5. 异常：中断执行，并留下调用链
+
+[`throw` 与 `try/catch/finally`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/try...catch) 的结构和 Java 相似。校验发现非法库存时，可以抛出一个带说明的错误，由调用者处理。
+
+```js title="errors.js"
+function requireStock(quantity) {
+  if (!Number.isInteger(quantity) || quantity < 0 || quantity > 99999) {
+    throw new RangeError("库存必须是 0–99999 的整数");
+  }
+  return quantity;
+}
+function readStock() {
+  return requireStock(-1);
+}
+
+try {
+  console.log("库存", readStock());
+} catch (error) {
+  console.log(error.name, error.message);
+  // → RangeError 库存必须是 0–99999 的整数
+} finally {
+  console.log("本次检查结束"); // → 本次检查结束
+}
+```
+
+输出依次是 `RangeError 库存必须是 0–99999 的整数`、`本次检查结束`，没有那行正常的「库存」输出。
+
+执行 `readStock()` 时，`requireStock(-1)` 抛错，正常返回路径被中断。错误沿调用链传到 `catch`，`error.name` 是错误类别，`error.message` 是说明；`finally` 在这段流程结束前执行，适合放必要的收尾代码。收尾块里写 `return` 或再次抛错，会覆盖原来的结果或错误。
+
+Java 的受检异常需要在方法签名中声明或处理；JS 没有这道编译检查。业务代码优先抛 `Error` 或它的子类，让调用者拿到消息与堆栈。
+
+**错误堆栈（stack）**记录调用如何走到抛错处。在 Chrome 查看 `error.stack`，靠上的业务函数依次是 `requireStock`、`readStock`、调用处，旁边有文件名和行号。先看类型与消息，再从上往下读业务调用。
+
+`SyntaxError` 看语法，`ReferenceError` 看名字与初始化，`TypeError` 看操作对象，`RangeError` 看范围。本例主动抛出范围错误；数组越界读取则得到 `undefined`。
+
+## 常见错误与调试
+
+### 总数变成 NaN：找到第一个错误元素
+
+:::tip[自己尝试 · 本地网页]
+1. 在终端进入仓库的 `examples/c04` 目录，运行 `python3 -m http.server 8000 --bind 127.0.0.1`。
+2. 用 Chrome 打开 `http://127.0.0.1:8000/`，按 F12。Console 正常应显示 `total 22`、`empty 0`、`zero 0`。
+3. 在编辑器中把 `stats.js` 的 `<` 改成 `<=`，保存后刷新。按下面六步定位，再恢复正确条件。
+
+预期：错误版三行都是 `NaN`；修好后三行恢复 22、0、0。
+:::
+
+完整的故障版本也保存在 `stats-broken.js`：
+
+```js title="stats-broken.js"
+// 有问题的写法：循环把 length 当成了最后一个有效下标
+function sumStock(quantities) {
+  let total = 0;
+  for (let index = 0; index <= quantities.length; index++) {
     const quantity = quantities[index];
     total = total + quantity;
   }
@@ -315,243 +344,191 @@ function sumStock(quantities) {
 }
 
 const quantities = [12, 0, 7, 3];
-console.log("total", sumStock(quantities));
-console.log("empty", sumStock([]));
+console.log("total", sumStock(quantities)); // → total NaN
+console.log("empty", sumStock([]));         // → empty NaN
+console.log("zero", sumStock([0]));         // → zero NaN
 ```
 
-两份程序都输出：
+1. **现象**：Console 打印 `total NaN`，却没有红色的异常。空数组和单个 0 的统计也变成了 `NaN`。
+2. **工具**：打开 Sources → 左侧文件树中的 `stats.js`，单击 `total = total + quantity;` 的行号设断点，刷新。右侧展开 Scope，看 Local 中的 `index`、`quantity`、`total`；Call Stack 顶部应是 `sumStock`。暂停时，这一行还没执行。
+3. **证据**：第一轮总数为 0，点 Step over 后变成 12。点 Resume 回到断点，按下表检查，第五轮首次出现 `undefined`。
+4. **原因**：长度 4 不等于最后下标 3，`<=` 多读了一项。这里 `quantities[4]` 得到 `undefined`，数字与它相加得到 `NaN`。这是运算结果，`try/catch` 捕获不到。
+5. **修复**：在编辑器把条件恢复为 `index < quantities.length`，保存。需要的只是元素时，也可以改为 `for...of`。
+6. **确认**：移除断点并刷新，三行恢复 `total 22`、`empty 0`、`zero 0`。空数组不会再进入循环体。
 
-```text
-total 22
-empty 0
-```
-
-这里提前使用最少的函数语法：`function sumStock(quantities) { ... }` 定义一段有名字的计算，`quantities` 是接收输入的形参，`sumStock([12, 0, 7, 3])` 调用它，`return total` 返回结果并离开函数。没有写 `return` 的路径会返回 `undefined`。函数表达式、箭头函数、参数细节与闭包留到 C06，不在这节预设你已学完它们。
-
-`[12, 0, 7, 3]` 是数组字面量，`.length` 是长度 4，`quantities[0]` 是第一个值 12，最后一个有效下标是 3。`[]` 的长度为 0，循环一次都不执行，所以保留初始总数 0。`total` 必须在循环外初始化；放到循环体内会每轮清零。当前元素 `quantity` 每轮只读取、不重新赋值，所以是 `const`。
-
-与 Java 的关键差别不是少写了几个类型名：Java 方法的 `int[]` 限定元素类型，JS 这份入门实现**假定输入是装有非负整数的普通数组**。如果传入字符串、缺失项或其他类型，需要另设验证策略；第 8 节先练一种明确拒绝无效值的异常。它还不是能接收任意外部 JSON 的完整业务接口。
-
-## 6. 自己尝试：在循环的同一行连续停住
-
-**操作方式：自己尝试 · 本地网页 / Sources，D01。**  
-**验证状态：循环断点与变量已通过 Chrome 调试协议实际验证；面板点击路径已对照官方资料核对。**
-
-把前面的 `stats.js` 与下面的 `index.html` 放进同一目录 `c04-lab`，或使用仓库 `examples/c04`。不需要 CSS、npm 或构建工具。
-
-```html title="index.html"
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>C04 循环断点</title>
-    <link rel="icon" href="data:,">
-    <script src="./stats.js" defer></script>
-  </head>
-  <body>
-    <main>
-      <h1>循环统计库存</h1>
-      <p>打开 DevTools，查看 Console；在 Sources 的 stats.js 中设置循环断点后刷新。</p>
-      <p>正常输出 total 22、empty 0。修改并保存源文件后刷新，重新验证。</p>
-    </main>
-  </body>
-</html>
-```
-
-沿用 C02 已有的本地文件服务：终端进入这个目录，运行 `python3 -m http.server 8000 --bind 127.0.0.1`，然后访问 `http://127.0.0.1:8000/`。Python 只提供文件，浏览器执行 JS；若已经有编辑器的静态预览服务，也可按它显示的 HTTP 地址访问。没有 Python 时不必为本课先装 Node。Windows 命令与服务解释见 [C02 准备步骤](../../01-history-web/c02-web-debugging/#2-准备编辑器终端浏览器各做一件事)。
-
-1. Console 先确认 `total 22` 与 `empty 0`，再到 Sources 打开 `stats.js`。
-2. 在 `total = total + quantity;` 所在行点击行号设断点，然后刷新。暂停在这行时，本行还没有执行。
-3. Scope 或暂停上下文的 Console 应能读到 `index=0`、`quantity=12`、`total=0`；Call Stack 顶部是 `sumStock`。
-4. 单步跳过一次，`total` 变为 12。继续运行到同一断点，观察下表；值为 0 的商品也占一次循环，但不增加总数。
-5. 继续到结束，删除断点。空数组调用不会进入这个循环体断点，日志仍得到 `empty 0`。
-
-| 本轮下标 | 本行执行前 quantity | 执行前 total | 本行执行后 total |
+| index | quantity | 本行执行前 total | 单步后 total |
 | --- | --- | --- | --- |
 | 0 | 12 | 0 | 12 |
 | 1 | 0 | 12 | 12 |
 | 2 | 7 | 12 | 19 |
 | 3 | 3 | 19 | 22 |
+| 4 | `undefined` | 22 | `NaN` |
 
-这里只读取当前暂停调用帧中的局部变量；函数结束后在普通全局 Console 输入 `total`，不能读取已经离开的局部绑定。调试器显示的 Scope 和 Call Stack 是两件事：一个看当前可访问的绑定，一个看这次执行如何调用到这里。[Chrome 断点](https://developer.chrome.com/docs/devtools/javascript/breakpoints)、[作用域与单步参考](https://developer.chrome.com/docs/devtools/javascript/reference)
+在暂停时输入 `quantities.length`，直接确认它是 4。给 `quantity` 加 `?? 0` 会遮住第五轮的异常数据，修复应落在循环边界。
 
-## 7. 必做修错：错误从哪一轮开始？
+Scope 展示当前能访问的绑定，Call Stack 展示这次执行的调用链。函数返回后，在全局 Console 输入 `total` 读不到局部变量；观察它要在函数暂停期间进行。[Chrome 单步与作用域参考](https://developer.chrome.com/docs/devtools/javascript/reference)有对应的面板说明。
 
-**操作方式：自己尝试 · 本地网页或 Console，E01 / A01；验证状态：故障和参考修复已验证。**
+### 主动抛错：从暂停位置读回调用者
 
-在自己的 `stats.js` 里只把循环条件改为 `index <= quantities.length`，保存并刷新。预期 `total NaN`，空数组调用也变成 `empty NaN`。正常文件和故障要分清；仓库保留正确 `stats.js`，单独的 `faults.js` 用日志复现这次错误。
+:::tip[自己尝试 · 本地网页]
+1. 在编辑器打开同目录的 `index.html`，把脚本路径 `./stats.js` 改成 `./errors.js`，保存。
+2. 在 Sources 右侧启用 **Pause on exceptions**，再勾选 **Pause on caught exceptions**，刷新。
+3. 按下面步骤查看堆栈，结束后恢复脚本路径并关闭异常暂停。
 
-你的任务：保留断点，找到**第一个不正确的 quantity**，记录它的下标、`quantities.length` 和加法前后的 total。不要先加 `?? 0` 或 `|| 0` 把结果补成 0。修复后用 `[12, 0, 7, 3]`、`[]`、`[0]` 三种输入验收，应分别返回 22、0、0。
+预期：先停在 `throw new RangeError(...)`，继续后进入 `catch`，Console 打印错误消息和「本次检查结束」。
+:::
 
-故障的关键证据：
+1. **现象**：Console 没有正常的「库存」日志，只有错误与收尾消息。
+2. **工具**：停在 `throw` 后，查看 Call Stack，点击 `readStock` 帧回到调用处。
+3. **证据**：顶部帧的 `quantity` 是 -1。在 `catch` 内日志行再设断点，Resume 后，在 Console 查看 `error.name`、`error.message`、`error.stack`。
+4. **原因**：校验抛错，`readStock()` 没正常返回，日志的参数求值被打断。
+5. **修复**：把 `readStock` 中的测试输入 -1 改成合法库存 12，保存刷新。
+6. **确认**：异常断点不再命中，输出 `库存 12`、`本次检查结束`；还原 -1 又能复现。
 
-```text
-index 4：quantity 为 undefined；加法前 total 为 22
-执行 total = total + quantity 后：total 为 NaN
-Number.isNaN(total) 为 true
-```
+## 练习
 
-对本课未修改原型的普通数组，缺失的下标属性读取得到 `undefined`；`22 + undefined` 经数字转换得到 `NaN`。读取 `quantities[4]` 本身没有抛出异常，所以包一层 `try/catch` 也不会自动报告这次越界。若后续对 `undefined` 读取属性，才可能另抛 `TypeError`；本课先查到第一次越界，不等错误传远了再猜。
+### 练习 1：预测名字与循环的结果
 
-<details>
-<summary>提示 A：长度与最后下标不是同一个数</summary>
+先写出四行输出及其类型，再运行 `prediction.js`，解释每行结果。
 
-长度为 4，合法下标是 0、1、2、3。循环条件在每轮开始前判断；当 index 变成 4，`4 <= 4` 仍成立，多执行了一轮。空数组长度为 0，错误条件让它也执行了 index=0 的一轮。
-
-</details>
-
-<details>
-<summary>参考答案 A01：恢复正确边界，并保留累计量作用域</summary>
-
-把条件改回 `index < quantities.length`，得到第 5 节完整 `stats.js`。`let total = 0` 保留在循环外；每轮的 `const quantity` 留在循环内。通过正确边界证明没有多读元素，比把错误读取静默替换成 0 更能解释这个故障。
-
-如果业务只需加元素值，也可以选 `for...of`，不必自己维护下标；它仍需要明确输入数据是否合法，不会自动把坏数据变成好数据。参考验证已额外调用空数组与 `[0]`，均返回 0。
-
-</details>
-
-### 再修一个作用域错误
-
-**操作方式：自己尝试 · Console，E02 / A02；验证状态：故障与两条路径的答案均已验证。** 把下面整块运行后会抛 `ReferenceError`。目标是既能在 `if` 后读消息，也能在 stock=3 时输出“可售”，不要改用 `var`。
-
-```js
+```js title="prediction.js"
+let count = 0;
+for (const quantity of [12, 0, 7]) {
+  if (quantity === 0) continue;
+  count++;
+}
+console.log(count);
+const zone = "默认仓";
 {
-  const stock = 0;
-  if (stock === 0) {
-    const message = "售完";
-  }
-  console.log(message);
+  const zone = "杭州仓";
+  console.log(zone);
 }
+console.log(zone);
+console.log([12, 0, 7][3]);
 ```
 
 <details>
-<summary>提示 B：消息需要被哪两段代码共享？</summary>
+<summary>提示</summary>
 
-消息既要被分支赋值，又要被分支后的日志读取。应该在包含这两处的外层块里建立绑定；每条业务分支都要给出结果。把内层 const 改成内层 let，并不会扩大作用域。
+`count` 统计进入累加语句的次数；`continue` 会跳过 0。两个 `zone` 各自属于不同的块。数组长度为 3，最后一个有效下标是 2。
 
 </details>
 
 <details>
-<summary>参考答案 A02：外层 let，分支赋值</summary>
+<summary>参考答案</summary>
 
-```js
-{
-  for (const stock of [0, 3]) {
-    let message;
-    if (stock === 0) {
-      message = "售完";
-    } else {
-      message = "可售";
-    }
-    console.log("fixed-message", stock, message);
-  }
-}
-```
+| 行 | 输出 | 类型 | 原因 |
+| --- | --- | --- | --- |
+| `count` | `2` | number | 只有 12、7 两轮执行 `count++` |
+| 内层 `zone` | `杭州仓` | string | 当前块的同名绑定遮蔽外层 |
+| 外层 `zone` | `默认仓` | string | 内层声明没有改外层值 |
+| 下标 3 | `undefined` | undefined | 这一项不存在，读取没有抛异常 |
 
-预期依次为 `fixed-message 0 售完`、`fixed-message 3 可售`。这段与仓库 `answers.js` 的 A02 一致。只处理 stock=0 而漏掉 else，另一条路径会留下 `undefined`；“不报错”不等于业务结果完整。
+`continue` 让库存 0 跳过计数；内层声明只影响内层的查找。
 
 </details>
 
-## 8. 异常和错误堆栈：从触发点读回调用者
+### 练习 2：让分支后的消息可读
 
-**操作方式：自己尝试 · Console，E03；验证状态：已验证错误类型、消息、调用顺序与 finally。** 完整故障演示见仓库 `faults.js`；以下是可单独复制的异常段。
+运行 `message-broken.js`，它会抛 `ReferenceError`。保留 `let` / `const`，修到库存 0 打印「售罄」，库存 3 打印「可售」，两种情况都在 `if` 后打印。
 
-```js
-function requireNonNegative(quantity) {
-  if (!Number.isInteger(quantity) || quantity < 0) {
-    throw new RangeError("库存必须是非负整数");
-  }
-  return quantity;
+```js title="message-broken.js"
+// expect-error: ReferenceError
+// 有问题的写法：message 只属于 if 块，块外无法读取
+const messageStock = 0;
+if (messageStock === 0) {
+  const message = "售罄";
 }
-
-function readStock() {
-  return requireNonNegative(-1);
-}
-
-try {
-  console.log(readStock());
-} catch (error) {
-  console.log("caught", error.name, error.message);
-  console.log(error.stack);
-} finally {
-  console.log("finally", "本次检查结束");
-}
+console.log(message); // → 抛出 ReferenceError
 ```
-
-预期先打印 `caught RangeError 库存必须是非负整数`，再打印堆栈，最后打印 `finally 本次检查结束`。堆栈的函数顺序大致如下，文件 URL、行列号和 Console 的 `VM...` 编号取决于运行位置，不要逐字匹配：
-
-```text
-RangeError: 库存必须是非负整数
-    at requireNonNegative (...)
-    at readStock (...)
-    at ...调用处...
-```
-
-`throw` 中止当前正常执行，沿调用链寻找能处理它的 `catch`。这里 `readStock()` 没有正常返回，外层那次 `console.log(readStock())` 不会打印正常结果。`catch (error)` 建立一个 catch 块局部绑定；它在本例是我们抛出的 `RangeError` 对象，但 JS 允许抛出其他值，不能泛化成“所有 catch 都收到 Error”。新业务代码应优先抛 `Error` 或合适的子类，保留明确消息。
-
-阅读堆栈先看类型与消息，再看靠上的业务函数与行号：本例真正触发 `throw` 的是 `requireNonNegative`，`readStock` 是它的调用者。`error.stack` 的存在与格式不要当作跨引擎逐字稳定的业务协议；本课 Chrome/Node 的堆栈按 V8 行为实际观察。[V8 堆栈说明](https://v8.dev/docs/stack-trace-api)
-
-`finally` 在这类正常完成或异常传播过程中执行，可承担必要收尾；不要在 finally 再写 return 或 throw 覆盖原结果，也不要把它误读为“页面或进程被外部强行终止时仍保证执行”。业务上只有明确能处理的错误才应恢复；捕获后什么都不做，会把证据丢掉。SyntaxError、ReferenceError、TypeError、RangeError 是不同线索，不能只凭“出红字”统一加 try/catch。[ECMAScript 的 throw 与 try](https://tc39.es/ecma262/2026/multipage/ecmascript-language-statements-and-declarations.html#sec-try-statement)
-
-## 9. 必做预测：先解释，再运行
-
-**操作方式：自己尝试 · 阅读预测 / Console；验证状态：下列现象与 A03 答案均已验证。** 不看前文输出，独立回答：
-
-1. `const product = { stock: 12 }` 后能否执行 `product.stock = 9`？能否执行 `product = { stock: 9 }`？
-2. `var` 声明前读取与 `let` 声明前读取为什么不同？`typeof` 能否绕过 TDZ？
-3. 内层在后面声明了同名 `label`，为什么前面的读取不使用外层值？
-4. 为什么 `for...of` 可以用 `const quantity`，普通计数循环的下标却使用 `let`？
-5. 把 `for...of [12, 0, 7]` 改成 `for...in [12, 0, 7]`，每轮拿到的值和类型怎样变化？
-
-再自己写一个循环：输入 `[12, 0, 7, 3]`，跳过库存 0 的项，累计其余库存，输出 `available-total 22`。累计量与当前元素分别用什么声明？写好后再展开。
 
 <details>
-<summary>参考答案 A03：绑定、查找与循环对象</summary>
+<summary>提示</summary>
 
-1. 修改属性可以；替换 const 绑定抛 TypeError。const 约束绑定，不冻结对象。
-2. var 绑定预先初始化为 undefined；let 初始化前在 TDZ，读取或对它使用 typeof 都抛 ReferenceError。
-3. 当前块已有同名绑定，查找在这里停止；未初始化就是 TDZ，不会去读取外层值。
-4. for...of 的 const 每轮建立新绑定；计数循环同一个下标需要更新，使用 let。
-5. 从数字值 12、0、7 变成字符串属性名 "0"、"1"、"2"；不能直接拿来累计库存。
-
-```js
-{
-  let availableTotal = 0;
-  for (const quantity of [12, 0, 7, 3]) {
-    if (quantity === 0) {
-      continue;
-    }
-    availableTotal = availableTotal + quantity;
-  }
-  console.log("available-total", availableTotal);
-}
-```
-
-这段是仓库 `answers.js` 的 A03。当前输入下跳过 0 不会改变总数，但它练习了 continue 的控制流。不要把条件改为“遇到 0 就 break”：那会过早结束，只累计到 12。
+先圈出消息的使用范围。分支要给它赋值，分支后的日志要读取它，所以声明应放在同时包含两处的外层块。只把内层 `const` 改成 `let`，作用域不会变。
 
 </details>
 
-## 10. 接回库存项目与验证记录
+<details>
+<summary>参考答案</summary>
 
-C02 的单商品库存已经能修改和展示，C03 明确了输入值与转换；这节进一步明确累计量的生命范围、循环边界与异常证据。下一步将把多个商品表示成对象记录，处理属性与 JSON，再把这些计算接到页面。对象传参与复制的边界见下一课 [C05 对象、引用与数据交换](../c05-objects-json/)；完整函数与闭包在 C06。
+```js title="message-answer.js"
+for (const messageStock of [0, 3]) {
+  let message;
+  if (messageStock === 0) {
+    message = "售罄";
+  } else {
+    message = "可售";
+  }
+  console.log(messageStock, message); // → 0 售罄 / 3 可售
+}
+```
 
-离开前应能独立解释：为什么 const 对象仍能改属性；为什么内层同名 let 尚未初始化也会遮蔽外层；为什么总数出现 NaN 却没有异常；怎样用最后一次正常的断点值和第一次错误值证明越界是根因。练习后的正确 `stats.js` 应保留 `<` 条件；故障代码另存，不要把错误版混入下一课。
+输出 `0 售罄`、`3 可售`。`let message` 每轮在分支外建立，两条路径都赋值，日志才能得到确定的结果。
 
-核查日期 **2026-10-15**。标准依据使用 [ECMAScript 2026 固定版](https://tc39.es/ecma262/2026/multipage/)，没有把滚动编辑草案或未完成提案当成新课必需能力。规范用于确认语义，不要求初学者通读：
+如果输出仍是 `undefined`，检查是否在分支里又写了 `let message = ...`：那会新建内层绑定，外层的同名变量仍然没有被赋值。
 
-- [声明、块、分支、循环、throw 与 try](https://tc39.es/ecma262/2026/multipage/ecmascript-language-statements-and-declarations.html)。
-- [环境记录与绑定查找](https://tc39.es/ecma262/2026/multipage/executable-code-and-execution-contexts.html#sec-environment-records)。
-- [普通对象的属性读取](https://tc39.es/ecma262/2026/multipage/ordinary-and-exotic-objects-behaviours.html#sec-ordinary-object-internal-methods-and-internal-slots-get-p-receiver)，对应普通数组缺失下标的读取；不要外推到所有代理对象或改过原型的环境。
-- [Chrome 断点](https://developer.chrome.com/docs/devtools/javascript/breakpoints)、[调试参考](https://developer.chrome.com/docs/devtools/javascript/reference)、[V8 堆栈](https://v8.dev/docs/stack-trace-api)。
+</details>
 
-| ID | 操作方式 | 验证状态与实际结果 |
-| --- | --- | --- |
-| S01 | Console / 讲解例子 | 已验证绑定、const 属性修改与赋值错误、var、TDZ、遮蔽、typeof TDZ、声明后的 undefined |
-| S02 | Console / 讲解例子 | 已验证 if、switch 严格匹配、for-of 值与 for-in 字符串键、while/do、continue/break |
-| S03 / J01 | Console；Java 对照为选做 | JS 与 Java 均输出 22、0；JS 另验 `[0]` 为 0 |
-| D01 | 本地网页 / Sources | Chrome 协议命中正常循环四轮断点，检查每轮 index/quantity/total；手动面板路径已核对 |
-| E01 / A01 | 修改循环边界 / 修复 | 已复现第五轮 undefined→NaN 与空数组故障；恢复 `<` 后正常、空数组、单个0均正确 |
-| E02 / A02 | Console / 修复 | 已复现块外读取 ReferenceError；外层 let 两条路径分别为“售完”“可售” |
-| E03 / A03 | Console / 异常及预测答案 | 已验证 RangeError 消息、堆栈函数顺序、finally；跳过0累计为22 |
+### 练习 3：迁移一个库存报告
 
-实际环境：macOS arm64，Node **24.22.0**、Chrome **155.0.8059.40**、JDK **21.0.2**。浏览器协议自动化只负责作者验证，学习者用浏览器即可。正常文件、故障文件、答案、运行命令与实际输出见[仓库练习说明](https://github.com/socoo123/js_web/tree/main/examples/c04)。手动点击面板、Edge、Windows、真实手机未执行；不同引擎的错误文案、堆栈行号与格式不承诺逐字一致。
+新建 `summary.js`，写 `summarize(quantities)`，打印总库存和有货商品数。用 `for...of` 遍历，不维护下标；输入已经是非负整数。
+
+验收：六件商品的库存 `[12, 0, 7, 3, 25, 5]` 打印 `总库存 52 有货商品数 5`；`[]` 和 `[0]` 都打印 `总库存 0 有货商品数 0`。0 件商品仍存在，只是不计入「有货商品数」。
+
+<details>
+<summary>提示</summary>
+
+需要两个累计量，都在循环外初始化。每个数量都进入总库存，只有 `quantity > 0` 时才增加有货商品数。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+```js title="summary-answer.js"
+function summarize(quantities) {
+  let total = 0;
+  let availableCount = 0;
+  for (const quantity of quantities) {
+    total = total + quantity;
+    if (quantity > 0) availableCount++;
+  }
+  console.log("总库存", total, "有货商品数", availableCount);
+}
+
+summarize([12, 0, 7, 3, 25, 5]); // → 总库存 52 有货商品数 5
+summarize([]);                  // → 总库存 0 有货商品数 0
+summarize([0]);                 // → 总库存 0 有货商品数 0
+```
+
+两个累计量用 `let`，当前元素用 `const`。空数组不进入循环，保留两个初始值 0；库存 0 会参与总数相加，但不会增加有货商品数。
+
+</details>
+
+## 小结
+
+- 默认用 `const`，需要重新赋值才用 `let`；修改对象属性不等于替换绑定。
+- 读取名字按词法作用域从内向外找，找到即停止；内层同名声明会遮蔽外层。
+- `var` 提前初始化为 `undefined`，`let` / `const` 初始化前处于 TDZ，读取会抛 `ReferenceError`。
+- 数组元素用 `for...of`；需要下标时用普通 `for`，条件是下标小于长度。
+- `NaN` 是值，异常才走 `catch`；调试时先找第一次错误的数据，再沿调用链回看来源。
+
+自测：
+
+1. `const product` 为什么能修改库存，却不能换成另一个商品对象？
+2. 内层声明还没执行，为什么也会遮蔽外层同名变量？
+3. `for...of` 每轮用 `const`，为什么不会第二轮就报错？
+4. `<= length` 造成的 `NaN`，为什么不能靠 `try/catch` 发现？
+5. Scope 和 Call Stack 分别回答什么问题？
+
+下一课把这些库存数字装进商品对象，讲属性访问、复制与 JSON 数据交换。
+
+## 延伸阅读
+
+- [MDN：let 与暂时性死区](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/let)
+- [MDN：const](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/const)
+- [MDN：循环与迭代](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Loops_and_iteration)
+- [MDN：控制流与错误处理](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Control_flow_and_error_handling)
+- [Chrome DevTools：使用断点暂停代码](https://developer.chrome.com/docs/devtools/javascript/breakpoints)
+- [ECMAScript：声明与控制流](https://tc39.es/ecma262/2026/multipage/ecmascript-language-statements-and-declarations.html)
