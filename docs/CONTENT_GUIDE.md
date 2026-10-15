@@ -1,6 +1,8 @@
 # 写作规范（硬约束）
 
-适用于 C06 起的所有新课，以及 C01–C05 的整改（PLAN 任务 R1）。写任何课程前必须读完本文件。
+适用于 C06 起的所有新课，以及 C01、C02、C04、C05 的整改（PLAN 任务 R1）。写任何课程前必须读完本文件。
+
+**范例**：[C03 值、类型、转换与比较](../src/content/docs/02-language-data/c03-values-types.md) 已按本规范整篇重写，配套 [examples/c03](../examples/c03/README.md) 和 [D2 源码](../diagrams/c03-value-boundary.d2)。本文件的规则说「写什么」，C03 示范「写成什么样」：开头场景、Java 对照表、一段代码一个概念、「先猜一猜」、按六步写的调试、带验收条件的练习、只在 examples README 留验证记录。两者冲突时以本文件为准，并修正 C03。
 
 标 **[lint]** 的条目由 `npm run lint:lessons` 自动检查（PLAN 任务 T0 实现）；其余条目由作者按第 13 节自查。lint 报错时删减内容，不放宽规则。
 
@@ -116,7 +118,9 @@ Java 最接近的写法是 `Objects.requireNonNullElse(stock, 12)`，它同样�
 
 环境标签只用这几个：`浏览器 Console`、`本地网页`、`Node`、`本地 React`、`本地 UI5`。
 
-**运行方式**：从 C06 起，纯语言的例子默认用 `node 文件名.js` 运行（Node 24 LTS），浏览器 Console 作为备选；DOM 相关的例子用本地网页。C06 开头用 5 行左右给出安装 Node 的步骤（官方下载、`node --version`），不展开 nvm 等版本管理器。
+**运行方式**：从 C06 起，纯语言的例子默认用 `node 文件名.js` 运行（Node 24 LTS），浏览器 Console 作为备选；DOM 相关的例子用本地网页。C06 开头用 5 行左右给出安装 Node 的步骤（官方下载、`node --version`），不展开 nvm 等版本管理器。C06 之前的课以浏览器 Console 为主、Node 为备选，写法见 C03。
+
+Chrome 的 Console 允许在不同输入之间重复声明 `let`/`const`，但不允许把前面的 `let x` 再声明成 `const x`。同一课里会被依次粘贴的代码块，顶层变量名不要一处用 `let`、另一处用 `const`。
 
 **验证标注**：要诚实，但记在对的地方。
 

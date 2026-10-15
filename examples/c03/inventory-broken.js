@@ -1,12 +1,15 @@
-// 故意有问题的起始代码：售完、赠品与不合法输入处理都要检查。
-const savedStock = 0;
-const stock = savedStock || 12;
-const rawQuantity = "3";
-const quantity = Number.parseInt(rawQuantity, 10);
-const unitPriceYuan = 0.1;
-const totalYuan = unitPriceYuan * quantity;
+// 有问题的写法：默认库存、补货计算和数量校验各有一个 bug
+const product = { id: "P002", name: "无线鼠标", stock: 0, priceCents: 12900 };
+const rawAmount = "3"; // 补货输入框读到的文本
 
-console.log("stock", stock);
-console.log("restocked", stock + rawQuantity);
-console.log("totalYuan", totalYuan);
-console.log("valid", Boolean(quantity));
+const stock = product.stock || 12;
+const amount = Number.parseInt(rawAmount, 10);
+
+if (Number.isNaN(amount)) {
+  console.log("补货数量无效");
+} else {
+  const newStock = stock + rawAmount;
+  const valueCents = newStock * product.priceCents;
+  console.log("补货后库存", newStock);
+  console.log("库存价值", (valueCents / 100).toFixed(2), "元");
+}

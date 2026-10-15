@@ -1,21 +1,12 @@
-console.log("Undefined:", typeof undefined);
-console.log("Null:", typeof null);
-console.log("Boolean:", typeof true);
-console.log("String:", typeof "键盘");
-console.log("Number:", typeof 12);
-console.log("BigInt:", typeof 12n);
-console.log("Symbol:", typeof Symbol("product"));
-console.log("Object:", typeof { name: "键盘" });
-console.log("Array:", typeof []);
-console.log("Function:", typeof console.log);
+let quantity = "3"; // 刚从输入框读到的文本
+console.log(typeof quantity); // → string
+quantity = Number(quantity);
+console.log(typeof quantity); // → number
 
-let incomingStock = "12";
-console.log(typeof incomingStock);
-incomingStock = 12;
-console.log(typeof incomingStock);
+console.log(typeof null);        // → object（历史遗留，null 不是对象）
+console.log(typeof []);          // → object（数组也是对象）
+console.log(typeof console.log); // → function
+console.log(typeof notDeclared); // → undefined（未声明的名字也不报错）
 
-let pendingStock;
-const selectedProduct = null;
-console.log(pendingStock === undefined);
-console.log(selectedProduct === null);
-console.log(Symbol("product") === Symbol("product"));
+const product = { id: "P001", stock: 12 };
+console.log(product.stok);       // → undefined（属性名拼错了）

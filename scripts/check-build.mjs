@@ -10,7 +10,7 @@ const pages = globSync('**/*.html', { cwd: dist });
 const lessons = [
   ['C01', '01-history-web/c01-story-ecosystem', 'c01-ecosystem'],
   ['C02', '01-history-web/c02-web-debugging', 'c02-page-flow'],
-  ['C03', '02-language-data/c03-values-types'],
+  ['C03', '02-language-data/c03-values-types', 'c03-value-boundary'],
   ['C04', '02-language-data/c04-scope-control', 'c04-scope'],
   ['C05', '02-language-data/c05-objects-json', 'c05-alias-copy'],
 ];

@@ -143,7 +143,7 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 
 日期：**2026-10-15**。本批使用已定稿的基础语言能力；引用 [ECMAScript 2026 固定版本](https://tc39.es/ecma262/2026/multipage/)，与持续更新的编辑草案区分。站点依赖和根级锁文件不变。
 
-- C03 对照类型、Number/BigInt、显式转换和比较算法，区分 `typeof` 的历史返回值与实际类型；库存与金额转换后再校验安全整数。Java 对照以 Java 规范和 BigDecimal 文档为依据，直接链接见正文。
+- C03（2026-10-15 范例重写）：正文改链 MDN 的 typeof、Number、BigInt、`??`、Object.is、相等比较与 Falsy 页面，规范只在延伸阅读留 1 条。Console 依次粘贴的说法依据 [Chrome 92 起支持跨输入重复声明 const](https://developer.chrome.com/blog/new-in-devtools-92#const-redeclaration)，并实测「先 let 后 const」会报错。Java 对照表由 `examples/c03/JavaNumbers.java` 在 Java 21 实际运行得出。
 - C04 对照[声明与控制流](https://tc39.es/ecma262/2026/multipage/ecmascript-language-statements-and-declarations.html)、[环境记录](https://tc39.es/ecma262/2026/multipage/executable-code-and-execution-contexts.html#sec-environment-records)，明确 TDZ 中的绑定不回退外层查找，`var` 的初始化和赋值不是同一步。
 - 数组越界例子使用未改原型的普通数组；依据[普通对象属性读取](https://tc39.es/ecma262/2026/multipage/ordinary-and-exotic-objects-behaviours.html#sec-ordinary-object-internal-methods-and-internal-slots-get-p-receiver)解释缺失下标得到 `undefined`，没有把 `NaN` 当成抛出的异常。
 - C04 的[Chrome 断点](https://developer.chrome.com/docs/devtools/javascript/breakpoints)与[调试参考](https://developer.chrome.com/docs/devtools/javascript/reference)用于手动操作路径核对；[V8 堆栈说明](https://v8.dev/docs/stack-trace-api)用于说明 `error.stack` 的格式边界。

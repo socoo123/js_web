@@ -1,0 +1,35 @@
+# C03：箭头表示一份输入依次经过的处理阶段，不表示函数调用关系。
+direction: down
+
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+input: 外部输入\n输入框 · JSON · URL\n都是 string
+
+boundary: 入口边界 {
+  style.font-size: 18
+  style.fill: "#f4f8ff"
+  style.stroke-dash: 4
+
+  convert: 转换\nNumber(text)\n可能得到 NaN
+  check: 校验\n非空 · 整数 · 范围
+  convert -> check
+}
+
+reject: 拒绝\n提示原因\n库存不变 {
+  style.fill: "#fff1f0"
+  style.stroke: "#cf1322"
+}
+
+core: 业务计算\n只用检查过的 number\n整数分 · === {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+
+output: 显示\ntoFixed(2) · String()\n转回 string
+
+input -> boundary.convert
+boundary.check -> core: 通过
+boundary.check -> reject: 不通过
+core -> output
