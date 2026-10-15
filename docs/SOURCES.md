@@ -149,3 +149,9 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - C04 的[Chrome 断点](https://developer.chrome.com/docs/devtools/javascript/breakpoints)与[调试参考](https://developer.chrome.com/docs/devtools/javascript/reference)用于手动操作路径核对；[V8 堆栈说明](https://v8.dev/docs/stack-trace-api)用于说明 `error.stack` 的格式边界。
 - C05 对照对象属性、浅复制、JSON、String 和 Date；使用明确的 ISO 时间偏移和 UTC 输出，并实际切换时区验证，避免将作者本机时区当成读者环境。JSON 语法解析与业务数据校验分别教学；参数传值与重新绑定使用运行结果解释。
 - 逐课实际版本、命令、输出及未验证范围见 [C03](../examples/c03/README.md)、[C04](../examples/c04/README.md)、[C05](../examples/c05/README.md)。本批没有新增运行时或第三方库安装命令，不据此宣称其他浏览器与操作系统已通过。
+
+## C01 按新版规范重构
+
+- 2026-10-15：重新核对 [Ecma 正式标准页](https://ecma-international.org/publications-and-standards/standards/ecma-262/)，当前为 ECMAScript 2026 / 第 17 版；按 [TC39 流程](https://tc39.es/process-document/)区分 Stage 4、年度归属与环境支持，正文移除具体在研提案的易过时快照。
+- 同日：按 [Node 环境差异](https://nodejs.org/en/learn/getting-started/differences-between-nodejs-and-the-browser)、[CommonJS](https://nodejs.org/api/modules.html)、[npm](https://docs.npmjs.com/about-npm/)、[Bun](https://bun.com/docs)及 Yarn/pnpm、React/UI5 官方文档重核职责与文中命令，无新增安装命令或依赖。
+- 同日：[Chrome Console](https://developer.chrome.com/docs/devtools/console/javascript)与 [JS 历史论文](https://www.wirfs-brock.com/allen/jshopl.pdf)用于操作路径与年代背景；实际运行记录移至 [examples/c01](../examples/c01/README.md)。

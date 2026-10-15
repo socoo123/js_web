@@ -1,0 +1,4 @@
+9
+剩余库存：9
+function
+undefined

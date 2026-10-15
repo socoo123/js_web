@@ -12,7 +12,7 @@
 
 | 日 | 课号与标题 | 必须讲清的内容 | 自己尝试与验收 |
 | --- | --- | --- | --- |
-| 1 | C01 JavaScript 的故事与生态地图 | 1995 浏览器脚本背景、1997 ECMAScript、浏览器兼容、ES5、Node/npm、ES2015 与年度标准、现代框架；语言/引擎/宿主/工具；为什么与 Java 名字相近却是不同语言 | 用自己的话解释浏览器/Node/Bun/npm/React 的职责；把旧代码的 var/回调/CommonJS 放回历史背景 |
+| 1 | C01 JavaScript 的故事与生态地图 | 浏览器中的第一次库存计算；1995 起源、1997 标准化、兼容问题、ES5/Node/npm、ES2015 与年度标准、组件生态；语言/引擎/宿主/工具；Java 对照；旧教程的 var/回调/CommonJS 与特性状态 | 在 Console 预测库存和环境探测输出；修复拼写与环境错误；用自己的话解释浏览器/Node/Bun/npm/React 的职责（已按 C03 范例重构） |
 | 1 | C02 Web 基础与第一个调试现场 | HTML 语义、表单和 DOM；CSS 选择器/盒模型/Flex/Grid/响应式；URL/HTTP 与页面加载；编辑器、终端、Console、Elements、Sources；脚本加载 | 建立商品卡片 HTML/CSS/JS，调整手机布局；在 Console 查看变量，在断点处观察值，修复一个路径错误 |
 | 2 | C03 值、类型、转换与比较 | 7 种原始类型与对象；typeof；Number/BigInt、浮点数、整数精度；null/undefined；truthy；===、==、Object.is；?? 与 || | 预测并解释输出；修复价格、库存与默认值处理；比较 Java 整数除法/BigDecimal 与 JS Number |
 | 2 | C04 变量、作用域与控制流 | let/const/var、块作用域、提升与 TDZ；const 不冻结对象；if/switch、循环、for-of/for-in；异常与错误堆栈入门 | 改写 Java 统计函数；断点观察循环；修复越界访问和作用域问题，不用“对象按引用传参”的错误说法 |

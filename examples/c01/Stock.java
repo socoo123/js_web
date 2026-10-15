@@ -1,6 +1,6 @@
 public class Stock {
     public static void main(String[] args) {
-        String productName = "键盘";
+        String productName = "机械键盘";
         int stock = 12;
         int sold = 3;
         int remaining = stock - sold;

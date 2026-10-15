@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-15（C03 范例重写）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-15（C01 按 C03 范例重构）。
 
 ## 续做时按这个顺序读
 
@@ -18,6 +18,7 @@
 - 用户曾要求用 3 个子 agent 并行写 C03–C05，已完成。
 - **2026-10-15：用户认为 C01–C05 写得不好，要求约束并调整计划。** 已修订 PLAN、CONTENT_GUIDE、CURRICULUM、AGENTS 和本文件，问题和约束见 PLAN §0。从 C06 起按新规范写；C06 写完后停下，等用户确认风格。
 - **2026-10-15：用户要求按新规范整篇重构 C03（文字和图），给其他 AI 当参考。** 已完成：正文约 7,500 字，新增 D2 图 c03-value-boundary，示例改用固定样例数据并全部带 `.expected.txt`。C03 不再属于 R1。
+- **2026-10-15：用户要求在最新计划与 C03 基础上重构 C01。** 本次按普通课上限整课重构正文、示例与 D2，C01 提前移出 R1；T0、C06 的原队列保留。
 
 ## 当前状态
 
@@ -25,7 +26,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 5 / 48（C01–C05）。C03 已按新规范重写；C01、C02、C04、C05 按旧规范写成，等待 R1 整改 |
+| 已发布 | 5 / 48（C01–C05）。C01、C03 已按新规范重构；C02、C04、C05 等待 R1 整改 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 5 张图：c01-ecosystem、c02-page-flow、c03-value-boundary、c04-scope、c05-alias-copy |
 | 自动门禁 | `lint:lessons`、`examples` 未实现（T0） |
 | 学习进度功能 | 未实施（F1） |
@@ -35,7 +36,7 @@
 
 | 课 | 线上 | 示例与验证记录 | 首次部署 |
 | --- | --- | --- | --- |
-| C01 JavaScript 的故事与生态地图 | [打开](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) | [examples/c01](../examples/c01/README.md) | [run 38662138819](https://github.com/socoo123/js_web/actions/runs/38662138819) |
+| C01 JavaScript 的故事与生态地图 | [打开](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) | [examples/c01](../examples/c01/README.md) | 首次：[run 38662138819](https://github.com/socoo123/js_web/actions/runs/38662138819)；本次重构待部署 |
 | C02 Web 基础与第一个调试现场 | [打开](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/) | [examples/c02](../examples/c02/README.md) | [run 38663909240](https://github.com/socoo123/js_web/actions/runs/38663909240) |
 | C03 值、类型、转换与比较 | [打开](https://socoo123.github.io/js_web/02-language-data/c03-values-types/) | [examples/c03](../examples/c03/README.md) | 范例重写：[run 38752272921](https://github.com/socoo123/js_web/actions/runs/38752272921) |
 | C04 变量、作用域与控制流 | [打开](https://socoo123.github.io/js_web/02-language-data/c04-scope-control/) | [examples/c04](../examples/c04/README.md) | 同上 |
@@ -57,11 +58,11 @@
 
 完整队列见 PLAN §8。
 
-P1（计划修订）和 C03 范例重写已上线。线上地址已核对包含新开头和 c03-value-boundary 图。
+P1 与 C03 范例重写已上线。C01 重构完成：正文约 7,700 字符、16 个代码块；内容规则、Node 10/10、Chrome/Java、`check`/`build` 通过，T0 尚未实现；部署待核对。
 
-1. **T0 工具门禁**：按 PLAN §8 实现 `lint:lessons`、`examples`，让 check-build 自动发现课程，创建 `examples/shared/products.*`，修改侧栏名称。完成标准：C03 零 error，C01、C02、C04、C05 只有 warning，`npm run examples -- c03` 12/12 通过，`npm run build` 通过。
+1. **T0 工具门禁**：按 PLAN §8 实现 `lint:lessons`、`examples`，让 check-build 自动发现课程，创建 `examples/shared/products.*`，修改侧栏名称。完成标准：C01、C03 零 error，C02、C04、C05 只有 warning，`npm run examples -- c03` 12/12 通过，`npm run build` 通过。
 2. **C06 函数、闭包与高阶操作**：目录 `02-language-data/c06-functions-closures.md`。内容与范围见 CURRICULUM 第 3 天和第 1 周写作范围，结构和语气对照 C03。项目从 `examples/inventory/01-core/inventory.js` 开始，写筛选工厂 `createCategoryFilter(category)`。属于难点课，正文上限 10,000 字。发布后**停下，请用户确认风格**，再做 R1。
-3. **R1 整改 C01、C02、C04、C05**：按 PLAN §8 只做减法。
+3. **R1 整改 C02、C04、C05**：按 PLAN §8 只做减法。
 
 ## 本文件的更新规则
 
