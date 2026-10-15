@@ -68,7 +68,7 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 
 ## C03–C05 并行编写与统一验收
 
-当前：**C03–C05 正文、示例、两张 D2 图已完成，本地检查与生产阅读验收通过；尚待本批提交推送与 Pages 发布。** 三个子 agent 各负责一课，主 agent 已逐篇审阅与统一集成。
+当前：**C03–C05 已提交推送，并成功部署 GitHub Pages（2026-10-15）；本地与真实 Pages 验收通过。** 三个子 agent 各负责一课，主 agent 已逐篇审阅与统一集成。
 
 - C03：[值、类型、转换与比较](../src/content/docs/02-language-data/c03-values-types.md)，承接 C02 的表单字符串、Number 转换与库存默认值。
 - C04：[变量、作用域与控制流](../src/content/docs/02-language-data/c04-scope-control.md)，包括循环统计、TDZ、越界与错误堆栈，配套作用域 D2 图。
@@ -78,8 +78,9 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 - 统一审阅修复：删除 C03 与大纲不符的后续课号预告；C04 明确每次 S01 前刷新独立页面，块只隔离 let/const。同一 Chrome 上下文实测首次 `var-before undefined`、复跑 `var-before 12`，避免把清空日志误当变量重置；正文与源码注释同步。
 - 固定 Node **24.22.0** / npm **11.19.1**：`npm run check` 为 0 errors/0 warnings/0 hints；`npm run build` 生成 8 个 HTML、4 张 D2 图与 Pagefind 索引。C01–C05 链接/资源、中文语言、源码与产物折叠区数量检查通过；保留已记录的 Starlight 404 路由优先级提示，实际 404.html 正常。
 - Chrome 本地生产预览：1280px/360px 首页、路线与 C01–C05 无整页横向溢出；新课亮暗正文正常，C04/C05 中文 SVG 清晰；C03/C04/C05 分别 4/5/5 个提示答案区完整可展开。禁用站点 JS 后三篇正文与答案仍存在；“安全整数”“TDZ”“浅复制”命中对应新课，搜索弹窗与旧查询正常，新课首个代码块复制到剪贴板的内容逐字正确，无资源 HTTP 错误或未处理异常。
+- 远端首发：[Actions run 38740720543](https://github.com/socoo123/js_web/actions/runs/38740720543) 的 build（35 秒）/deploy（50 秒）均成功；Ubuntu 24.04 实际完成锁文件安装、固定 Node、D2/字体准备、检查、构建、产物上传和 Pages 发布。上游 Actions 内部 Node 20 声明提示与此前相同，runner 已使用 Node 24 并成功执行。
+- 真实 Pages 的 [C03](https://socoo123.github.io/js_web/02-language-data/c03-values-types/)、[C04](https://socoo123.github.io/js_web/02-language-data/c04-scope-control/)、[C05](https://socoo123.github.io/js_web/02-language-data/c05-objects-json/) 均 HTTP 200。Chrome 1280px/360px、亮暗模式、中文 SVG、14 个提示/答案、代码复制、禁用站点 JS 的静态正文、三项新课检索与搜索弹窗全部通过；资源无 HTTP 错误、无未处理异常。
 - 已同步课程目录 **5/48**、C02→C03 链接、README、来源、架构和构建输出检查。下一篇为 C06；个人学习进度功能仍未实施。
-
 
 ## 尚未实施
 
@@ -89,7 +90,7 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 
 ## 下一项未完成：C06 函数、闭包与高阶操作
 
-先确认本批 C03–C05 的提交与 Pages 结果，再按 `CURRICULUM.md` 和 `CONTENT_GUIDE.md` 继续 C06：函数是值，声明/表达式/箭头函数，参数、默认值与 rest，词法作用域与闭包，高阶函数，Java lambda 类比及边界。库存筛选工厂与独立计数器是主练习；用 Scope 面板观察闭包，修复循环捕获错误。C04 的作用域图只讲绑定查找，C06 再延伸到函数保留的词法环境。
+按 `CURRICULUM.md` 和 `CONTENT_GUIDE.md` 继续 C06：函数是值，声明/表达式/箭头函数，参数、默认值与 rest，词法作用域与闭包，高阶函数，Java lambda 类比及边界。库存筛选工厂与独立计数器是主练习；用 Scope 面板观察闭包，修复循环捕获错误。C04 的作用域图只讲绑定查找，C06 再延伸到函数保留的词法环境。
 
 1. 先读 STATUS 与 AGENTS，检查 Git 与现有站点，保留 C01–C05 和静态架构。
 2. 核对本课使用的官方规范与目标环境，不提前扩大为 C07。
