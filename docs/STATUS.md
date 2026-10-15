@@ -54,7 +54,7 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 
 ## C02 已完成：Web 基础、卡片与调试现场
 
-当前：**正文与配套文件完成，本地验证通过，待本次提交推送并核查 Pages。** 线上状态将在发布后更新，不把本地预览写成已上线。
+当前：**已提交推送，并成功部署 GitHub Pages（2026-10-15）。** [线上 C02](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/) · [课程目录 2/48](https://socoo123.github.io/js_web/roadmap/)。
 
 - 正文：[C02 Web 基础与第一个调试现场](../src/content/docs/01-history-web/c02-web-debugging.md)。覆盖 HTML 语义/标签/表单与 DOM，CSS 选择器/层叠/盒模型/Flex/Grid/响应式，URL/HTTP/路径与页面加载；解释 defer、内存数据与 DOM、源码与临时编辑的边界。
 - 配套：[examples/c02](../examples/c02/README.md)。三个完整 HTML/CSS/JS 文件，无第三方依赖；已有 Python 3 提供本地服务，不要求提前安装 Node/npm。包含原生输入约束、正整数/超卖校验、售完禁用、Enter 提交、补货增量答案；操作方式与验证状态逐项分开。
@@ -63,6 +63,7 @@ P0 计划文件已纳入此前 Git 提交。远端同步的实际状态以 `git 
 - 实际示例验证（2026-10-15）：macOS arm64、Chrome **155.0.8059.40**、Python **3.11.8**；浏览器协议驱动使用 Node **24.22.0**。12→9、超卖不变、售完0并禁用、刷新12、Enter、空值/0/1.5的原生与JS校验、404与漏defer、DOM临时99/样式32px恢复、补货12→17→0→5→2、禁用页面JS均符合预期。实际断点在app.js第23行，单步前stock=12/quantity=3，单步后remaining=9/stock=12。
 - 站点验证：固定 Node **24.22.0** / npm **11.19.1** 的 `npm run check` 为0 errors/0 warnings；`npm run build` 生成5个HTML、两张D2图和搜索索引，`/js_web/` 内部链接/资源、C01/C02各5个有内容的折叠区检查通过。保留此前已记录的404路由优先级提示，不影响实际404.html。
 - Chrome生产预览：1280px/360px 首页、路线、C01/C02无整页溢出；C02亮暗正文、中文图与5个折叠区正常，禁用站点JS仍有正文与答案。搜索“defer”“盒模型”“补货”均命中C02，旧查询与搜索弹窗正常，资源无HTTP错误、无未处理异常。图首次窄屏检查后已简化为纵向并重新构建验收；Edge、Windows、真实手机与屏幕阅读器未执行。
+- 远端首发：[Actions run 38663909240](https://github.com/socoo123/js_web/actions/runs/38663909240) build/deploy 全部成功；Ubuntu 24.04 实际执行锁文件安装、D2/字体准备、检查、静态构建和 Pages 发布。C02 深层地址 HTTP 200；真实 Pages 的1280px/360px、亮暗正文与D2图、5个折叠区、禁用站点JS阅读、搜索弹窗及“defer/盒模型/补货”检索全部通过，没有资源HTTP错误或未处理异常。上游Actions内部Node20声明提示与此前相同，runner使用Node24并执行成功。
 - 已同步课程目录2/48、C01→C02链接、README、来源与架构；生产输出检查新增C02。M1的网站基础与两篇示范课验收条件已满足；后续学习功能和46课并未因此完成。
 
 ## 尚未实施
