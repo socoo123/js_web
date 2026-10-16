@@ -7,6 +7,7 @@ export function createCategoryFilter(category) {
 export class Inventory {
   #products;
   #byId;
+  #history = [];
   constructor(products) {
     this.#products = [...products];
     this.#byId = new Map();
@@ -17,6 +18,23 @@ export class Inventory {
   }
   getById(id) {
     return this.#byId.get(id);
+  }
+  setStock(id, stock) {
+    const product = this.getById(id);
+    if (product === undefined) throw new Error("商品不存在：" + id);
+    if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+      throw new RangeError("库存须为 0–99999 的整数");
+    }
+    if (product.stock === stock) return false;
+    this.#history.push({ id, stock: product.stock });
+    product.stock = stock;
+    return true;
+  }
+  undo() {
+    const previous = this.#history.pop();
+    if (previous === undefined) return false;
+    this.getById(previous.id).stock = previous.stock;
+    return true;
   }
   count() { return this.#products.length; }
   select(predicate) {

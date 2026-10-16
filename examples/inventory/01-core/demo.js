@@ -1,5 +1,6 @@
 import { products } from "../../shared/products.js";
 import { Inventory, createCategoryFilter } from "./inventory.js";
+import { categoryTree, walkDepthFirst, walkBreadthFirst } from "./tree.js";
 
 const inventory = new Inventory(products);
 const isPeripheral = createCategoryFilter("外设");
@@ -30,3 +31,23 @@ for (const [category, group] of groups) console.log("分类：", category, group
 console.log("去重标签：", inventory.uniqueTags().join(", "));
 const empty = new Inventory([]);
 console.log("空库存索引 / 分组 / 标签：", empty.getById("P001"), empty.groupedByCategory().size, empty.uniqueTags().length);
+const editable = new Inventory(products.map(product => ({ ...product, tags: [...product.tags] })));
+const tasks = [{ id: "P002", stock: 3 }, { id: "P004", stock: 6 }];
+const completed = [];
+for (let head = 0; head < tasks.length; head++) {
+  const { id, stock } = tasks[head];
+  editable.setStock(id, stock);
+  completed.push(id);
+}
+console.log("任务执行：", completed.join(", "));
+console.log("修改库存：", editable.getById("P002").stock, editable.getById("P004").stock);
+console.log("撤销一次：", editable.undo(), editable.getById("P004").stock);
+console.log("撤销两次：", editable.undo(), editable.getById("P002").stock);
+console.log("历史耗尽：", editable.undo());
+console.log("撤销后总库存：", editable.summary().totalStock);
+const navigation = [];
+walkDepthFirst(categoryTree, (node, depth) => navigation.push("  ".repeat(depth) + node.name));
+console.log("分类导航：\n" + navigation.join("\n"));
+const breadthNames = [];
+walkBreadthFirst(categoryTree, node => breadthNames.push(node.name));
+console.log("逐层分类：", breadthNames.join(" → "));

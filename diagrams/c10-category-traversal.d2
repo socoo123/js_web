@@ -1,0 +1,35 @@
+# 箭头表示父子关系；节点上的两组序号表示从左到右的访问顺序。
+direction: down
+
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+root: 库存分类\nDFS ① · BFS ① {
+  style.fill: "#f4f8ff"
+}
+equipment: 设备\nDFS ② · BFS ② {
+  style.fill: "#f4f8ff"
+}
+accessories: 配件\nDFS ⑥ · BFS ③ {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+peripherals: 外设\nDFS ③ · BFS ④ {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+screens: 显示器\nDFS ④ · BFS ⑤ {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+audio: 音频\nDFS ⑤ · BFS ⑥ {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+
+root -> accessories
+root -> equipment
+equipment -> audio
+equipment -> screens
+equipment -> peripherals

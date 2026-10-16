@@ -195,3 +195,8 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 同日：按 [WeakMap](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap) 与 [WeakSet](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet) 核对对象/非注册 Symbol、弱引用、不可枚举与缺少 size 的原因。只演示一份对象快照的附属检查信息，未把可观察行为验证当成垃圾回收时机验证。
 - 同日：按 [Chrome Scope 调试参考](https://developer.chrome.com/docs/devtools/javascript/reference#scope)核对暂停位置与 Console 求值路径。沿用 Node 24 与已有静态服务命令，无新依赖或安装步骤；运行结果见 [examples/c09](../examples/c09/README.md)。
 - 同日：用 Java 官方 [Map](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Map.html)、[IdentityHashMap](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/IdentityHashMap.html) 与 [WeakHashMap](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/WeakHashMap.html) 核对 equals/hashCode、身份比较与弱键接口的类比边界。
+
+## C10 栈、队列、树与复杂度
+
+- 2026-10-16：核对 MDN 的 [push](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/push)、[pop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/pop) 与 [shift](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/shift)，确认尾部进出、返回新长度、空数组 undefined、首部删除及长度变化。复杂度按本课算法和普通数组操作估算，区分抽象代价与引擎优化，未把标准描述写成特定引擎的固定耗时保证。
+- 同日：按 [MDN 递归过深错误](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Too_much_recursion)、[Node console.time/timeEnd](https://nodejs.org/api/console.html#consoletimelabel) 与 [Chrome Scope、单步调试](https://developer.chrome.com/docs/devtools/javascript/reference#scope)核对深度错误、计时标签与断点步骤。DFS/BFS 和复杂度来自随课实现；使用已有 Node 24 与静态服务命令，无新依赖、安装步骤或提案 API；运行与断点证据见 [examples/c10](../examples/c10/README.md)。
