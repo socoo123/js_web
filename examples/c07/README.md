@@ -42,4 +42,5 @@
 - 同日：上表输入、类的原型关系、两个库存实例独立、普通/绑定回调、固定商品不变均实际执行通过。
 - 同日 · Chrome 155.0.8059.82（headless，经 DevTools 协议驱动）：13 个 JS 文件逐个运行，输出均与预期一致；本地网页暂停在 readStock，修复前 this 为 undefined，上层 runReport 的 callback 为该方法；直接调用仍返回 12。两种修复的断点都读到报告实例与库存 12，输出均为 12。
 - 同日：D2 SVG 编译并检查渲染；课程 lint、Astro check、完整 build 通过。
+- 同日：[Pages run 38866722105](https://github.com/socoo123/js_web/actions/runs/38866722105) 构建与部署成功；新课、路线页与 D2 返回 200，课程 HTML 与 D2 的 SHA-256 均与本地构建一致。
 - 未运行：在 DevTools 界面上手动点击（面板路径按官方文档核对）、Firefox、Safari、Windows。

@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C07 本地门禁完成，待 Pages 部署确认）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C07 已上线；下一课 C08）。
 
 ## 续做时按这个顺序读
 
@@ -31,7 +31,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 6 / 48（C01–C06）；C07 已过本地门禁，待上线确认 |
+| 已发布 | 7 / 48（C01–C07）；C07 按新规范编写，门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1：分类筛选工厂、Inventory 类与 demo；后续继续扩展 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 7 张图，新增 c07-prototype-lookup |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -48,6 +48,7 @@
 | C04 变量、作用域与控制流 | [打开](https://socoo123.github.io/js_web/02-language-data/c04-scope-control/) | [examples/c04](../examples/c04/README.md) | 重构：[run 38764394967](https://github.com/socoo123/js_web/actions/runs/38764394967) |
 | C05 对象、引用与数据交换 | [打开](https://socoo123.github.io/js_web/02-language-data/c05-objects-json/) | [examples/c05](../examples/c05/README.md) | 重构：[run 38842751440](https://github.com/socoo123/js_web/actions/runs/38842751440) |
 | C06 函数、闭包与高阶操作 | [打开](https://socoo123.github.io/js_web/02-language-data/c06-functions-closures/) | [examples/c06](../examples/c06/README.md) | [run 38844828221](https://github.com/socoo123/js_web/actions/runs/38844828221) |
+| C07 this、原型与 class | [打开](https://socoo123.github.io/js_web/02-language-data/c07-this-prototypes/) | [examples/c07](../examples/c07/README.md) | [run 38866722105](https://github.com/socoo123/js_web/actions/runs/38866722105) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -65,10 +66,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0 与 C06 已完成，R1 范围清空；用户已要求继续 C07。本课本地门禁与浏览器断点通过，验证明细见 examples/c07。
+P1、C01–C05 重构、T0 与 C06–C07 已完成；C06 风格停等已由用户继续 C07 的指令解除。C07 门禁与 Pages 核验通过，验证明细见 examples/c07。
 
-1. **C07 发布确认**：推送后等待 Pages Actions 成功，核对新课与 D2 在线返回 200，再补发布记录。
-2. **C08 Array 与业务数据处理**：复用阶段 1 的 Inventory.select(predicate) 与 count()，加入数组排序和统计；随后 C09–C12，详见 PLAN §8。
+1. **C08 Array 与业务数据处理**：复用阶段 1 的 `Inventory.select(predicate)` 与 `count()`，加入数组排序和统计。
+2. **C09–C12，随后 Q1 周验收**：继续阶段 1，并在 C12 后按 PLAN §6 做全套视觉验收，详见 PLAN §8。
 
 ## 本文件的更新规则
 
