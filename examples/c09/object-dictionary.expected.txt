@@ -1,0 +1,4 @@
+1 文本键
+false function
+3, 12, note
+true

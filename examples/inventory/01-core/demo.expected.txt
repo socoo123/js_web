@@ -10,3 +10,12 @@
 库存总价值（分）： 2634800
 售罄 / 低库存： 1 2
 空库存统计： {"totalStock":0,"totalValueCents":0,"soldOutCount":0,"lowStockCount":0}
+按 id 查找： P004 USB-C 扩展坞 3
+缺失商品： undefined
+分类种数： 4
+分类： 外设 2
+分类： 显示器 1
+分类： 配件 2
+分类： 音频 1
+去重标签： 热销, 新品
+空库存索引 / 分组 / 标签： undefined 0 0
