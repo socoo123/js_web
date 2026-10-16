@@ -181,3 +181,9 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 ## C07 this、原型与 class
 
 - 2026-10-16：按 MDN 的 [this](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this)、[原型链](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain)、[class](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)与[私有元素](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_elements)重核基础规则；均为已定稿能力，无提案特性、新依赖或安装命令，沿用 Node 24 基线。运行记录见 [examples/c07](../examples/c07/README.md)。
+
+## C08 Array 与业务数据处理
+
+- 2026-10-16：核对 MDN 的 [Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array)、[map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)、[filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)、[every](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every)与 [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)，确认空数组、空位、回调返回值与浅复制的区别；正文使用固定商品数据。
+- 同日：按 [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)、[toSorted](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted)、[toSpliced](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSpliced)与 [ECMA-262 数组算法](https://tc39.es/ecma262/multipage/indexed-collections.html)核对默认 UTF-16 顺序、比较器符号、稳定排序与复制方法；ES2023 复制方法均为正式标准，实际运行记录见 [examples/c08](../examples/c08/README.md)。
+- 同日：按 [Chrome Scope 与单步调试](https://developer.chrome.com/docs/devtools/javascript/reference#scope)核对回调内和回调后的断点步骤。沿用既有 Node 24 与 Python 本地服务命令，没有新增依赖或安装步骤。

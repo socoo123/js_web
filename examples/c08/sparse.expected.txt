@@ -1,0 +1,4 @@
+3
+undefined false
+true
+0, 0, 0

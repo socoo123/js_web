@@ -4,3 +4,9 @@
 回调筛选配件： 2
 实例自有 select： false
 独立空库存： 0
+库存升序： P002, P004, P006, P003, P001, P005
+原始顺序： P001, P002, P003, P004, P005, P006
+总库存： 52
+库存总价值（分）： 2634800
+售罄 / 低库存： 1 2
+空库存统计： {"totalStock":0,"totalValueCents":0,"soldOutCount":0,"lowStockCount":0}
