@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C15 每课本地门禁已通过，等待 Pages 发布核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C15 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -39,7 +39,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 14 / 48（C01–C14）；C14 每课门禁与线上核验通过 |
+| 已发布 | 15 / 48（C01–C15）；C15 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1 已完成；阶段 2 已加入请求、存储恢复、JSON 备份与响应式布局 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 9 张图，新增 c12-browser-event-loop |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -64,6 +64,7 @@
 | C12 从回调到 Promise：执行顺序 | [打开](https://socoo123.github.io/js_web/03-async-modules/c12-callbacks-promises/) | [examples/c12](../examples/c12/README.md) | [run 38915791749](https://github.com/socoo123/js_web/actions/runs/38915791749) |
 | C13 async/await、请求与 Network | [打开](https://socoo123.github.io/js_web/03-async-modules/c13-async-await-fetch/) | [examples/c13](../examples/c13/README.md) | [run 38919408362](https://github.com/socoo123/js_web/actions/runs/38919408362) |
 | C14 原生页面、存储与错误处理 | [打开](https://socoo123.github.io/js_web/03-async-modules/c14-storage-errors/) | [examples/c14](../examples/c14/README.md) | [run 38924073963](https://github.com/socoo123/js_web/actions/runs/38924073963) |
+| C15 CSS 布局与响应式：排版库存页 | [打开](https://socoo123.github.io/js_web/03-async-modules/c15-css-layout-responsive/) | [examples/c15](../examples/c15/README.md) | [run 38927024152](https://github.com/socoo123/js_web/actions/runs/38927024152) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -82,7 +83,7 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C14 与 Q1 已完成；C15 每课本地门禁已通过，等待 Pages 发布核验。验证明细见 examples/c15。
+P1、C01–C05 重构、T0、C06–C15 与 Q1 已完成；C15 每课门禁与 Pages 核验通过。验证明细见 examples/c15。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C16 模块、依赖与组织代码**：以 C15 响应式库存页为起点拆分 ES 模块，并复用阶段 1 的库存逻辑。
