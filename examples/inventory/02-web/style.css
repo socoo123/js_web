@@ -1,0 +1,10 @@
+body { margin: 0; color: #1b2733; background: #f4f6f9; font: 1rem/1.6 system-ui, sans-serif; }
+main { max-width: 56rem; margin: auto; padding: 1rem; }
+input, select, button { font: inherit; padding: .4rem .6rem; max-width: 100%; box-sizing: border-box; }
+input, select { display: block; margin: .25rem 0 1rem; }
+button { cursor: pointer; margin: .3rem; }
+ul { list-style: none; padding: 0; }
+li, #editor { border: 1px solid #b4bfca; border-radius: .4rem; background: white; padding: .8rem; margin-block: .7rem; overflow-wrap: anywhere; }
+li p { margin: .2rem 0; }
+.error { color: #a01717; }
+:focus-visible { outline: 3px solid #155cb5; outline-offset: 3px; }

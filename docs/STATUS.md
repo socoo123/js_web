@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C10 已上线；下一课 C11）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C11 本地完成，待 Pages 核验；下一课 C12）。
 
 ## 续做时按这个顺序读
 
@@ -27,6 +27,7 @@
 - **2026-10-16：用户要求在最新计划与重做的 C03 基础上开发 C08。** 正文与 14 个示例已完成，阶段 1 加入排序和统计，沿用普通课上限与每课门禁。
 - **2026-10-16：用户要求在最新计划与重做的 C03 基础上开发 C09。** 正文、15 个示例、库存 id 索引、分类分组与标签去重已完成，沿用普通课上限与每课门禁。
 - **2026-10-16：用户要求在最新计划与重做的 C03 基础上开发 C10。** 加入撤销栈、头索引队列、分类树遍历与 D2，按普通课上限和每课门禁实施。
+- **2026-10-16：用户要求在最新计划与重做的 C03 基础上开发 C11。** 正文、DOM/事件调试示例与阶段 2 原生库存页已完成，按普通课上限和每课门禁实施。
 
 ## 当前状态
 
@@ -34,8 +35,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 10 / 48（C01–C10）；C10 按新规范编写，门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1：新增可撤销库存编辑、头索引任务队列与分类树；demo 固定业务参考值通过 |
+| 已发布 | 10 / 48（C01–C10）；C11 本地门禁通过，部署待核验 |
+| 贯穿项目 | 阶段 1 保留；阶段 2 新增原生页面的组合筛选、库存编辑、校验与键盘操作 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 8 张图，新增 c10-category-traversal |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -55,6 +56,7 @@
 | C08 Array 与业务数据处理 | [打开](https://socoo123.github.io/js_web/02-language-data/c08-arrays-processing/) | [examples/c08](../examples/c08/README.md) | [run 38868560351](https://github.com/socoo123/js_web/actions/runs/38868560351) |
 | C09 Object、Map、Set 与弱集合 | [打开](https://socoo123.github.io/js_web/02-language-data/c09-maps-sets/) | [examples/c09](../examples/c09/README.md) | [run 38871515466](https://github.com/socoo123/js_web/actions/runs/38871515466) |
 | C10 栈、队列、树与复杂度 | [打开](https://socoo123.github.io/js_web/02-language-data/c10-stacks-queues-trees/) | [examples/c10](../examples/c10/README.md) | [run 38876725107](https://github.com/socoo123/js_web/actions/runs/38876725107) |
+| C11 DOM、事件、表单与页面调试 | 本地完成，部署待核验 | [examples/c11](../examples/c11/README.md) | 待 Pages Actions |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -72,9 +74,9 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0 与 C06–C10 已完成。C10 门禁与 Pages 核验通过，验证明细见 examples/c10。
+P1、C01–C05 重构、T0 与 C06–C10 已完成；C11 本地门禁通过，验证明细见 examples/c11。
 
-1. **C11 DOM、事件、表单与页面调试**：从阶段 1 库存逻辑开始建立阶段 2 页面，增加筛选和编辑。
+1. **完成 C11 Pages 发布核验**：推送后等 Actions 成功，核对文章线上返回 200。
 2. **C12，随后 Q1 周验收**：补齐阶段 1 的模拟异步加载，在 C12 后按 PLAN §6 做全套视觉验收，详见 PLAN §8。
 
 ## 本文件的更新规则

@@ -5,7 +5,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 <!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
 
-**已发布 10 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**已发布 11 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
 
 ## 选择你的节奏
 
@@ -28,7 +28,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 4 天 | [C08 Array 与业务数据处理](../02-language-data/c08-arrays-processing/) | 已发布 |
 | 第 5 天 | [C09 Object、Map、Set 与弱集合](../02-language-data/c09-maps-sets/) | 已发布 |
 | 第 5 天 | [C10 栈、队列、树与复杂度](../02-language-data/c10-stacks-queues-trees/) | 已发布 |
-| 第 6 天 | C11 DOM、事件、表单与页面调试 | 待发布 |
+| 第 6 天 | [C11 DOM、事件、表单与页面调试](../03-async-modules/c11-dom-events-forms/) | 已发布 |
 | 第 6 天 | C12 从回调到 Promise：执行顺序 | 待发布 |
 
 ## 第 2 周：现代 JS、运行时、工具与 React 起步

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>文本与 HTML：本地 XSS 演示</title>
+  <style>body { max-width: 56rem; margin: 2rem auto; padding: 0 1rem; font: 18px/1.7 system-ui; } button, input { font: inherit; } :focus-visible { outline: 3px solid #1565c0; outline-offset: 3px; } li { margin-block: .6rem; } pre { white-space: pre-wrap; }</style>
+  <script defer src="text.js"></script><script defer src="xss.js"></script>
+</head>
+<body>
+  <a href="index.html">返回示例目录</a>
+  <h1>文本与 HTML：本地 XSS 演示</h1>
+  <h2>按文本显示</h2><p id="safe"></p>
+  <h2>危险的 HTML 写入</h2><div id="unsafe"></div>
+  <p>输入中的代码是否执行：<output id="result">等待图片错误</output></p>
+  <p>本例只修改当前页面的标记，没有发送数据。</p>
+</body>
+</html>

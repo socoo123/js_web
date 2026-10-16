@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>原生库存页 · 阶段 2</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="data.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <main>
+    <h1>库存管理</h1>
+    <p>本次编辑保存在当前页面，刷新后恢复起始数据。</p>
+    <section aria-labelledby="filters-title">
+      <h2 id="filters-title">查找商品</h2>
+      <label for="search">商品名称或编号</label>
+      <input id="search" type="search" autocomplete="off">
+      <label for="category">分类</label>
+      <select id="category">
+        <option value="">全部</option><option>外设</option><option>显示器</option><option>配件</option><option>音频</option>
+      </select>
+    </section>
+    <p id="summary"></p>
+    <p id="result-count" role="status"></p>
+    <ul id="products" aria-label="商品列表"></ul>
+    <section id="editor" aria-labelledby="editor-title" hidden>
+      <h2 id="editor-title">编辑库存</h2>
+      <p id="editing-name"></p>
+      <form id="stock-form">
+        <label for="stock">库存件数</label>
+        <input id="stock" name="stock" type="number" required min="0" max="99999" step="1" aria-describedby="stock-help stock-error">
+        <p id="stock-help">请输入 0–99999 的整数，0 表示售罄。</p>
+        <p id="stock-error" class="error" aria-live="polite"></p>
+        <button type="submit">保存库存</button>
+        <button id="cancel" type="button">取消</button>
+      </form>
+    </section>
+    <p id="feedback" role="status"></p>
+    <noscript><p>请启用 JavaScript 以使用库存筛选和编辑。</p></noscript>
+  </main>
+</body>
+</html>
