@@ -1,0 +1,7 @@
+12
+false
+true
+true
+现货
+库存
+undefined

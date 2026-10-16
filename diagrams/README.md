@@ -1,6 +1,6 @@
 # D2 教学图
 
-当前有 C01 生态关系图、C02 页面加载关系图、C03 输入边界图、C04 作用域查找图、C05 别名与浅复制图。源码为 `c01-ecosystem.d2`、`c02-page-flow.d2`、`c03-value-boundary.d2`、`c04-scope.d2`、`c05-alias-copy.d2`，产物位于 `../src/assets/diagrams/` 的同名 SVG。已接入网站 npm 构建与 Pages Actions；编译失败会阻止发布。C02 的图展示资源与处理阶段的依赖，不是精确请求瀑布时间线。
+当前有 C01 生态关系图、C02 页面加载关系图、C03 输入边界图、C04 作用域查找图、C05 别名与浅复制图、C06 闭包环境图、C07 原型查找图。源码依次为 `c01-ecosystem.d2`、`c02-page-flow.d2`、`c03-value-boundary.d2`、`c04-scope.d2`、`c05-alias-copy.d2`、`c06-closure-environment.d2`、`c07-prototype-lookup.d2`，产物位于 `../src/assets/diagrams/` 的同名 SVG。已接入网站 npm 构建与 Pages Actions；编译失败会阻止发布。C02 的图展示资源与处理阶段的依赖，不是精确请求瀑布时间线。
 
 C03 的图是新规范下的样例写法：文件首行注释说明箭头含义；`**` 统一字号与圆角；一个容器圈出「边界」；红色只用于拒绝分支，绿色只用于正常路径；节点文字最多 3 行。
 

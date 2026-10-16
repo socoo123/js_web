@@ -1,0 +1,32 @@
+# 实线表示对象的原型链接；虚线表示属性查找或方法调用。
+direction: down
+
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+lookup: 读取 keyboard.readStock {
+  style.fill: "#f4f8ff"
+}
+instance: keyboard 实例\n自有属性：id = P001 · stock = 12\n没有自有 readStock {
+  style.fill: "#f4f8ff"
+}
+prototype: ProductStock.prototype\n自有属性：readStock 函数 {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+object: Object.prototype\n例如 toString
+end: null\n原型链终点
+call: 调用 keyboard.readStock()\nthis = keyboard\n读取实例的 stock，得到 12 {
+  style.fill: "#fffbe6"
+}
+
+lookup -> instance: 先查自身 {
+  style.stroke-dash: 5
+}
+instance -> prototype: 原型链接 · 找到方法
+prototype -> object: 原型链接
+object -> end: 原型链接
+prototype -> call: 方法调用 {
+  style.stroke-dash: 5
+}
