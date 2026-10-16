@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C12 已上线；第一周验收完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C13 本地门禁完成，待 Pages 核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -30,14 +30,16 @@
 - **2026-10-16：用户要求在最新计划与重做的 C03 基础上开发 C11。** 正文、DOM/事件调试示例与阶段 2 原生库存页已完成，按普通课上限和每课门禁实施。
 - **2026-10-16：用户要求在最新计划与重做的 C03 基础上开发 C12。** 正文、Promise 执行顺序示例、D2 与阶段 1 模拟异步加载已完成，并完成第一周验收。
 
+- **2026-10-16：用户要求在最新计划与重做的 C03 基础上开发 C13。** 按指定提前完成正文、异步/请求示例与阶段 2 静态 JSON 加载；F1 保留队列。
+
 ## 当前状态
 
 | 项目 | 状态 |
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 12 / 48（C01–C12）；C12 每课门禁、周验收与线上核验通过 |
-| 贯穿项目 | 阶段 1 完成模拟异步加载与第一周报告；阶段 2 保留 C11 原生页 |
+| 已发布 | 12 / 48（C01–C12）；C13 本地门禁通过，待线上核验 |
+| 贯穿项目 | 阶段 1 已完成；阶段 2 已加入静态 JSON 请求、加载/空/错状态与重试 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 9 张图，新增 c12-browser-event-loop |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -59,6 +61,7 @@
 | C10 栈、队列、树与复杂度 | [打开](https://socoo123.github.io/js_web/02-language-data/c10-stacks-queues-trees/) | [examples/c10](../examples/c10/README.md) | [run 38876725107](https://github.com/socoo123/js_web/actions/runs/38876725107) |
 | C11 DOM、事件、表单与页面调试 | [打开](https://socoo123.github.io/js_web/03-async-modules/c11-dom-events-forms/) | [examples/c11](../examples/c11/README.md) | [run 38913333294](https://github.com/socoo123/js_web/actions/runs/38913333294) |
 | C12 从回调到 Promise：执行顺序 | [打开](https://socoo123.github.io/js_web/03-async-modules/c12-callbacks-promises/) | [examples/c12](../examples/c12/README.md) | [run 38915791749](https://github.com/socoo123/js_web/actions/runs/38915791749) |
+| C13 async/await、请求与 Network | [打开](https://socoo123.github.io/js_web/03-async-modules/c13-async-await-fetch/) | [examples/c13](../examples/c13/README.md) | 本地门禁通过，待 Pages 核验 |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -77,10 +80,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C12 与 Q1 已完成；C12 门禁、周验收与 Pages 核验通过。验证明细见 examples/c12。
+P1、C01–C05 重构、T0、C06–C12 与 Q1 已完成；C13 本地门禁通过，待 Pages 核验。验证明细见 examples/c13。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C13 async/await、请求与 Network**：以阶段 2 原生页读取静态 products.json，处理加载/空/错状态。
+2. **C14 原生页面、存储与错误处理**：以 C13 阶段 2 原生页为起点，加入 localStorage、损坏恢复与导入导出。
 
 ## 本文件的更新规则
 

@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>原生库存页 · 阶段 2</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="data.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -23,6 +22,7 @@
     </section>
     <p id="summary"></p>
     <p id="result-count" role="status"></p>
+    <button id="retry" type="button" hidden>重试加载</button>
     <ul id="products" aria-label="商品列表"></ul>
     <section id="editor" aria-labelledby="editor-title" hidden>
       <h2 id="editor-title">编辑库存</h2>

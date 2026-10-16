@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>读取静态商品文件</title><script defer src="fetch-json.js"></script><script defer src="fetch-demo.js"></script></head><body>
+<main><h1>读取静态商品文件</h1><label for="source">数据来源</label>
+<select id="source"><option value="../shared/products.json">正常商品</option><option value="empty.json">空数组</option><option value="missing.json">404</option><option value="invalid.json">错误 JSON</option><option value="wrong-shape.json">对象而非数组</option></select>
+<button id="run" type="button">加载</button><pre id="output" role="status"></pre></main>
+</body></html>

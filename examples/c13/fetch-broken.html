@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>请求错误 · broken</title><script defer src="fetch-json.js"></script></head><body>
+<main><h1>请求错误 · broken</h1><pre id="output"></pre><script>
+const output = document.querySelector("#output");
+const log = console.log.bind(console);
+console.log = (...values) => { log(...values); output.textContent += values.join(" ") + "\n"; };
+</script><script defer src="fetch-broken.js"></script></main>
+</body></html>

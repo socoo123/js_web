@@ -1,4 +1,4 @@
-const inventory = products.map(product => ({ ...product, tags: [...product.tags] }));
+let inventory = [];
 const list = document.querySelector("#products");
 const search = document.querySelector("#search");
 const category = document.querySelector("#category");
@@ -7,7 +7,9 @@ const form = document.querySelector("#stock-form");
 const stockInput = document.querySelector("#stock");
 const stockError = document.querySelector("#stock-error");
 const feedback = document.querySelector("#feedback");
+const retry = document.querySelector("#retry");
 let selectedId = null;
+let loadState = "loading";
 
 function createRow(product) {
   const row = document.createElement("li");
@@ -28,6 +30,7 @@ function createRow(product) {
 }
 
 function renderProducts() {
+  if (loadState !== "ready") return;
   const keyword = search.value.trim().toLowerCase();
   const visible = inventory.filter(product =>
     (category.value === "" || product.category === category.value) &&
@@ -35,7 +38,7 @@ function renderProducts() {
   );
   list.replaceChildren(...visible.map(createRow));
   document.querySelector("#result-count").textContent = visible.length === 0
-    ? "没有匹配的商品。" : "显示 " + visible.length + " 种商品";
+    ? (inventory.length === 0 ? "暂无商品。" : "没有匹配的商品。") : "显示 " + visible.length + " 种商品";
 }
 
 function renderSummary() {
@@ -106,5 +109,45 @@ form.addEventListener("submit", event => {
   closeEditor(product.id);
 });
 document.querySelector("#cancel").addEventListener("click", () => closeEditor(selectedId));
-renderProducts();
-renderSummary();
+
+async function fetchProducts(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("HTTP " + response.status);
+  const rows = await response.json();
+  if (!Array.isArray(rows)) throw new Error("商品数据应为数组");
+  return rows;
+}
+
+function setLoading(value) {
+  search.disabled = value;
+  category.disabled = value;
+  retry.disabled = value;
+  list.setAttribute("aria-busy", String(value));
+}
+
+async function loadProducts() {
+  loadState = "loading";
+  setLoading(true);
+  retry.hidden = true;
+  editor.hidden = true;
+  selectedId = null;
+  list.replaceChildren();
+  document.querySelector("#summary").textContent = "";
+  document.querySelector("#result-count").textContent = "正在加载商品…";
+  try {
+    inventory = await fetchProducts("./products.json");
+    loadState = "ready";
+    renderProducts();
+    renderSummary();
+  } catch (error) {
+    loadState = "error";
+    inventory = [];
+    document.querySelector("#result-count").textContent = "加载失败，请检查网络后重试。";
+    console.error("商品加载失败", error);
+    retry.hidden = false;
+  } finally {
+    setLoading(false);
+  }
+}
+retry.addEventListener("click", loadProducts);
+loadProducts();
