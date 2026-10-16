@@ -36,4 +36,5 @@
   - 自定义校验错误能在重新输入后清除；同一函数重复注册只执行一次；CSS display 显隐与 isConnected 区分通过。
   - Enter 提交、Space 激活、Tab 到取消、保存/取消后的焦点恢复和筛选隐藏商品后的搜索框回退通过，无页面脚本异常。
 - 同日：正文 10 个完整 JS 代码块与示例逐字一致，3 个项目片段来自 app.js；内容 lint 零 error/warning，astro check 零诊断，build 与全量 125/125 示例通过；本地 /js_web/ 预览返回 200，标题、代码块、折叠答案和路线页通过。
+- 同日：[Pages Actions 38913333294](https://github.com/socoo123/js_web/actions/runs/38913333294) 成功；文章与路线页均返回 200，HTML 与本地构建逐字节一致。
 - 未运行：在 DevTools 界面上手动点击的路径、Firefox、Safari、真实手机；面板名称依据 Chrome 官方文档。
