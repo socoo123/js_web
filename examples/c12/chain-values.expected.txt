@@ -1,0 +1,3 @@
+同一个 Promise false
+库存 15
+下一步 undefined

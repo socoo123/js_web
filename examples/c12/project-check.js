@@ -1,0 +1,38 @@
+import assert from "node:assert/strict";
+import { products } from "../shared/products.js";
+import { Inventory, loadInventory } from "../inventory/01-core/inventory.js";
+
+const before = JSON.stringify(products);
+const pending = loadInventory(products, { delayMs: 0 });
+assert.ok(pending instanceof Promise);
+let synchronous = true;
+const verified = pending.then(inventory => {
+  assert.equal(synchronous, false);
+  return inventory;
+});
+synchronous = false;
+const first = await verified;
+const second = await loadInventory(products, { delayMs: 0 });
+assert.ok(first instanceof Inventory);
+assert.equal(first.count(), 6);
+assert.deepEqual(first.summary(), { totalStock: 52, totalValueCents: 2634800, soldOutCount: 1, lowStockCount: 2 });
+assert.deepEqual([...first.groupedByCategory()].map(([category, rows]) => [category, rows.length]), [["外设", 2], ["显示器", 1], ["配件", 2], ["音频", 1]]);
+assert.deepEqual(first.uniqueTags(), ["热销", "新品"]);
+assert.deepEqual(first.select(p => p.stock === 0).map(p => p.id), ["P002"]);
+assert.deepEqual(first.select(p => p.stock > 0 && p.stock <= 5).map(p => p.id), ["P004", "P006"]);
+first.setStock("P002", 3);
+first.getById("P001").tags.push("本地");
+assert.equal(first.summary().totalStock, 55);
+assert.equal(second.getById("P002").stock, 0);
+assert.deepEqual(second.getById("P001").tags, ["热销"]);
+assert.equal(JSON.stringify(products), before);
+assert.equal(first.undo(), true);
+assert.equal(first.summary().totalStock, 52);
+assert.equal(second.undo(), false);
+await assert.rejects(loadInventory(products, { fail: true, delayMs: 0 }), { message: "库存加载失败" });
+await assert.rejects(loadInventory([products[0], products[0]], { delayMs: 0 }), /重复商品 id/);
+await assert.rejects(loadInventory([{ id: "P001" }], { delayMs: 0 }), TypeError);
+const empty = await loadInventory([], { delayMs: 0 });
+assert.equal(empty.count(), 0);
+assert.deepEqual(empty.summary(), { totalStock: 0, totalValueCents: 0, soldOutCount: 0, lowStockCount: 0 });
+console.log("阶段 1：异步交付、固定报告、副本隔离、撤销、失败与空数据通过");

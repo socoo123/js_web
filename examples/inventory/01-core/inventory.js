@@ -68,3 +68,20 @@ export class Inventory {
     return [...tags];
   }
 }
+
+export function loadInventory(source, { fail = false, delayMs = 20 } = {}) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (fail) {
+        reject(new Error("库存加载失败"));
+        return;
+      }
+      try {
+        const snapshot = source.map(product => ({ ...product, tags: [...product.tags] }));
+        resolve(new Inventory(snapshot));
+      } catch (error) {
+        reject(error);
+      }
+    }, delayMs);
+  });
+}

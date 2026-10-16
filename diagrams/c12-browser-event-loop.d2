@@ -1,0 +1,21 @@
+# 简化的浏览器主线程循环；箭头表示处理顺序，底部节点接入下一轮。
+direction: down
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+run: 当前任务\n同步函数进入调用栈\n执行完毕，逐层返回 {
+  style.fill: "#f4f8ff"
+}
+micro: 微任务检查点\n执行已排队的 Promise 回调等\n新入队的微任务也继续执行 {
+  style.fill: "#fff7e6"
+}
+paint: 到了渲染时机才更新画面\n布局 · 绘制\n本轮也可能跳过 {
+  style.fill: "#f6ffed"
+}
+next: 浏览器选择下一个可运行任务\n例如到期的定时器回调、用户交互\n进入下一轮同步调用 {
+  style.fill: "#f5f5f5"
+}
+run -> micro: 当前任务返回
+micro -> paint: 微任务队列清空
+paint -> next

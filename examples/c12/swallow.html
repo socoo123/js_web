@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C12 被吞掉的错误</title>
+<style>body{font:18px/1.7 system-ui;max-width:50rem;margin:2rem auto;padding:0 1rem}pre{white-space:pre-wrap}button{font:inherit}a{margin-right:1rem}</style>
+<h1>被吞掉的错误</h1>
+<p>观察记录错误以后，为什么还出现成功结果。</p><a href="swallow-fixed.html">查看修复版</a>
+<pre id="output" aria-live="polite"></pre>
+<script>
+const output = document.querySelector("#output");
+const originalLog = console.log;
+console.log = (...values) => {
+  output.textContent += values.map(String).join(" ") + "\n";
+  originalLog(...values);
+};
+</script>
+<script type="module" src="swallow-broken.js"></script>
+</html>

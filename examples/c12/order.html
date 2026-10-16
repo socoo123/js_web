@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C12 浏览器执行顺序</title>
+<style>body{font:18px/1.7 system-ui;max-width:50rem;margin:2rem auto;padding:0 1rem}pre{white-space:pre-wrap}button{font:inherit}a{margin-right:1rem}</style>
+<h1>浏览器执行顺序</h1>
+<p>打开 Sources，在 order.js 的日志行设断点；刷新后按顺序继续。</p>
+<pre id="output" aria-live="polite"></pre>
+<script>
+const output = document.querySelector("#output");
+const originalLog = console.log;
+console.log = (...values) => {
+  output.textContent += values.map(String).join(" ") + "\n";
+  originalLog(...values);
+};
+</script>
+<script type="module" src="order.js"></script>
+</html>

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C12 已连接的 Promise 链</title>
+<style>body{font:18px/1.7 system-ui;max-width:50rem;margin:2rem auto;padding:0 1rem}pre{white-space:pre-wrap}button{font:inherit}a{margin-right:1rem}</style>
+<h1>已连接的 Promise 链</h1>
+<a href="missing-return.html">回到错误版</a>
+<pre id="output" aria-live="polite"></pre>
+<script>
+const output = document.querySelector("#output");
+const originalLog = console.log;
+console.log = (...values) => {
+  output.textContent += values.map(String).join(" ") + "\n";
+  originalLog(...values);
+};
+</script>
+<script type="module" src="missing-return-fixed.js"></script>
+</html>

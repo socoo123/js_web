@@ -1,5 +1,5 @@
 import { products } from "../../shared/products.js";
-import { Inventory, createCategoryFilter } from "./inventory.js";
+import { Inventory, createCategoryFilter, loadInventory } from "./inventory.js";
 import { categoryTree, walkDepthFirst, walkBreadthFirst } from "./tree.js";
 
 const inventory = new Inventory(products);
@@ -51,3 +51,17 @@ console.log("分类导航：\n" + navigation.join("\n"));
 const breadthNames = [];
 walkBreadthFirst(categoryTree, node => breadthNames.push(node.name));
 console.log("逐层分类：", breadthNames.join(" → "));
+
+console.log("开始异步加载");
+loadInventory(products)
+  .then(loaded => {
+    const report = loaded.summary();
+    console.log("异步报告：", loaded.count(), report.totalStock, report.totalValueCents);
+    loaded.setStock("P002", 3);
+    console.log("异步副本编辑：", loaded.summary().totalStock);
+    console.log("原模块总库存：", inventory.summary().totalStock);
+    return loadInventory(products, { fail: true });
+  })
+  .catch(error => console.log("异步失败：", error.message))
+  .finally(() => console.log("异步加载结束"));
+console.log("同步代码继续");

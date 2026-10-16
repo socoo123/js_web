@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C12 DOM 更新与绘制</title>
+<style>body{font:18px/1.7 system-ui;max-width:50rem;margin:2rem auto;padding:0 1rem}pre{white-space:pre-wrap}button{font:inherit}a{margin-right:1rem}</style>
+<h1>DOM 更新与绘制</h1>
+<button id="run">开始计算</button><p id="status" role="status">待开始</p><p>观察页面文字和日志；计算期间尝试再次点击。</p>
+<pre id="output" aria-live="polite"></pre>
+<script>
+const output = document.querySelector("#output");
+const originalLog = console.log;
+console.log = (...values) => {
+  output.textContent += values.map(String).join(" ") + "\n";
+  originalLog(...values);
+};
+</script>
+<script type="module" src="rendering.js"></script>
+</html>
