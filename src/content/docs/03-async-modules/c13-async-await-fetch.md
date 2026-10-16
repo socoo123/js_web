@@ -396,7 +396,9 @@ async function read() {
   }
 }
 read().then(stock => console.log("库存", stock))
-  .catch(error => console.log("外部处理", error.message));
+  .catch(error => {
+    console.log("外部处理", error.message);
+  });
 ```
 
 **工具**：在本课 `index.html` 的 Console 输入 `import("./catch-broken.js")`。到 Sources → Page 打开刚加载的文件，在内部 catch 和外部 catch 的日志行设断点；刷新页面后再次导入，等待读取失败。
@@ -419,7 +421,9 @@ async function read() {
   }
 }
 read().then(stock => console.log("库存", stock))
-  .catch(error => console.log("外部处理", error.message));
+  .catch(error => {
+    console.log("外部处理", error.message);
+  });
 ```
 
 **确认**：运行 `node catch-fixed.js`，输出 `内部处理 库存加载失败`、`库存 0`。浏览器刷新后导入修复文件，这次命中内部断点，外部 catch 不再命中。此例按约定降级为 0；库存页则提示错误并允许重试。

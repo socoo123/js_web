@@ -10,4 +10,6 @@ async function read() {
   }
 }
 read().then(stock => console.log("库存", stock))
-  .catch(error => console.log("外部处理", error.message));
+  .catch(error => {
+    console.log("外部处理", error.message);
+  });
