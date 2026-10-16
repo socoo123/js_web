@@ -47,5 +47,6 @@
 - 同日 · Chrome 155.0.8059.82（headless，经 DevTools 协议驱动）：14 个浏览器可用模块的输出全部匹配；project-check.js 使用 Node assert，仅在 Node 运行。
 - 同日：本地网页首处日志断点读取到 size=0、has=false、hasOwn=true、属性 P001 的名称为机械键盘；以 index-fixed.js 的内容加载后，断点处 size=6、has=true、hasOwn=false，get 查询成功。
 - 同日：全量示例 111/111；课程 lint 零 error / warning，Astro check 零问题，完整 build 与 `/js_web/` 产物检查通过。
+- 同日：[Pages run 38871515466](https://github.com/socoo123/js_web/actions/runs/38871515466) 构建与部署成功；新课和路线页返回 200，两页 HTML 的 SHA-256 均与本地构建一致。
 - 弱集合仅验证可观察的查询与删除行为，未强制触发或测量垃圾回收。
 - 未运行：DevTools 界面手动点击、Firefox、Safari、Windows。
