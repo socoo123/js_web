@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C08 门禁已通过，待 Pages 部署核验）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C08 已上线；下一课 C09）。
 
 ## 续做时按这个顺序读
 
@@ -32,7 +32,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 7 / 48（C01–C07）；C07 按新规范编写，门禁与线上核验通过 |
+| 已发布 | 8 / 48（C01–C08）；C08 按新规范编写，门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1：分类筛选工厂、Inventory 类、排序与统计；demo 固定业务参考值通过 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 7 张图，新增 c07-prototype-lookup |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -50,6 +50,7 @@
 | C05 对象、引用与数据交换 | [打开](https://socoo123.github.io/js_web/02-language-data/c05-objects-json/) | [examples/c05](../examples/c05/README.md) | 重构：[run 38842751440](https://github.com/socoo123/js_web/actions/runs/38842751440) |
 | C06 函数、闭包与高阶操作 | [打开](https://socoo123.github.io/js_web/02-language-data/c06-functions-closures/) | [examples/c06](../examples/c06/README.md) | [run 38844828221](https://github.com/socoo123/js_web/actions/runs/38844828221) |
 | C07 this、原型与 class | [打开](https://socoo123.github.io/js_web/02-language-data/c07-this-prototypes/) | [examples/c07](../examples/c07/README.md) | [run 38866722105](https://github.com/socoo123/js_web/actions/runs/38866722105) |
+| C08 Array 与业务数据处理 | [打开](https://socoo123.github.io/js_web/02-language-data/c08-arrays-processing/) | [examples/c08](../examples/c08/README.md) | [run 38868560351](https://github.com/socoo123/js_web/actions/runs/38868560351) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -67,10 +68,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0 与 C06–C07 已完成。C08 正文、示例与阶段项目已通过本地门禁，验证明细见 examples/c08。
+P1、C01–C05 重构、T0 与 C06–C08 已完成。C08 门禁与 Pages 核验通过，验证明细见 examples/c08。
 
-1. **C08 发布核验**：推送后等待 Pages Actions 成功，确认课程线上地址返回 200，再更新已发布计数。
-2. **C09–C12，随后 Q1 周验收**：继续阶段 1，并在 C12 后按 PLAN §6 做全套视觉验收，详见 PLAN §8。
+1. **C09 Object、Map、Set 与弱集合**：复用阶段 1 的 Inventory，加入按 id 建 Map 索引、按分类分组和标签去重。
+2. **C10–C12，随后 Q1 周验收**：继续阶段 1，并在 C12 后按 PLAN §6 做全套视觉验收，详见 PLAN §8。
 
 ## 本文件的更新规则
 

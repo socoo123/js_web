@@ -43,4 +43,5 @@
 - 同日：上表变体、ES2023 的 toSpliced/toReversed、升降序、对象引用共享、固定数据未修改均实际执行通过。
 - 同日 · Chrome 155.0.8059.82（headless，经 DevTools 协议驱动）：14 个模块的输出与预期一致；本地网页在回调内读到 P001 / 机械键盘，回调后 labels 长度为 6、首项为 undefined；加载参考修复内容后首项为 P001：机械键盘。
 - 同日：全量示例 96/96；课程 lint 零 error / warning，Astro check 零问题，完整 build 与 `/js_web/` 产物检查通过。
+- 同日：[Pages run 38868560351](https://github.com/socoo123/js_web/actions/runs/38868560351) 构建与部署成功；新课及路线页返回 200，两页 HTML 的 SHA-256 均与本地构建一致。
 - 未运行：在 DevTools 界面上手动点击、Firefox、Safari、Windows。
