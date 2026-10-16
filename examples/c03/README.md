@@ -22,7 +22,7 @@
 
 ## 运行
 
-- Node：在本目录执行上表命令。T0 的 `npm run examples -- c03` 实现后，会用各文件的 `.expected.txt` 自动核对输出。
+- Node：在本目录执行上表命令；在仓库根目录执行 `npm run examples -- c03`，用各文件的 `.expected.txt` 自动核对输出。
 - 浏览器 Console：在 Chrome 打开任意网页，按正文顺序粘贴。
 - 本地网页：在本目录运行 `python3 -m http.server 8000 --bind 127.0.0.1`，打开 `http://127.0.0.1:8000/restock.html`。
 - Java：需要 JDK 11 及以上，在本目录运行 `java JavaNumbers.java`。

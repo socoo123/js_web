@@ -27,7 +27,7 @@
 - Node：在本目录执行表中命令，输出与同名 `.expected.txt` 比较。
 - Console：按正文顺序粘贴完整代码块；异常分类为练习的预期结果。
 - 本地网页：在本目录运行 `python3 -m http.server 8000 --bind 127.0.0.1`，用 Chrome 打开 `http://127.0.0.1:8000/draft.html`。
-- T0 尚未实施，`npm run examples -- c05` 与 `npm run lint:lessons` 当前不存在；实施后可自动运行这些预期输出用例。
+- 在仓库根目录运行 `npm run examples -- c05` 自动核对预期输出，`npm run lint:lessons` 检查正文规则。
 
 ## 验证记录
 
@@ -39,5 +39,5 @@
 - 正文临时规则通过：7,973 个非空白字符、15 个代码块、每块 ≤ 25 行、5 个主体概念节、3 处先猜、2 题各有提示和答案；带文件名的代码块与文件逐字一致。`npm run check`、`npm run build` 通过。
 - D2 已用固定工具重建并截图检查，中文与身份箭头清楚。全套周视觉验收未重复执行。
 - Pages [run 38842751440](https://github.com/socoo123/js_web/actions/runs/38842751440) 成功；线上文章和新版 D2 返回 200，字节内容与本地生产构建一致。
-- 临时核对脚本和结果在忽略目录 `.cache/qa/c05-*`，不是课程运行依赖；永久门禁仍属于 T0。
+- 重构时的临时核对脚本和结果在忽略目录 `.cache/qa/c05-*`，不是课程运行依赖；后续完成的 T0 已提供永久门禁。
 - 未运行：DevTools 界面逐项人工点击、Firefox、Safari、Windows。面板路径已按 Chrome 官方文档核对，断点与单步经协议实测。

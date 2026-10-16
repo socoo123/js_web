@@ -1,0 +1,31 @@
+# 箭头表示引用关系。两个 next 函数使用同一段代码，但来自不同的工厂调用。
+direction: down
+grid-columns: 1
+
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+shared: 第一次 createCounter() {
+  style.fill: "#f4f8ff"
+  alias: nextKeyboard 和 sameCounter
+  next: 返回的 next 函数
+  environment: 保留的词法环境\ncount：0 → 1 → 2 {
+    style.fill: "#f6ffed"
+    style.stroke: "#389e0d"
+  }
+  alias -> next: 都引用
+  next -> environment: 读写 count
+}
+
+independent: 第二次 createCounter() {
+  style.fill: "#fff7e6"
+  alias: nextMouse
+  next: 另一个 next 函数
+  environment: 另一份词法环境\ncount：0 → 1 {
+    style.fill: "#f6ffed"
+    style.stroke: "#389e0d"
+  }
+  alias -> next: 引用
+  next -> environment: 读写 count
+}

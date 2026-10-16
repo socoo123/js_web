@@ -24,7 +24,7 @@
 - Node：在本目录运行 `node 文件名.js`。同名 `.expected.txt` 保存 **Node** 预期 stdout；错误文件首行标记预期错误类型，空输出文件表示报错前没有日志。
 - CommonJS：在本目录运行 `node -e "console.log(require('./commonjs.cjs')(12, 3))"`，预期 9。
 - Java：已有 JDK 11 及以上时，在本目录运行 `java Stock.java`。
-- T0 尚未实现 `npm run examples -- c01`；当前预期输出由本次临时核对脚本逐个执行比较，未新增课程依赖。
+- 在仓库根目录运行 `npm run examples -- c01` 自动核对 Node 固定输出；下面保留重构时的实际验证记录。
 
 ## 练习验收
 

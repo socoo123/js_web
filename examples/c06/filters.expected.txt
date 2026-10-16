@@ -1,0 +1,4 @@
+function
+true
+false
+true

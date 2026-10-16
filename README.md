@@ -2,12 +2,12 @@
 
 面向会 Java、尚未系统学习前端的开发者，用中文从 JavaScript 的历史讲到现代语言、数据结构、Node 与包管理、React、SAP UI5 和开源组件。
 
-当前阶段：**C01–C05 正文与练习已完成，关键机制配套 D2 教学图；Astro + Starlight 网站使用 GitHub Pages 自动部署。课程逐篇发布，当前 5 / 48 课，实际部署与验证记录见 [STATUS](docs/STATUS.md)。**
+当前阶段：**C01–C06 正文与练习已完成，关键机制配套 D2 教学图；Astro + Starlight 网站使用 GitHub Pages 自动部署。课程逐篇发布，当前 6 / 48 课，实际部署与验证记录见 [STATUS](docs/STATUS.md)。**
 
 - 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
 - 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)
 - 第二课：[C02 Web 基础与第一个调试现场](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/)
-- 本批新课：[C03](https://socoo123.github.io/js_web/02-language-data/c03-values-types/) · [C04](https://socoo123.github.io/js_web/02-language-data/c04-scope-control/) · [C05](https://socoo123.github.io/js_web/02-language-data/c05-objects-json/)
+- 最新课：[C06 函数、闭包与高阶操作](https://socoo123.github.io/js_web/02-language-data/c06-functions-closures/)
 - [本地构建与自动提交/部署说明](docs/DEPLOYMENT.md)
 
 ## 已完成课程
@@ -22,9 +22,11 @@
 - [C04 练习与验证记录](examples/c04/README.md)。
 - [C05 对象、引用与数据交换](src/content/docs/02-language-data/c05-objects-json.md)：别名与浅复制、JSON 导入、日期与字符串。
 - [C05 练习与验证记录](examples/c05/README.md)。
+- [C06 函数、闭包与高阶操作](src/content/docs/02-language-data/c06-functions-closures.md)：函数值、词法作用域、闭包、筛选工厂与 Scope 调试。
+- [C06 练习与验证记录](examples/c06/README.md)；[库存项目阶段 1](examples/inventory/01-core/README.md)。
 - [D2 教学图与构建说明](diagrams/README.md)：保留源码、SVG 与固定工具/字体信息。
 
-后续 C06–C48 仍为大纲，下一篇为 C06 函数、闭包与高阶操作。
+后续 C07–C48 仍为大纲；按计划等待用户确认 C06 风格后，再继续 C07。
 
 ## 清理上下文后如何继续
 

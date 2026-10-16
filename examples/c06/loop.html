@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>循环闭包调试</title>
+<h1>循环闭包调试</h1>
+<p>打开 DevTools → Sources，在 loop-broken.js 的 readers.push 行设断点，刷新并单步观察 index。</p>
+<p>当前 Console 输出：3、3、3。把脚本换成 loop-fixed.js 后应输出：0、1、2。</p>
+<script src="loop-broken.js"></script>
+</html>

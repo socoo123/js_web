@@ -1,0 +1,4 @@
+true
+true
+库存 12 件
+function true

@@ -5,7 +5,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 <!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
 
-**已发布 5 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**已发布 6 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
 
 ## 选择你的节奏
 
@@ -23,7 +23,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 2 天 | [C03 值、类型、转换与比较](../02-language-data/c03-values-types/) | 已发布 |
 | 第 2 天 | [C04 变量、作用域与控制流](../02-language-data/c04-scope-control/) | 已发布 |
 | 第 3 天 | [C05 对象、引用与数据交换](../02-language-data/c05-objects-json/) | 已发布 |
-| 第 3 天 | C06 函数、闭包与高阶操作 | 待发布 |
+| 第 3 天 | [C06 函数、闭包与高阶操作](../02-language-data/c06-functions-closures/) | 已发布 |
 | 第 4 天 | C07 this、原型与 class | 待发布 |
 | 第 4 天 | C08 Array 与业务数据处理 | 待发布 |
 | 第 5 天 | C09 Object、Map、Set 与弱集合 | 待发布 |

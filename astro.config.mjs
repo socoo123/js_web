@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 const courseSections = [
   ['01-history-web', '历史、Web 与语言基础'],
   ['02-language-data', '语言与数据结构'],
-  ['03-async-modules', '异步与模块'],
+  ['03-async-modules', '浏览器、异步与模块'],
   ['04-runtime-tooling', '运行时与工程工具'],
   ['05-react', 'React'],
   ['06-components-ui5', '组件生态与 UI5'],

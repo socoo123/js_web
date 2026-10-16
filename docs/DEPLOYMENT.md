@@ -35,7 +35,7 @@ npm run preview
 
 用户已授权自动提交和推送，完整约定在 [AGENTS.md](../AGENTS.md)，门禁定义在 [PLAN §6](PLAN.md)。执行者每次完成文章后：
 
-1. 运行 `npm run examples -- cNN`、`npm run lint:lessons`、`npm run check`、`npm run build`（前两项在 T0 完成后可用）。验证细节写进 `examples/cNN/README.md`。
+1. 运行 `npm run examples -- cNN`、`npm run lint:lessons`、`npm run check`、`npm run build`。构建也会自动检查全部课程与固定输出示例；验证细节写进 `examples/cNN/README.md`。
 2. 在 `docs/STATUS.md` 的「已发布课程」加一行，更新「下一步」。路线页由构建自动同步。
 3. 审阅 Git 差异，只提交本次的文章、配套示例、图和相关网站改动；不提交缓存、凭据或用户无关的工作。
 4. 检查远端，再正常提交并推送到 `origin/main`，例如 `docs: publish C06 functions and closures lesson`。不强制推送。

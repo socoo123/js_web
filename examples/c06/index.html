@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>闭包计数器调试</title>
+<h1>闭包计数器调试</h1>
+<p>打开 DevTools → Sources，在 counter.js 的 count += 1 行设断点，再刷新。</p>
+<p>Console 的预期输出：1、2、1。Scope 中前两次共用 count，第三次属于另一次工厂调用。</p>
+<script src="counter.js"></script>
+</html>

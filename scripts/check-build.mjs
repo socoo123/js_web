@@ -7,13 +7,12 @@ const origin = 'https://socoo123.github.io';
 const base = '/js_web/';
 const errors = [];
 const pages = globSync('**/*.html', { cwd: dist });
-const lessons = [
-  ['C01', '01-history-web/c01-story-ecosystem', 'c01-ecosystem'],
-  ['C02', '01-history-web/c02-web-debugging', 'c02-page-flow'],
-  ['C03', '02-language-data/c03-values-types', 'c03-value-boundary'],
-  ['C04', '02-language-data/c04-scope-control', 'c04-scope'],
-  ['C05', '02-language-data/c05-objects-json', 'c05-alias-copy'],
-];
+const docsRoot = fileURLToPath(new URL('../src/content/docs/', import.meta.url));
+const lessons = globSync('**/c[0-9][0-9]-*.{md,mdx}', { cwd: docsRoot }).sort().map((file) => {
+  const source = readFileSync(path.join(docsRoot, file), 'utf8');
+  const diagrams = [...source.matchAll(/assets\/diagrams\/([^\s)"']+)\.svg/g)].map((match) => match[1]);
+  return [path.basename(file).slice(0, 3).toUpperCase(), file.replace(/\.(?:md|mdx)$/, ''), diagrams, source];
+});
 for (const required of ['index.html', 'roadmap/index.html', 'pagefind/pagefind.js', ...lessons.map(([, slug]) => `${slug}/index.html`)]) {
   if (!existsSync(path.join(dist, required))) errors.push(`缺少输出：${required}`);
 }
@@ -39,18 +38,19 @@ for (const page of pages) {
     }
   }
 }
-for (const [id, slug, diagram] of lessons) {
+for (const [id, slug, diagrams, source] of lessons) {
   const lessonFile = path.join(dist, `${slug}/index.html`);
   if (!existsSync(lessonFile)) continue;
   const lesson = readFileSync(lessonFile, 'utf8');
   const answers = [...lesson.matchAll(/<details\b[^>]*>([\s\S]*?)<\/details>/g)]
     .filter((match) => /<summary>\s*(提示|参考答案)/.test(match[1]));
-  const source = readFileSync(new URL(`../src/content/docs/${slug}.md`, import.meta.url), 'utf8');
   const sourceAnswers = [...source.matchAll(/<summary>\s*(?:提示|参考答案)/g)].length;
   if (sourceAnswers < 2 || answers.length !== sourceAnswers || answers.some((match) => !/<(?:p|ol|ul|pre)\b/.test(match[1]))) {
     errors.push(`${id} 应保留源码中的 ${sourceAnswers} 个有正文的练习折叠区（至少 2 个）。`);
   }
-  if (diagram && !lesson.includes(diagram)) errors.push(`${id} 缺少 D2 教学图。`);
+  for (const diagram of diagrams) {
+    if (!lesson.includes(diagram)) errors.push(`${id} 缺少 D2 教学图 ${diagram}。`);
+  }
 }
 if (errors.length) throw new Error(errors.join('\n'));
-console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口与 C01–C05 折叠区。`);
+console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口与 ${lessons.length} 课折叠区/D2 图。`);

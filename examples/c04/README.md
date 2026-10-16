@@ -24,7 +24,7 @@
 
 ## 运行
 
-- 在本目录执行上表命令。每个 JS 文件配有 `.expected.txt`；message-broken 的预期 stdout 为空，以首行 `expect-error` 检查异常。T0 实现后，在仓库根目录运行 `npm run examples -- c04` 自动核对。
+- 在本目录执行上表命令。每个 JS 文件配有 `.expected.txt`；message-broken 的预期 stdout 为空，以首行 `expect-error` 检查异常。在仓库根目录运行 `npm run examples -- c04` 自动核对。
 - Console：逐块粘贴完整代码，重复声明报错时刷新。var 示例在函数内运行，每次调用都从新的局部绑定开始。
 - 本地网页：在本目录运行 `python3 -m http.server 8000 --bind 127.0.0.1`，打开 `http://127.0.0.1:8000/`。
 - Java：已有 JDK 11 以上时运行，不生成 class 文件。
@@ -45,5 +45,5 @@
 - 2026-10-15 · Chrome 155.0.8059.40（headless，经 DevTools 协议）：15 个文件分别运行、正文 JS 代码块按顺序在同一 Console 会话运行，结果符合预期；typeof TDZ 变体通过。
 - 同日 · Chrome：本地 HTTP 加载、正常四轮断点及单步、故障第五轮 undefined→NaN、异常暂停、catch 中的消息与 stack、合法输入修复均通过；结束后页面恢复正常三行统计。验证使用响应变体，仓库保留正确 stats.js 与原始异常演示。
 - 同日 · 生产预览：1280px/360px 的新版 D2、6 个折叠区、16 个代码块与子路径资源通过；禁用页面 JS 后正文和折叠答案仍可读。
-- T0 的 `lint:lessons`、`examples` 尚未实现；本次使用忽略目录内的临时脚本核对内容规则、文件一致性与输出。
+- 本课重构时 T0 尚未实现；当时使用忽略目录内的临时脚本核对内容规则、文件一致性与输出。
 - 未运行：手动点击 DevTools 的操作路径（已对照 Chrome 官方文档核对）、Firefox、Safari、Windows。

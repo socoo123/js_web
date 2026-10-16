@@ -14,7 +14,9 @@
     "diagrams": "bash scripts/build-diagrams.sh",
     "sync:roadmap": "node scripts/sync-roadmap.mjs",
     "check": "astro check",
-    "build": "npm run sync:roadmap && npm run diagrams && astro build && npm run check:build",
+    "lint:lessons": "node scripts/lint-lessons.mjs",
+    "examples": "node scripts/run-examples.mjs",
+    "build": "npm run lint:lessons && npm run examples && npm run sync:roadmap && npm run diagrams && astro build && npm run check:build",
     "check:build": "node scripts/check-build.mjs",
     "preview": "astro preview"
   },

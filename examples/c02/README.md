@@ -14,7 +14,7 @@
 
 在本目录执行 `python3 -m http.server 8000 --bind 127.0.0.1`，用 Chrome 打开 `http://127.0.0.1:8000/`。已有编辑器静态预览服务也可使用；浏览器执行 JS，服务只返回文件。终端按 `Ctrl+C` 结束。
 
-Node 只用于可选的 URL 例子。在本目录运行 `node url-resolution.js`；T0 实现后，仓库根目录的 `npm run examples -- c02` 会核对唯一的 Node 预期输出。其余文件依赖 DOM，按本地网页步骤操作。
+Node 只用于可选的 URL 例子。在本目录运行 `node url-resolution.js`；仓库根目录的 `npm run examples -- c02` 会核对唯一的 Node 预期输出。其余文件依赖 DOM，按本地网页步骤操作。
 
 ## 练习验收
 
@@ -36,5 +36,5 @@ Node 只用于可选的 URL 例子。在本目录运行 `node url-resolution.js`
 - 2026-10-15 · Node 24.22.0：`url-resolution.js` 的 stdout 与 `.expected.txt` 一致，1/1 通过。
 - 2026-10-15 · 本地生产页：15 个代码块、6 个练习折叠区；360px/1280px 无整页溢出，新版 D2 中文可读、折叠交互和禁用 JS 后正文阅读正常；`npm run check`、`npm run build` 通过。
 - 2026-10-15 · [Pages run 38761177588](https://github.com/socoo123/js_web/actions/runs/38761177588) 成功；文章与新版 SVG 均返回 200，内容逐字节等于本地构建。
-- T0 尚未实现，未运行 `npm run lint:lessons` / `npm run examples`；用忽略目录中的临时脚本核对本课内容规则、代码块与文件一致性、Node 输出。
+- 本课重构时 T0 尚未实现，使用忽略目录中的临时脚本核对内容规则、代码块与文件一致性、Node 输出。
 - 未运行：手动点击 DevTools 面板（路径按 Chrome 官方文档核对）、其他浏览器、Windows、真实手机。
