@@ -1,0 +1,2 @@
+{"id":"P001","name":"机械键盘","stock":12,"priceCents":39900}
+false

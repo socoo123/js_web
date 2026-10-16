@@ -1,0 +1,4 @@
+string object 12
+{"id":"P001","stock":12}
+null
+SyntaxError

@@ -1,12 +1,38 @@
-# C05：纵向只表示身份关系，不模拟实际内存地址或 GC 布局。
+# 实线箭头表示引用关系；图展示创建草稿后的状态，尚未执行修改。
 direction: down
 
-*.style.font-size: 20
-*.style.border-radius: 10
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
 
-original: original\nalias\n同一外层 A
-draft: draft\n新外层 B
-shared: warehouse\n同一仓库 W\ncity = 杭州
+original: original / alias
+shallow: draft
+independent: independent
 
-original -> shared
-draft -> shared
+record: 原商品对象\nstock = 12 {
+  style.fill: "#f4f8ff"
+  style.stroke: "#1677ff"
+}
+draft: 新商品对象\nstock = 15 {
+  style.fill: "#fff7e6"
+  style.stroke: "#d48806"
+}
+copied: 新商品对象\nstock = 15 {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+warehouse: 共享仓库对象\ncity = 上海 {
+  style.fill: "#fff1f0"
+  style.stroke: "#cf1322"
+}
+newWarehouse: 新仓库对象\ncity = 杭州 {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+
+original -> record
+shallow -> draft: 只新建外层
+independent -> copied: 按路径复制
+record -> warehouse: warehouse
+draft -> warehouse: warehouse
+copied -> newWarehouse: warehouse
