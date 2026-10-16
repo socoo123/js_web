@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C10 门禁已通过，待 Pages 部署核验）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C10 已上线；下一课 C11）。
 
 ## 续做时按这个顺序读
 
@@ -34,8 +34,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 9 / 48（C01–C09）；C09 按新规范编写，门禁与线上核验通过 |
-| 本次课程 | C10 正文、示例、D2 与项目门禁通过，待 Pages 核验 |
+| 已发布 | 10 / 48（C01–C10）；C10 按新规范编写，门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1：新增可撤销库存编辑、头索引任务队列与分类树；demo 固定业务参考值通过 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 8 张图，新增 c10-category-traversal |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -55,6 +54,7 @@
 | C07 this、原型与 class | [打开](https://socoo123.github.io/js_web/02-language-data/c07-this-prototypes/) | [examples/c07](../examples/c07/README.md) | [run 38866722105](https://github.com/socoo123/js_web/actions/runs/38866722105) |
 | C08 Array 与业务数据处理 | [打开](https://socoo123.github.io/js_web/02-language-data/c08-arrays-processing/) | [examples/c08](../examples/c08/README.md) | [run 38868560351](https://github.com/socoo123/js_web/actions/runs/38868560351) |
 | C09 Object、Map、Set 与弱集合 | [打开](https://socoo123.github.io/js_web/02-language-data/c09-maps-sets/) | [examples/c09](../examples/c09/README.md) | [run 38871515466](https://github.com/socoo123/js_web/actions/runs/38871515466) |
+| C10 栈、队列、树与复杂度 | [打开](https://socoo123.github.io/js_web/02-language-data/c10-stacks-queues-trees/) | [examples/c10](../examples/c10/README.md) | [run 38876725107](https://github.com/socoo123/js_web/actions/runs/38876725107) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -72,10 +72,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0 与 C06–C09 已上线。C10 每课门禁已通过，验证明细见 examples/c10。
+P1、C01–C05 重构、T0 与 C06–C10 已完成。C10 门禁与 Pages 核验通过，验证明细见 examples/c10。
 
-1. **完成 C10 发布**：推送 main，等待 Pages Actions 成功，核对新课与路线页。
-2. **C11–C12，随后 Q1 周验收**：继续阶段 1，在 C12 后按 PLAN §6 做全套视觉验收，详见 PLAN §8。
+1. **C11 DOM、事件、表单与页面调试**：从阶段 1 库存逻辑开始建立阶段 2 页面，增加筛选和编辑。
+2. **C12，随后 Q1 周验收**：补齐阶段 1 的模拟异步加载，在 C12 后按 PLAN §6 做全套视觉验收，详见 PLAN §8。
 
 ## 本文件的更新规则
 

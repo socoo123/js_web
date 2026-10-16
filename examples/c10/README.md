@@ -46,4 +46,5 @@
 - 同日 · Chrome 155.0.8059.82（headless，经 DevTools 协议驱动）：11 个浏览器可用模块输出匹配；project-check.js 使用 Node assert，仅在 Node 运行。计时文件单独在 Node 执行。
 - 同日：错误版断点前后均为同一对象，库存/历史从 12/12 变成 15/15，最终 15；按正文替换入栈行后，引用比较 false，单步后 15/12，最终 12；Module 作用域存在。
 - 同日：课程 lint 零 error / warning，Astro check 零问题，全量 123/123；完整 build 与 13 页 `/js_web/` 产物检查通过。D2 已渲染检查。
+- 同日：[Pages run 38876725107](https://github.com/socoo123/js_web/actions/runs/38876725107) 构建与部署成功；新课、路线页与 D2 SVG 返回 200，内容均与本地产物逐字节一致。
 - 未运行：DevTools 界面手动点击、Firefox、Safari、Windows。
