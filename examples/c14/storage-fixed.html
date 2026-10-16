@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>坏 JSON 恢复</title>
+<h1>坏 JSON 恢复</h1>
+<p id="output">等待读取…</p>
+<button id="recover" type="button">清除练习副本再刷新</button>
+<script src="storage-fixed.js"></script>
+<script>
+document.querySelector("#recover").addEventListener("click", () => {
+  try {
+    localStorage.removeItem(brokenKey);
+    location.reload();
+  } catch (error) {
+    output.textContent = "清除失败，请允许本站使用存储后重试。";
+    console.error(error);
+  }
+});
+</script>
+</html>
