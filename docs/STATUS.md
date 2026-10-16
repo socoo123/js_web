@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C12 与第一周验收完成，Pages 待核验）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（C12 已上线；第一周验收完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -36,7 +36,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | C01–C11 已上线；C12 本地门禁通过，Pages 待核验 |
+| 已发布 | 12 / 48（C01–C12）；C12 每课门禁、周验收与线上核验通过 |
 | 贯穿项目 | 阶段 1 完成模拟异步加载与第一周报告；阶段 2 保留 C11 原生页 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 9 张图，新增 c12-browser-event-loop |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -58,7 +58,7 @@
 | C09 Object、Map、Set 与弱集合 | [打开](https://socoo123.github.io/js_web/02-language-data/c09-maps-sets/) | [examples/c09](../examples/c09/README.md) | [run 38871515466](https://github.com/socoo123/js_web/actions/runs/38871515466) |
 | C10 栈、队列、树与复杂度 | [打开](https://socoo123.github.io/js_web/02-language-data/c10-stacks-queues-trees/) | [examples/c10](../examples/c10/README.md) | [run 38876725107](https://github.com/socoo123/js_web/actions/runs/38876725107) |
 | C11 DOM、事件、表单与页面调试 | [打开](https://socoo123.github.io/js_web/03-async-modules/c11-dom-events-forms/) | [examples/c11](../examples/c11/README.md) | [run 38913333294](https://github.com/socoo123/js_web/actions/runs/38913333294) |
-| C12 从回调到 Promise：执行顺序 | [待核验](https://socoo123.github.io/js_web/03-async-modules/c12-callbacks-promises/) | [examples/c12](../examples/c12/README.md) | 待核验 |
+| C12 从回调到 Promise：执行顺序 | [打开](https://socoo123.github.io/js_web/03-async-modules/c12-callbacks-promises/) | [examples/c12](../examples/c12/README.md) | [run 38915791749](https://github.com/socoo123/js_web/actions/runs/38915791749) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -77,7 +77,7 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C12 与 Q1 已完成；C12 正在发布，核验后更新本页。验证明细见 examples/c12。
+P1、C01–C05 重构、T0、C06–C12 与 Q1 已完成；C12 门禁、周验收与 Pages 核验通过。验证明细见 examples/c12。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C13 async/await、请求与 Network**：以阶段 2 原生页读取静态 products.json，处理加载/空/错状态。
