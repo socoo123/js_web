@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（T0 完成，C06 待部署核验）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-16（T0 完成，C06 已上线；等待风格确认）。
 
 ## 续做时按这个顺序读
 
@@ -30,8 +30,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 5 / 48（C01–C05）。C01–C05 均已按新规范重构并上线 |
-| C06 | 正文、14 个示例与阶段 1 工厂已完成，本地门禁通过；待推送并核验 Pages |
+| 已发布 | 6 / 48（C01–C06）。C01–C05 已重构，C06 按新规范编写并上线 |
+| 贯穿项目 | 阶段 1 已开始：分类筛选工厂与 demo；后续课程继续扩展 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 6 张图，新增 c06-closure-environment |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -46,6 +46,7 @@
 | C03 值、类型、转换与比较 | [打开](https://socoo123.github.io/js_web/02-language-data/c03-values-types/) | [examples/c03](../examples/c03/README.md) | 范例重写：[run 38752272921](https://github.com/socoo123/js_web/actions/runs/38752272921) |
 | C04 变量、作用域与控制流 | [打开](https://socoo123.github.io/js_web/02-language-data/c04-scope-control/) | [examples/c04](../examples/c04/README.md) | 重构：[run 38764394967](https://github.com/socoo123/js_web/actions/runs/38764394967) |
 | C05 对象、引用与数据交换 | [打开](https://socoo123.github.io/js_web/02-language-data/c05-objects-json/) | [examples/c05](../examples/c05/README.md) | 重构：[run 38842751440](https://github.com/socoo123/js_web/actions/runs/38842751440) |
+| C06 函数、闭包与高阶操作 | [打开](https://socoo123.github.io/js_web/02-language-data/c06-functions-closures/) | [examples/c06](../examples/c06/README.md) | [run 38844828221](https://github.com/socoo123/js_web/actions/runs/38844828221) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -63,9 +64,9 @@
 
 完整队列见 PLAN §8。
 
-P1 与 C01–C05 重构已上线，R1 范围清空。T0 已实现：五课 lint 零 error，C03 示例 12/12、全量 54/54、34 组工具正反例和 build 通过；共享商品数据已建立。
+P1、C01–C05 重构、T0 与 C06 已完成，R1 范围清空。C06 正文 8,762 字符、17 个代码块；示例 14/14、全量 69/69、34 组工具正反例、闭包/循环断点、lint/check/build 与本地视觉验收通过。Pages 成功，新课与 D2 返回 200，均与本地构建一致。
 
-1. **C06 发布核验**：正文 8,762 字符、17 个代码块；C06 示例 14/14、全量 69/69，浏览器闭包/循环断点、练习变体、lint/check/build 与本地视觉验收通过。推送后等待 Pages，确认新课与 D2 返回 200。发布后**停下，请用户确认风格**，再继续 C07–C12。
+1. **等待用户确认 C06 风格**：按 PLAN §8 的唯一停等节点，先请用户阅读 C06；有修改意见则先调整，确认后再继续。
 2. **C07–C12**：在用户确认 C06 风格后继续，详见 PLAN §8。
 
 ## 本文件的更新规则

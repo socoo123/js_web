@@ -32,4 +32,6 @@
 - 计数器实际网页断点：`next` 的 Closure (createCounter) 中 count 在加法前为 0、1、0，单步后为 1、2、1；最终日志为 1、2、1。
 - 循环实际网页断点：创建函数时 index 为 0、1、2；循环后调用三个函数，var 版为 3、3、3，let 版为 0、1、2。修复版通过相同页面加载后核对。
 - D2 以固定工具链生成 SVG，已在 Chrome 渲染并检查中文与引用关系。
+- 全站门禁：六课 lint 零 error/warning，Node 固定输出 69/69，`check`、`build` 通过；本地 1280px/360px、亮暗模式、折叠答案、复制、搜索与禁用 JS 阅读通过。
+- Pages：[run 38844828221](https://github.com/socoo123/js_web/actions/runs/38844828221) 成功；新课、路线和搜索入口返回 200，文章与 D2 与本地生产产物逐字一致。
 - 未运行：Windows/macOS 图形安装向导、DevTools 界面上的手动点击、Firefox、Safari。面板路径依据 Chrome 官方文档核对，断点与作用域内容按上述协议实测。
