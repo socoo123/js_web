@@ -40,3 +40,4 @@
   - 正常页无未捕获脚本异常；错误页的故意 SyntaxError 已单独核对。
   - 生产预览 /js_web/ 下文章与路线返回 200，16 个代码块与 4 个答案折叠区存在；禁用 JS 后正文与答案仍在。练习 2 去掉 throw 后两版均输出库存 3。
 - 未运行：DevTools 界面手动点击、Firefox、Safari、真实手机；面板入口对照 Chrome 官方文档。本课未改站点样式，沿用 C12 周验收。
+- 同日：[Pages Actions 38924073963](https://github.com/socoo123/js_web/actions/runs/38924073963) 成功；线上文章与路线页返回 200，HTML 与本地构建逐字节一致。
