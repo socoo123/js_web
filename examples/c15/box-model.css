@@ -1,0 +1,9 @@
+/* 同样的 width，比较边框盒的实际宽度 */
+.box {
+  width: 300px;
+  padding: 20px;
+  border: 2px solid #758291;
+  margin-block: 1rem;
+}
+.content-box { box-sizing: content-box; }
+.border-box { box-sizing: border-box; }

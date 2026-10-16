@@ -1,0 +1,12 @@
+* { box-sizing: border-box; }
+body { margin: 0; font: 1rem/1.6 system-ui, sans-serif; color: #1b2733; background: #f4f6f9; }
+main { max-width: 75rem; margin-inline: auto; padding: 1rem; }
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.3rem; }
+input, select, button { font: inherit; padding: .5rem .75rem; }
+input, select { width: 100%; min-width: 0; }
+button { cursor: pointer; }
+label { display: block; margin-block-end: .25rem; }
+.product { min-width: 0; padding: 1rem; border: 1px solid #758291; background: white; border-radius: .5rem; overflow-wrap: anywhere; }
+.product p { margin-block: .5rem; }
+:focus-visible { outline: 3px solid #155cb5; outline-offset: 3px; }

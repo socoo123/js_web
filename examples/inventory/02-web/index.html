@@ -12,29 +12,39 @@
     <h1>库存管理</h1>
     <p>保存库存会写入当前浏览器的本地副本；刷新可恢复，其他浏览器和设备各自独立。</p>
     <p id="data-source" role="status"></p>
-    <section aria-labelledby="backup-title">
+    <section class="panel" aria-labelledby="backup-title">
       <h2 id="backup-title">本地副本与备份</h2>
-      <button id="export" type="button">导出 JSON</button>
-      <label for="import">导入 JSON（替换全部商品）</label>
-      <input id="import" type="file" accept=".json,application/json" aria-describedby="backup-help">
+      <div class="backup-actions">
+        <button id="export" type="button">导出 JSON</button>
+        <div class="field">
+          <label for="import">导入 JSON（替换全部商品）</label>
+          <input id="import" type="file" accept=".json,application/json" aria-describedby="backup-help">
+        </div>
+        <button id="reset" type="button">恢复初始数据</button>
+      </div>
       <p id="backup-help">使用本页导出的 version 1 文件。导入前会确认，失败时保留原数据。</p>
-      <button id="reset" type="button">恢复初始数据</button>
       <p id="storage-feedback" role="status"></p>
     </section>
-    <section aria-labelledby="filters-title">
+    <section class="panel" aria-labelledby="filters-title">
       <h2 id="filters-title">查找商品</h2>
-      <label for="search">商品名称或编号</label>
-      <input id="search" type="search" autocomplete="off">
-      <label for="category">分类</label>
-      <select id="category">
-        <option value="">全部</option><option>外设</option><option>显示器</option><option>配件</option><option>音频</option>
-      </select>
+      <div class="toolbar">
+        <div class="field">
+          <label for="search">商品名称或编号</label>
+          <input id="search" type="search" autocomplete="off">
+        </div>
+        <div class="field field--category">
+          <label for="category">分类</label>
+          <select id="category">
+            <option value="">全部</option><option>外设</option><option>显示器</option><option>配件</option><option>音频</option>
+          </select>
+        </div>
+      </div>
     </section>
     <p id="summary"></p>
     <p id="result-count" role="status"></p>
     <button id="retry" type="button" hidden>重试加载</button>
     <ul id="products" aria-label="商品列表"></ul>
-    <section id="editor" aria-labelledby="editor-title" hidden>
+    <section class="panel" id="editor" aria-labelledby="editor-title" hidden>
       <h2 id="editor-title">编辑库存</h2>
       <p id="editing-name"></p>
       <form id="stock-form">

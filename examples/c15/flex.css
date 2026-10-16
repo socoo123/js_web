@@ -1,0 +1,9 @@
+/* 布局作用于直接子元素，每个 field 是一个项目 */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+}
+.field { flex: 1 1 16rem; min-width: 0; }
+.field--category { flex: 0 1 12rem; }

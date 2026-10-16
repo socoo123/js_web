@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 2：原生页面
 
-当前参考状态：C14 完成。沿用 C13 的请求、筛选和库存编辑，加入 localStorage、损坏恢复与 JSON 导入导出；响应式布局和 ESM 拆分继续按后续课推进。
+当前参考状态：C15 完成。沿用 C14 的请求、筛选编辑、localStorage 与备份恢复，加入 Flex 工具栏、Grid 商品卡片与移动优先布局；C16 继续拆分 ESM。
 
 ## 运行
 
@@ -11,7 +11,7 @@
 | index.html | 搜索、分类、列表、库存表单、请求状态、数据来源与备份控件 |
 | products.json | 与 `../../shared/products.json` 一致的固定数据 |
 | app.js | 请求与完整字段校验、本地快照、失败恢复、筛选编辑、导入导出和焦点恢复 |
-| style.css | 沿用 C11 的基础排版、错误信息与可见焦点 |
+| style.css | border-box、CSS 变量、Flex 工具栏与备份区、Grid 卡片、媒体查询、错误与焦点样式 |
 
 使用一个 defer 经典脚本；C16 再拆成 ES 模块并复用阶段 1 的 Inventory。加载状态为 loading、ready、error；ready 时再按数组和筛选结果区分两类空态。
 
@@ -25,7 +25,17 @@
 - 导入整份替换，验证后确认；取消、坏文件、请求或存储失败都保留原数据。读取文件与恢复期间禁用相关控件，finally 恢复。
 - localStorage 依源隔离，同源路径共享；本页用一个标签操作，多标签并发以最后一次写入为准。不写回静态 JSON。
 
+## 布局规则
+
+- 根字号默认 16px 时，360px 单列、768px 两列、1280px 四列；main 最大边框盒宽 75rem，含左右各 1rem 的内边距。
+- 48rem 与 75rem 两个 min-width 查询按从小到大排列；Grid 使用 minmax(0, 1fr)，gap 为 1rem。
+- 工具栏的 label/控件按 field 包装后一起换行；字段 min-width: 0，控件 width: 100%。
+- 卡片用纵向 Flex，按钮的 margin-block-start: auto 吸收多余空间；名称允许任意处换行。
+- 键盘顺序沿用 DOM 顺序，保留 :focus-visible、label、状态提示和 editor 的 hidden。
+
 ## 验收
+
+- 检查 360/768/1280px 的 1/2/4 列与无横向滚动；筛选、编辑、错误和空态时也成立。
 
 - 无副本或恢复初始数据后：6 种、52 件、总价值 2634800 分（26348.00 元）。
 - 慢网且禁用缓存：先显示加载提示，列表为空，搜索/分类/重试禁用，结束后恢复；列表 aria-busy 从 true 变 false。
@@ -40,4 +50,4 @@
 - 导入 c14/empty.json 后刷新仍为空；c14/valid.json 恢复固定数据。语法、版本、重复 id、字符串库存均被拒绝。
 - 存储拒绝读取时降级到初始 JSON；写入失败时，编辑、导入与恢复均提示失败并保留原数据。
 
-DOM/编辑验证见 [examples/c11](../../c11/README.md)，请求验证见 [examples/c13](../../c13/README.md)，当前存储与恢复验证见 [examples/c14](../../c14/README.md)。
+DOM/编辑验证见 [examples/c11](../../c11/README.md)，请求验证见 [examples/c13](../../c13/README.md)，存储与恢复验证见 [examples/c14](../../c14/README.md)，布局、键盘与本次交互验证见 [examples/c15](../../c15/README.md)。

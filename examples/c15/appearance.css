@@ -1,0 +1,11 @@
+:root {
+  --surface: #ffffff;
+  --text: #1b2733;
+  --muted: #425466;
+  --accent: #155cb5;
+  --error: #a01717;
+  --space: 1rem;
+}
+.panel { background: var(--surface); color: var(--text); padding: var(--space); }
+.hint { color: var(--muted); }
+.error { color: var(--error); }
