@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C25 完成。App 保存商品与筛选条件，支持新增示例商品、补货、删除、搜索、分类、排序与商品编辑；表单处理字段校验、错误说明与键盘操作。InventoryCounter 继续独立保存本次操作次数。
+当前参考状态：C26 完成。App 保存商品、筛选条件与 editingId，协调列表、统计和单一编辑区；ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 独立记数。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 正常卡片、组合、状态与数组交互回归，20 条通过；不包含故意失败的 labs |
+| npm test | 卡片、组合、状态、数组、表单与状态归属回归，49 条通过；不包含故意失败的 labs |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
 | npm run test:bug -- labs/props.test.jsx | C22 传错商品的回归，原始版本预期失败；修复后通过 |
@@ -28,7 +28,7 @@ npm run dev -- --host 127.0.0.1
 
 ## 文件与边界
 
-- index.html → src/main.jsx → App → InventoryToolbar / ProductList → ProductCard。StrictMode 保留，Fragment 不增加 DOM 包装。
+- index.html → src/main.jsx → App → InventoryToolbar / ProductForm / ProductList → ProductCard。StrictMode 保留，Fragment 不增加 DOM 包装。
 - src/App.jsx 从 `../../../shared/products.js` 复制固定起点，保存 state 后向下传递；ProductCard 只读 product prop，标题 id 按商品编号区分。
 - InventoryCounter 的 count 是独立 UI 状态，不修改商品库存；两个实例各自记数。三个按钮分别提交一次加一、三次加一及定时器中的一次加三。
 - vite.config.js 使用 /js_web/ 基础路径，开发服务允许读取 examples 内的共享模块；本阶段的锁与网站根锁独立。
@@ -83,8 +83,17 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 
 - src/ProductForm.jsx 保存独立字符串草稿和错误；src/product-form.js 提供库存/价格解析、精确单价格式化与 validateDraft。名称 trim 后为 1–40 字符，分类限四种，库存 0–99999 整数，价格最多两位小数并转非负安全整数分。
 - 表单采用 noValidate 与统一业务校验，字段保留 required，库存仍有 min/max/step；独立 NativeForm 实验演示原生阻止提交的时机。
-- 卡片内点击编辑才挂载表单并聚焦名称；输入不改变商品。保存经 App 的回调按 id 替换记录，关闭表单，成功区域保留提示，焦点移到持续存在的页面标题。取消不保存，焦点回编辑按钮。
+- 点击编辑挂载表单并聚焦名称；输入不改变商品。保存经 App 的回调按 id 替换记录，关闭表单，成功区域保留提示，焦点移到持续存在的页面标题。取消不保存，焦点回编辑按钮；当前 C26 入口在统一编辑区。
 - 热销 checkbox 只管理热销标签，保留新品等其他标签。保存后筛选/排序/统计立即重算；若改名或分类使商品移出筛选，成功提示与标题焦点仍保留。
-- 各卡片可以独立展开；关闭表单或筛选移出卡片会丢弃未保存草稿。编辑前保存或取消，再切筛选；跨商品草稿策略在后续课程推进。当前改动不持久化，刷新恢复初始值。
+- C25 的卡片内独立展开已在 C26 替换为单一编辑区，当前筛选与切换策略见下文。当前改动不持久化，刷新恢复初始值。
 - labs/forms.html?case=controlled / locked / uncontrolled / native / blank / blank-answer 提供六个实验。两项故意失败的回归使用 npm run test:bug -- labs/forms-bugs.test.jsx，按正文修复两个 Broken 文件后通过。
 - tests/forms.test.jsx 包含 22 条回归，与既有用例合计 42 条。浏览器键盘、原生校验、错误关联与实际结果见 [examples/c25](../../c25/README.md)。
+
+## 状态提升、保留与重置（C26）
+
+- App 保存 editingId，从完整 products 查 editingProduct；ProductList 传递 editing/onEdit，ProductCard 不再拥有编辑开关。ProductForm 是独立于筛选列表的兄弟区域，key=商品 id。
+- 选择同一商品、筛选和排序保留草稿；切换商品会丢弃旧草稿并重置错误。保存、取消和删除当前商品都关闭编辑；删除其他商品不影响草稿。编辑期间禁用当前商品补货，避免旧草稿覆盖另一条库存更新。
+- 隐藏当前卡片后仍可编辑或保存。取消时若编辑按钮存在则返回按钮，否则聚焦页面标题；保存或删除当前商品后聚焦标题。
+- labs/ownership.html?case=local / shared 对比重复库存和共享父节点；switch / switch-answer 对比同位置表单和按商品 key 重置；identity 观察 props、容器类型和移除后的状态。
+- 两项教学错误：npm run test:bug -- labs/ownership-bugs.test.jsx，保留错误起点；分别按 SharedStock 与 SwitchProductFixed 的设计修改 Broken 文件后通过。
+- tests/ownership.test.jsx 新增 7 条，正常回归累计 49 条。运行和断点记录见 [examples/c26](../../c26/README.md)。

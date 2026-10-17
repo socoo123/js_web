@@ -297,3 +297,9 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 同日：核对 MDN [FormData 构造](https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData)、[数字输入](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/number)、[button](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button)、[约束校验](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Constraint_validation) 与 [requestSubmit](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/requestSubmit)。区分字符串/数字、name/id、未勾选/disabled 的省略规则、required/min/max/step、原生校验先于 submit、noValidate 自定义入口与取消按钮类型；未使用新 action API。
 - 同日：核对 [W3C WAI 表单反馈](https://www.w3.org/WAI/tutorials/forms/notifications/) 与 [aria-invalid](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-invalid)。采用可见 label、字段说明关联、总错误 alert、成功 status、首次错误焦点及关闭后的焦点安排；浏览器检查键盘与关联属性，没有把屏幕阅读器朗读列为已验证。
 - 同日：沿用现有 Node 24、npm 11 和阶段 4 独立锁，无安装新包、语言提案或新教学图；精确金额输入按两位小数文本解析，并检查安全整数分。运行、先失败后修复与 Chrome 证据见 [examples/c25](../examples/c25/README.md)。
+
+## C26 状态提升、保留与重置
+
+- 2026-10-17：核对 React 官方[共享 state](https://react.dev/learn/sharing-state-between-components)与[选择 state 结构](https://react.dev/learn/choosing-the-state-structure)。共同父节点拥有共享来源，子组件以 props/回调协调；受控设计可按组件行为划分；选中编号替代重复对象，派生值直接计算，未提交草稿与业务记录区分。
+- 同日：核对[保留和重置 state](https://react.dev/learn/preserving-and-resetting-state)、[useState 初始值](https://react.dev/reference/react/useState)和 [key 特殊属性](https://react.dev/warnings/special-props)。树位置、组件/祖先类型与同级 key 决定身份；props 更新不重做初始化；移除再挂载不恢复旧 state，嵌套定义和不稳定 key 会重置子树。原创实验复用固定库存数据。
+- 同日：核对[按 key 重置整份状态](https://react.dev/learn/you-might-not-need-an-effect#resetting-all-state-when-a-prop-changes)与 [Context 的使用边界](https://react.dev/learn/passing-data-deeply-with-context)。单一编辑区使用商品 key，草稿本地保存，筛选不卸载编辑区；跨商品保存草稿作为设计对照，未加入默认应用。不新增 Effect、Context、依赖、安装流程或 D2 图；沿用阶段 4 的 npm 锁。运行记录见 [examples/c26](../examples/c26/README.md)。

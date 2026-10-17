@@ -87,13 +87,13 @@ it("草稿直到提交才更新列表，转换后的数字和标签同时刷新�
   const host = await mount(<App />);
   let card = [...host.querySelectorAll("article")].find((node) => node.textContent.includes("P002"));
   await click("编辑", card);
-  expect(document.activeElement).toBe(card.querySelector('[name="name"]'));
-  await fill(card.querySelector('[name="stock"]'), "3");
-  await fill(card.querySelector('[name="price"]'), "129.90");
-  await fill(card.querySelector('[name="name"]'), "  无线鼠标  ");
-  await act(async () => card.querySelector('[name="featured"]').click());
+  expect(document.activeElement).toBe(host.querySelector('[name="name"]'));
+  await fill(host.querySelector('[name="stock"]'), "3");
+  await fill(host.querySelector('[name="price"]'), "129.90");
+  await fill(host.querySelector('[name="name"]'), "  无线鼠标  ");
+  await act(async () => host.querySelector('[name="featured"]').click());
   expect(host.textContent).toContain("总库存 52 件");
-  await click("保存商品", card);
+  await click("保存商品", host);
   card = [...host.querySelectorAll("article")].find((node) => node.textContent.includes("P002"));
   expect(card.querySelector("form")).toBeNull();
   expect(card.querySelector("h2").textContent).toBe("无线鼠标");
@@ -110,12 +110,12 @@ it("取消不保存，焦点返回编辑按钮，再次打开读取已保存值"
   const host = await mount(<App />);
   const card = host.querySelector("article");
   await click("编辑", card);
-  await fill(card.querySelector('[name="name"]'), "放弃的草稿");
-  await click("取消编辑", card);
+  await fill(host.querySelector('[name="name"]'), "放弃的草稿");
+  await click("取消编辑", host);
   expect(card.querySelector("h2").textContent).toBe("机械键盘");
   expect(document.activeElement.id).toBe("open-editor-P001");
   await click("编辑", card);
-  expect(card.querySelector('[name="name"]').value).toBe("机械键盘");
+  expect(host.querySelector('[name="name"]').value).toBe("机械键盘");
 });
 
 it("保存后即使商品移出筛选，仍有持久的成功反馈和焦点目标", async () => {
@@ -123,8 +123,8 @@ it("保存后即使商品移出筛选，仍有持久的成功反馈和焦点目�
   await fill(host.querySelector("input"), "鼠标");
   const card = host.querySelector("article");
   await click("编辑", card);
-  await fill(card.querySelector('[name="name"]'), "办公指针");
-  await click("保存商品", card);
+  await fill(host.querySelector('[name="name"]'), "办公指针");
+  await click("保存商品", host);
   expect(host.querySelector("article")).toBeNull();
   expect(host.textContent).toContain("已保存 P002");
   expect(document.activeElement.id).toBe("inventory-heading");
