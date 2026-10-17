@@ -8,6 +8,12 @@ export function removeProduct(items, id) {
   return items.filter((product) => product.id !== id);
 }
 
+export function updateProduct(items, id, changes) {
+  return items.map((product) => product.id === id
+    ? { ...product, ...changes, id: product.id }
+    : product);
+}
+
 export function nextProductId(items) {
   const number = Math.max(0, ...items.map((product) => Number(product.id.slice(1)))) + 1;
   return number > 999 ? null : `P${String(number).padStart(3, "0")}`;

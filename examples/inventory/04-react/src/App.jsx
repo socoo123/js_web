@@ -3,13 +3,14 @@ import { products as initialProducts } from "../../../shared/products.js";
 import InventoryToolbar from "./InventoryToolbar.jsx";
 import ProductList from "./ProductList.jsx";
 import InventoryCounter from "./InventoryCounter.jsx";
-import { addSampleProduct, nextProductId, removeProduct, restockProduct, selectProducts } from "./product-state.js";
+import { addSampleProduct, nextProductId, removeProduct, restockProduct, selectProducts, updateProduct } from "./product-state.js";
 
 export default function App() {
   const [products, setProducts] = useState(() => structuredClone(initialProducts));
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("全部");
   const [order, setOrder] = useState("id");
+  const [notice, setNotice] = useState("");
   const visibleProducts = selectProducts(products, { query, category, order });
   const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
   const totalCents = products.reduce((sum, product) => sum + product.stock * product.priceCents, 0);
@@ -23,10 +24,16 @@ export default function App() {
   function handleAdd() {
     setProducts((pending) => addSampleProduct(pending));
   }
+  function handleSave(id, changes) {
+    setProducts((pending) => updateProduct(pending, id, changes));
+    setNotice(`已保存 ${id}。如未见卡片，请检查筛选条件。`);
+    document.getElementById("inventory-heading")?.focus();
+  }
 
   return (
     <>
-      <h1>库存管理</h1>
+      <h1 id="inventory-heading" tabIndex={-1}>库存管理</h1>
+      <p role="status">{notice}</p>
       <p>全部：{products.length} 种 · 总库存 {totalStock} 件 · 库存总价值 ¥{(totalCents / 100).toFixed(2)}</p>
       <InventoryToolbar count={visibleProducts.length}>
         <label>搜索名称 <input value={query} onChange={(event) => setQuery(event.target.value)} /></label>
@@ -39,7 +46,7 @@ export default function App() {
         <button type="button" onClick={handleAdd} disabled={nextProductId(products) === null}>新增示例商品</button>
       </InventoryToolbar>
       <InventoryCounter />
-      <ProductList products={visibleProducts} onRestock={handleRestock} onDelete={handleDelete} />
+      <ProductList products={visibleProducts} onRestock={handleRestock} onDelete={handleDelete} onSave={handleSave} />
     </>
   );
 }

@@ -24,6 +24,13 @@ export async function advance(ms) {
   await act(async () => vi.advanceTimersByTime(ms));
 }
 
+export async function fill(input, value) {
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+
 afterEach(async () => {
   if (root) await act(async () => root.unmount());
   host?.remove();

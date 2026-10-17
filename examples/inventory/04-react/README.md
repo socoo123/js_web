@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C24 完成。App 保存商品与筛选条件，支持新增示例商品、补货、删除、搜索、分类与排序；列表和统计由当前来源计算。InventoryCounter 继续独立保存本次操作次数。
+当前参考状态：C25 完成。App 保存商品与筛选条件，支持新增示例商品、补货、删除、搜索、分类、排序与商品编辑；表单处理字段校验、错误说明与键盘操作。InventoryCounter 继续独立保存本次操作次数。
 
 ## 运行
 
@@ -78,3 +78,13 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/arrays.html?case= 后接 mutation / mutation-answer、keys / keys-answer、derived / derived-answer，对比同引用跳过、索引 key 草稿错位与重复 state 过期。
 - labs/arrays-bugs.test.jsx 三项预期失败，修复三个对应 Broken 文件后原命令通过：`npm run test:bug -- labs/arrays-bugs.test.jsx`。仓库保留教学错误起点，正常 tests/arrays.test.jsx 验证正确行为。
 - 课程练习「仅看售罄」的修改是可选跟做，不在默认首页中。运行与第二周验收细节见 [examples/c24](../../c24/README.md)。
+
+## 表单、校验与可访问性（C25）
+
+- src/ProductForm.jsx 保存独立字符串草稿和错误；src/product-form.js 提供库存/价格解析、精确单价格式化与 validateDraft。名称 trim 后为 1–40 字符，分类限四种，库存 0–99999 整数，价格最多两位小数并转非负安全整数分。
+- 表单采用 noValidate 与统一业务校验，字段保留 required，库存仍有 min/max/step；独立 NativeForm 实验演示原生阻止提交的时机。
+- 卡片内点击编辑才挂载表单并聚焦名称；输入不改变商品。保存经 App 的回调按 id 替换记录，关闭表单，成功区域保留提示，焦点移到持续存在的页面标题。取消不保存，焦点回编辑按钮。
+- 热销 checkbox 只管理热销标签，保留新品等其他标签。保存后筛选/排序/统计立即重算；若改名或分类使商品移出筛选，成功提示与标题焦点仍保留。
+- 各卡片可以独立展开；关闭表单或筛选移出卡片会丢弃未保存草稿。编辑前保存或取消，再切筛选；跨商品草稿策略在后续课程推进。当前改动不持久化，刷新恢复初始值。
+- labs/forms.html?case=controlled / locked / uncontrolled / native / blank / blank-answer 提供六个实验。两项故意失败的回归使用 npm run test:bug -- labs/forms-bugs.test.jsx，按正文修复两个 Broken 文件后通过。
+- tests/forms.test.jsx 包含 22 条回归，与既有用例合计 42 条。浏览器键盘、原生校验、错误关联与实际结果见 [examples/c25](../../c25/README.md)。

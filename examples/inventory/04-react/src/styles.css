@@ -30,3 +30,9 @@ label { display: flex; flex-direction: column; min-width: 0; }
 input { min-width: 0; max-width: 100%; }
 select { font: inherit; padding: 0.5rem; }
 select:focus-visible { outline: 3px solid #005ac7; outline-offset: 2px; }
+.product-form { display: grid; gap: 0.4rem; margin-top: 1rem; border-top: 1px solid #bccadd; }
+.product-form input:not([type="checkbox"]), .product-form select { width: 100%; }
+.checkbox-label { flex-direction: row; align-items: center; gap: 0.5rem; }
+.field-error, [role="alert"] { color: #a11a17; margin: 0; }
+[aria-invalid="true"] { border: 2px solid #a11a17; }
+#inventory-heading:focus { outline: 3px solid #005ac7; outline-offset: 2px; }
