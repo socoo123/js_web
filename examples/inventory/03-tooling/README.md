@@ -1,23 +1,27 @@
 # 库存项目 · 阶段 3：Node 与工具
 
-当前参考状态：C17 完成。本地 Node 报表复用阶段 1 的 Inventory 与阶段 2 的纯字段校验；npm scripts、Vite 构建与 Vitest 留待 C18/C20。
+当前参考状态：C18 完成。本地 Node 报表复用阶段 1 的 Inventory 与阶段 2 的纯字段校验；已有 report、versions 两个 npm scripts 与锁定的开发依赖。Vite 构建与 Vitest 在 C20 加入。
 
 ## 运行
 
-需要 Node 24。当前无第三方依赖，直接运行，无需安装。
+需要 Node 24 与 npm 11。先按本目录的锁文件安装开发工具；报表本身仍只依赖 Node 内建模块和本仓库业务代码。
 
 在本目录执行：
 
 ```sh
-node cli.js
-node cli.js ../../shared/products.json inventory-report.txt
-node cli.js ../../shared/products.json accessories.txt 配件
-LOW_STOCK_LIMIT=0 node cli.js ../../shared/products.json no-alert.txt 配件
+npm ci
+npm run report
+npm run report -- ../../shared/products.json inventory-report.txt
+npm run report -- ../../shared/products.json accessories.txt 配件
+LOW_STOCK_LIMIT=0 npm run report -- ../../shared/products.json no-alert.txt 配件
+npm run versions
 ```
 
-最后一条使用 macOS/Linux shell 的环境变量语法。已有输出文件会返回 EEXIST，换一个新文件名再运行。生成的文件是本地练习结果，无需提交。
+LOW_STOCK_LIMIT 那条使用 macOS/Linux shell 语法。已有输出文件会返回 EEXIST，换一个新文件名再运行。生成的文件是本地练习结果，无需提交。`node cli.js` 等 C17 直接运行方式仍然可用。
 
 默认读取固定 JSON，打印 6 种商品、52 件、2634800 分（26348.00 元）、售罄 1、低库存 2；分类为外设 2、显示器 1、配件 2、音频 1，标签为热销、新品。配件为 2 种、28 件、587200 分（5872.00 元）。
+
+versions 使用本地 semver 命令按 `^7.0.0` 筛选 6.3.1、7.8.5、8.0.0，打印 7.8.5。semver 是开发依赖，精确锁为 7.8.5；`npm ls --depth=0` 查看直接依赖，`npm explain semver` 查看其来源。清单与锁只属于本目录，不使用网站根目录的锁。
 
 | 文件 | 作用 |
 | --- | --- |
@@ -26,7 +30,7 @@ LOW_STOCK_LIMIT=0 node cli.js ../../shared/products.json no-alert.txt 配件
 | report.js | 校验数据，按分类筛选后复用 Inventory 统计 |
 | ../01-core/inventory.js | 原有业务模块，不使用 DOM 或 fs |
 | ../02-web/validation.js | 原有纯字段校验函数，不访问浏览器存储 |
-| package.json / package-lock.json | 本目录独立的 ESM 项目与锁文件，当前无外部依赖 |
+| package.json / package-lock.json | 本目录独立的 ESM 项目、scripts、semver 开发依赖与锁文件 |
 
 ## 输入与输出规则
 
@@ -41,3 +45,5 @@ LOW_STOCK_LIMIT=0 node cli.js ../../shared/products.json no-alert.txt 配件
 ## 验证
 
 仓库根目录执行 `npm run examples -- c17`，会运行 project-report.js 和 cli-cases.js，对真实 CLI 的默认/分类/空数据、跨 cwd、环境变量、错误出口、已有文件保护进行验证。记录见 [examples/c17](../../c17/README.md)。
+
+C18 的 `npm ci`、两个 scripts、参数转发、重复写入的非零退出，以及依赖树/本地命令均已执行；固定输出在根目录用 `npm run examples -- c18` 核对，安装实验明细见 [examples/c18](../../c18/README.md)。

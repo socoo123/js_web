@@ -1,0 +1,4 @@
+项目 inventory-tooling
+项目版本 0.1.0
+report node cli.js
+semver 类别 开发依赖

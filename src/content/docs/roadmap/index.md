@@ -5,7 +5,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 <!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
 
-**已发布 17 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**已发布 18 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
 
 ## 选择你的节奏
 
@@ -40,7 +40,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 8 天 | [C15 CSS 布局与响应式：排版库存页](../03-async-modules/c15-css-layout-responsive/) | 已发布 |
 | 第 8 天 | [C16 模块、依赖与组织代码](../03-async-modules/c16-modules-dependencies/) | 已发布 |
 | 第 9 天 | [C17 Node 与浏览器的边界](../04-runtime-tooling/c17-node-browser/) | 已发布 |
-| 第 9 天 | C18 npm：项目、版本与可复现安装 | 待发布 |
+| 第 9 天 | [C18 npm：项目、版本与可复现安装](../04-runtime-tooling/c18-npm-reproducible-installs/) | 已发布 |
 | 第 10 天 | C19 Yarn、pnpm、Bun 的职责与选择 | 待发布 |
 | 第 10 天 | C20 构建工具与第一次 UT | 待发布 |
 | 第 11 天 | C21 React 来由、JSX 与第一个组件 | 待发布 |

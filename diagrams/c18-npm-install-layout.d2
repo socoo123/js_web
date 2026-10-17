@@ -1,0 +1,32 @@
+# C18：箭头表示安装时的信息流；容器内展示本课单一依赖的磁盘布局。
+direction: down
+
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+manifest: package.json\n依赖范围 · scripts
+lock: package-lock.json\n具体版本 · 来源 · 摘要
+install: npm ci\n检查清单与锁\n一致后重建依赖 {
+  style.fill: "#f4f8ff"
+}
+registry: registry / 本地缓存\n取得锁定的包内容
+disk: node_modules/ {
+  style.fill: "#f6ffed"
+  style.font-size: 18
+  package: semver/\n已安装的包
+  bin: .bin/semver\n本地命令入口
+}
+run: npm run versions\n通过 PATH 找到本地命令
+reject: 安装失败\n先确认是否有意改依赖 {
+  style.fill: "#fff1f0"
+  style.stroke: "#cf1322"
+}
+
+manifest -> install
+lock -> install
+install -> reject: 不一致
+install -> registry: 一致
+registry -> disk.package: 安装
+disk.package -> disk.bin: 创建命令入口
+disk.bin -> run
