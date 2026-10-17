@@ -1,0 +1,30 @@
+# 展示一次事件的快照与单个 state 的更新队列；不表达渲染次数或调度实现。
+direction: down
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+before: 本次渲染\nstock = 12
+handler: 本次事件函数\n闭包读取 stock = 12
+queue: 更新队列：依次处理 {
+  style.fill: "#f4f8ff"
+  style.stroke-dash: 4
+  first: "pending => pending + 1\n12 → 13"
+  second: "pending => pending + 1\n13 → 14"
+  third: "pending => pending + 1\n14 → 15"
+  first -> second -> third
+}
+after: 下一次渲染\nstock = 15\n生成新的事件函数 {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+commit: 提交 DOM\n页面显示 15
+later: 本次创建的延时回调\n仍读取旧 stock = 12 {
+  style.fill: "#fff7e6"
+  style.stroke: "#d48806"
+}
+before -> handler
+handler -> queue.first: 排入三个 updater
+queue.third -> after
+after -> commit
+handler -> later: 闭包保留本次绑定

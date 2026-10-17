@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C22 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C23 本地门禁通过，待提交与 Pages 核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -39,6 +39,7 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C20。** 已完成构建/UT 课程、Vite 复用阶段 2 页面、38 条 Vitest 回归与独立 TS 失败实验；每课门禁及 Pages 核验通过，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C21。** 已完成 React/JSX 课程、阶段 4 商品卡片与调试实验；每课门禁及 Pages 核验通过，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C22，并协助配置 React DevTools。** 已完成 props/组合/渲染课程、阶段 4 列表与调试实验；Chrome 扩展原已安装，Components 与 Profiler 入口已确认可用，F1 保留队列。
+- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C23，调试避开正在使用的窗口。** 已完成状态快照课程、D2 与阶段 4 盘点交互；使用独立后台 Chrome 验证，F1 保留队列。
 
 ## 当前状态
 
@@ -46,9 +47,9 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 22 / 48（C01–C22）；C22 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–3 已完成；阶段 4：工具栏/列表/卡片组合、条件渲染、DOM 保留实验与 6 条正常回归 |
-| D2 | 0.9.0 + Dagre + Noto Sans SC；已有 11 张图，新增 c18-npm-install-layout |
+| 已发布 | 22 / 48（C01–C22）；C23 本地门禁通过，待 Pages 核验 |
+| 贯穿项目 | 阶段 1–3 已完成；阶段 4：盘点计数、状态快照、连续/延时更新实验与 14 条正常回归 |
+| D2 | 0.9.0 + Dagre + Noto Sans SC；已有 12 张图，新增 c23-state-snapshot |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
 | React islands | 未接入，没有实际需求前不安装 |
@@ -79,6 +80,7 @@
 | C20 构建工具与第一次 UT | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c20-vite-vitest/) | [examples/c20](../examples/c20/README.md) | [run 38997587821](https://github.com/socoo123/js_web/actions/runs/38997587821) |
 | C21 React 来由、JSX 与第一个组件 | [打开](https://socoo123.github.io/js_web/05-react/c21-react-jsx-components/) | [examples/c21](../examples/c21/README.md) | [run 39009250317](https://github.com/socoo123/js_web/actions/runs/39009250317) |
 | C22 Props、组合与渲染模型 | [打开](https://socoo123.github.io/js_web/05-react/c22-props-composition-render/) | [examples/c22](../examples/c22/README.md) | [run 39018608877](https://github.com/socoo123/js_web/actions/runs/39018608877) |
+| C23 useState：状态快照与更新队列 | 待部署 | [examples/c23](../examples/c23/README.md) | 本地门禁通过，待 Pages 核验 |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -97,10 +99,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C22 与 Q1 已完成；C22 每课门禁与 Pages 核验通过。验证明细见 examples/c22。
+P1、C01–C05 重构、T0、C06–C22 与 Q1 已完成；C23 正文及本地门禁通过，下一步提交推送并核验 Pages。明细见 examples/c23。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C23 useState：状态快照与更新队列**：在阶段 4 加入事件与状态，讲清快照、批处理、函数式更新和闭包。
+2. **C24 数组更新、key 与派生数据**：在阶段 4 推进商品数组更新、列表身份与筛选，并完成 Q2 和「Java ↔ JS 速查」。
 
 ## 本文件的更新规则
 
