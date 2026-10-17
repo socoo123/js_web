@@ -1,0 +1,8 @@
+{"totalStock":0,"totalValueCents":0,"soldOutCount":0,"lowStockCount":0}
+0 0
+1 1
+5 1
+6 0
+商品数据应为数组
+商品数据应为数组
+库存应为 0–99999 的整数

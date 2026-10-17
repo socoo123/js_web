@@ -5,9 +5,21 @@
   "type": "module",
   "scripts": {
     "report": "node cli.js",
-    "versions": "semver -r \"^7.0.0\" 6.3.1 7.8.5 8.0.0"
+    "versions": "semver -r \"^7.0.0\" 6.3.1 7.8.5 8.0.0",
+    "dev": "vite --config vite.config.js",
+    "build": "vite build --config vite.config.js",
+    "preview": "vite preview --config vite.config.js",
+    "test": "vitest run",
+    "test:watch": "vitest --watch",
+    "test:bug": "vitest run --config vitest.bug.config.js",
+    "build:bridge": "vite build --config type-bridge/vite.config.js",
+    "preview:bridge": "vite preview --config type-bridge/vite.config.js",
+    "check:bridge": "tsc -p type-bridge/tsconfig.json"
   },
   "devDependencies": {
-    "semver": "7.8.5"
+    "semver": "7.8.5",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
   }
 }
