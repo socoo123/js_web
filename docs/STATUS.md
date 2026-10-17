@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C21 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C22 内容与本地验证已完成，待 Pages 核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -38,6 +38,7 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C19。** 已完成 Yarn/pnpm/Bun 课程与仓库外隔离实验，每课门禁及 Pages 核验通过；F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C20。** 已完成构建/UT 课程、Vite 复用阶段 2 页面、38 条 Vitest 回归与独立 TS 失败实验；每课门禁及 Pages 核验通过，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C21。** 已完成 React/JSX 课程、阶段 4 商品卡片与调试实验；每课门禁及 Pages 核验通过，F1 保留队列。
+- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C22，并协助配置 React DevTools。** 已完成 props/组合/渲染课程、阶段 4 列表与调试实验；Chrome 扩展原已安装，Components 与 Profiler 入口已确认可用，F1 保留队列。
 
 ## 当前状态
 
@@ -45,8 +46,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 21 / 48（C01–C21）；C21 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–3 已完成；阶段 4 开始：React 商品卡片、JSX 实验、Vitest 回归与独立依赖锁 |
+| 已发布 | 21 / 48 已上线（C01–C21）；C22 本地验证完成，待推送及线上核验 |
+| 贯穿项目 | 阶段 1–3 已完成；阶段 4：工具栏/列表/卡片组合、条件渲染、DOM 保留实验与 6 条正常回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 11 张图，新增 c18-npm-install-layout |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -77,6 +78,7 @@
 | C19 Yarn、pnpm、Bun 的职责与选择 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c19-yarn-pnpm-bun/) | [examples/c19](../examples/c19/README.md) | [run 38996724990](https://github.com/socoo123/js_web/actions/runs/38996724990) |
 | C20 构建工具与第一次 UT | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c20-vite-vitest/) | [examples/c20](../examples/c20/README.md) | [run 38997587821](https://github.com/socoo123/js_web/actions/runs/38997587821) |
 | C21 React 来由、JSX 与第一个组件 | [打开](https://socoo123.github.io/js_web/05-react/c21-react-jsx-components/) | [examples/c21](../examples/c21/README.md) | [run 39009250317](https://github.com/socoo123/js_web/actions/runs/39009250317) |
+| C22 Props、组合与渲染模型 | [打开](https://socoo123.github.io/js_web/05-react/c22-props-composition-render/) | [examples/c22](../examples/c22/README.md) | 待推送并核验 Pages |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -95,10 +97,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C21 与 Q1 已完成；C21 每课门禁与 Pages 核验通过。验证明细见 examples/c21。
+P1、C01–C05 重构、T0、C06–C21 与 Q1 已完成；C22 正文、示例与阶段 4 已完成，待 Pages 核验。验证明细见 examples/c22。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C22 Props、组合与渲染模型**：在阶段 4 拆分列表、卡片与工具栏，讲清 props、children、单向流与 render/commit。
+2. **C23 useState：状态快照与更新队列**：在阶段 4 加入事件与状态，讲清快照、批处理、函数式更新和闭包。
 
 ## 本文件的更新规则
 
