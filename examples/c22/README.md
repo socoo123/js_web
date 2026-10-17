@@ -27,9 +27,10 @@
 - 2026-10-17 · macOS arm64 · Node 24.22.0、npm 11.19.1；沿用 C21 的 React/react-dom 19.3.1、Vite 8.3.4 与 Vitest 5.0.5，依赖清单及各锁文件未改。
 - `npm run examples -- c22` 5/5，阶段 4 正常 `npm test` 6/6。props 错误测试实际从失败到修复通过；临时加入 product.stock += 1，冻结输入测试抛 TypeError，恢复后 6/6。
 - Chrome（桌面原生 DevTools）：首页显示六件商品及固定库存；props 实验的 count=0、链接 children、自定义空提示正确；wrong 页面最初六张机械键盘，修复后第二张无线鼠标、0 件、¥129.00。
-- React Developer Tools 8.0.0：官方商店显示已安装；实际从 DevTools 的 More tabs 打开 Components，树为 PropsPreview → ProductListBroken → 六个 ProductCard；选中 key=P002 的卡片，其 product 误为 P001，父组件 products 为六项数组。Profiler 入口可见。
+- React Developer Tools 8.0.0：官方商店显示已安装；实际从 DevTools 的 More tabs 打开 Components，树为 PropsPreview → ProductListBroken → 六个 ProductCard；选中 key=P002 的卡片，其 product 误为 P001，父组件 products 为六项数组。Profiler 入口可见；正式应用选中 P002，product 已正确显示无线鼠标。
 - render-commit 实验：重复 render 有日志，StrictMode 开发调用重复；标题切换后 Console 比较 same=true，备注值保持「先核对外设」。
 - zero 页面最初显示孤立 0，tags.test.jsx 失败；改为 length > 0 后页面只剩标题，同一测试通过，最终恢复教学错误起点。
 - 阶段 4 重装 npm ci、正常测试及生产构建通过；练习 3 加粗说明实际构建/预览后恢复参考基线，再次正常测试与构建通过。网站 lint 为 22 课零 error/warning，check 零诊断，build 固定输出 207/207、26 个 HTML 与 22 课产物检查通过；C22 正文 7,869 字符、16 个代码块，具名代码与示例逐字一致。
 - 本地静态课程 HTTP 200，Chrome 显示新课与侧栏入口，6 个练习折叠区及路线页 22 / 48 已检查。
 - 未运行：Firefox、Safari、Windows；Profiler 性能录制（本课只介绍入口）。
+- Pages：[run 39018608877](https://github.com/socoo123/js_web/actions/runs/39018608877) 构建与部署成功；C22 和路线页 HTTP 200，线上标题、正文、6 个答案折叠区与 22 / 48 入口正确。

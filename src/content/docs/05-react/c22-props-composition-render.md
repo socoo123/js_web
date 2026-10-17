@@ -75,10 +75,10 @@ function stockLabel({ product, prefix = "库存" }) {
   return `${product.name} ${prefix}：${product.stock} 件`;
 }
 
-console.log(stockLabel({ product: products[0] }));
-console.log(stockLabel({ product: products[1], prefix: "剩余" }));
-console.log(stockLabel({ product: products[1], prefix: undefined }));
-console.log(stockLabel({ product: products[1], prefix: null }));
+console.log(stockLabel({ product: products[0] })); // → 机械键盘 库存：12 件
+console.log(stockLabel({ product: products[1], prefix: "剩余" })); // → 无线鼠标 剩余：0 件
+console.log(stockLabel({ product: products[1], prefix: undefined })); // → 无线鼠标 库存：0 件
+console.log(stockLabel({ product: products[1], prefix: null })); // → 无线鼠标 null：0 件
 ```
 
 依次输出「机械键盘 库存：12 件」「无线鼠标 剩余：0 件」「无线鼠标 库存：0 件」「无线鼠标 null：0 件」。null 是明确传入的值，默认值不会接管；数字 0、false、空字符串也会保留。
@@ -199,10 +199,10 @@ P002 隐藏标签并显示已售罄；P004 显示「标签：热销、新品」�
 import { products } from "../shared/products.js";
 
 const mouse = products[1];
-console.log(mouse.stock && "有货");
-console.log(mouse.stock > 0 && "有货");
-console.log(mouse.stock === 0 ? "已售罄" : "有货");
-console.log(mouse.tags.length > 0 ? mouse.tags.join("、") : "无标签");
+console.log(mouse.stock && "有货"); // → 0
+console.log(mouse.stock > 0 && "有货"); // → false
+console.log(mouse.stock === 0 ? "已售罄" : "有货"); // → 已售罄
+console.log(mouse.tags.length > 0 ? mouse.tags.join("、") : "无标签"); // → 无标签
 ```
 
 依次输出 0、false、已售罄、无标签。Console 会打印 false，React 把它放在子内容的位置时则不显示文字。
