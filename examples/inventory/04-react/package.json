@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "inspect": "node labs/inspect-elements.js",
     "test": "vitest run",
+    "lint": "eslint src labs/ProductWatch.jsx labs/IntervalFixed.jsx labs/LoopFixed.jsx labs/WatchControls.jsx",
+    "lint:bug": "eslint labs/StaleSubscriptionBroken.jsx labs/IntervalBroken.jsx",
     "test:bug": "vitest run --config vitest.bug.config.js"
   },
   "dependencies": {
@@ -17,6 +19,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "6.1.2",
+    "eslint": "10.13.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "happy-dom": "21.0.3",
     "vite": "8.3.4",
     "vitest": "5.0.5"

@@ -5,7 +5,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 <!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
 
-**已发布 28 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**已发布 29 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
 
 ## 选择你的节奏
 
@@ -56,7 +56,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 13 天 | [C26 状态提升、保留与重置](../05-react/c26-state-ownership-reset/) | 已发布 |
 | 第 14 天 | [C27 useReducer 与 Context](../05-react/c27-reducer-context/) | 已发布 |
 | 第 14 天 | [C28 useRef 与外部系统](../05-react/c28-refs-external-systems/) | 已发布 |
-| 第 15 天 | C29 useEffect 深入与清理 | 待发布 |
+| 第 15 天 | [C29 useEffect 深入与清理](../05-react/c29-effects-cleanup/) | 已发布 |
 | 第 15 天 | C30 请求状态与竞态调试 | 待发布 |
 | 第 16 天 | C31 自定义 Hooks 与路由 | 待发布 |
 | 第 16 天 | C32 认识 TanStack Query 与服务端状态 | 待发布 |

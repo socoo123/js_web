@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C28 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；Catalog 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 独立记数，支持取消和替换延时记录。
+当前参考状态：C29 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；Catalog 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。
 
 ## 运行
 
@@ -18,7 +18,8 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、归属、reducer 与 Context 回归，86 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、归属、Context、ref 与 Effect 回归，97 条通过；不包含故意失败的 labs |
+| npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
 | npm run test:bug -- labs/props.test.jsx | C22 传错商品的回归，原始版本预期失败；修复后通过 |
@@ -115,3 +116,12 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/refs.html?case= 后接 probe / count / count-answer / focus / early / early-answer / timer / timer-answer，分别观察跨渲染保留、ref 显示错误、提交焦点、条件挂载焦点与取消句柄；timer-answer 可隐藏再挂载。
 - npm run test:bug -- labs/refs-bugs.test.jsx 两项预期失败；按 RefCountFixed 与 InventoryCounter 修复两个 Broken 文件后通过。仓库保留错误起点。
 - tests/refs.test.jsx 新增 9 条，正常回归累计 86 条；含 ref/局部变量、可见计数、两种焦点时机、跨渲染取消、替换时序、实例隔离和卸载清理。运行证据见 [examples/c28](../../c28/README.md)。
+
+## useEffect 深入与清理（C29）
+
+- InventoryTitle 依赖全部商品的 totalStock，同步 document.title；每次 cleanup 恢复接管前的标题，整个应用移除后恢复原页面标题。当前页面只使用这一个标题管理组件。
+- Catalog 的 searchRef 传给 InventorySearchShortcut；全局 keydown 的 / 聚焦搜索。编辑控件、contenteditable、修饰键、合成输入、已处理事件保持原行为；移除时注销同一函数，ref prop 更换时重新同步。
+- 本阶段新增独立开发依赖 eslint 与 eslint-plugin-react-hooks，并锁入本阶段 package-lock；两条规则只检查 Hook 调用位置和依赖读取，不将未启用的规则说成已通过。根工程不增加依赖。
+- labs/effects.html?case= 后接 lifecycle / missing / stale / guard / interval / interval-answer / loop / loop-answer，分别观察正确生命周期、缺清理、旧闭包、ref 阻止重启、计时器快照和派生值循环。loop 加停止条件，由实验边界显示错误，避免持续更新；实验页仅 dev 提供。
+- npm run lint:bug 预期报两项缺依赖；npm run test:bug -- labs/effects-bugs.test.jsx 预期四项失败。两个通知组件按 ProductWatch、计时器按 IntervalFixed、筛选按 LoopFixed 修复后，两项命令都通过；仓库保留错误起点。
+- tests/effects.test.jsx 新增 11 条，正常回归累计 97 条；覆盖清理顺序、无关重渲染、卸载/重挂载、interval、派生值、标题更新/恢复、快捷键单次处理/编辑保留/注销。运行证据见 [examples/c29](../../c29/README.md)。

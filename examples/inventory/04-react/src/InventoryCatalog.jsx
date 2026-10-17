@@ -1,8 +1,9 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { ProductsContext, ProductsDispatchContext } from "./InventoryContext.jsx";
 import { nextProductId, selectProducts } from "./product-state.js";
 import InventoryToolbar from "./InventoryToolbar.jsx";
 import ProductList from "./ProductList.jsx";
+import InventorySearchShortcut from "./InventorySearchShortcut.jsx";
 
 export default function InventoryCatalog({ editingId, onEdit, onDelete, children }) {
   const products = useContext(ProductsContext);
@@ -10,12 +11,14 @@ export default function InventoryCatalog({ editingId, onEdit, onDelete, children
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("全部");
   const [order, setOrder] = useState("id");
+  const searchRef = useRef(null);
   if (products === null || dispatch === null) throw new Error("InventoryCatalog 需要 InventoryProvider");
   const visibleProducts = selectProducts(products, { query, category, order });
   return (
     <>
+      <InventorySearchShortcut inputRef={searchRef} />
       <InventoryToolbar count={visibleProducts.length}>
-        <label>搜索名称 <input value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+        <label>搜索名称（按 / 聚焦） <input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
         <label>分类 <select aria-label="分类" value={category} onChange={(event) => setCategory(event.target.value)}>
           {["全部", "外设", "显示器", "配件", "音频"].map((value) => <option key={value}>{value}</option>)}
         </select></label>

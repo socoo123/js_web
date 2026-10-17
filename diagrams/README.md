@@ -8,6 +8,8 @@ C03 的图是新规范下的样例写法：文件首行注释说明箭头含义�
 
 后续新增 C10 分类遍历、C12 事件循环、C16 ESM 依赖图与 C18 npm 安装布局，源码分别为 `c10-category-traversal.d2`、`c12-browser-event-loop.d2`、`c16-esm-dependencies.d2`、`c18-npm-install-layout.d2`；当前共 11 张。C16 箭头从导入方指向依赖方，虚线表示动态导入，不表示请求的时间顺序。C18 箭头表示安装的信息流，展示单个包及其 .bin 入口，逻辑依赖树另由 npm ls 读取。
 
+C23 的 `c23-state-snapshot.d2` 展示状态快照与更新队列；C29 的 `c29-effect-lifecycle.d2` 展示同一 Effect 的 setup/cleanup 顺序，蓝色容器表示根 StrictMode 的首次开发检查，生产路径跳过该容器。加入这两张后共 13 张；C30 继续复用 Effect 生命周期图。
+
 ## 准备与生成
 
 操作方式：维护者构建。验证状态：macOS arm64 的准备/构建路径和 Pages Actions 的 Ubuntu 24.04/Linux x64 路径均于 **2026-10-15** 实际执行通过；macOS x64、Linux arm64 和原生 Windows 路径尚未执行。学习者阅读 C01 不需要安装 D2。
