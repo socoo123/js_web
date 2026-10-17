@@ -95,7 +95,7 @@ it("草稿直到提交才更新列表，转换后的数字和标签同时刷新�
   expect(host.textContent).toContain("总库存 52 件");
   await click("保存商品", host);
   card = [...host.querySelectorAll("article")].find((node) => node.textContent.includes("P002"));
-  expect(card.querySelector("form")).toBeNull();
+  expect(host.querySelector("form")).toBeNull();
   expect(card.querySelector("h2").textContent).toBe("无线鼠标");
   expect(card.textContent).toContain("库存：3 件");
   expect(card.textContent).toContain("129.90");
