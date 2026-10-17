@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C25 本地门禁已通过，待推送与 Pages 核验；F1 保留）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C25 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -41,7 +41,7 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C22，并协助配置 React DevTools。** 已完成 props/组合/渲染课程、阶段 4 列表与调试实验；Chrome 扩展原已安装，Components 与 Profiler 入口已确认可用，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C23，调试避开正在使用的窗口。** 已完成状态快照课程、D2 与阶段 4 盘点交互；使用独立后台 Chrome 验证，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C24。** 已完成数组/key/派生数据、阶段 4 商品操作、Q2 与 Java ↔ JS 速查，每课门禁及 Pages 核验通过；F1 保留。
-- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C25。** 已完成表单、校验、可访问性与阶段 4 商品编辑，本地门禁通过，待 Pages 核验；F1 保留。
+- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C25。** 已完成表单、校验、可访问性与阶段 4 商品编辑，每课门禁及 Pages 核验通过；F1 保留。
 
 ## 当前状态
 
@@ -49,7 +49,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 24 / 48（C01–C24）；C25 本地完成，待部署核验 |
+| 已发布 | 25 / 48（C01–C25）；C25 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–3 已完成；阶段 4：商品编辑/校验/键盘操作，累计 42 条正常回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 12 张图，新增 c23-state-snapshot |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -84,6 +84,7 @@
 | C22 Props、组合与渲染模型 | [打开](https://socoo123.github.io/js_web/05-react/c22-props-composition-render/) | [examples/c22](../examples/c22/README.md) | [run 39018608877](https://github.com/socoo123/js_web/actions/runs/39018608877) |
 | C23 useState：状态快照与更新队列 | [打开](https://socoo123.github.io/js_web/05-react/c23-state-snapshot-queue/) | [examples/c23](../examples/c23/README.md) | [run 39020278502](https://github.com/socoo123/js_web/actions/runs/39020278502) |
 | C24 数组更新、key 与派生数据 | [打开](https://socoo123.github.io/js_web/05-react/c24-arrays-keys-derived/) | [examples/c24](../examples/c24/README.md) | [run 39021433607](https://github.com/socoo123/js_web/actions/runs/39021433607) |
+| C25 表单、校验与可访问性 | [打开](https://socoo123.github.io/js_web/05-react/c25-forms-validation-accessibility/) | [examples/c25](../examples/c25/README.md) | [run 39030596833](https://github.com/socoo123/js_web/actions/runs/39030596833) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -103,7 +104,7 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C24、Q1/Q2 与 Java ↔ JS 速查均已完成；C25 本地门禁通过，待发布核验。明细见 examples/c25。
+P1、C01–C05 重构、T0、C06–C25、Q1/Q2 与 Java ↔ JS 速查均已完成；C25 每课门禁与 Pages 核验通过。明细见 examples/c25。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C26 状态提升、保留与重置**：安排共同父节点、状态归属与切换商品时的草稿策略。
