@@ -1,0 +1,3 @@
+counter 初始化
+TypeError
+1

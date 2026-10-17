@@ -1,0 +1,11 @@
+ES2015 true
+ES2016 true
+ES2017 true
+ES2018 true
+ES2019 true
+ES2020 true
+ES2021 true
+ES2022 true
+ES2023 true
+ES2024 true
+ES2025 true

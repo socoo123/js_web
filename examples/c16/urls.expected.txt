@@ -1,0 +1,2 @@
+/js_web/examples/inventory/01-core/inventory.js
+/inventory.js

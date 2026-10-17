@@ -1,0 +1,5 @@
+counter 初始化
+1 1 0
+库存计数器
+undefined
+true

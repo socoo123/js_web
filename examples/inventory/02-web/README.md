@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 2：原生页面
 
-当前参考状态：C15 完成。沿用 C14 的请求、筛选编辑、localStorage 与备份恢复，加入 Flex 工具栏、Grid 商品卡片与移动优先布局；C16 继续拆分 ESM。
+当前参考状态：C16 完成，原生页面 v1。沿用请求、筛选编辑、localStorage、备份恢复与响应式布局，拆为 ES 模块并复用阶段 1 的 Inventory。
 
 ## 运行
 
@@ -10,10 +10,16 @@
 | --- | --- |
 | index.html | 搜索、分类、列表、库存表单、请求状态、数据来源与备份控件 |
 | products.json | 与 `../../shared/products.json` 一致的固定数据 |
-| app.js | 请求与完整字段校验、本地快照、失败恢复、筛选编辑、导入导出和焦点恢复 |
+| app.js | 事件与状态协调、候选库存保存、失败提示和焦点恢复 |
+| ../01-core/inventory.js | 复用 Inventory 的 select/getById/summary/setStock 与筛选工厂 |
+| validation.js | 完整字段校验与独立复制、库存文本解析 |
+| storage.js | 版本快照编解码、读取和保存；localStorage 仅在调用时使用 |
+| api.js | 模块相邻 products.json 的 URL、请求与校验 |
+| view.js | 商品筛选与列表、汇总渲染 |
+| download.js | 首次导出时动态加载的浏览器下载功能 |
 | style.css | border-box、CSS 变量、Flex 工具栏与备份区、Grid 卡片、媒体查询、错误与焦点样式 |
 
-使用一个 defer 经典脚本；C16 再拆成 ES 模块并复用阶段 1 的 Inventory。加载状态为 loading、ready、error；ready 时再按数组和筛选结果区分两类空态。
+index.html 通过 type="module" 加载 app.js，依赖自动加载。静态服务须从仓库根目录启动，确保兄弟目录 01-core 可访问。加载状态为 loading、ready、error；ready 时再区分两类空态。
 
 首次没有副本时读取相对路径 `./products.json`，失败后可重试；有效副本优先，筛选只处理内存数据。只编辑 stock，接受 0–99999 整数。
 
@@ -22,6 +28,7 @@
 - 键为 `js_web:inventory:v1`，内容为 `{ "version": 1, "products": [...] }`，导出文件用同一格式。
 - 有效副本包括空数组；读取失败时提示并尝试初始 JSON，保留坏原文，不自动写回。
 - 保存、导入和恢复均先校验并写入成功，才替换内存和渲染。恢复会重新请求初始 JSON，成功后保存为新副本。
+- 编辑时将当前商品经过 validateProducts 复制后构造候选 Inventory，setStock 只改候选。存储写入失败时，当前 Inventory 的对象也保持旧值。
 - 导入整份替换，验证后确认；取消、坏文件、请求或存储失败都保留原数据。读取文件与恢复期间禁用相关控件，finally 恢复。
 - localStorage 依源隔离，同源路径共享；本页用一个标签操作，多标签并发以最后一次写入为准。不写回静态 JSON。
 
@@ -50,4 +57,4 @@
 - 导入 c14/empty.json 后刷新仍为空；c14/valid.json 恢复固定数据。语法、版本、重复 id、字符串库存均被拒绝。
 - 存储拒绝读取时降级到初始 JSON；写入失败时，编辑、导入与恢复均提示失败并保留原数据。
 
-DOM/编辑验证见 [examples/c11](../../c11/README.md)，请求验证见 [examples/c13](../../c13/README.md)，存储与恢复验证见 [examples/c14](../../c14/README.md)，布局、键盘与本次交互验证见 [examples/c15](../../c15/README.md)。
+DOM/编辑验证见 [examples/c11](../../c11/README.md)，请求见 [examples/c13](../../c13/README.md)，存储见 [examples/c14](../../c14/README.md)，布局见 [examples/c15](../../c15/README.md)，模块拆分与写入失败验证见 [examples/c16](../../c16/README.md)。

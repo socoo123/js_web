@@ -134,7 +134,7 @@ React 16 课的写作深度要求：
 
 ## 现代标准附录：参考页「ES 版本速查」
 
-原 C15 的内容改为参考页 `reference/es-versions.md`，在 C16 发布后编写。按 ES2015→ES2026 列出每个特性「解决了什么问题」，加一列目标环境支持，并链接到首次讲解它的课。ES2026 查询所见新增组包括 Map/WeakMap Upsert、JSON 源文本访问、Iterator Sequencing、Uint8Array Base64/Hex、Math.sumPrecise、Error.isError、Array.fromAsync；正式写课前逐项核对规范、API 名称和目标环境。
+原 C15 的内容已改为参考页 `reference/es-versions.md`，随 C16 提供。按 ES2015→ES2026 列出代表特性「解决了什么问题」、目标环境支持和首次讲解入口。ES2026 新增组包括 Map/WeakMap Upsert、JSON 源文本访问、Iterator Sequencing、Uint8Array Base64/Hex、Math.sumPrecise、Error.isError、Array.fromAsync；更新时逐项核对规范、API 名称和目标环境。
 
 TC39 完成提案表查询所见将 Temporal、Explicit Resource Management 列为预计进入 2027，不能标成 ES2026。规范年份、提案阶段与环境支持是三件事；以 [来源文件](SOURCES.md) 指向的官方资料为准。
 

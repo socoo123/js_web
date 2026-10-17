@@ -1,0 +1,18 @@
+# 箭头从导入方指向依赖方；只画业务复用与按需下载两条依赖，其余文件见正文表格。
+direction: down
+**.style.font-size: 22
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+app: app.js\n页面事件与状态
+core: ../01-core/\ninventory.js\n纯业务模块 {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+download: download.js\n点击导出时加载
+app -> core: 静态 import
+app -> download: 动态 import() {
+  style.stroke-dash: 5
+}
+# 不可见边只约束 Dagre 的纵向排列，不是模块依赖。
+core -> download: {style.opacity: 0}
