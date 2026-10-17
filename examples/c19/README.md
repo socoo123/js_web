@@ -38,5 +38,6 @@
 - Bun：安装后裸 node report.js 与 bun run report 均正确；node runtime.js、bun runtime.js、bun run runtime、bun run --bun runtime 分别为 Node/Bun/Node/Bun。
 - 三副本各自只把 wrap-ansi 改成 6.2.0：冻结安装非零退出且锁不变；普通 install 同步后，冻结安装与报告再次通过。Yarn 报 YN0028，pnpm 报锁不同步，Bun 报冻结模式下锁需改变。
 - Corepack 在网站根目录拒绝调用 yarn，指出根 packageManager 为 npm；在实验副本读取各自固定版本，证明入口按项目区分。
-- 全站 lint 19 课零 error/warning；check 零诊断；build 的固定输出示例与 23 页产物检查通过。
+- 全站 lint 19 课零 error/warning；check 零诊断；build 的 196/196 固定输出示例与 23 页产物检查通过。
+- [Pages run 38996724990](https://github.com/socoo123/js_web/actions/runs/38996724990) 成功；线上 C19 与路线页 HTTP 200，正文包含新课标题/代码，路线页显示 19/48 并链接 C19。
 - 未运行：Windows/Linux 本地实验、Bun 测试/打包、workspaces 应用；后两项在正文只作职责与组织方式说明。

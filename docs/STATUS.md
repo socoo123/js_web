@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C19 本地门禁完成，待发布核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C19 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -35,7 +35,7 @@
 - **2026-10-17：用户要求等 C15 完成后，按最新计划与重做的 C03 开发 C16。** 已完成模块课、ES 版本速查、D2 与阶段 2 ESM 拆分；F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C17。** Node 课程、13 个固定输出示例与阶段 3 库存报表已完成；网页对照未运行，已标注，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C18。** 已完成 npm 课程、隔离安装实验、D2 与阶段 3 scripts，F1 保留队列。
-- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C19。** 已完成 Yarn/pnpm/Bun 课程与仓库外隔离实验，本地门禁通过，待发布核验；F1 保留队列。
+- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C19。** 已完成 Yarn/pnpm/Bun 课程与仓库外隔离实验，每课门禁及 Pages 核验通过；F1 保留队列。
 
 ## 当前状态
 
@@ -43,7 +43,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 18 / 48（C01–C18）；C18 每课门禁与线上核验通过 |
+| 已发布 | 19 / 48（C01–C19）；C19 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–2 已完成；阶段 3 已有 Node 报告、report/versions scripts 与独立依赖锁 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 11 张图，新增 c18-npm-install-layout |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -72,6 +72,7 @@
 | C16 模块、依赖与组织代码 | [打开](https://socoo123.github.io/js_web/03-async-modules/c16-modules-dependencies/) | [examples/c16](../examples/c16/README.md) | [run 38984292309](https://github.com/socoo123/js_web/actions/runs/38984292309) |
 | C17 Node 与浏览器的边界 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c17-node-browser/) | [examples/c17](../examples/c17/README.md) | [run 38989123796](https://github.com/socoo123/js_web/actions/runs/38989123796) |
 | C18 npm：项目、版本与可复现安装 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c18-npm-reproducible-installs/) | [examples/c18](../examples/c18/README.md) | [run 38994824234](https://github.com/socoo123/js_web/actions/runs/38994824234) |
+| C19 Yarn、pnpm、Bun 的职责与选择 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c19-yarn-pnpm-bun/) | [examples/c19](../examples/c19/README.md) | [run 38996724990](https://github.com/socoo123/js_web/actions/runs/38996724990) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -90,7 +91,7 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C18 与 Q1 已完成；C19 正文、隔离实验与本地门禁已完成，待 Pages 核验。验证明细见 examples/c19。
+P1、C01–C05 重构、T0、C06–C19 与 Q1 已完成；C19 每课门禁与 Pages 核验通过。验证明细见 examples/c19。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C20 构建工具与第一次 UT**：用 Vite 构建阶段 2 页面，给库存逻辑写 Vitest 测试；TypeScript 仅作短桥接。
