@@ -29,6 +29,6 @@
 - JSX 实验的 title 字面量/表达式、P002 库存 0、false/null 空内容、数字 0、style 颜色与 8px 均符合正文；替换 P001 得到 12 件/399.00，改颜色经 HMR 更新。开发模块响应是 JSX helper 调用，article/className/子内容和内联 source map 可对应。
 - name 错误页标题为 product.name、title 为机械键盘；生成代码返回位置断点两次命中，求值 product.name 均为机械键盘。补大括号后页面正确，同一 test:bug 从失败到通过；正常卡片测试也能抓住此错误改动。
 - ReturnBroken 实际返回 undefined，页面没有 h2；括号修复与 answer 页面显示机械键盘。删除结束 p 实际触发 Vite 遮罩与 500，恢复后正常；错误文件最终恢复教学起点。
-- 练习 3 实际构建与预览新增库存价值 ¥4788.00，之后恢复 C21 基线并重建。原生与正常 React 页面无 JS 异常或失败资源，360px 卡片无横向溢出；C21 静态教程禁用 JS 后正文与 6 个答案折叠区保留。
+- 练习 3 实际构建与预览新增库存价值 ¥4788.00，之后恢复 C21 基线并重建。原生与正常 React 页面无 JS 异常，业务模块与样式加载正常，360px 卡片无横向溢出；C21 静态教程禁用 JS 后正文与 6 个答案折叠区保留。
 - 未运行：DevTools UI 中的手工点击/单步路径（按 Chrome 官方文档核对）、Firefox、Safari、Windows。本课发布教程正文，库存应用只在本地运行。
-- Pages：待推送后核验。
+- Pages：[run 39009250317](https://github.com/socoo123/js_web/actions/runs/39009250317) 成功；C21 地址 HTTP 200、标题与正文正确，路线页 21 / 48 与新课链接正确。
