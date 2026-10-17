@@ -309,3 +309,9 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 2026-10-17：核对 React 官方[提取 reducer](https://react.dev/learn/extracting-state-logic-into-a-reducer)与 [useReducer](https://react.dev/reference/react/useReducer)：state/action/新 state、纯计算、初始化函数、dispatch 的稳定身份和无返回值、快照/连续队列、Object.is 与 StrictMode 开发纯度检查。业务 action、校验和边界由本项目自主定义；未引入第三方状态库。
 - 同日：核对 [reducer 配合 Context](https://react.dev/learn/scaling-up-with-reducer-and-context)、[createContext](https://react.dev/reference/react/createContext)与 [useContext](https://react.dev/reference/react/useContext)。分开传递数据/dispatch、同一 Context 对象、最近上层 Provider、静态默认值与显式 undefined、React 19 的直接 Provider 写法、Context 订阅通知与父组件渲染的区别均依当前文档。
 - 同日：沿用 Node 24、npm 11、React 19 与阶段 4 独立锁，无新依赖、安装工具或 D2。库存是页面内本地业务数据；Context 不实现服务端缓存、重试和失效。原创实验复用固定商品；运行与先失败后修复记录见 [examples/c27](../examples/c27/README.md)。
+
+## C28 useRef 与外部系统
+
+- 2026-10-17：核对 React 官方 [useRef](https://react.dev/reference/react/useRef) 与[引用值](https://react.dev/learn/referencing-values-with-refs)：同身份保留容器、初始值、每实例独立、current 可变但不触发渲染、不用 ref 充当渲染数据。普通 JS 对象例子只解释别名和闭包，React 的跨渲染行为由真实组件验证。
+- 同日：核对 [DOM ref](https://react.dev/learn/manipulating-the-dom-with-refs)、[Effect 同步](https://react.dev/learn/synchronizing-with-effects)、[useEffect](https://react.dev/reference/react/useEffect) 与[纯渲染](https://react.dev/reference/rules/components-and-hooks-must-be-pure)。DOM 提交后连接 ref、移除归 null；已存在节点的事件焦点与条件挂载后的 Effect 焦点分开；空依赖、开发检查和卸载 cleanup 仅作为起点，完整依赖/竞态留给后课。
+- 同日：核对 MDN [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus)、[clearTimeout](https://developer.mozilla.org/en-US/docs/Web/API/Window/clearTimeout) 与 Node 24 [timers](https://nodejs.org/download/release/latest-v24.x/docs/api/timers.html)。浏览器与 Node 句柄类型区分，清空容器不等于撤销任务；项目自主约定一次保留一条延时记录。沿用 Node 24、npm 11 与阶段 4 独立锁，无新增依赖、安装工具或 D2。实际运行、失败/修复和焦点证据见 [examples/c28](../examples/c28/README.md)。

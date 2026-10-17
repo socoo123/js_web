@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { InventoryProvider, ProductsContext, ProductsDispatchContext } from "./InventoryContext.jsx";
 import InventorySummary from "./InventorySummary.jsx";
 import InventoryCatalog from "./InventoryCatalog.jsx";
@@ -14,6 +14,7 @@ function InventoryPage() {
   const dispatch = useContext(ProductsDispatchContext);
   const [notice, setNotice] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const headingRef = useRef(null);
   if (products === null || dispatch === null) throw new Error("InventoryPage 需要 InventoryProvider");
   const editingProduct = products.find((product) => product.id === editingId) ?? null;
 
@@ -22,25 +23,25 @@ function InventoryPage() {
     if (editingId === id) {
       setEditingId(null);
       setNotice(`已删除 ${id}，编辑已结束。`);
-      document.getElementById("inventory-heading")?.focus();
+      headingRef.current?.focus();
     }
   }
   function handleSave(id, changes) {
     dispatch({ type: "saved", id, changes });
     setEditingId(null);
     setNotice(`已保存 ${id}。如未见卡片，请检查筛选条件。`);
-    document.getElementById("inventory-heading")?.focus();
+    headingRef.current?.focus();
   }
   function handleCancel() {
     setEditingId(null);
     const target = document.getElementById(`open-editor-${editingId}`)
-      ?? document.getElementById("inventory-heading");
+      ?? headingRef.current;
     target?.focus();
   }
 
   return (
     <>
-      <h1 id="inventory-heading" tabIndex={-1}>库存管理</h1>
+      <h1 id="inventory-heading" ref={headingRef} tabIndex={-1}>库存管理</h1>
       <p role="status">{notice}</p>
       <InventorySummary />
       <InventoryCatalog editingId={editingId} onEdit={setEditingId} onDelete={handleDelete}>

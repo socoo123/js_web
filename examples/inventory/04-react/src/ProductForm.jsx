@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { categories, toDraft, validateDraft } from "./product-form.js";
 
 export default function ProductForm({ product, onSave, onCancel }) {
   const [draft, setDraft] = useState(() => toDraft(product));
   const [errors, setErrors] = useState({});
+  const nameRef = useRef(null);
   const prefix = `edit-${product.id}`;
+
+  useEffect(() => {
+    nameRef.current?.focus();
+  }, []);
 
   function change(field, value) {
     setDraft((pending) => ({ ...pending, [field]: value }));
@@ -36,7 +41,7 @@ export default function ProductForm({ product, onSave, onCancel }) {
       <p>名称、分类、库存、单价均为必填。保存前只修改草稿。</p>
       {Object.keys(errors).length > 0 && <p role="alert">保存失败，请检查下面的字段。</p>}
       <label htmlFor={`${prefix}-name`}>商品名称（必填）</label>
-      <input {...fieldProps("name")} required autoFocus value={draft.name}
+      <input {...fieldProps("name")} required ref={nameRef} value={draft.name}
         onChange={(event) => change("name", event.target.value)} />
       {errorMessage("name")}
       <label htmlFor={`${prefix}-category`}>商品分类（必填）</label>

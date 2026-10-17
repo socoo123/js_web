@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C27 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；Catalog 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 独立记数。
+当前参考状态：C28 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；Catalog 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 独立记数，支持取消和替换延时记录。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、归属、reducer 与 Context 回归，77 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、归属、reducer 与 Context 回归，86 条通过；不包含故意失败的 labs |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
 | npm run test:bug -- labs/props.test.jsx | C22 传错商品的回归，原始版本预期失败；修复后通过 |
@@ -30,7 +30,7 @@ npm run dev -- --host 127.0.0.1
 
 - index.html → src/main.jsx → App → InventoryProvider → InventoryPage → InventorySummary / InventoryCatalog → ProductList → ProductCard。编辑区作为 Catalog 的 children，独立于筛选列表；StrictMode 保留。
 - src/InventoryContext.jsx 从 `../../../shared/products.js` 复制固定起点，products-reducer.js 统一更新业务数据；ProductCard 只读 product prop，标题 id 按商品编号区分。
-- InventoryCounter 的 count 是独立 UI 状态，不修改商品库存；两个实例各自记数。三个按钮分别提交一次加一、三次加一及定时器中的一次加三。
+- InventoryCounter 的 count 是独立 UI 状态，不修改商品库存；两个实例各自记数。按钮分别记录一次、连续三次、安排延时与取消；新安排替换上一条延时记录，卸载时清除任务。
 - vite.config.js 使用 /js_web/ 基础路径，开发服务允许读取 examples 内的共享模块；本阶段的锁与网站根锁独立。
 - 普通 CSS 保留盒模型与移动端空间；React 组件描述结构，浏览器继续负责布局。
 - npm run build 的正常入口只有首页。labs 的 HTML 是本地 dev 实验页，不进入生产构建。
@@ -106,3 +106,12 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/reducer-context.html?case=queue / mutation / mutation-answer / split / split-answer / scope / missing 分别演示 action 队列、旧快照污染、错接 Provider、独立实例与静态默认值；实验页仅 dev 可用。
 - npm run test:bug -- labs/reducer-context-bugs.test.jsx 预期两项失败；分别按 MutationReducerFixed 与 ContextJoined 修复两个 Broken 文件后通过。仓库保留错误起点。
 - tests/reducer.test.jsx 新增 22 条，tests/context.test.jsx 新增 6 条，正常回归累计 77 条。详细运行和浏览器证据见 [examples/c27](../../c27/README.md)。
+
+## useRef 与外部系统（C28）
+
+- App 的持续标题用 headingRef 取得节点；保存/删除当前商品后回标题，取消优先回列表编辑按钮，筛选隐藏按钮时回标题。
+- ProductForm 用 nameRef 与挂载 Effect 聚焦名称，按商品 key 重建时重新聚焦；修改草稿不重新聚焦，首次错误仍由 form.elements 定位。
+- InventoryCounter 用 timerRef 保存当前句柄，pending state 显示等待信息；重复安排替换上一条，取消保留已有次数，到期加三，卸载清除未完成任务。各实例独立，句柄不参与渲染。
+- labs/refs.html?case= 后接 probe / count / count-answer / focus / early / early-answer / timer / timer-answer，分别观察跨渲染保留、ref 显示错误、提交焦点、条件挂载焦点与取消句柄；timer-answer 可隐藏再挂载。
+- npm run test:bug -- labs/refs-bugs.test.jsx 两项预期失败；按 RefCountFixed 与 InventoryCounter 修复两个 Broken 文件后通过。仓库保留错误起点。
+- tests/refs.test.jsx 新增 9 条，正常回归累计 86 条；含 ref/局部变量、可见计数、两种焦点时机、跨渲染取消、替换时序、实例隔离和卸载清理。运行证据见 [examples/c28](../../c28/README.md)。
