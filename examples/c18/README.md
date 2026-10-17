@@ -31,4 +31,6 @@
 - report 参数转发：配件报告 2 种、28 件、587200 分；重复写入 EEXIST，npm 非零退出且原文件不变。输出放临时目录并清理。
 - 阶段 3 ci --omit=dev 后本地 semver 不存在，report 仍正确；再 ci 恢复工具。两次安装前后清单与锁的 SHA-256 一致；阈值环境变量经 npm 脚本传递，配件低库存为 0。
 - 仓库根目录 npm run report 复现 Missing script；npm prefix 与 npm run 显示网站清单；切到阶段 3 后恢复。
+- 全站 lint 18 课零 error/warning，check 零诊断，build 的 193/193 示例与 22 页产物检查通过；D2 中文及连线通过本地 SVG 预览检查。
+- [Pages run 38994824234](https://github.com/socoo123/js_web/actions/runs/38994824234) 成功；线上课程、C18 D2 资源和路线页均为 HTTP 200，路线页显示 18/48 并包含 C18 链接。
 - 未运行：Windows、Linux 本地命令实验。构建与部署记录由 STATUS 和对应 Actions 保留。

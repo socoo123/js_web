@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C18 本地门禁通过，待 Pages 核验；后续 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C18 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -42,7 +42,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 17 / 48（C01–C17）；C18 正文、示例和本地门禁完成，待部署核验 |
+| 已发布 | 18 / 48（C01–C18）；C18 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–2 已完成；阶段 3 已有 Node 报告、report/versions scripts 与独立依赖锁 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 11 张图，新增 c18-npm-install-layout |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -70,6 +70,7 @@
 | C15 CSS 布局与响应式：排版库存页 | [打开](https://socoo123.github.io/js_web/03-async-modules/c15-css-layout-responsive/) | [examples/c15](../examples/c15/README.md) | [run 38927024152](https://github.com/socoo123/js_web/actions/runs/38927024152) |
 | C16 模块、依赖与组织代码 | [打开](https://socoo123.github.io/js_web/03-async-modules/c16-modules-dependencies/) | [examples/c16](../examples/c16/README.md) | [run 38984292309](https://github.com/socoo123/js_web/actions/runs/38984292309) |
 | C17 Node 与浏览器的边界 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c17-node-browser/) | [examples/c17](../examples/c17/README.md) | [run 38989123796](https://github.com/socoo123/js_web/actions/runs/38989123796) |
+| C18 npm：项目、版本与可复现安装 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c18-npm-reproducible-installs/) | [examples/c18](../examples/c18/README.md) | [run 38994824234](https://github.com/socoo123/js_web/actions/runs/38994824234) |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -88,11 +89,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C17 与 Q1 已完成；C18 本地门禁通过，待部署核验。验证明细见 examples/c18。
+P1、C01–C05 重构、T0、C06–C18 与 Q1 已完成；C18 每课门禁与 Pages 核验通过。验证明细见 examples/c18。
 
-1. **C18 发布核验**：推送后等待 Pages Actions 成功，确认新课返回 200。
-2. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-3. **C19 Yarn、pnpm、Bun 的职责与选择**：在独立目录比较工具和锁文件，主站继续使用 npm。
+1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
+2. **C19 Yarn、pnpm、Bun 的职责与选择**：在独立目录比较工具和锁文件，主站继续使用 npm。
 
 ## 本文件的更新规则
 
