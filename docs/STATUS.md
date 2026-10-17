@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C26 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C27 本地门禁完成，待 Pages 核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -43,6 +43,7 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C24。** 已完成数组/key/派生数据、阶段 4 商品操作、Q2 与 Java ↔ JS 速查，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C25。** 已完成表单、校验、可访问性与阶段 4 商品编辑，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C26。** 已完成状态归属、保留/重置与阶段 4 单一编辑区，每课门禁及 Pages 核验通过；F1 保留。
+- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C27。** 已完成纯 reducer、Context、边界测试与七个实验，本地门禁通过，待 Pages 核验；F1 保留。
 
 ## 当前状态
 
@@ -50,8 +51,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 26 / 48（C01–C26）；C26 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–3 已完成；阶段 4：单一编辑区、草稿切换与状态归属，累计 49 条正常回归 |
+| 已发布 | 26 / 48（C01–C26）；C27 本地完成，待 Pages 核验 |
+| 贯穿项目 | 阶段 1–3 已完成；阶段 4：纯 reducer 与库存 Context、本地 UI 状态，累计 77 条正常回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 12 张图，新增 c23-state-snapshot |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -87,8 +88,8 @@
 | C24 数组更新、key 与派生数据 | [打开](https://socoo123.github.io/js_web/05-react/c24-arrays-keys-derived/) | [examples/c24](../examples/c24/README.md) | [run 39021433607](https://github.com/socoo123/js_web/actions/runs/39021433607) |
 | C25 表单、校验与可访问性 | [打开](https://socoo123.github.io/js_web/05-react/c25-forms-validation-accessibility/) | [examples/c25](../examples/c25/README.md) | [run 39030596833](https://github.com/socoo123/js_web/actions/runs/39030596833) |
 | C26 状态提升、保留与重置 | [打开](https://socoo123.github.io/js_web/05-react/c26-state-ownership-reset/) | [examples/c26](../examples/c26/README.md) | [run 39037201320](https://github.com/socoo123/js_web/actions/runs/39037201320) |
+| C27 useReducer 与 Context | [打开](https://socoo123.github.io/js_web/05-react/c27-reducer-context/) | [examples/c27](../examples/c27/README.md) | 本地门禁通过，待部署 |
 
-发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
 ## 周验收记录
 
@@ -106,10 +107,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C26、Q1/Q2 与 Java ↔ JS 速查均已完成；C26 每课门禁与 Pages 核验通过。明细见 examples/c26。
+P1、C01–C05 重构、T0、C06–C26、Q1/Q2 与 Java ↔ JS 速查均已完成；C27 本地门禁通过，待 Pages 核验。明细见 examples/c27。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C27 useReducer 与 Context**：组织库存 action 与纯 reducer，只共享确有跨层需求的数据。
+2. **C28 useRef 与外部系统**：区分 ref 与 state，管理 DOM 焦点和可变句柄。
 
 ## 本文件的更新规则
 

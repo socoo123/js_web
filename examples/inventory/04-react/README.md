@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C26 完成。App 保存商品、筛选条件与 editingId，协调列表、统计和单一编辑区；ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 独立记数。
+当前参考状态：C27 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；Catalog 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 独立记数。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、组合、状态、数组、表单与状态归属回归，49 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、归属、reducer 与 Context 回归，77 条通过；不包含故意失败的 labs |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
 | npm run test:bug -- labs/props.test.jsx | C22 传错商品的回归，原始版本预期失败；修复后通过 |
@@ -28,8 +28,8 @@ npm run dev -- --host 127.0.0.1
 
 ## 文件与边界
 
-- index.html → src/main.jsx → App → InventoryToolbar / ProductForm / ProductList → ProductCard。StrictMode 保留，Fragment 不增加 DOM 包装。
-- src/App.jsx 从 `../../../shared/products.js` 复制固定起点，保存 state 后向下传递；ProductCard 只读 product prop，标题 id 按商品编号区分。
+- index.html → src/main.jsx → App → InventoryProvider → InventoryPage → InventorySummary / InventoryCatalog → ProductList → ProductCard。编辑区作为 Catalog 的 children，独立于筛选列表；StrictMode 保留。
+- src/InventoryContext.jsx 从 `../../../shared/products.js` 复制固定起点，products-reducer.js 统一更新业务数据；ProductCard 只读 product prop，标题 id 按商品编号区分。
 - InventoryCounter 的 count 是独立 UI 状态，不修改商品库存；两个实例各自记数。三个按钮分别提交一次加一、三次加一及定时器中的一次加三。
 - vite.config.js 使用 /js_web/ 基础路径，开发服务允许读取 examples 内的共享模块；本阶段的锁与网站根锁独立。
 - 普通 CSS 保留盒模型与移动端空间；React 组件描述结构，浏览器继续负责布局。
@@ -97,3 +97,12 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/ownership.html?case=local / shared 对比重复库存和共享父节点；switch / switch-answer 对比同位置表单和按商品 key 重置；identity 观察 props、容器类型和移除后的状态。
 - 两项教学错误：npm run test:bug -- labs/ownership-bugs.test.jsx，保留错误起点；分别按 SharedStock 与 SwitchProductFixed 的设计修改 Broken 文件后通过。
 - tests/ownership.test.jsx 新增 7 条，正常回归累计 49 条。运行和断点记录见 [examples/c26](../../c26/README.md)。
+
+## useReducer 与 Context（C27）
+
+- src/products-reducer.js 处理 sampleAdded/restocked/removed/saved；沿用 product-state.js 的纯更新，保存时检查字段、固定 id、复制标签；未知 type、无效编号和非法保存数据明确抛错，合法但不存在的编号保留数据内容。
+- src/InventoryContext.jsx 提供 ProductsContext 与 ProductsDispatchContext；每个 InventoryProvider 实例拥有独立库存。InventoryPage、InventoryCatalog、InventorySummary 使用同一个屏幕级 Provider，展示组件继续接收 props。
+- Catalog 管 query/category/order，Page 管 editingId/notice，Form 管 draft/errors；派生值渲染时计算。C26 的切换、取消、保存、删除、焦点和筛选保留策略延续。
+- labs/reducer-context.html?case=queue / mutation / mutation-answer / split / split-answer / scope / missing 分别演示 action 队列、旧快照污染、错接 Provider、独立实例与静态默认值；实验页仅 dev 可用。
+- npm run test:bug -- labs/reducer-context-bugs.test.jsx 预期两项失败；分别按 MutationReducerFixed 与 ContextJoined 修复两个 Broken 文件后通过。仓库保留错误起点。
+- tests/reducer.test.jsx 新增 22 条，tests/context.test.jsx 新增 6 条，正常回归累计 77 条。详细运行和浏览器证据见 [examples/c27](../../c27/README.md)。

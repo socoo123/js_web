@@ -303,3 +303,9 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 2026-10-17：核对 React 官方[共享 state](https://react.dev/learn/sharing-state-between-components)与[选择 state 结构](https://react.dev/learn/choosing-the-state-structure)。共同父节点拥有共享来源，子组件以 props/回调协调；受控设计可按组件行为划分；选中编号替代重复对象，派生值直接计算，未提交草稿与业务记录区分。
 - 同日：核对[保留和重置 state](https://react.dev/learn/preserving-and-resetting-state)、[useState 初始值](https://react.dev/reference/react/useState)和 [key 特殊属性](https://react.dev/warnings/special-props)。树位置、组件/祖先类型与同级 key 决定身份；props 更新不重做初始化；移除再挂载不恢复旧 state，嵌套定义和不稳定 key 会重置子树。原创实验复用固定库存数据。
 - 同日：核对[按 key 重置整份状态](https://react.dev/learn/you-might-not-need-an-effect#resetting-all-state-when-a-prop-changes)与 [Context 的使用边界](https://react.dev/learn/passing-data-deeply-with-context)。单一编辑区使用商品 key，草稿本地保存，筛选不卸载编辑区；跨商品保存草稿作为设计对照，未加入默认应用。不新增 Effect、Context、依赖、安装流程或 D2 图；沿用阶段 4 的 npm 锁。运行记录见 [examples/c26](../examples/c26/README.md)。
+
+## C27 useReducer 与 Context
+
+- 2026-10-17：核对 React 官方[提取 reducer](https://react.dev/learn/extracting-state-logic-into-a-reducer)与 [useReducer](https://react.dev/reference/react/useReducer)：state/action/新 state、纯计算、初始化函数、dispatch 的稳定身份和无返回值、快照/连续队列、Object.is 与 StrictMode 开发纯度检查。业务 action、校验和边界由本项目自主定义；未引入第三方状态库。
+- 同日：核对 [reducer 配合 Context](https://react.dev/learn/scaling-up-with-reducer-and-context)、[createContext](https://react.dev/reference/react/createContext)与 [useContext](https://react.dev/reference/react/useContext)。分开传递数据/dispatch、同一 Context 对象、最近上层 Provider、静态默认值与显式 undefined、React 19 的直接 Provider 写法、Context 订阅通知与父组件渲染的区别均依当前文档。
+- 同日：沿用 Node 24、npm 11、React 19 与阶段 4 独立锁，无新依赖、安装工具或 D2。库存是页面内本地业务数据；Context 不实现服务端缓存、重试和失效。原创实验复用固定商品；运行与先失败后修复记录见 [examples/c27](../examples/c27/README.md)。
