@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>Node 与浏览器的宿主边界</title>
+<h1>相同业务，不同宿主</h1>
+<pre id="output"></pre>
+<script type="module">
+  import { Inventory } from "../inventory/01-core/inventory.js";
+  import { products } from "../shared/products.js";
+  document.querySelector("#output").textContent = [
+    "document " + typeof document,
+    "process " + typeof process,
+    "fetch " + typeof fetch,
+    "总库存 " + new Inventory(products).summary().totalStock,
+  ].join("\n");
+</script>
+</html>

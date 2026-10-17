@@ -1,0 +1,4 @@
+products.json
+true
+true
+inventory.txt

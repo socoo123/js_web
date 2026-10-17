@@ -1,0 +1,4 @@
+document undefined
+process object
+fetch function
+总库存 52
