@@ -41,3 +41,4 @@
 - 生产 JS 的 sourceMappingURL 与 .map 一致；映射至 01-core/inventory.js 第 30 行，在对应生成位置命中断点，调用参数为 P002、3；继续后汇总正确。
 - TS 独立预览实际显示 123；转换并重建后实际显示 15。
 - 未运行：在 DevTools UI 中手工点击的操作路径（按 Chrome 官方文档核对）、Firefox、Safari、Windows。无线上库存应用部署，本课线上发布的是教程正文。
+- Pages：[run 38997587821](https://github.com/socoo123/js_web/actions/runs/38997587821) 成功；C20 地址 HTTP 200，标题/正文正确；路线页 20 / 48 与新课链接正确。
