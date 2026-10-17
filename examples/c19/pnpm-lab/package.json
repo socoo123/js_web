@@ -1,0 +1,14 @@
+{
+  "name": "inventory-tool-comparison",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.14.0",
+  "scripts": {
+    "report": "node report.js",
+    "runtime": "node runtime.js"
+  },
+  "dependencies": {
+    "wrap-ansi": "7.0.0"
+  }
+}
