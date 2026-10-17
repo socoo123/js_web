@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C23 完成。App 组合工具栏、盘点计数和商品列表。InventoryCounter 用 useState 保存本次操作次数，支持立即、连续和延时累计；商品数组的编辑在后续课程推进。
+当前参考状态：C24 完成。App 保存商品与筛选条件，支持新增示例商品、补货、删除、搜索、分类与排序；列表和统计由当前来源计算。InventoryCounter 继续独立保存本次操作次数。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 正常卡片、组合与状态交互回归，14 条通过；不包含故意失败的 labs |
+| npm test | 正常卡片、组合、状态与数组交互回归，20 条通过；不包含故意失败的 labs |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
 | npm run test:bug -- labs/props.test.jsx | C22 传错商品的回归，原始版本预期失败；修复后通过 |
@@ -29,7 +29,7 @@ npm run dev -- --host 127.0.0.1
 ## 文件与边界
 
 - index.html → src/main.jsx → App → InventoryToolbar / ProductList → ProductCard。StrictMode 保留，Fragment 不增加 DOM 包装。
-- src/App.jsx 从 `../../../shared/products.js` 读取固定数据，向下传递；ProductCard 只读 product prop，标题 id 按商品编号区分。
+- src/App.jsx 从 `../../../shared/products.js` 复制固定起点，保存 state 后向下传递；ProductCard 只读 product prop，标题 id 按商品编号区分。
 - InventoryCounter 的 count 是独立 UI 状态，不修改商品库存；两个实例各自记数。三个按钮分别提交一次加一、三次加一及定时器中的一次加三。
 - vite.config.js 使用 /js_web/ 基础路径，开发服务允许读取 examples 内的共享模块；本阶段的锁与网站根锁独立。
 - 普通 CSS 保留盒模型与移动端空间；React 组件描述结构，浏览器继续负责布局。
@@ -68,3 +68,13 @@ npm run dev -- --host 127.0.0.1
 queue 和 delay 保留错误起点；对应 answer 提供正确结果。snapshot 的旧日志是有意保留的点击时快照。完整地址、操作与结果见 [examples/c23](../../c23/README.md)。
 
 tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；辅助文件在每个用例结束后卸载根、清理定时器并恢复时钟。它不替代 Chrome 对页面与断点的验证。RTL 的系统用法留到测试课。
+
+## 数组、key 与派生数据（C24）
+
+- src/product-state.js 提供 restockProduct、removeProduct、addSampleProduct 与 selectProducts；返回新数组和被修改的新记录，未变商品共享只读引用。
+- App 的 products/query/category/order 是来源状态；visibleProducts/totalStock/totalCents 在渲染时计算。ProductCard 上报 id，App 使用待处理数组更新，ProductList 用 product.id 作 key。
+- 新增默认「新商品 / 配件 / 0 件 / 0 分 / 空标签」，从当前最大编号加一。到 P999 禁用新增，删除末尾可复用编号；不承担后端长期编号职责。补货上限 99999，所有改动刷新后恢复。
+- 浏览器验收：搜索鼠标后补 1 件为 53 件、26477.00 元；切外设，删除 P001 后为 41 件、21689.00 元。清空条件再新增两次，P007/P008 出现，共 7 种，总库存与价值不变。
+- labs/arrays.html?case= 后接 mutation / mutation-answer、keys / keys-answer、derived / derived-answer，对比同引用跳过、索引 key 草稿错位与重复 state 过期。
+- labs/arrays-bugs.test.jsx 三项预期失败，修复三个对应 Broken 文件后原命令通过：`npm run test:bug -- labs/arrays-bugs.test.jsx`。仓库保留教学错误起点，正常 tests/arrays.test.jsx 验证正确行为。
+- 课程练习「仅看售罄」的修改是可选跟做，不在默认首页中。运行与第二周验收细节见 [examples/c24](../../c24/README.md)。

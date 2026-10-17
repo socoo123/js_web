@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C23 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C24 与 Q2 本地门禁完成，Pages 待核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -40,6 +40,7 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C21。** 已完成 React/JSX 课程、阶段 4 商品卡片与调试实验；每课门禁及 Pages 核验通过，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C22，并协助配置 React DevTools。** 已完成 props/组合/渲染课程、阶段 4 列表与调试实验；Chrome 扩展原已安装，Components 与 Profiler 入口已确认可用，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C23，调试避开正在使用的窗口。** 已完成状态快照课程、D2 与阶段 4 盘点交互；使用独立后台 Chrome 验证，F1 保留队列。
+- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C24。** 已完成数组/key/派生数据、阶段 4 商品操作、Q2 与 Java ↔ JS 速查，本地门禁通过，Pages 待核验；F1 保留。
 
 ## 当前状态
 
@@ -47,8 +48,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 23 / 48（C01–C23）；C23 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–3 已完成；阶段 4：盘点计数、状态快照、连续/延时更新实验与 14 条正常回归 |
+| 已发布 | 23 / 48（C01–C23）；C24 本地完成，Pages 待核验 |
+| 贯穿项目 | 阶段 1–3 已完成；阶段 4：商品新增/补货/删除/筛选/排序、key/派生数据实验与 20 条正常回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 12 张图，新增 c23-state-snapshot |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -81,6 +82,7 @@
 | C21 React 来由、JSX 与第一个组件 | [打开](https://socoo123.github.io/js_web/05-react/c21-react-jsx-components/) | [examples/c21](../examples/c21/README.md) | [run 39009250317](https://github.com/socoo123/js_web/actions/runs/39009250317) |
 | C22 Props、组合与渲染模型 | [打开](https://socoo123.github.io/js_web/05-react/c22-props-composition-render/) | [examples/c22](../examples/c22/README.md) | [run 39018608877](https://github.com/socoo123/js_web/actions/runs/39018608877) |
 | C23 useState：状态快照与更新队列 | [打开](https://socoo123.github.io/js_web/05-react/c23-state-snapshot-queue/) | [examples/c23](../examples/c23/README.md) | [run 39020278502](https://github.com/socoo123/js_web/actions/runs/39020278502) |
+| C24 数组更新、key 与派生数据 | 待部署 | [examples/c24](../examples/c24/README.md) | 本地门禁与 Q2 完成，Pages 待核验 |
 
 发布新课时在表格末尾加一行。验证细节写进 examples README，这里不写。
 
@@ -89,6 +91,7 @@
 - 建站与 C01–C05（2026-10-15，旧流程）：本地和线上 Pages 都检查过 1280px/360px、亮暗模式、D2 中文、折叠答案、禁用 JS 后阅读、搜索、代码复制，全部通过。
 - T0 配置调整与 C06（2026-10-16）：本地 1280px/360px、亮暗模式、D2、折叠答案、代码复制、三个关键词搜索及禁用 JS 阅读通过。
 - C12 / 第一周验收（2026-10-16）：C01–C12 及首页/路线页的 1280px/360px、亮暗模式、9 张 D2 中文、折叠答案、代码复制、三关键词搜索与禁用 JS 阅读通过；阶段 1 业务参考值一致。
+- C24 / 第二周验收（2026-10-17）：28 页的 1280px/360px、亮暗模式、12 张 D2、折叠答案/复制、三关键词搜索、25 页禁用 JS 阅读通过；阶段 1–3 业务参考值、原生页编辑/刷新/坏副本恢复与 React 列表操作通过。
 
 ## 已知问题（不阻塞）
 
@@ -99,10 +102,10 @@
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C23 与 Q1 已完成；C23 每课门禁与 Pages 核验通过。验证明细见 examples/c23。
+P1、C01–C05 重构、T0、C06–C23 与 Q1 已上线；C24、Q2 和 Java ↔ JS 速查本地门禁完成，Pages 待核验。明细见 examples/c24。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C24 数组更新、key 与派生数据**：在阶段 4 推进商品数组更新、列表身份与筛选，并完成 Q2 和「Java ↔ JS 速查」。
+2. **C25 表单、校验与可访问性**：在阶段 4 推进商品编辑、字段校验与键盘操作。
 
 ## 本文件的更新规则
 

@@ -1,4 +1,4 @@
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, onRestock, onDelete }) {
   const priceLabel = (product.priceCents / 100).toFixed(2);
   const headingId = `product-${product.id}`;
   return (
@@ -9,6 +9,10 @@ export default function ProductCard({ product }) {
       <p className="status">{product.stock === 0 ? "已售罄" : "有货"}</p>
       <p className="price">单价：¥{priceLabel}</p>
       {product.tags.length > 0 && <p>标签：{product.tags.join("、")}</p>}
+      <div className="product-actions">
+        {onRestock && <button type="button" disabled={product.stock >= 99999} onClick={() => onRestock(product.id)}>补 1 件</button>}
+        {onDelete && <button type="button" onClick={() => onDelete(product.id)}>删除</button>}
+      </div>
     </article>
   );
 }

@@ -5,7 +5,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 <!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
 
-**已发布 23 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**已发布 24 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
 
 ## 选择你的节奏
 
@@ -46,7 +46,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 11 天 | [C21 React 来由、JSX 与第一个组件](../05-react/c21-react-jsx-components/) | 已发布 |
 | 第 11 天 | [C22 Props、组合与渲染模型](../05-react/c22-props-composition-render/) | 已发布 |
 | 第 12 天 | [C23 useState：状态快照与更新队列](../05-react/c23-state-snapshot-queue/) | 已发布 |
-| 第 12 天 | C24 数组更新、key 与派生数据 | 待发布 |
+| 第 12 天 | [C24 数组更新、key 与派生数据](../05-react/c24-arrays-keys-derived/) | 已发布 |
 
 ## 第 3 周：详细 React 与组件工程
 

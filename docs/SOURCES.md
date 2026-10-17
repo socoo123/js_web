@@ -284,3 +284,9 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 2026-10-17：核对 React 官方[组件的记忆](https://react.dev/learn/state-a-components-memory)、[响应事件](https://react.dev/learn/responding-to-events)和[Hooks 规则](https://react.dev/reference/rules/rules-of-hooks)。useState 返回值与 setter、初始值与跨渲染保存、事件传函数、各实例独立、顶层调用与条件返回顺序均按当前文档。只讲 useState，不将后续 use API 的特殊规则泛化到这里。
 - 同日：核对[state 快照](https://react.dev/learn/state-as-a-snapshot)、[更新队列](https://react.dev/learn/queueing-a-series-of-state-updates)与 [useState 参考](https://react.dev/reference/react/useState)：同一事件的快照、批处理与分别处理点击、替换值/updater 的顺序、纯 updater 与 StrictMode 开发检查、setter 无返回值。Node 手算器只算单个 state 队列；真实 React 事件、延时闭包和页面结果另行运行验证。
 - 同日：核对 [Vitest 环境](https://vitest.dev/guide/environment)、[Happy DOM 官方仓库](https://github.com/capricorn86/happy-dom)与 [React act](https://react.dev/reference/react/act)。npm registry `npm view happy-dom version engines --json` 返回 21.0.3、Node >=20；只锁入阶段 4 的 devDependencies，按文件选择 happy-dom，不引入 RTL 或修改站点根依赖。使用 React createRoot/act 和可控时钟，测试连续补货及等待期间的新操作，保留两份教学错误起点。
+
+## C24 数组更新、key 与派生数据及 Java ↔ JS 速查
+
+- 2026-10-17：核对 React 官方[对象更新](https://react.dev/learn/updating-objects-in-state)、[数组更新](https://react.dev/learn/updating-arrays-in-state)和 [useState 相同值检查](https://react.dev/reference/react/useState#ive-updated-the-state-but-the-screen-doesnt-update)。强调 state 只读约定、Object.is、浅复制、新容器与新目标记录、嵌套 tags 的复制路径、纯 updater；未修改元素可以继续共享引用。
+- 同日：核对[列表 key](https://react.dev/learn/rendering-lists)及[保留和重置状态](https://react.dev/learn/preserving-and-resetting-state)。同级稳定 key 配合类型识别组件，key 非普通 prop；索引错位使用实际行内草稿复现；随机 key 重建及移出树后重新挂载的边界按文档说明。
+- 同日：核对[state 结构](https://react.dev/learn/choosing-the-state-structure)和[渲染时计算派生结果](https://react.dev/learn/you-might-not-need-an-effect#updating-state-based-on-props-or-state)，只存来源状态，筛选排序统计直接计算，草稿与已保存值区分。速查页回链已核查的 C03–C24 和对应官方入口，不引入新年度特性、安装命令或依赖；沿用阶段 4 独立锁和 Node 24。运行证据见 [examples/c24](../examples/c24/README.md)。
