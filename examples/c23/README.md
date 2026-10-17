@@ -41,5 +41,5 @@
 - 阶段 4 重装 npm ci 及生产预览通过；首页的六件商品仍保持固定库存，生产版本计数交互正常。
 - 网站 lint 为 23 课零 error/warning，check 零诊断，build 固定输出 211/211、27 个 HTML 与 23 课产物检查通过。正文 9,017 字符、15 个代码块，4 个具名代码块与示例逐字一致。
 - 本地静态 C23 HTTP 200；Chrome 核对标题、D2、6 个练习折叠区与路线页 23 / 48；禁用 JavaScript 后正文仍可阅读。未执行全站周验收（按计划在 C24 后进行）。
-- Pages 待推送后记录。
+- Pages：[run 39020278502](https://github.com/socoo123/js_web/actions/runs/39020278502) 构建与部署成功；线上 C23 HTTP 200，标题、6 个答案折叠区、D2 资源正确，路线页 HTTP 200 且为 23 / 48。
 - 未运行：Firefox、Safari、Windows；原生 DevTools 界面的手动点击路径。
