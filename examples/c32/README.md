@@ -29,5 +29,5 @@
 - 同日：错误 key 选择 P002 后无 P002 GET、仍显示 P001；给浏览器模块响应补上编号后出现 P002 GET 且显示 P002。同一 Vitest bug 用例先失败，修改源文件加入编号后通过，随后还原教学错误起点。
 - 同日：应用 hash 详情补货后库存为 1，回列表仍为本地库存 0、总数 52；重入复用详情缓存，刷新恢复 0，资源路径保留 /js_web/。
 - 同日：去掉 onSuccess 后，mock 保存断点显示 current.stock=12、saved.stock=13，缓存仍为 12、没有新 GET；恢复后显示 13 且只读回一次。源文件已恢复。
-- 同日：根目录 lint:lessons（32 课零 error/warning）、check（零诊断）、build 通过；全量固定输出 249/249 与 37 页子路径/资源/折叠区检查通过。阶段 4 生产构建与 hash 详情预览通过；静态正文禁用 JS 后可阅读及展开 6 个折叠区。Pages 待推送后核验。
+- 同日：根目录 lint:lessons（32 课零 error/warning）、check（零诊断）、build 通过；全量固定输出 249/249 与 37 页子路径/资源/折叠区检查通过。阶段 4 生产构建与 hash 详情预览通过；静态正文禁用 JS 后可阅读及展开 6 个折叠区。Pages [run 39087677999](https://github.com/socoo123/js_web/actions/runs/39087677999) 成功，课程与路线页 HTTP 200，线上目录为 32/48。
 - 未运行：Firefox、Safari、Windows、真实后端和多用户同步。

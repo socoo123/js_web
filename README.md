@@ -7,7 +7,7 @@
 - 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
 - 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)
 - 第二课：[C02 Web 基础与第一个调试现场](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/)
-- 最新开发课程：[C32 认识 TanStack Query 与服务端状态](src/content/docs/05-react/c32-tanstack-query-server-state.md)
+- 最新课：[C32 认识 TanStack Query 与服务端状态](https://socoo123.github.io/js_web/05-react/c32-tanstack-query-server-state/)
 - [本地构建与自动提交/部署说明](docs/DEPLOYMENT.md)
 
 ## 课程入口
