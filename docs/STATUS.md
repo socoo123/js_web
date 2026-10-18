@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C36 与 Q3 本地门禁完成，待 Pages 核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C36 已上线，Q3 与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -38,7 +38,7 @@
 - **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C29、C30。** 已完成 Effect、请求竞态、实验、共用 D2 与阶段 4 标题/快捷键/详情；每课门禁与 Pages 核验通过；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C34、C35。** 性能/加载实验与测试课程、每课门禁及 Pages 核验完成；F1 保留。
-- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C36。** 综合排错、商品快照/本地详情、Hooks 速查与 Q3 本地验收完成，待 Pages 核验；F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C36。** 综合排错、商品快照/本地详情、Hooks 速查与 Q3 完成；每课门禁及 Pages 核验通过，F1 保留。
 
 ## 当前状态
 
@@ -46,8 +46,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 36 / 48（C01–C36）；C36 本地完成，待本次 Pages 核验 |
-| 贯穿项目 | 阶段 1–3 已完成；阶段 4：本地快照/详情、190 条正常回归与 2 条生产 E2E；Q3 本地完成 |
+| 已发布 | 36 / 48（C01–C36）；C36 每课门禁与线上核验通过 |
+| 贯穿项目 | 阶段 1–3 已完成；阶段 4：本地快照/详情、190 条正常回归与 2 条生产 E2E；Q3 完成 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 13 张图，c29-effect-lifecycle 共用生命周期/请求竞态 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -91,7 +91,7 @@
 | C33 现代 React 19 与更新速查 | [打开](https://socoo123.github.io/js_web/05-react/c33-modern-react-actions/) | [examples/c33](../examples/c33/README.md) | [run 39088993996](https://github.com/socoo123/js_web/actions/runs/39088993996) |
 | C34 性能、加载与错误诊断 | [打开](https://socoo123.github.io/js_web/05-react/c34-performance-loading-errors/) | [examples/c34](../examples/c34/README.md) | [run 39101734918](https://github.com/socoo123/js_web/actions/runs/39101734918) |
 | C35 React UT、集成测试与 E2E 地图 | [打开](https://socoo123.github.io/js_web/05-react/c35-react-testing/) | [examples/c35](../examples/c35/README.md) | [run 39108651570](https://github.com/socoo123/js_web/actions/runs/39108651570) |
-| C36 React 项目复盘与故障排查 | [打开](https://socoo123.github.io/js_web/05-react/c36-react-project-debugging/) | [examples/c36](../examples/c36/README.md) | 本地门禁与 Q3 完成，待 Pages 核验 |
+| C36 React 项目复盘与故障排查 | [打开](https://socoo123.github.io/js_web/05-react/c36-react-project-debugging/) | [examples/c36](../examples/c36/README.md) | [run 39110881230](https://github.com/socoo123/js_web/actions/runs/39110881230) |
 
 ## 周验收记录
 
@@ -107,7 +107,7 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C36、T0、Q1–Q3 与三张速查页已完成本地门禁；C36 待本次 Pages 核验。明细见 examples/c36。
+完整队列见 PLAN §8。C01–C36、T0、Q1–Q3 与三张速查页均已完成；C36 每课门禁与 Pages 核验通过。明细见 examples/c36。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C37 组件生态与选择标准**：比较组件方案，为阶段 5 的表格与编辑弹窗选择组件库。
