@@ -28,4 +28,5 @@
 - DevTools 暂停帧：错误入口在 onRestock 的日志行前停住，getProperty 为数字 3、控件 getText 为字符串 `"0"`，与正文一致；通过独立 Chrome 调试接口检查，没有操作用户窗口。
 - `npm run build`：全量固定输出 272/272、45 页构建及 /js_web/ 路径/资源/折叠区/D2 检查通过；全站 14 张 D2。新增图中文与箭头布局已截图检查。
 - 本地生产页：C39 与路线 HTTP 200、路线 39/48；1280px/360px 无文档横向溢出，D2 资源正常，6 个答案折叠区和禁用 JS 阅读正常，无失败资源或页面错误。3 个带 title 的正文代码块与对应文件逐字一致。
+- Pages：[run 39122376307](https://github.com/socoo123/js_web/actions/runs/39122376307) 成功；线上 C39、路线均 HTTP 200，标题、6 个折叠区、D2 资源与路线 39/48 正确，无失败资源或页面错误。
 - 未运行：在 DevTools 界面上手动点击面板、屏幕阅读器、Firefox、Safari、Windows；SAPUI5、Web Components、React 包装库接入与真实 SAP 服务。
