@@ -5,6 +5,7 @@ import InventoryCatalog from "./InventoryCatalog.jsx";
 import InventoryCounter from "./InventoryCounter.jsx";
 import ProductForm from "./ProductForm.jsx";
 import InventoryNote from "./InventoryNote.jsx";
+import ReportPanel from "./ReportPanel.jsx";
 import { Route, Routes, Navigate } from "react-router";
 import InventoryLayout from "./InventoryLayout.jsx";
 import ProductDetailRoute from "./ProductDetailRoute.jsx";
@@ -63,6 +64,7 @@ function InventoryPage() {
       <h1 id="inventory-heading" ref={headingRef} tabIndex={-1}>库存管理</h1>
       <p role="status">{notice}</p>
       <InventorySummary />
+      <ReportPanel />
       <InventoryCatalog editingId={editingId} onEdit={setEditingId} onDelete={handleDelete}>
         <InventoryCounter />
         <InventoryNote />

@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C33 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C34 本地门禁通过，待 Pages 核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -41,6 +41,7 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C27、C28。** 已完成 reducer/Context、ref/外部系统、对应实验与阶段 4 代码，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C29、C30。** 已完成 Effect、请求竞态、实验、共用 D2 与阶段 4 标题/快捷键/详情；每课门禁与 Pages 核验通过；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C34。** 性能实验、Transition、按需报表与局部错误边界本地门禁通过，待 Pages 核验；F1 保留。
 
 ## 当前状态
 
@@ -48,12 +49,11 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 33 / 48（C01–C33）；C33 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–3 已完成；阶段 4：异步 Action、表单状态与乐观补货预览，累计 154 条正常回归 |
+| 已发布 | 33 / 48（C01–C33）；C34 本地门禁通过、待部署 |
+| 贯穿项目 | 阶段 1–3 已完成；阶段 4：增加按需分类报表与局部错误边界，累计 163 条正常回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 13 张图，c29-effect-lifecycle 共用生命周期/请求竞态 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
-| React islands | 未接入，没有实际需求前不安装 |
 
 ## 已发布课程
 
@@ -92,6 +92,7 @@
 | C31 自定义 Hooks 与路由 | [打开](https://socoo123.github.io/js_web/05-react/c31-custom-hooks-routing/) | [examples/c31](../examples/c31/README.md) | [run 39082631885](https://github.com/socoo123/js_web/actions/runs/39082631885) |
 | C32 认识 TanStack Query 与服务端状态 | [打开](https://socoo123.github.io/js_web/05-react/c32-tanstack-query-server-state/) | [examples/c32](../examples/c32/README.md) | [run 39087677999](https://github.com/socoo123/js_web/actions/runs/39087677999) |
 | C33 现代 React 19 与更新速查 | [打开](https://socoo123.github.io/js_web/05-react/c33-modern-react-actions/) | [examples/c33](../examples/c33/README.md) | [run 39088993996](https://github.com/socoo123/js_web/actions/runs/39088993996) |
+| C34 性能、加载与错误诊断 | [打开](https://socoo123.github.io/js_web/05-react/c34-performance-loading-errors/) | [examples/c34](../examples/c34/README.md) | 本地门禁通过，待部署核验 |
 
 ## 周验收记录
 
@@ -106,10 +107,10 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。P1、C01–C05 重构、T0、C06–C33、Q1/Q2 与 Java ↔ JS 速查均已完成；C33 每课门禁与 Pages 核验通过。明细见 examples/c33。
+完整队列见 PLAN §8。P1、C01–C05 重构、T0、C06–C34、Q1/Q2 与 Java ↔ JS 速查本地工作已完成；C34 待 Pages 核验。明细见 examples/c34。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C34 性能、加载与错误诊断**：先测量再优化，区分 Suspense、请求状态与错误边界。
+2. **C35 React UT、集成测试与 E2E 地图**：角色查询、用户行为、异步失败回归与测试层级。
 
 ## 本文件的更新规则
 

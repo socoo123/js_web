@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C33 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32 给详情加入 Query 缓存与可写 mock，列表仍是本地 reducer 数据。
+当前参考状态：C34 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、归属、Context、ref 与 Effect 回归，154 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、请求、Action 与报表等回归，163 条通过；不包含故意失败的 labs |
 | npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
@@ -162,3 +162,12 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/actions.html 默认提供保存失败、读回失败、商品切换；case=simple / signature / signature-answer / status / status-answer / ref / element / use 分别演示基础 action、参数错位/修复、上下文归属/修复、ref prop、对象 property 与自定义事件、稳定 Promise 的 use 读取。实验只用于 dev。
 - npm run test:bug -- labs/actions-bugs.test.jsx 的两个原始起点先失败；用对应 Fixed 文件修复后通过，仓库保留错误起点。tests/actions.test.jsx 新增 10 条，正常回归共 154 条；包含保存失败恢复、写成功读回失败、等待读回、切换商品、字段边界、签名与状态归属。
 - 生产预览的 P002 详情 Action 补货后为 1；列表仍是本地库存 0、总数 52，刷新恢复 mock 与缓存。没有真实写 API、Server Functions 或 RSC 框架。运行记录见 [examples/c33](../../c33/README.md)。
+
+## 性能、加载与错误（C34）
+
+- InventoryPage 在统计后增加 ReportPanel；组件外声明 lazy，首次展开才 import InventoryReport，生产构建生成独立 chunk。普通六件商品继续直接筛选/汇总，不额外加 memo。
+- report-summary.js 只派生本地分类统计，InventoryReport 用 caption 与行列表头显示。P002 补货后外设 13 件、4917.00 元，编辑草稿与盘点不因展开/收起而重置。
+- ReportErrorBoundary 仅替换报表后代，记录 error 与 componentStack；修正渲染原因后以 key 重建。相同 lazy 的失败结果仍缓存，模块加载失败需恢复网络、确认资源可用后刷新，内存库存与未保存草稿会随刷新丢失。
+- labs/performance.html 的 before/memo/after 对照放大列表；transition 调整结果更新优先级；lazy/request/render-error/chunk-error 分开观察代码等待、普通请求与局部异常。实验没有启用 Compiler。
+- stale/stale-answer 演示缺依赖；npm run lint:c34-bug 与 npm run test:bug -- labs/performance-bugs.test.jsx 先失败，补完整依赖后通过，仓库保留错误起点。
+- tests/performance.test.jsx 新增 9 条，累计 163 条。浏览器测量、生产 chunk、异常与业务验证记录见 [examples/c34](../../c34/README.md)。
