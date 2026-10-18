@@ -1,0 +1,13 @@
+<mvc:View controllerName="course.c39.Inventory"
+  xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">
+  <VBox class="sapUiSmallMargin">
+    <Title text="库存绑定实验" level="H1" />
+    <Text text="{inventory>/product/name}" />
+    <HBox alignItems="Center">
+      <Text text="库存：" />
+      <Text id="stock" text="{inventory>/product/stock}" />
+      <Text text="件" />
+    </HBox>
+    <Button text="补货 3 件" press=".onRestock" />
+  </VBox>
+</mvc:View>

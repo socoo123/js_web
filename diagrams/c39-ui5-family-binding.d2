@@ -1,0 +1,30 @@
+# 上半部箭头表示设计指导与包装关系；下半部表示经典 UI5 一次事件到绑定更新的方向。
+direction: down
+**.style.font-size: 20
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+
+design: SAP Fiori\n设计系统与交互规范 {
+  style.fill: "#fff7e6"
+  style.stroke: "#d48806"
+}
+family: UI5 家族 {
+  style.fill: "#f4f8ff"
+  classic: 经典 UI5\nSAPUI5 / OpenUI5\n共享核心，交付库范围不同
+  web: UI5 Web Components\n标准自定义元素
+  react: UI5 Web Components\nfor React\nReact 接口与组合组件
+  react -> web: 包装 / 组合
+}
+design -> family: 设计指导
+
+mvc: 经典 UI5 的 MVC 与绑定 {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+  view: XML View / 控件\n声明显示与绑定路径
+  controller: Controller\n响应补货事件
+  model: JSONModel\nsetProperty 更新库存
+  view -> controller: press 事件
+  controller -> model: 读取并写入
+  model -> view: 绑定通知，更新显示
+}
+family -> mvc: 经典 UI5 采用

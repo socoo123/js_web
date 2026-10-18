@@ -10,6 +10,8 @@ C03 的图是新规范下的样例写法：文件首行注释说明箭头含义�
 
 C23 的 `c23-state-snapshot.d2` 展示状态快照与更新队列；C29 的 `c29-effect-lifecycle.d2` 展示同一 Effect 的 setup/cleanup 顺序，蓝色容器表示根 StrictMode 的首次开发检查，生产路径跳过该容器。加入这两张后共 13 张；C30 继续复用 Effect 生命周期图。
 
+C39 的 `c39-ui5-family-binding.d2` 上半部展示 Fiori 对两条 UI 技术路线的设计指导与 React 库的包装关系，下半部展示经典 UI5 的 View 事件、Controller 写模型和绑定通知；当前共 14 张。
+
 ## 准备与生成
 
 操作方式：维护者构建。验证状态：macOS arm64 的准备/构建路径和 Pages Actions 的 Ubuntu 24.04/Linux x64 路径均于 **2026-10-15** 实际执行通过；macOS x64、Linux arm64 和原生 Windows 路径尚未执行。学习者阅读 C01 不需要安装 D2。
