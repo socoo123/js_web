@@ -31,5 +31,5 @@
 - 独立调试页面在 onEdit 暂停：P004 的 context 路径 /products/3、id P004、可见 1 行。Fragment stock 改为 Stock 后，在 dialog.open 前暂停：草稿 "0"、绑定 /Stock、控件值 ""；恢复源码后输入为 0。取消输入 8 后重开为 3。
 - model-console.js 的实际输出依次为 TwoWay、3、undefined；带 title 的正文示例与文件逐字一致。正文普通课长度与代码块数由 lint 检查，无新增图。
 - 网站 check 零诊断；全量固定输出 277/277，build 47 页及 /js_web/ 检查通过。课程生产页 HTTP 200，正文 6 个折叠区、1280/360 无文档溢出、无失败资源/页面异常、禁用 JS 阅读正常；课程/表格/Dialog 截图已检查。
-- Pages：待推送后记录。
+- Pages：[run 39134470004](https://github.com/socoo123/js_web/actions/runs/39134470004) 成功；线上课程与路线均 HTTP 200，标题、6 个答案、路线 41/48 与 C41 链接正确。
 - 未运行：DevTools 界面上手动点选面板、屏幕阅读器、Firefox、Safari、Windows；真实 SAP 服务。

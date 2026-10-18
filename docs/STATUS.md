@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C41 本地门禁完成，等待 Pages 发布与核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C41 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -34,7 +34,7 @@
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C34、C35。** 性能/加载实验与测试课程、每课门禁及 Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C36。** 综合排错、商品快照/本地详情、Hooks 速查与 Q3 完成；每课门禁及 Pages 核验通过，F1 保留。
-- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C37–C41。** 组件库、UI5 家族/MVC 工程已上线；C41 在阶段 6 增加绑定、筛选、草稿编辑、汇总与 i18n，本地门禁通过，待 Pages 核验；F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C37–C41。** 组件库、UI5 家族/MVC 工程与阶段 6 筛选、草稿编辑、校验、汇总、i18n 已上线；每课门禁与 Pages 核验通过，F1 保留。
 
 ## 当前状态
 
@@ -42,7 +42,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 40 / 48（C01–C40）；C40 每课门禁与线上核验通过 |
+| 已发布 | 41 / 48（C01–C41）；C41 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–5、Q3 已完成；阶段 6：Table 筛选/草稿 Dialog/校验/汇总/i18n，9 条回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 14 张图，新增 C39 家族/MVC 绑定共用图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -92,7 +92,7 @@
 | C38 一个普通组件库的完整案例 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c38-antd-inventory/) | [examples/c38](../examples/c38/README.md) | [run 39121201638](https://github.com/socoo123/js_web/actions/runs/39121201638) |
 | C39 SAP Fiori 与 UI5 家族 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c39-fiori-ui5-family/) | [examples/c39](../examples/c39/README.md) | [run 39122376307](https://github.com/socoo123/js_web/actions/runs/39122376307) |
 | C40 OpenUI5 入门：MVC 与工程 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c40-openui5-mvc-project/) | [examples/c40](../examples/c40/README.md) | [run 39124104412](https://github.com/socoo123/js_web/actions/runs/39124104412) |
-| C41 UI5 Model、绑定与业务控件 | 待发布 | [examples/c41](../examples/c41/README.md) | 本地门禁通过，等待部署 |
+| C41 UI5 Model、绑定与业务控件 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c41-model-binding-controls/) | [examples/c41](../examples/c41/README.md) | [run 39134470004](https://github.com/socoo123/js_web/actions/runs/39134470004) |
 
 ## 周验收记录
 
@@ -108,7 +108,7 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C41、T0、Q1–Q3 与三张速查页本地任务已完成；C41 门禁通过，等待部署。明细见 examples/c41。
+完整队列见 PLAN §8。C01–C41、T0、Q1–Q3 与三张速查页已完成；C41 每课门禁与线上核验通过。明细见 examples/c41。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C42 UI5 路由与 OData 起点**：阶段 6 的列表/详情路由、元数据与 V2 浏览器 mock。
