@@ -40,4 +40,5 @@
 - 同日：生产真实报表 chunk 展开前未请求，首次延迟下载显示 fallback、再次展开无新请求；库存同步、草稿/盘点保留、Action 详情与深层刷新通过。阻断 chunk 真实请求后只显示局部错误，重试不重载，恢复请求并刷新后成功；360px 报表无溢出。
 - 同日：网站 lint:lessons（34 课零 error/warning，C34 7951 字符、12 个代码块）、check（零诊断）、build（固定输出 257/257、39 页子路径/资源检查）通过；12 个正文代码块均与源文件片段一致。
 - 同日：本地静态正文 HTTP 200，禁用 JS 后可阅读并展开 4 个练习折叠区；路线显示 34/48，正文链接正确。
+- 同日：Pages [run 39101734918](https://github.com/socoo123/js_web/actions/runs/39101734918) 构建/部署成功；线上课程与路线均 HTTP 200，标题、4 个练习折叠区、未运行标注与 34/48 目录链接一致。
 - 未运行：Profiler 扩展面板的手动录制与 Flamegraph/Ranked 操作（正文已标注；已执行的是 React Profiler API 的真实组件测量）、Firefox、Safari、Windows、生产专用 profiling 构建和 Compiler；未关闭 StrictMode。
