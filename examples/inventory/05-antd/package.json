@@ -1,0 +1,25 @@
+{
+  "name": "inventory-antd",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:production": "npm run build && playwright test --config playwright.production.config.js"
+  },
+  "dependencies": {
+    "antd": "6.6.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@vitejs/plugin-react": "6.1.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  }
+}

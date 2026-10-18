@@ -1,0 +1,11 @@
+import { products } from "../shared/products.js";
+import { toDraft } from "../inventory/04-react/src/product-form.js";
+import { commitDraft } from "../inventory/05-antd/src/form-adapter.js";
+import { productsReducer } from "../inventory/04-react/src/products-reducer.js";
+const mouse = products.find((p) => p.id === "P002");
+const { value } = commitDraft(products, mouse.id, { ...toDraft(mouse), stock: "3" });
+const updated = productsReducer(products, { type: "saved", id: mouse.id, changes: value });
+console.log(updated.reduce((sum, p) => sum + p.stock, 0));
+console.log(updated.reduce((sum, p) => sum + p.stock * p.priceCents, 0));
+console.log(mouse.stock);
+console.log(commitDraft(products, mouse.id, { ...toDraft(mouse), stock: "" }).value);
