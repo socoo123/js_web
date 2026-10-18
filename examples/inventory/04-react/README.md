@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C34 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界。
+当前参考状态：C35 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、请求、Action 与报表等回归，163 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、请求、Action 与报表等回归，171 条通过；不包含故意失败的 labs |
 | npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
@@ -171,3 +171,12 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/performance.html 的 before/memo/after 对照放大列表；transition 调整结果更新优先级；lazy/request/render-error/chunk-error 分开观察代码等待、普通请求与局部异常。实验没有启用 Compiler。
 - stale/stale-answer 演示缺依赖；npm run lint:c34-bug 与 npm run test:bug -- labs/performance-bugs.test.jsx 先失败，补完整依赖后通过，仓库保留错误起点。
 - tests/performance.test.jsx 新增 9 条，累计 163 条。浏览器测量、生产 chunk、异常与业务验证记录见 [examples/c34](../../c34/README.md)。
+
+
+## React UT、集成测试与 E2E（C35）
+
+- 阶段独立 devDependencies 加入 RTL、DOM Testing Library、user-event、jest-dom 与 Playwright Test；已有锁时 npm ci，不改网站根锁。
+- tests/testing-forms.test.jsx 与 testing-async.test.jsx 新增 8 条行为回归，累计 171 条。真实组件保留，只以加载函数控制外部结果；tests/rtl-support.jsx 显式清理 DOM、QueryClient 与替换资源。
+- labs/testing-bugs.test.jsx 是空库存错误起点的 RTL 回归，npm run test:bug -- labs/testing-bugs.test.jsx 原始版本预期失败；按 parseStock/null 判断修复后通过，完整答案 BlankStockFixed。
+- 在本目录执行 npx playwright install chromium，再运行 npm run test:e2e：自动构建、在独立 4178 端口预览并用 Chromium 检查筛选→详情→刷新→返回。测试保持 /js_web/ 和 hash；不复用其他正在运行的服务。失败 trace 写入忽略的 test-results。
+- 运行证据、练习的先失败后修复和浏览器范围见 [examples/c35](../../c35/README.md)。课程 Pages 仍只发布静态教程。
