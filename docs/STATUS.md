@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C35 本地门禁完成，待 Pages 部署；下一项完成发布核验）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C35 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -39,7 +39,7 @@
 - **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C29、C30。** 已完成 Effect、请求竞态、实验、共用 D2 与阶段 4 标题/快捷键/详情；每课门禁与 Pages 核验通过；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C34。** 性能实验、Transition、按需报表与局部错误边界已完成，每课门禁与 Pages 核验通过；F1 保留。
-- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C35。** 正文、角色查询/业务回归、异步失败重试与跨页 E2E 完成；本地门禁通过，Pages 待核验，F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C35。** 正文、角色查询/业务回归、异步失败重试与跨页 E2E 完成；每课门禁及 Pages 核验通过，F1 保留。
 
 ## 当前状态
 
@@ -47,7 +47,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 34 / 48（C01–C34）；C35 本地完成，待发布核验 |
+| 已发布 | 35 / 48（C01–C35）；C35 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–3 已完成；阶段 4：RTL 行为回归与 Playwright 跨页冒烟，累计 171 条正常回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 13 张图，c29-effect-lifecycle 共用生命周期/请求竞态 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -91,7 +91,7 @@
 | C32 认识 TanStack Query 与服务端状态 | [打开](https://socoo123.github.io/js_web/05-react/c32-tanstack-query-server-state/) | [examples/c32](../examples/c32/README.md) | [run 39087677999](https://github.com/socoo123/js_web/actions/runs/39087677999) |
 | C33 现代 React 19 与更新速查 | [打开](https://socoo123.github.io/js_web/05-react/c33-modern-react-actions/) | [examples/c33](../examples/c33/README.md) | [run 39088993996](https://github.com/socoo123/js_web/actions/runs/39088993996) |
 | C34 性能、加载与错误诊断 | [打开](https://socoo123.github.io/js_web/05-react/c34-performance-loading-errors/) | [examples/c34](../examples/c34/README.md) | [run 39101734918](https://github.com/socoo123/js_web/actions/runs/39101734918) |
-| C35 React UT、集成测试与 E2E 地图 | 待部署 | [examples/c35](../examples/c35/README.md) | 本地门禁通过；Pages 待核验 |
+| C35 React UT、集成测试与 E2E 地图 | [打开](https://socoo123.github.io/js_web/05-react/c35-react-testing/) | [examples/c35](../examples/c35/README.md) | [run 39108651570](https://github.com/socoo123/js_web/actions/runs/39108651570) |
 
 ## 周验收记录
 
@@ -106,7 +106,7 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。P1、C01–C05 重构、T0、C06–C34、Q1/Q2 与 Java ↔ JS 速查均已完成；C35 本地门禁通过，先完成推送与 Pages 核验。明细见 examples/c35。
+完整队列见 PLAN §8。P1、C01–C05 重构、T0、C06–C35、Q1/Q2 与 Java ↔ JS 速查均已完成；C35 每课门禁与 Pages 核验通过。明细见 examples/c35。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C36 React 项目复盘与故障排查**：综合故障、Q3 与参考页「React Hooks 速查」。

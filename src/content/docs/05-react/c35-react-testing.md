@@ -1,6 +1,6 @@
 ---
 title: C35 React UT、集成测试与 E2E 地图
-description: 用角色查询和用户行为验证表单、创建商品与失败重试，按风险选择 Vitest、Testing Library 和 Playwright。
+description: 用角色查询和用户行为验证表单、创建商品与失败重试，分清 UT、集成测试和 E2E。
 sidebar:
   order: 35
 ---

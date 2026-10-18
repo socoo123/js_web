@@ -32,5 +32,5 @@
 - 同日：错误起点 1 项失败，Expected「库存无效」、Received「已保存库存 0」；按正文修改后同命令 1/1 通过，随后恢复错误起点。
 - 同日：练习 2 空回调使成功内容查询超时，恢复回调后通过；隔离的两表单实验漏 cleanup 时第二项报多个匹配，导入清理入口后 2/2 通过，实验文件已移除。
 - 同日 · Playwright 1.64.1 / Chromium 156.0.8078.4（headless，独立进程）：生产产物跨页 E2E 1/1；开发页新增、空库存、合法 0、焦点、刷新与 blank/blank-answer 操作通过；拦截静态读取为 HTTP 503 后重试恢复，应用自动重试另发一次请求。
-- 同日：课程 lint（正文 9115 字符、15 代码块、0 error/warning）、Astro check/build 与 40 页产物检查通过；静态课页 200、标题及正文折叠答案通过；Pages 部署待发布后核验。
+- 同日：课程 lint（正文 9115 字符、15 代码块、0 error/warning）、Astro check/build 与 40 页产物检查通过；静态课页 200、标题及正文折叠答案通过；Pages [run 39108651570](https://github.com/socoo123/js_web/actions/runs/39108651570) 成功，新课线上地址 HTTP 200。
 - 未运行：Firefox、Safari、Windows、多浏览器 E2E、屏幕阅读器；全套周视觉验收留 C36。
