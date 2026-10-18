@@ -1,0 +1,27 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m">
+  <Dialog id="editDialog" title="{i18n>editTitle}" contentWidth="28rem" initialFocus="editName">
+    <content>
+      <VBox class="sapUiSmallMargin">
+        <Text text="{draft>/id}" />
+        <Label text="{i18n>name}" labelFor="editName" required="true" />
+        <Input id="editName" value="{draft>/name}" valueLiveUpdate="true"
+          valueState="{= %{draft>/errors/name} ? 'Error' : 'None' }" valueStateText="{i18n>invalidName}" />
+        <Label text="{i18n>category}" labelFor="editCategory" />
+        <Select id="editCategory" selectedKey="{draft>/category}"
+          valueState="{= %{draft>/errors/category} ? 'Error' : 'None' }">
+          <core:Item key="外设" text="{i18n>peripherals}" /><core:Item key="显示器" text="{i18n>displays}" />
+          <core:Item key="配件" text="{i18n>accessories}" /><core:Item key="音频" text="{i18n>audio}" />
+        </Select>
+        <Label text="{i18n>stock}" labelFor="editStock" required="true" />
+        <Input id="editStock" value="{draft>/stock}" valueLiveUpdate="true"
+          valueState="{= %{draft>/errors/stock} ? 'Error' : 'None' }" valueStateText="{i18n>invalidStock}" />
+        <Label text="{i18n>price}" labelFor="editPrice" required="true" />
+        <Input id="editPrice" value="{draft>/price}" valueLiveUpdate="true"
+          valueState="{= %{draft>/errors/price} ? 'Error' : 'None' }" valueStateText="{i18n>invalidPrice}" />
+        <MessageStrip text="{i18n>formInvalid}" type="Error" visible="{draft>/hasErrors}" showIcon="true" />
+      </VBox>
+    </content>
+    <beginButton><Button text="{i18n>save}" type="Emphasized" press=".onSave" /></beginButton>
+    <endButton><Button text="{i18n>cancel}" press=".onCancel" /></endButton>
+  </Dialog>
+</core:FragmentDefinition>

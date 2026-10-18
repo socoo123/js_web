@@ -1,6 +1,6 @@
 sap.ui.define([
-  "sap/ui/core/UIComponent", "sap/ui/model/json/JSONModel",
-], (UIComponent, JSONModel) => {
+  "sap/ui/core/UIComponent", "sap/ui/model/json/JSONModel", "sap/base/i18n/Localization",
+], (UIComponent, JSONModel, Localization) => {
   "use strict";
   return UIComponent.extend("course.inventory.Component", {
     metadata: {
@@ -9,7 +9,10 @@ sap.ui.define([
     },
     init() {
       UIComponent.prototype.init.apply(this, arguments);
-      this.setModel(new JSONModel({ message: "输入编号后查看商品。" }), "ui");
+      this.setModel(new JSONModel({
+        message: "", query: "", count: 0, stock: 0, valueCents: 0,
+        language: Localization.getLanguage().startsWith("en") ? "en" : "zh-CN",
+      }), "ui");
     },
   });
 });

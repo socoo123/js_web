@@ -24,7 +24,7 @@ async function snapshot(page) {
       const view = component.getRootControl();
       resolve({
         rows: view.byId("products").getItems().map((item) => ({
-          title: item.getTitle(), info: item.getInfo(),
+          title: item.getCells()[0].getTitle(), info: item.getCells()[2].getNumber(),
         })),
         products: component.getModel("inventory").getProperty("/products"),
         message: view.byId("message").getText(),
