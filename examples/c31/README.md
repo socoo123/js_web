@@ -42,4 +42,5 @@
 - 开发与生产预览均通过：完整 hash 地址的新标签分享/刷新、前进后退、保留 q/category/order、未知路径/编号返回入口、标题焦点、跨页库存保留、草稿卸载及备注恢复。P002 初始 JSON 为 /js_web/data/products/P002.json、HTTP 200、库存 0；原标签补货往返维持 53 / 26477.00，新标签和刷新恢复 52 / 26348.00。
 - 网站 lint 31 课零 error/warning，check 零诊断，build 固定输出 243/243、36 页产物检查通过；正文 7887 字符、15 个代码块，所有 JS/JSX 与完整文件或连续片段一致。
 - 静态课程生产预览 HTTP 200；禁用 JS 后 15 段代码、6 个答案折叠区与 /js_web/ 内部链接可用，路线页 31/48 与 C31 链接正确。
+- Pages：[run 39082631885](https://github.com/socoo123/js_web/actions/runs/39082631885) build/deploy 成功；C31 与路线均 HTTP 200，标题、自定义 Hook、存储、hash 路由正文与 31/48 目录及链接已上线。
 - 未运行：DevTools 界面手动点击、屏幕阅读器朗读、Firefox、Safari、Windows。
