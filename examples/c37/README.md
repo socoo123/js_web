@@ -34,4 +34,5 @@ node examples/inventory/04-react/node_modules/vitest/vitest.mjs run --config exa
 - 同日：深色页面/dialog 的计算背景均 rgb(23,32,51)，1280px/360px 截图与无整页横向溢出检查通过；刷新回初始 52/26348.00，无页面 JS 异常。
 - 同日：正文的 npm view 命令读取 React/react-dom >=18.0.0、MIT；完整查询 version 得到 antd 6.6.6，动态事实来源见 docs/SOURCES.md。
 - 同日：课程 lint 零 error/warning（C37 正文 7947 字符、14 个代码块）；Astro check 零诊断；全站固定输出 266/266、build 与 43 页产物检查通过；5 个带文件名的正文代码块与示例逐字一致。生产预览 C37 HTTP 200，1280px/360px 无整页横向溢出，6 个折叠区与禁用 JS 阅读通过；路线页 37/48 且 C37 链接正确，无失败资源。
+- 同日：Pages [run 39111938025](https://github.com/socoo123/js_web/actions/runs/39111938025) 成功；线上 C37 与路线页 HTTP 200，正文标题、6 个折叠区、路线 37/48 与 C37 导航正确，无失败资源。
 - 未运行：六个第三方组件库的实际接入、屏幕阅读器、Firefox、Safari、Windows。
