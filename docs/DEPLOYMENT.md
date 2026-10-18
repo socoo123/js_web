@@ -12,6 +12,7 @@
 node --version
 npm --version
 npm ci
+npm ci --prefix examples/inventory/04-react
 npm run setup:diagrams
 npm run check
 npm run build
@@ -20,6 +21,8 @@ npm run preview
 
 前两个命令应分别显示 `v24.22.0` 与 `11.19.1`。预览使用终端给出的地址，并带上 `/js_web/` 子路径。开发时运行 `npm run dev`；正式验收使用生产预览，因为 Pagefind 搜索索引在构建后才生成。
 
+C32 的 Node 示例复用阶段 4 安装的 TanStack Query，因此全量构建前也要安装该阶段的锁定依赖；Actions 会执行相同步骤。网站根锁与阶段 4 的独立锁分别使用。
+
 根目录只有 npm 的 `package-lock.json`。没有使用 React island 的当前页面只需 Astro/Starlight；未来真正加入交互示例时再核查并安装 React 集成。
 
 ## 构建流程
@@ -27,7 +30,7 @@ npm run preview
 - `npm run setup:diagrams`：按当前 macOS/Linux 的架构下载固定 D2 和中文字体，核对 SHA-256，保存在被忽略的 `.cache/tools/`。首次准备需要网络；生成图本身可离线。
 - `npm run sync:roadmap`：从 `docs/CURRICULUM.md` 的 48 课大纲与现有文章生成路线页；已有文章显示链接，其余显示「待发布」。
 - `npm run check`：Astro 内容与类型检查。
-- `npm run build`：同步目录 → 重建 D2 SVG → Astro 静态构建与 Pagefind 索引 → 检查 `/js_web/` 页面/资产链接、中文语言和 C01–C05 折叠区。任一步失败都会停止。
+- `npm run build`：课程 lint 与全量固定输出示例 → 同步目录 → 重建 D2 SVG → Astro 静态构建与 Pagefind 索引 → 检查 `/js_web/` 页面/资产链接、中文语言和已发布课程折叠区。任一步失败都会停止。
 
 如果更新 D2 版本或字体，先核查官方来源，再同时更新下载摘要、固定版本与许可信息，不能仅改版本号。
 
@@ -46,7 +49,7 @@ npm run preview
 
 ## Pages 自动部署
 
-[工作流](../.github/workflows/deploy.yml) 在 `main` 推送或手动触发时运行：固定 Node → `npm ci` → 准备 D2/字体 → 检查 → 构建与链接检查 → 上传静态输出 → Pages 发布。
+[工作流](../.github/workflows/deploy.yml) 在 `main` 推送或手动触发时运行：固定 Node → 安装网站与阶段 4 锁定依赖 → 阶段 4 lint/测试/构建 → 准备 D2/字体 → 检查 → 构建与链接检查 → 上传静态输出 → Pages 发布。
 
 GitHub 仓库的 Settings → Pages → Source 需要选择 **GitHub Actions**。工作流的构建任务只有读取内容与 Pages 配置的权限，部署任务取得 `pages: write` 和 `id-token: write`；不需要额外的网站部署密钥。
 

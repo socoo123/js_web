@@ -9,18 +9,22 @@ import { Route, Routes, Navigate } from "react-router";
 import InventoryLayout from "./InventoryLayout.jsx";
 import ProductDetailRoute from "./ProductDetailRoute.jsx";
 import NotFound from "./NotFound.jsx";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createInventoryQueryClient } from "./query-client.js";
+import { mockProductService } from "./mock-product-service.js";
 
-export default function App({ loadProduct }) {
-  return <InventoryProvider><Routes>
+export default function App({ loadProduct = mockProductService.getProduct, saveProduct = mockProductService.restock }) {
+  const [client] = useState(createInventoryQueryClient);
+  return <QueryClientProvider client={client}><InventoryProvider><Routes>
     <Route element={<InventoryLayout />}>
       <Route index element={<Navigate to="/products" replace />} />
       <Route path="products">
         <Route index element={<InventoryPage />} />
-        <Route path=":productId" element={<ProductDetailRoute loadProduct={loadProduct} />} />
+        <Route path=":productId" element={<ProductDetailRoute loadProduct={loadProduct} saveProduct={saveProduct} />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Route>
-  </Routes></InventoryProvider>;
+  </Routes></InventoryProvider></QueryClientProvider>;
 }
 
 function InventoryPage() {

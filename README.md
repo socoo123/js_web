@@ -2,15 +2,15 @@
 
 面向会 Java、尚未系统学习前端的开发者，用中文从 JavaScript 的历史讲到现代语言、数据结构、Node 与包管理、React、SAP UI5 和开源组件。
 
-当前阶段：**C01–C07 正文与练习已完成，关键机制配套 D2 教学图；Astro + Starlight 网站使用 GitHub Pages 自动部署。课程逐篇发布，当前 7 / 48 课，实际部署与验证记录见 [STATUS](docs/STATUS.md)。**
+当前阶段：**C01–C32 正文与练习已完成，React 库存项目已推进到查询缓存与浏览器内 mock；Astro + Starlight 网站使用 GitHub Pages 自动部署。实际发布与验证记录见 [STATUS](docs/STATUS.md)。**
 
 - 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
 - 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)
 - 第二课：[C02 Web 基础与第一个调试现场](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/)
-- 最新课：[C07 this、原型与 class](https://socoo123.github.io/js_web/02-language-data/c07-this-prototypes/)
+- 最新开发课程：[C32 认识 TanStack Query 与服务端状态](src/content/docs/05-react/c32-tanstack-query-server-state.md)
 - [本地构建与自动提交/部署说明](docs/DEPLOYMENT.md)
 
-## 已完成课程
+## 课程入口
 
 - [C01 JavaScript 的故事与生态地图](src/content/docs/01-history-web/c01-story-ecosystem.md)：历史、Java 对照、生态分层、Console 练习与答案。
 - [C01 练习与验证记录](examples/c01/README.md)：浏览器主线，Node/Java 选做对照。
@@ -28,7 +28,7 @@
 - [C07 练习与验证记录](examples/c07/README.md)；[库存项目阶段 1](examples/inventory/01-core/README.md)。
 - [D2 教学图与构建说明](diagrams/README.md)：保留源码、SVG 与固定工具/字体信息。
 
-后续 C08–C48 仍为大纲；下一课继续数组筛选、排序与库存统计。
+完整已发布清单见[学习路线](https://socoo123.github.io/js_web/roadmap/)与 [STATUS](docs/STATUS.md)。下一课为 C33 现代 React 19 与更新速查；F1 学习进度功能仍在任务队列。
 
 ## 清理上下文后如何继续
 

@@ -28,6 +28,14 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
+      - name: Install locked React example dependencies
+        run: npm ci --prefix examples/inventory/04-react
+      - name: Check React reference project
+        working-directory: examples/inventory/04-react
+        run: |
+          npm run lint
+          npm test
+          npm run build
       - name: Prepare D2 and Chinese font
         run: npm run setup:diagrams
       - name: Check content and types

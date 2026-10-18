@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { it, expect } from "vitest";
+import { flushQuery } from "./query-harness.jsx";
 import { act } from "react";
 import { MemoryRouter, useNavigate, useLocation } from "react-router";
 import App from "../src/App.jsx";
@@ -41,13 +42,14 @@ it("非法筛选枚举回退到全部与编号，未匹配结果显示空提示"
   expect(host.textContent).toContain("没有匹配的商品");
 });
 
-it("直接进入详情参数页显示嵌套内容、初始快照与带筛选的返回链接", async () => {
+it("直接进入详情参数页显示嵌套内容、缓存详情与带筛选的返回链接", async () => {
   const api = controlledLoader();
   const host = await mount(<TestApp initialEntries={["/products/P002?q=鼠标"]} loadProduct={api.load} />);
   expect(host.querySelector('[aria-label="库存导航"]')).not.toBeNull();
   expect(document.activeElement.textContent).toBe("商品详情 P002");
   await resolveProduct(api.latest());
-  expect(host.textContent).toContain("无线鼠标 · 外设 · 初始库存 0 件 · ¥129.00");
+  await flushQuery();
+  expect(host.textContent).toContain("无线鼠标 · 外设 · 缓存库存 0 件 · ¥129.00");
   expect([...host.querySelectorAll("a")].find((a) => a.textContent === "返回筛选列表").getAttribute("href")).toBe("/products?q=鼠标");
 });
 
@@ -68,7 +70,8 @@ it("跨路由保留 Provider 商品，返回恢复 URL 筛选，编辑草稿随�
   await fill(host.querySelector('[name="name"]'), "未保存草稿");
   await follow(card(host, "P002").querySelector("a"));
   await resolveProduct(api.latest());
-  expect(host.textContent).toContain("初始库存 0 件");
+  await flushQuery();
+  expect(host.textContent).toContain("缓存库存 0 件");
   await follow([...host.querySelectorAll("a")].find((a) => a.textContent === "返回筛选列表"));
   expect(host.querySelector("input").value).toBe("鼠标");
   expect(card(host, "P002").textContent).toContain("库存：1 件");
@@ -84,11 +87,13 @@ it("详情参数改变时取消旧请求，后退到旧 URL 启动独立请求",
   await click("去鼠标详情");
   expect(old.signal.aborted).toBe(true);
   await resolveProduct(api.latest());
+  await flushQuery();
   await resolveProduct(old);
   expect(host.textContent).toContain("详情已加载：P002");
   await click("历史后退");
   expect(host.querySelector("output").textContent).toBe("/products/P001?q=鼠标");
   await resolveProduct(api.latest());
+  await flushQuery();
   expect(host.textContent).toContain("详情已加载：P001");
 });
 
