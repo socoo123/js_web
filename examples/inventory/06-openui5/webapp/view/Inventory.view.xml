@@ -1,0 +1,21 @@
+<mvc:View controllerName="course.inventory.controller.Inventory"
+  xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true">
+  <App>
+    <Page title="OpenUI5 库存入门">
+      <content>
+        <VBox class="sapUiSmallMargin">
+          <Label text="商品编号" labelFor="productId" />
+          <HBox wrap="Wrap" alignItems="Center">
+            <Input id="productId" value="P002" width="10rem" />
+            <Button text="查看商品" press=".onInspect" class="sapUiTinyMarginBegin" />
+          </HBox>
+          <Text id="message" text="{ui>/message}" wrapping="true" />
+          <List id="products" headerText="商品列表" items="{inventory>/products}">
+            <StandardListItem title="{inventory>name}" description="{inventory>id}"
+              info="{inventory>stock}" />
+          </List>
+        </VBox>
+      </content>
+    </Page>
+  </App>
+</mvc:View>

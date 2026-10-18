@@ -1,0 +1,27 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "course.inventory",
+    "type": "application",
+    "title": "OpenUI5 库存入门",
+    "applicationVersion": { "version": "0.1.0" }
+  },
+  "sap.ui": { "technology": "UI5" },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.153.0",
+      "libs": { "sap.ui.core": {}, "sap.m": {} }
+    },
+    "rootView": {
+      "viewName": "course.inventory.view.Inventory",
+      "type": "XML",
+      "id": "inventoryView"
+    },
+    "models": {
+      "inventory": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/products.json"
+      }
+    }
+  }
+}

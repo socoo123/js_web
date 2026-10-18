@@ -1,0 +1,11 @@
+specVersion: "4.0"
+metadata:
+  name: course.inventory
+type: application
+framework:
+  name: OpenUI5
+  version: "1.153.0"
+  libraries:
+    - name: sap.ui.core
+    - name: sap.m
+    - name: themelib_sap_horizon

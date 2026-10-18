@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C39 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C40 已完成本地门禁，Pages 待核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -34,7 +34,7 @@
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C34、C35。** 性能/加载实验与测试课程、每课门禁及 Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C36。** 综合排错、商品快照/本地详情、Hooks 速查与 Q3 完成；每课门禁及 Pages 核验通过，F1 保留。
-- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C37–C39。** 组件比较、Ant Design 阶段 5、UI5 家族关系与绑定实验均已上线，每课门禁与 Pages 核验通过；F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C37–C40。** C37–C39 已上线；C40 的阶段 6 工程、正文与本地门禁完成，Pages 待核验；F1 保留。
 
 ## 当前状态
 
@@ -42,8 +42,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 39 / 48（C01–C39）；C39 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–4、Q3 已完成；阶段 5：Ant Design 表格/弹窗、15 条业务回归与 5 条生产浏览器回归 |
+| 已发布 | 39 / 48（C01–C39）；C40 完成，待部署核验 |
+| 贯穿项目 | 阶段 1–5、Q3 已完成；阶段 6：OpenUI5 列表/编号查询、3 条开发与 2 条生产浏览器回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 14 张图，新增 C39 家族/MVC 绑定共用图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -91,6 +91,7 @@
 | C37 组件生态与选择标准 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c37-component-ecosystem-selection/) | [examples/c37](../examples/c37/README.md) | [run 39111938025](https://github.com/socoo123/js_web/actions/runs/39111938025) |
 | C38 一个普通组件库的完整案例 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c38-antd-inventory/) | [examples/c38](../examples/c38/README.md) | [run 39121201638](https://github.com/socoo123/js_web/actions/runs/39121201638) |
 | C39 SAP Fiori 与 UI5 家族 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c39-fiori-ui5-family/) | [examples/c39](../examples/c39/README.md) | [run 39122376307](https://github.com/socoo123/js_web/actions/runs/39122376307) |
+| C40 OpenUI5 入门：MVC 与工程 | 待部署 | [examples/c40](../examples/c40/README.md) | 本地门禁通过，Pages 待核验 |
 
 ## 周验收记录
 
@@ -106,10 +107,10 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C39、T0、Q1–Q3 与三张速查页已完成；C39 每课门禁与线上核验通过。明细见 examples/c39。
+完整队列见 PLAN §8。C01–C39 已上线，C40 本地门禁通过、Pages 待核验；T0、Q1–Q3 与三张速查页已完成。明细见 examples/c40。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C40 OpenUI5 入门：MVC 与工程**：建立阶段 6，连接 bootstrap、模块、XML View、Controller、Component、manifest 与 UI5 CLI。
+2. **C41 UI5 Model、绑定与业务控件**：在阶段 6 推进筛选、编辑 Dialog、汇总与 i18n。
 
 ## 本文件的更新规则
 

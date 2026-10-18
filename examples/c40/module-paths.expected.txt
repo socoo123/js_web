@@ -1,0 +1,3 @@
+model/findProduct.js
+/model/findProduct.js
+/js_web/ui5/resources/sap-ui-core.js

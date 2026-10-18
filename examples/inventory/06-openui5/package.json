@@ -1,0 +1,13 @@
+{
+  "name": "inventory-openui5",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ui5 serve --port 8040",
+    "build": "ui5 build --all --clean-dest --include-task generateVersionInfo"
+  },
+  "devDependencies": {
+    "@ui5/cli": "4.0.71"
+  }
+}
