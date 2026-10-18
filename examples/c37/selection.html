@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>商品表格与弹窗 · 组件选型基线</title>
+  <link rel="stylesheet" href="selection.css">
+  <script type="module" src="selection.js"></script>
+</head>
+<body>
+  <main>
+    <h1>组件选型基线</h1>
+    <p>用原生表格和 dialog 练习验收。商品更改仅在当前页面生效。</p>
+    <p id="mode"></p>
+    <div class="toolbar">
+      <button type="button" id="sort">按库存升序</button>
+      <button type="button" id="theme" aria-pressed="false">深色主题</button>
+    </div>
+    <p id="summary"></p>
+    <p id="notice" role="status" aria-live="polite"></p>
+    <table>
+      <caption>商品库存（固定样例数据）</caption>
+      <thead><tr><th scope="col">编号 / 商品</th><th scope="col">库存</th><th scope="col">操作</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <dialog id="editor" aria-labelledby="editor-title" aria-describedby="editor-help">
+      <form id="editor-form" novalidate>
+        <h2 id="editor-title">编辑商品</h2>
+        <p id="editor-help">取消或按 Esc 会丢弃本次草稿。</p>
+        <p id="editing-product"></p>
+        <label for="stock">库存数量</label>
+        <input id="stock" name="stock" type="number" min="0" max="99999" step="1" required autofocus aria-describedby="stock-error">
+        <p id="stock-error" role="alert"></p>
+        <div class="toolbar">
+          <button type="submit">保存</button>
+          <button type="button" id="cancel">取消</button>
+        </div>
+      </form>
+    </dialog>
+  </main>
+</body>
+</html>
