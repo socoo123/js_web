@@ -28,5 +28,5 @@
 - 同日：ref prop 焦点进入 input；Custom Element 收到对象 property（没有 product attribute），Shadow DOM 按钮派发 stock-check 后 React 显示 P001；use 实验先显示等待再显示固定商品，未出现未缓存 Promise 警告或页面异常。
 - 同日：根目录 lint:lessons（33 课零 error/warning，C33 7943 字符/12 个代码块）、check（零诊断）、build（固定输出 253/253、38 页子路径/资源/折叠区）通过；12 个正文代码块均与实际源文件片段一致。
 - 同日：应用生产预览的 hash 深层入口、Action 补货、返回本地列表、缓存重入与刷新恢复通过；静态正文 HTTP 200，禁用 JS 后可阅读并展开 4 个练习折叠区。
-- Pages：待推送后核验。
+- 同日：Pages [run 39088993996](https://github.com/socoo123/js_web/actions/runs/39088993996) 构建/部署成功；课程与路线页均 HTTP 200，线上目录 33/48，C33 标题、链接与 4 个折叠区一致。
 - 未运行：Firefox、Safari、Windows、真实后端、RSC/Server Functions 与版本索引中的其他进阶 API；索引只做官方资料核对。
