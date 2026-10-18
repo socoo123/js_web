@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C35 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟。
+当前参考状态：C36 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟；C36 增加本地商品快照、恢复提示、本地详情和综合故障实验。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、请求、Action 与报表等回归，171 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、请求、Action 与报表等回归，190 条通过；不包含故意失败的 labs |
 | npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
@@ -180,3 +180,13 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/testing-bugs.test.jsx 是空库存错误起点的 RTL 回归，npm run test:bug -- labs/testing-bugs.test.jsx 原始版本预期失败；按 parseStock/null 判断修复后通过，完整答案 BlankStockFixed。
 - 在本目录执行 npx playwright install chromium，再运行 npm run test:e2e：自动构建、在独立 4178 端口预览并用 Chromium 检查筛选→详情→刷新→返回。测试保持 /js_web/ 和 hash；不复用其他正在运行的服务。失败 trace 写入忽略的 test-results。
 - 运行证据、练习的先失败后修复和浏览器范围见 [examples/c35](../../c35/README.md)。课程 Pages 仍只发布静态教程。
+
+
+## 项目复盘与第三周验收（C36）
+
+- inventory-storage.js 定义 js_web:inventory:products:v1 / version=1 快照。初始化只读，字段校验与重复 id 检查失败时复制固定起点并提示；损坏原文保留。无快照时初始参考值仍是 6 种、52 件、26348.00 元。
+- InventoryPersistence 的「保存本地快照」写入当前已提交商品；其后修改需再次保存。清除快照保留当前内存商品，刷新回固定起点；写/删失败明确提示。筛选由 URL 保存，草稿/盘点/Query 不写快照，备注独立。
+- ProductDetailRoute 上部直接读 ProductsContext，新增 P007 也可查看本地详情，且不请求不存在的静态 JSON；下部六种初始商品仍可做独立 Query/Action mock。C21–C35 各节描述的是当课推进状态，C36 的快照规则以此节为准。
+- labs/review.html?case=summary / query / storage 保留三个错误起点；对应 summary-answer / query-answer / storage-answer 提供答案。存储实验仅写 js_web:c36:broken:v1，不改商品快照。
+- npm run test:bug -- labs/review-bugs.test.jsx 原始起点三项失败，按正文修好三个 Broken 文件后通过；仓库保留错误起点。正常 tests/review.test.jsx 新增 19 条，共 190 条；生产 E2E 共 2 条，覆盖新增详情、快照恢复与损坏清除。
+- Q3 的业务、浏览器、source maps 与全站周验收记录见 [examples/c36](../../c36/README.md)；本阶段产物仍供本地使用，课程 Pages 发布静态正文。

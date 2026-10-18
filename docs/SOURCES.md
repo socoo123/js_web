@@ -364,3 +364,10 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 同日：npm registry 查询 @testing-library/react 16.3.3（React/react-dom ^18 或 ^19、DOM ^10、Node >=18）、@testing-library/dom 10.4.2（Node >=18）、@testing-library/user-event 14.6.8（DOM >=7.21.4）、@testing-library/jest-dom 7.0.1（Node >=22）、@playwright/test 1.64.1（Node >=20）；精确锁入阶段 4 独立清单与锁，现有 Node 24/React 19 满足。正文使用主版本安装命令，当前仓库用 npm ci；根清单/锁不变。
 - 同日：核对 [Playwright 测试](https://playwright.dev/docs/writing-tests)、[断言自动等待](https://playwright.dev/docs/test-assertions)、[webServer](https://playwright.dev/docs/test-webserver) 与[浏览器安装](https://playwright.dev/docs/browsers)。选择 Chromium，先构建后预览，独立端口、保留 /js_web/ 与 hash，不复用现有服务；关键路径为筛选→详情→刷新→返回，静态 JSON 真实读取。E2E 命令本地执行，未改变现有 Pages workflow。
 - 同日：核对 [Jest 定位](https://jestjs.io/docs/getting-started)与 [Vitest 快照](https://vitest.dev/guide/snapshot.html)，区分运行器/组件辅助库/浏览器 E2E；小型序列化输出需审阅参考变更，整页 DOM 快照不能代替行为断言。无新语言特性或 D2。运行与正反实验记录见 [examples/c35](../examples/c35/README.md)。
+
+
+## C36 React 项目复盘与故障排查、React Hooks 速查
+
+- 2026-10-18：核对 React [状态结构](https://react.dev/learn/choosing-the-state-structure)、[开发者工具](https://react.dev/learn/react-developer-tools)、[Hooks 目录](https://react.dev/reference/react/hooks)与 [Hooks 规则](https://react.dev/reference/rules/rules-of-hooks)。原创综合实验分别隔离派生统计、查询身份与外部存储；本地商品详情改读同一 Provider，六种初始商品的 Query/Action mock 继续作为独立学习来源。速查仅汇总已教 API，use 的条件调用单独说明；未新增 React API。
+- 同日：核对 TanStack [查询键](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys)、Chrome [Network](https://developer.chrome.com/docs/devtools/network/)、[source maps](https://developer.chrome.com/docs/devtools/javascript/source-maps)、Vite [build.sourcemap](https://vite.dev/config/build-options#build-sourcemap)与 Vitest [测试筛选](https://vitest.dev/guide/filtering)。在新鲜期复现漏编号导致缓存复用/无新请求；沿用既有 sourcemap=true，生产断点检查构建源码对应；测试按文件和 -t 名称筛选。
+- 同日：核对 MDN [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)。商品快照使用独立版本化键，只在明确按钮事件写入/清除；读取校验字段、重复编号和格式，失败保留原记录，合法 0 和空数组可恢复。初始化不写盘，未接入跨标签同步、真实后端或自动保存。沿用 Node 24/npm 11 与阶段 4 独立锁，无新依赖、安装命令或 D2。三个错误起点的先失败后修复与 Q3 记录见 [examples/c36](../examples/c36/README.md)。
