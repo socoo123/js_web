@@ -1,0 +1,4 @@
+/js_web/ui5/localService/service/Products
+stock ge 1 and stock le 5
+stock desc,id asc
+2

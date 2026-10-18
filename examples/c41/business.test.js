@@ -6,9 +6,10 @@ let browser;
 beforeAll(async () => { browser = await chromium.launch({ channel: "chrome" }); });
 afterAll(async () => { await browser?.close(); });
 async function state(page) {
+  await page.locator(".sapMPage").first().waitFor();
   return page.evaluate(() => new Promise((resolve) => {
     sap.ui.require(["sap/ui/core/Component"], (Component) => {
-      const view = Component.getComponentById("container-inventory")?.getRootControl();
+      const view = Component.getComponentById("container-inventory")?.byId("inventoryView");
       if (!view) return resolve({ rows: [] });
       const table = view.byId("products");
       resolve({

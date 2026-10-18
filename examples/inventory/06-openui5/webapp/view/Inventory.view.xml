@@ -1,6 +1,5 @@
 <mvc:View controllerName="course.inventory.controller.Inventory"
   xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns="sap.m" displayBlock="true">
-  <App>
     <Page title="{i18n>appTitle}">
       <content>
         <VBox class="sapUiSmallMargin">
@@ -37,7 +36,7 @@
               <Column hAlign="End"><Text text="{i18n>actions}" /></Column>
             </columns>
             <items>
-              <ColumnListItem>
+              <ColumnListItem type="Navigation" press=".onDetail">
                 <cells>
                   <ObjectIdentifier title="{inventory>name}" text="{inventory>id}" />
                   <Text text="{inventory>category}" />
@@ -52,5 +51,4 @@
         </VBox>
       </content>
     </Page>
-  </App>
 </mvc:View>

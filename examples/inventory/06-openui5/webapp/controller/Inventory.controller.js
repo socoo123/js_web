@@ -31,6 +31,10 @@ sap.ui.define([
       }
       this.getView().getModel("ui").setProperty("/message", message);
     },
+    onDetail(event) {
+      const id = event.getSource().getBindingContext("inventory").getProperty("id");
+      this.getOwnerComponent().getRouter().navTo("detail", { id });
+    },
     onFilter(event) {
       const query = event.getParameter("query").trim();
       const filters = query ? [new Filter({

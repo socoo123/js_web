@@ -1,0 +1,9 @@
+<mvc:View controllerName="course.inventory.controller.NotFound"
+  xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true">
+  <Page title="{i18n>routeMissing}">
+    <content><VBox class="sapUiSmallMargin">
+      <Text text="{i18n>routeMissing}" />
+      <Button text="{i18n>backToList}" press=".onList" />
+    </VBox></content>
+  </Page>
+</mvc:View>

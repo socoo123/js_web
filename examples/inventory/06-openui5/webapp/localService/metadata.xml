@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices m:DataServiceVersion="2.0" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+    <Schema Namespace="Inventory" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+      <EntityType Name="Product">
+        <Key><PropertyRef Name="id" /></Key>
+        <Property Name="id" Type="Edm.String" Nullable="false" MaxLength="4" />
+        <Property Name="name" Type="Edm.String" Nullable="false" MaxLength="40" />
+        <Property Name="category" Type="Edm.String" Nullable="false" />
+        <Property Name="stock" Type="Edm.Int32" Nullable="false" />
+        <Property Name="priceCents" Type="Edm.Int32" Nullable="false" />
+      </EntityType>
+      <EntityContainer Name="InventoryService" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="Products" EntityType="Inventory.Product" />
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

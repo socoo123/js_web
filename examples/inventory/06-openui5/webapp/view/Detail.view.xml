@@ -1,0 +1,20 @@
+<mvc:View controllerName="course.inventory.controller.Detail"
+  xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true">
+  <Page title="{i18n>detailTitle}">
+    <content>
+      <VBox class="sapUiSmallMargin">
+        <Button text="{i18n>backToList}" press=".onList" />
+        <Text text="{i18n>detailLoading}" visible="{= %{detail>/status} === 'loading' }" />
+        <MessageStrip text="{i18n>notFound}" type="Warning" visible="{= %{detail>/status} === 'missing' }" />
+        <MessageStrip text="{i18n>detailError}" type="Error" visible="{= %{detail>/status} === 'error' }" />
+        <VBox visible="{= %{detail>/status} === 'found' }">
+          <ObjectIdentifier title="{inventory>name}" text="{inventory>id}" />
+          <Label text="{i18n>category}" /><Text text="{inventory>category}" />
+          <Label text="{i18n>stock}" /><ObjectNumber id="detailStock" number="{inventory>stock}" />
+          <Label text="{i18n>price}" />
+          <ObjectNumber number="{path: 'inventory>priceCents', formatter: '.formatter.money'}" />
+        </VBox>
+      </VBox>
+    </content>
+  </Page>
+</mvc:View>

@@ -1,0 +1,16 @@
+<mvc:View controllerName="course.inventory.test.OData" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true">
+  <App><Page title="OData V2 浏览器 mock">
+    <content><VBox class="sapUiSmallMargin">
+      <Text text="本页使用独立模拟数据；编辑库存主页面不会改变这里，刷新重新加载。" />
+      <Table id="odataProducts" items="{odata>/Products}">
+        <columns><Column><Text text="商品" /></Column><Column><Text text="库存" /></Column></columns>
+        <items><ColumnListItem><cells>
+          <ObjectIdentifier title="{odata>name}" text="{odata>id}" />
+          <ObjectNumber number="{odata>stock}" />
+        </cells></ColumnListItem></items>
+      </Table>
+      <Button text="有限查询" press=".onRead" />
+      <Text id="result" text="{probe>/result}" wrapping="true" />
+    </VBox></content>
+  </Page></App>
+</mvc:View>

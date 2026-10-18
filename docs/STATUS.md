@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C41 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C42 本地门禁完成，Pages 待核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -34,7 +34,7 @@
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C34、C35。** 性能/加载实验与测试课程、每课门禁及 Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C36。** 综合排错、商品快照/本地详情、Hooks 速查与 Q3 完成；每课门禁及 Pages 核验通过，F1 保留。
-- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C37–C41。** 组件库、UI5 家族/MVC 工程与阶段 6 筛选、草稿编辑、校验、汇总、i18n 已上线；每课门禁与 Pages 核验通过，F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C37–C42。** 组件库、UI5 家族/MVC 工程与阶段 6 筛选、草稿编辑、校验、汇总、i18n 已上线；C42 路由与 V2 mock 本地完成，待部署；每课门禁与 Pages 核验通过，F1 保留。
 
 ## 当前状态
 
@@ -42,8 +42,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 41 / 48（C01–C41）；C41 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–5、Q3 已完成；阶段 6：Table 筛选/草稿 Dialog/校验/汇总/i18n，9 条回归 |
+| 已发布 | 41 / 48（C01–C41）；C41 每课门禁与线上核验通过；C42 待部署 |
+| 贯穿项目 | 阶段 1–5、Q3 已完成；阶段 6：路由/详情/V2 mock 与既有编辑，17 条开发回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 14 张图，新增 C39 家族/MVC 绑定共用图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -93,6 +93,7 @@
 | C39 SAP Fiori 与 UI5 家族 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c39-fiori-ui5-family/) | [examples/c39](../examples/c39/README.md) | [run 39122376307](https://github.com/socoo123/js_web/actions/runs/39122376307) |
 | C40 OpenUI5 入门：MVC 与工程 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c40-openui5-mvc-project/) | [examples/c40](../examples/c40/README.md) | [run 39124104412](https://github.com/socoo123/js_web/actions/runs/39124104412) |
 | C41 UI5 Model、绑定与业务控件 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c41-model-binding-controls/) | [examples/c41](../examples/c41/README.md) | [run 39134470004](https://github.com/socoo123/js_web/actions/runs/39134470004) |
+| C42 UI5 路由与 OData 起点 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c42-routing-odata/) | [examples/c42](../examples/c42/README.md) | 待部署核验 |
 
 ## 周验收记录
 
@@ -103,15 +104,14 @@
 - C36 / 第三周验收（2026-10-18）：41 页共 164 组宽度/亮暗检查、13 张 D2、折叠答案/复制、竞态/乐观/故障搜索与禁用 JS 阅读通过；库存 v2 本地快照/详情/校验、源码映射与 190 条回归、2 条生产 E2E 通过。
 
 ## 已知问题（不阻塞）
-
 - Starlight 自定义 404 有一条路由优先级提示，404.html 正常；上游 Pages Actions 有 Node 20 弃用提示，runner 实际使用 Node 24，部署成功，升级时复查。
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C41、T0、Q1–Q3 与三张速查页已完成；C41 每课门禁与线上核验通过。明细见 examples/c41。
+完整队列见 PLAN §8。C01–C41 已上线，C42 本地完成、Pages 待核验；T0、Q1–Q3 与三张速查页完成。明细见 examples/c42。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C42 UI5 路由与 OData 起点**：阶段 6 的列表/详情路由、元数据与 V2 浏览器 mock。
+2. **C43 UI5 Web Components 原生使用**：按第 4 周范围完成自定义元素、属性/事件、slots、主题与资源实验。
 
 ## 本文件的更新规则
 

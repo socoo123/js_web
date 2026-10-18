@@ -20,9 +20,9 @@
       }
     },
     "rootView": {
-      "viewName": "course.inventory.view.Inventory",
+      "viewName": "course.inventory.view.App",
       "type": "XML",
-      "id": "inventoryView"
+      "id": "appView"
     },
     "models": {
       "inventory": {
@@ -39,6 +39,48 @@
           ],
           "fallbackLocale": "",
           "async": true
+        }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "type": "View",
+        "viewType": "XML",
+        "path": "course.inventory.view",
+        "controlId": "app",
+        "controlAggregation": "pages",
+        "async": true
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "list",
+          "target": "list"
+        },
+        {
+          "pattern": "products/{id}",
+          "name": "detail",
+          "target": "detail"
+        },
+        {
+          "pattern": ":all*:",
+          "name": "notFound",
+          "target": "notFound"
+        }
+      ],
+      "targets": {
+        "list": {
+          "id": "inventoryView",
+          "name": "Inventory"
+        },
+        "detail": {
+          "id": "detailView",
+          "name": "Detail"
+        },
+        "notFound": {
+          "id": "notFoundView",
+          "name": "NotFound"
         }
       }
     }

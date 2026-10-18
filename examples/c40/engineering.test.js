@@ -17,11 +17,12 @@ async function open(action, setup = async () => {}) {
 }
 
 async function snapshot(page) {
+  await page.locator(".sapMPage").first().waitFor();
   return page.evaluate(() => new Promise((resolve) => {
     sap.ui.require(["sap/ui/core/Component"], (Component) => {
       const component = Component.getComponentById("container-inventory");
-      if (!component?.getRootControl()) return resolve({ rows: [] });
-      const view = component.getRootControl();
+      if (!component?.byId("inventoryView")) return resolve({ rows: [] });
+      const view = component.byId("inventoryView");
       resolve({
         rows: view.byId("products").getItems().map((item) => ({
           title: item.getCells()[0].getTitle(), info: item.getCells()[2].getNumber(),
