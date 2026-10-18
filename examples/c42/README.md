@@ -30,4 +30,5 @@
 - 初次运行发现同字段顶层 Filter 数组按 OR 分组，查询错误返回 P005/P001；修复成显式 AND 后低库存回归通过。发现 MockServer rootUri 使用含域名 URL 时 metadata 404，改为与模型一致的站内路径；hash 使用框架默认 #/ 前缀。
 - 断点实测 onDetail 的 id=P004、path=/products/3；小写集合错误回调的 statusCode=404。练习 3 移除 LE 条件实际返回 P005/P001，恢复后返回 P006/P004。
 - 网站 lint 42 课零 error；check 零诊断；全量固定输出 280/280；build 48 页与 /js_web/ 产物检查通过。课程生产页 HTTP 200、6 个折叠区、资源与页面异常检查、禁用 JS 阅读通过。
+- Pages：[run 39144417753](https://github.com/socoo123/js_web/actions/runs/39144417753) 成功；线上课程与路线均 HTTP 200，标题、6 个课程折叠区、路线 42/48 与 C42 链接正确。
 - 未运行：DevTools 界面手动点选、屏幕阅读器、Firefox、Safari、Windows；V4/CAP、完整 OData CRUD、真实 SAP 登录/权限/CSRF/持久化。
