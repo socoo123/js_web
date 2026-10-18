@@ -1,6 +1,6 @@
 ---
 title: C33 现代 React 19 与更新速查
-description: 用 Actions 和三个表单 Hook 呈现提交、结果与乐观预览，认识 ref prop、Custom Elements，并分清浏览器交互与服务器能力。
+description: 用 Actions 组织异步补货，处理提交状态与乐观预览，查阅 React 更新并分清服务器能力。
 sidebar:
   order: 33
 ---
