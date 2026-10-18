@@ -1,0 +1,4 @@
+/js_web/
+外层无查询参数
+#/products/P002?q=鼠标
+/products/P002 鼠标

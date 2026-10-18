@@ -5,7 +5,7 @@ import { products } from "../../../shared/products.js";
 import WatchControls from "../labs/WatchControls.jsx";
 import IntervalFixed from "../labs/IntervalFixed.jsx";
 import LoopFixed from "../labs/LoopFixed.jsx";
-import App from "../src/App.jsx";
+import { TestApp as App } from "./router-harness.jsx";
 import InventorySearchShortcut from "../src/InventorySearchShortcut.jsx";
 import { mount, click, fill, advance } from "./state-harness.jsx";
 

@@ -1,14 +1,26 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { InventoryProvider, ProductsContext, ProductsDispatchContext } from "./InventoryContext.jsx";
 import InventorySummary from "./InventorySummary.jsx";
 import InventoryCatalog from "./InventoryCatalog.jsx";
 import InventoryCounter from "./InventoryCounter.jsx";
 import ProductForm from "./ProductForm.jsx";
-import InventoryTitle from "./InventoryTitle.jsx";
-import InventoryDetails from "./InventoryDetails.jsx";
+import InventoryNote from "./InventoryNote.jsx";
+import { Route, Routes, Navigate } from "react-router";
+import InventoryLayout from "./InventoryLayout.jsx";
+import ProductDetailRoute from "./ProductDetailRoute.jsx";
+import NotFound from "./NotFound.jsx";
 
-export default function App() {
-  return <InventoryProvider><InventoryPage /></InventoryProvider>;
+export default function App({ loadProduct }) {
+  return <InventoryProvider><Routes>
+    <Route element={<InventoryLayout />}>
+      <Route index element={<Navigate to="/products" replace />} />
+      <Route path="products">
+        <Route index element={<InventoryPage />} />
+        <Route path=":productId" element={<ProductDetailRoute loadProduct={loadProduct} />} />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Route>
+  </Routes></InventoryProvider>;
 }
 
 function InventoryPage() {
@@ -17,6 +29,7 @@ function InventoryPage() {
   const [notice, setNotice] = useState("");
   const [editingId, setEditingId] = useState(null);
   const headingRef = useRef(null);
+  useEffect(() => { headingRef.current?.focus(); }, []);
   if (products === null || dispatch === null) throw new Error("InventoryPage 需要 InventoryProvider");
   const editingProduct = products.find((product) => product.id === editingId) ?? null;
 
@@ -43,13 +56,12 @@ function InventoryPage() {
 
   return (
     <>
-      <InventoryTitle />
       <h1 id="inventory-heading" ref={headingRef} tabIndex={-1}>库存管理</h1>
       <p role="status">{notice}</p>
       <InventorySummary />
-      <InventoryDetails />
       <InventoryCatalog editingId={editingId} onEdit={setEditingId} onDelete={handleDelete}>
         <InventoryCounter />
+        <InventoryNote />
         <section id="product-editor" aria-labelledby="editor-heading">
           <h2 id="editor-heading">商品编辑区</h2>
           <p>切换商品、取消或删除当前商品会丢弃未保存草稿；筛选和排序保留草稿。</p>

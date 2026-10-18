@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C30 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；Catalog 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。
+当前参考状态：C31 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 列表/详情导航，URL 管理筛选；请求提取为 Hook，本机备注可持久化。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、归属、Context、ref 与 Effect 回归，110 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、归属、Context、ref 与 Effect 回归，131 条通过；不包含故意失败的 labs |
 | npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
@@ -29,7 +29,7 @@ npm run dev -- --host 127.0.0.1
 
 ## 文件与边界
 
-- index.html → src/main.jsx → App → InventoryProvider → InventoryPage → InventorySummary / InventoryCatalog → ProductList → ProductCard。编辑区作为 Catalog 的 children，独立于筛选列表；StrictMode 保留。
+- index.html → src/main.jsx → HashRouter → App → InventoryProvider → Routes → InventoryLayout / Outlet → 列表 InventoryPage 或 ProductDetailRoute / NotFound。列表继续用 InventorySummary / InventoryCatalog → ProductList → ProductCard。编辑区作为 Catalog 的 children，独立于筛选列表；StrictMode 保留。
 - src/InventoryContext.jsx 从 `../../../shared/products.js` 复制固定起点，products-reducer.js 统一更新业务数据；ProductCard 只读 product prop，标题 id 按商品编号区分。
 - InventoryCounter 的 count 是独立 UI 状态，不修改商品库存；两个实例各自记数。按钮分别记录一次、连续三次、安排延时与取消；新安排替换上一条延时记录，卸载时清除任务。
 - vite.config.js 使用 /js_web/ 基础路径，开发服务允许读取 examples 内的共享模块；本阶段的锁与网站根锁独立。
@@ -133,3 +133,14 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/requests.html?case= 后接 race / abort-only / answer / finally / finally-answer / http / invalid / network。固定延时位于 fetch 后续处理，Network 的传输耗时与 Console 的处理时间分别观察；network 模式只使用真实传输。
 - npm run test:bug -- labs/requests-bugs.test.jsx 预期三项失败。按 ProductDetails 的完整设计修复三个 Broken 默认导出后，三项通过；仓库保留错误起点。FinallyFixed 仅用于正常文件的 finally 时序对照，完整失败处理见 ProductDetails。
 - tests/requests.test.jsx 新增 13 条，正常回归累计 110 条。开发、生产、慢网/断网与暂停帧记录见 [examples/c30](../../c30/README.md)。
+
+## 自定义 Hooks 与路由（C31）
+
+- src/useProductRequest.js 原样接过 C30 的请求状态、清理、取消与重试，ProductDetails 只连接 Hook 和 RequestView；多个调用各自拥有状态，不自动去重或缓存。
+- main.jsx 的 HashRouter 包住 App；App 的 InventoryProvider 在 Routes 上方，InventoryLayout 通过 Outlet 放置列表/详情/不存在页。首页重定向 #/products，详情为 #/products/:productId；六个固定编号以外显示没有初始快照，未知路径显示不存在页，不向静态数据发请求。
+- URL 参数 q/category/order 是筛选的唯一来源；useCatalogFilters 每次复制参数再 replace，不新增打字历史。卡片和详情的返回 Link 传递 search；全部商品导航清空筛选。标题焦点在页面进入/详情参数变化时安排。
+- 进入详情卸载列表页，会丢弃编辑草稿与盘点次数；Provider 保留已补货/保存的库存，回列表从 URL 恢复筛选。刷新/新标签重建库存为固定起点，详情始终读取初始静态快照。
+- src/useLocalStorage.js 专门保存 string，以 JSON 字符串存储；key 固定于组件生命周期，改变 key 时应 key 重挂载。挂载只读，输入事件写入；损坏记录显示默认值和提示，成功输入后修复，权限/容量失败保留页面文本并提示。没有跨实例/跨标签同步。
+- InventoryNote 使用 js_web:inventory:note:v1，仅持久化备注；商品数据保持刷新恢复行为。labs/hooks.html?case=counters / storage / request / stale 提供四个 dev 实验。
+- npm run lint:c31-bug 与 npm run test:bug -- labs/hooks-bugs.test.jsx 对 useStaleRequest 的缺依赖起点预期失败；补上 productId 依赖后通过，仓库保留错误起点。
+- tests/hooks.test.jsx 新增 11 条，tests/routes.test.jsx 新增 10 条，共 131 条；原 App 测试统一通过 MemoryRouter 的 TestApp 提供路由上下文。生产构建仍仅首页入口，本阶段未部署到课程 Pages。详细记录见 [examples/c31](../../c31/README.md)。

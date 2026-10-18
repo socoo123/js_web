@@ -7,7 +7,7 @@ import ReducerQueue from "../labs/ReducerQueue.jsx";
 import ReducerProbe from "../labs/ReducerProbe.jsx";
 import { restockReducer } from "../labs/MutationReducerFixed.js";
 import InventorySummary from "../src/InventorySummary.jsx";
-import App from "../src/App.jsx";
+import { TestApp as App } from "./router-harness.jsx";
 import { mount, click, fill } from "./state-harness.jsx";
 
 it("补货和统计消费同一 Provider，连续操作都能同步", async () => {

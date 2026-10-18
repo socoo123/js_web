@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { it, expect } from "vitest";
 import { act } from "react";
-import App from "../src/App.jsx";
+import { TestApp as App } from "./router-harness.jsx";
 import SharedStock from "../labs/SharedStock.jsx";
 import SwitchProductFixed from "../labs/SwitchProductFixed.jsx";
 import IdentityProbe from "../labs/IdentityProbe.jsx";

@@ -6,7 +6,7 @@ import RefCountFixed from "../labs/RefCountFixed.jsx";
 import FocusForm from "../labs/FocusForm.jsx";
 import FocusMountFixed from "../labs/FocusMountFixed.jsx";
 import InventoryCounter from "../src/InventoryCounter.jsx";
-import App from "../src/App.jsx";
+import { TestApp as App } from "./router-harness.jsx";
 import { mount, click, fill, advance } from "./state-harness.jsx";
 
 it("事件中读写 ref，跨渲染保留；普通局部变量重新开始", async () => {

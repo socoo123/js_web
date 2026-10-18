@@ -2,7 +2,7 @@
 import { it, expect, vi } from "vitest";
 import { act } from "react";
 import ProductForm from "../src/ProductForm.jsx";
-import App from "../src/App.jsx";
+import { TestApp as App } from "./router-harness.jsx";
 import ControlledName from "../labs/ControlledName.jsx";
 import BlankStockFixed from "../labs/BlankStockFixed.jsx";
 import { products } from "../../../shared/products.js";

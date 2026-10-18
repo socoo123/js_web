@@ -1,7 +1,7 @@
 import { it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { products } from "../../../shared/products.js";
-import App from "../src/App.jsx";
+import { TestApp as App } from "./router-harness.jsx";
 import ProductCard from "../src/ProductCard.jsx";
 import ProductList from "../src/ProductList.jsx";
 import InventoryToolbar from "../src/InventoryToolbar.jsx";

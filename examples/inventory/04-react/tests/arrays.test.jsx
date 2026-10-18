@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { it, expect } from "vitest";
 import { act } from "react";
-import App from "../src/App.jsx";
+import { TestApp as App } from "./router-harness.jsx";
 import MutationFixed from "../labs/MutationFixed.jsx";
 import StableKeys from "../labs/StableKeys.jsx";
 import DerivedFixed from "../labs/DerivedFixed.jsx";
