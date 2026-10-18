@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C38 本地门禁完成，待 Pages 核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C38 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -35,7 +35,7 @@
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C34、C35。** 性能/加载实验与测试课程、每课门禁及 Pages 核验完成；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C36。** 综合排错、商品快照/本地详情、Hooks 速查与 Q3 完成；每课门禁及 Pages 核验通过，F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C37。** 已完成组件方案比较、库存适配/原生弹窗基线，每课门禁与 Pages 核验通过；阶段 5 完整迁移留给 C38，F1 保留。
-- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C38。** 已完成 Ant Design 阶段 5、草稿故障实验及本地门禁，待 Pages 核验；F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C38。** 已完成 Ant Design 阶段 5、草稿故障实验，每课门禁与 Pages 核验通过；F1 保留。
 
 ## 当前状态
 
@@ -43,7 +43,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 37 / 48（C01–C37）；C38 本地完成，待部署核验 |
+| 已发布 | 38 / 48（C01–C38）；C38 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–4、Q3 已完成；阶段 5：Ant Design 表格/弹窗、15 条业务回归与 5 条生产浏览器回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 13 张图，c29-effect-lifecycle 共用生命周期/请求竞态 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -90,7 +90,7 @@
 | C35 React UT、集成测试与 E2E 地图 | [打开](https://socoo123.github.io/js_web/05-react/c35-react-testing/) | [examples/c35](../examples/c35/README.md) | [run 39108651570](https://github.com/socoo123/js_web/actions/runs/39108651570) |
 | C36 React 项目复盘与故障排查 | [打开](https://socoo123.github.io/js_web/05-react/c36-react-project-debugging/) | [examples/c36](../examples/c36/README.md) | [run 39110881230](https://github.com/socoo123/js_web/actions/runs/39110881230) |
 | C37 组件生态与选择标准 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c37-component-ecosystem-selection/) | [examples/c37](../examples/c37/README.md) | [run 39111938025](https://github.com/socoo123/js_web/actions/runs/39111938025) |
-| C38 一个普通组件库的完整案例 | 待部署 | [examples/c38](../examples/c38/README.md) | 本地门禁完成，待 Pages 核验 |
+| C38 一个普通组件库的完整案例 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c38-antd-inventory/) | [examples/c38](../examples/c38/README.md) | [run 39121201638](https://github.com/socoo123/js_web/actions/runs/39121201638) |
 
 ## 周验收记录
 
@@ -106,7 +106,7 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C37、T0、Q1–Q3 与三张速查页已完成；C38 本地门禁完成，待 Pages 核验。明细见 examples/c38。
+完整队列见 PLAN §8。C01–C37、T0、Q1–Q3 与三张速查页已完成；C38 已上线，每课门禁与线上核验完成。明细见 examples/c38。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C39 SAP Fiori 与 UI5 家族**：核对四套技术的关系，按 PLAN 图清单完成 D2。

@@ -24,4 +24,5 @@
 - `npm run test:e2e:production`：构建后 5/5 应用用例通过，/js_web/ 生产资源可用。构建有单入口 JS 大于 500kB 的体积提示，未修改阈值；实验不计入生产产物。
 - 站点：`npm run lint:lessons` 38 课零 error/warning；`npm run check` 零诊断；`npm run build` 全量固定输出 269/269、44 页构建与资源/折叠区检查通过。
 - 本地站点：C38 与路线 HTTP 200、标题与 6 个练习折叠区正确、路线 38/48，无失败资源或页面错误；1280px 表格和 360px 深色弹窗已截图检查。
+- Pages：[run 39121201638](https://github.com/socoo123/js_web/actions/runs/39121201638) 成功；线上 C38 与路线 HTTP 200、标题/6 个折叠区/路线 38/48 正确，无失败资源或页面错误。
 - 未运行：在 React DevTools 界面中手动展开 Components 的步骤（实验值由浏览器行为核对）、屏幕阅读器、Firefox、Safari、Windows；MUI 等候选库接入未执行。
