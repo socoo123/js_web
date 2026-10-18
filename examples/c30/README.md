@@ -44,5 +44,5 @@
 - 首页与生产预览通过：详情请求为 /js_web/data/products/P002.json，HTTP 200、初始库存 0；列表补货后总库存 53 / 价值 26477.00 元，详情仍标初始库存；清空恢复 idle，刷新恢复 52 / 26348.00。
 - 网站 lint 30 课零 error/warning；check 零诊断；build 固定输出 239/239、35 页产物检查通过。正文 9861 字符、13 个代码块，全部与示例完整文件或连续片段一致。
 - 生产 C30 HTTP 200，禁用 JS 后 13 段代码、六个折叠区和 D2 可阅读；目录 30/48、C30 链接正确。共用 D2 已检查中文、箭头与两栏时序，全站仍为 13 张图。
-- Pages 待推送核验。
+- Pages：[run 39081623244](https://github.com/socoo123/js_web/actions/runs/39081623244) build/deploy 成功；C30 与路线均 HTTP 200，标题、共用 D2、请求/竞态正文及 30/48 目录已上线。
 - 未运行：屏幕阅读器朗读、DevTools 界面手动点击、Firefox、Safari、Windows。
