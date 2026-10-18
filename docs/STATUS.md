@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C32 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C33 本地门禁完成，待 Pages 核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -38,11 +38,9 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C24。** 已完成数组/key/派生数据、阶段 4 商品操作、Q2 与 Java ↔ JS 速查，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C25。** 已完成表单、校验、可访问性与阶段 4 商品编辑，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C26。** 已完成状态归属、保留/重置与阶段 4 单一编辑区，每课门禁及 Pages 核验通过；F1 保留。
-- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C27。** 已完成纯 reducer、Context、边界测试与七个实验，每课门禁及 Pages 核验通过；F1 保留。
-- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C28。** 已完成正文、DOM 焦点、可取消盘点与八个实验，每课门禁及 Pages 核验通过；F1 保留。
+- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C27、C28。** 已完成 reducer/Context、ref/外部系统、对应实验与阶段 4 代码，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C29、C30。** 已完成 Effect、请求竞态、实验、共用 D2 与阶段 4 标题/快捷键/详情；每课门禁与 Pages 核验通过；F1 保留。
-- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31。** 已完成自定义 Hooks、文本存储与 hash 路由，每课门禁与 Pages 核验通过；F1 保留。
-- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C32。** 已完成 Query 缓存、重试、失效与可写 mock，每课门禁与 Pages 核验通过；F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与本地门禁完成，待 Pages 核验；F1 保留。
 
 ## 当前状态
 
@@ -50,8 +48,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 32 / 48（C01–C32）；C32 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–3 已完成；阶段 4：Query 缓存、精确失效与浏览器内 mock，累计 144 条正常回归 |
+| 已发布 | 32 / 48（C01–C32）；C33 本地门禁完成，待部署核验 |
+| 贯穿项目 | 阶段 1–3 已完成；阶段 4：异步 Action、表单状态与乐观补货预览，累计 154 条正常回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 13 张图，c29-effect-lifecycle 共用生命周期/请求竞态 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -93,6 +91,7 @@
 | C30 请求状态与竞态调试 | [打开](https://socoo123.github.io/js_web/05-react/c30-requests-races/) | [examples/c30](../examples/c30/README.md) | [run 39081623244](https://github.com/socoo123/js_web/actions/runs/39081623244) |
 | C31 自定义 Hooks 与路由 | [打开](https://socoo123.github.io/js_web/05-react/c31-custom-hooks-routing/) | [examples/c31](../examples/c31/README.md) | [run 39082631885](https://github.com/socoo123/js_web/actions/runs/39082631885) |
 | C32 认识 TanStack Query 与服务端状态 | [打开](https://socoo123.github.io/js_web/05-react/c32-tanstack-query-server-state/) | [examples/c32](../examples/c32/README.md) | [run 39087677999](https://github.com/socoo123/js_web/actions/runs/39087677999) |
+| C33 现代 React 19 与更新速查 | [打开](https://socoo123.github.io/js_web/05-react/c33-modern-react-actions/) | [examples/c33](../examples/c33/README.md) | 本地门禁通过，待 Pages 核验 |
 
 ## 周验收记录
 
@@ -107,10 +106,10 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。P1、C01–C05 重构、T0、C06–C32、Q1/Q2 与 Java ↔ JS 速查均已完成；C32 每课门禁与 Pages 核验通过。明细见 examples/c32。
+完整队列见 PLAN §8。P1、C01–C05 重构、T0、C06–C33、Q1/Q2 与 Java ↔ JS 速查均已完成；C33 本地门禁完成，待 Pages 核验。明细见 examples/c33。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C33 现代 React 19 与更新速查**：区分浏览器异步提交与服务器能力，按核心用法和更新附录组织。
+2. **C34 性能、加载与错误诊断**：先测量再优化，区分 Suspense、请求状态与错误边界。
 
 ## 本文件的更新规则
 

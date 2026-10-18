@@ -2,12 +2,12 @@
 
 面向会 Java、尚未系统学习前端的开发者，用中文从 JavaScript 的历史讲到现代语言、数据结构、Node 与包管理、React、SAP UI5 和开源组件。
 
-当前阶段：**C01–C32 正文与练习已完成，React 库存项目已推进到查询缓存与浏览器内 mock；Astro + Starlight 网站使用 GitHub Pages 自动部署。实际发布与验证记录见 [STATUS](docs/STATUS.md)。**
+当前阶段：**C01–C33 正文与练习已完成，React 库存项目已加入异步 Action 与乐观补货预览；Astro + Starlight 网站使用 GitHub Pages 自动部署。实际发布与验证记录见 [STATUS](docs/STATUS.md)。**
 
 - 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
 - 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)
 - 第二课：[C02 Web 基础与第一个调试现场](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/)
-- 最新课：[C32 认识 TanStack Query 与服务端状态](https://socoo123.github.io/js_web/05-react/c32-tanstack-query-server-state/)
+- 最新课：[C33 现代 React 19 与更新速查](https://socoo123.github.io/js_web/05-react/c33-modern-react-actions/)
 - [本地构建与自动提交/部署说明](docs/DEPLOYMENT.md)
 
 ## 课程入口
@@ -28,7 +28,7 @@
 - [C07 练习与验证记录](examples/c07/README.md)；[库存项目阶段 1](examples/inventory/01-core/README.md)。
 - [D2 教学图与构建说明](diagrams/README.md)：保留源码、SVG 与固定工具/字体信息。
 
-完整已发布清单见[学习路线](https://socoo123.github.io/js_web/roadmap/)与 [STATUS](docs/STATUS.md)。下一课为 C33 现代 React 19 与更新速查；F1 学习进度功能仍在任务队列。
+完整已发布清单见[学习路线](https://socoo123.github.io/js_web/roadmap/)与 [STATUS](docs/STATUS.md)。下一课为 C34 性能、加载与错误诊断；F1 学习进度功能仍在任务队列。
 
 ## 清理上下文后如何继续
 

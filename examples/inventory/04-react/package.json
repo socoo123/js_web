@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "inspect": "node labs/inspect-elements.js",
     "test": "vitest run",
-    "lint": "eslint src labs/ProductWatch.jsx labs/IntervalFixed.jsx labs/LoopFixed.jsx labs/WatchControls.jsx labs/RequestControls.jsx labs/request-loaders.js labs/useCounter.js labs/HookCounters.jsx labs/StoredNotes.jsx labs/query-main.jsx",
+    "lint": "eslint src labs/ProductWatch.jsx labs/IntervalFixed.jsx labs/LoopFixed.jsx labs/WatchControls.jsx labs/RequestControls.jsx labs/request-loaders.js labs/useCounter.js labs/HookCounters.jsx labs/StoredNotes.jsx labs/query-main.jsx labs/actions-main.jsx labs/SimpleActionForm.jsx labs/SignatureFixed.jsx labs/StatusScopeFixed.jsx labs/RefPropInput.jsx labs/CustomElementStock.jsx labs/PromiseProduct.jsx",
     "lint:bug": "eslint labs/StaleSubscriptionBroken.jsx labs/IntervalBroken.jsx",
     "test:bug": "vitest run --config vitest.bug.config.js",
     "lint:c31-bug": "eslint labs/useStaleRequest.js"

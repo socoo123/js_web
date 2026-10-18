@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C32 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32 给详情加入 Query 缓存与可写 mock，列表仍是本地 reducer 数据。
+当前参考状态：C33 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32 给详情加入 Query 缓存与可写 mock，列表仍是本地 reducer 数据。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、归属、Context、ref 与 Effect 回归，144 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、归属、Context、ref 与 Effect 回归，154 条通过；不包含故意失败的 labs |
 | npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
@@ -153,3 +153,12 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - useRestockMutation 成功后精确失效 saved.id 的详情，等待活跃查询读回；保存过程中切换商品仍失效原编号。读回失败保留旧值并显示更新错误，写失败不触发失效。
 - labs/query.html 可切快慢响应、失败一次/持续失败、写失败、显示/隐藏详情和双观察者；case=key-bug 保留漏编号的错误起点。query-bugs.test.jsx 原始起点失败，加编号后通过，仓库保留错误起点。
 - 正常测试新增 13 条，累计 144 条；CI 安装本阶段锁，执行 lint/test/build 后供网站全量示例使用。运行明细见 [examples/c32](../../c32/README.md)。
+
+
+## 现代 React 提交与乐观预览（C33）
+
+- ProductDetailRoute 改接 ActionProductDetails，复用 CachedProductDetails 的读取视图与同一 query key。RestockActionForm 使用 useActionState/useOptimistic，RestockSubmit 在 form 内读取 useFormStatus；saveProduct 仍由原 mutation 执行并精确失效 saved.id。query.html 保留 C32 的原始 mutation 按钮。
+- restock-action.js 导出操作工厂，校验编号与库存上限，显示预计绝对库存并 await mutateAsync。保存失败结束临时预览；保存成功而读回失败时分别提示，点击“重新读取详情”恢复，不重复补货。预览只在表单区域，读取视图继续显示缓存值。
+- labs/actions.html 默认提供保存失败、读回失败、商品切换；case=simple / signature / signature-answer / status / status-answer / ref / element / use 分别演示基础 action、参数错位/修复、上下文归属/修复、ref prop、对象 property 与自定义事件、稳定 Promise 的 use 读取。实验只用于 dev。
+- npm run test:bug -- labs/actions-bugs.test.jsx 的两个原始起点先失败；用对应 Fixed 文件修复后通过，仓库保留错误起点。tests/actions.test.jsx 新增 10 条，正常回归共 154 条；包含保存失败恢复、写成功读回失败、等待读回、切换商品、字段边界、签名与状态归属。
+- 生产预览的 P002 详情 Action 补货后为 1；列表仍是本地库存 0、总数 52，刷新恢复 mock 与缓存。没有真实写 API、Server Functions 或 RSC 框架。运行记录见 [examples/c33](../../c33/README.md)。

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link, useLocation, useParams } from "react-router";
 import { products } from "../../../shared/products.js";
-import CachedProductDetails from "./CachedProductDetails.jsx";
+import ActionProductDetails from "./ActionProductDetails.jsx";
 import NotFound from "./NotFound.jsx";
 
 export default function ProductDetailRoute({ loadProduct, saveProduct }) {
@@ -19,6 +19,6 @@ export default function ProductDetailRoute({ loadProduct, saveProduct }) {
       {products.map(({ id }) => <Link key={id} to={{ pathname: `/products/${id}`, search }}>{id}{" "}</Link>)}
     </nav>
     <p>以下详情用静态 JSON 初始化浏览器内 mock；模拟远端补货只改变这份副本，刷新恢复。列表库存仍是独立的本地练习数据。</p>
-    <CachedProductDetails key={productId} productId={productId} loadProduct={loadProduct} saveProduct={saveProduct} />
+    <ActionProductDetails key={productId} productId={productId} loadProduct={loadProduct} saveProduct={saveProduct} />
   </>;
 }

@@ -5,7 +5,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 <!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
 
-**已发布 32 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**已发布 33 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
 
 ## 选择你的节奏
 
@@ -60,7 +60,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 15 天 | [C30 请求状态与竞态调试](../05-react/c30-requests-races/) | 已发布 |
 | 第 16 天 | [C31 自定义 Hooks 与路由](../05-react/c31-custom-hooks-routing/) | 已发布 |
 | 第 16 天 | [C32 认识 TanStack Query 与服务端状态](../05-react/c32-tanstack-query-server-state/) | 已发布 |
-| 第 17 天 | C33 现代 React 19 与更新速查 | 待发布 |
+| 第 17 天 | [C33 现代 React 19 与更新速查](../05-react/c33-modern-react-actions/) | 已发布 |
 | 第 17 天 | C34 性能、加载与错误诊断 | 待发布 |
 | 第 18 天 | C35 React UT、集成测试与 E2E 地图 | 待发布 |
 | 第 18 天 | C36 React 项目复盘与故障排查 | 待发布 |
