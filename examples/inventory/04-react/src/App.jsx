@@ -5,6 +5,7 @@ import InventoryCatalog from "./InventoryCatalog.jsx";
 import InventoryCounter from "./InventoryCounter.jsx";
 import ProductForm from "./ProductForm.jsx";
 import InventoryTitle from "./InventoryTitle.jsx";
+import InventoryDetails from "./InventoryDetails.jsx";
 
 export default function App() {
   return <InventoryProvider><InventoryPage /></InventoryProvider>;
@@ -46,6 +47,7 @@ function InventoryPage() {
       <h1 id="inventory-heading" ref={headingRef} tabIndex={-1}>库存管理</h1>
       <p role="status">{notice}</p>
       <InventorySummary />
+      <InventoryDetails />
       <InventoryCatalog editingId={editingId} onEdit={setEditingId} onDelete={handleDelete}>
         <InventoryCounter />
         <section id="product-editor" aria-labelledby="editor-heading">

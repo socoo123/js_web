@@ -1,0 +1,10 @@
+{
+  "id": "P001",
+  "name": "机械键盘",
+  "category": "外设",
+  "stock": 12,
+  "priceCents": 39900,
+  "tags": [
+    "热销"
+  ]
+}

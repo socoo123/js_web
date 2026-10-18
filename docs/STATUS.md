@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-17（C29 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-18（C30 本地门禁完成，待 Pages 核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -13,8 +13,7 @@
 
 ## 用户要求的变更记录
 
-- 最初的要求：中文课程，读者会 Java；4 周 48 课，8 周慢速版；内容覆盖 JS 历史、语言、数据结构、异步、Node 与包管理器、详细的 React、SAP UI5 与开源组件；图只用 D2；静态站部署到 GitHub Pages。不要求所有示例在线运行，需要动手的标「自己尝试」；必须教调试工具和 UT。
-- 用户授权：每次生成文章后，验证、提交、推送并检查 Pages，不必再请求许可（见 AGENTS.md）。
+- 最初的要求：中文课程，读者会 Java；4 周 48 课，8 周慢速版；内容覆盖 JS 历史、语言、数据结构、异步、Node 与包管理器、详细的 React、SAP UI5 与开源组件；图只用 D2；静态站部署到 GitHub Pages。不要求所有示例在线运行，需要动手的标「自己尝试」；必须教调试工具和 UT。每篇完成后授权验证、提交、推送并检查 Pages（见 AGENTS.md）。
 - 用户曾要求用 3 个子 agent 并行写 C03–C05，已完成。
 - **2026-10-15：用户认为 C01–C05 写得不好，要求约束并调整计划。** 已修订 PLAN、CONTENT_GUIDE、CURRICULUM、AGENTS 和本文件，问题和约束见 PLAN §0。从 C06 起按新规范写；C06 写完后停下，等用户确认风格。
 - **2026-10-15：用户要求按新规范整篇重构 C03（文字和图），给其他 AI 当参考。** 已完成：正文约 7,500 字，新增 D2 图 c03-value-boundary，示例改用固定样例数据并全部带 `.expected.txt`。C03 不再属于 R1。
@@ -43,6 +42,7 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C27。** 已完成纯 reducer、Context、边界测试与七个实验，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C28。** 已完成正文、DOM 焦点、可取消盘点与八个实验，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C29。** 已完成 Effect、八个实验、D2 与阶段 4 标题/快捷键同步，每课门禁及 Pages 核验通过；F1 保留。
+- **2026-10-18：用户要求按最新计划与重做的 C03 开发 C30。** 已完成请求状态、八个实验、共用 D2 与阶段 4 详情；本地门禁通过，Pages 待核验，F1 保留。
 
 ## 当前状态
 
@@ -50,9 +50,9 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 29 / 48（C01–C29）；C29 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–3 已完成；阶段 4：Context、焦点/盘点、Effect 标题与快捷键，累计 97 条正常回归 |
-| D2 | 0.9.0 + Dagre + Noto Sans SC；已有 13 张图，新增 c29-effect-lifecycle |
+| 已发布 | 29 / 48（C01–C29）；C30 本地门禁完成，Pages 待核验 |
+| 贯穿项目 | 阶段 1–3 已完成；阶段 4：Context、焦点/盘点、Effect 与请求详情，累计 110 条正常回归 |
+| D2 | 0.9.0 + Dagre + Noto Sans SC；已有 13 张图，c29-effect-lifecycle 共用生命周期/请求竞态 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
 | React islands | 未接入，没有实际需求前不安装 |
@@ -90,6 +90,7 @@
 | C27 useReducer 与 Context | [打开](https://socoo123.github.io/js_web/05-react/c27-reducer-context/) | [examples/c27](../examples/c27/README.md) | [run 39038415280](https://github.com/socoo123/js_web/actions/runs/39038415280) |
 | C28 useRef 与外部系统 | [打开](https://socoo123.github.io/js_web/05-react/c28-refs-external-systems/) | [examples/c28](../examples/c28/README.md) | [run 39040017175](https://github.com/socoo123/js_web/actions/runs/39040017175) |
 | C29 useEffect 深入与清理 | [打开](https://socoo123.github.io/js_web/05-react/c29-effects-cleanup/) | [examples/c29](../examples/c29/README.md) | [run 39042403933](https://github.com/socoo123/js_web/actions/runs/39042403933) |
+| C30 请求状态与竞态调试 | 待核验 | [examples/c30](../examples/c30/README.md) | 本地门禁完成，待 Pages |
 
 ## 周验收记录
 
@@ -100,17 +101,16 @@
 
 ## 已知问题（不阻塞）
 
-- Starlight 自定义 404 与内部路由在构建时有一条优先级提示，实际的 404.html 正常。
-- 上游 Pages Actions 有 Node 20 的弃用提示；runner 实际使用 Node 24，部署成功。升级 Actions 时复查。
+- Starlight 自定义 404 有一条路由优先级提示，404.html 正常；上游 Pages Actions 有 Node 20 弃用提示，runner 实际使用 Node 24，部署成功，升级时复查。
 
 ## 下一步
 
 完整队列见 PLAN §8。
 
-P1、C01–C05 重构、T0、C06–C29、Q1/Q2 与 Java ↔ JS 速查均已完成；C29 每课门禁与 Pages 核验通过。明细见 examples/c29。
+P1、C01–C05 重构、T0、C06–C30、Q1/Q2 与 Java ↔ JS 速查均已完成本地门禁；C30 待 Pages 核验。明细见 examples/c30。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C30 请求状态与竞态调试**：请求状态机、失败、取消、过期响应与 Network 对照。
+2. **C31 自定义 Hooks 与路由**：复用逻辑、Hook API 与依赖、hash 路由和详情导航。
 
 ## 本文件的更新规则
 

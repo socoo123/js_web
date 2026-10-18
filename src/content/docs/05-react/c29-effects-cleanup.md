@@ -80,9 +80,9 @@ export default function ProductWatch({ productId }) {
 
 新界面提交时，React 会在运行该 Effect 的新 setup 前先运行旧 cleanup。cleanup 不只在卸载时执行，它也负责依赖变化时交接资源。这里关注同一个 Effect 的配对顺序，无需把它理解成所有组件之间的全局执行顺序。
 
-![Effect 时序图：首次提交 P001 后建立监听；根 StrictMode 在开发中额外清理并重建；提交 P002 后先清理 P001 再建立 P002；移除组件时清理 P002。](../../../assets/diagrams/c29-effect-lifecycle.svg)
+![共用机制图：左栏展示 P001 的 setup、StrictMode 检查、切换 P002 时的 cleanup 和新 setup、卸载清理；右栏将清理规则应用于请求竞态，失效的 P001 不能覆盖 P002。](../../../assets/diagrams/c29-effect-lifecycle.svg)
 
-从上往下读，每个 cleanup 清理的是与自己配对的 setup。蓝色区域是首次挂载的开发检查，生产路径直接跳过它。
+先看左栏，从上往下读，每个 cleanup 清理的是与自己配对的 setup。蓝色区域是首次挂载的开发检查，生产路径直接跳过它；右栏的请求应用在下一课展开。
 
 ### 为什么旧清理知道旧编号
 

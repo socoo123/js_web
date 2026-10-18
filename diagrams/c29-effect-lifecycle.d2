@@ -1,32 +1,59 @@
-# 箭头表示同一个 Effect 的执行先后；每次 cleanup 使用对应 setup 的闭包。
+# 共用机制图：左侧是 Effect 交接资源，右侧把同一规则应用于请求竞态。
+# 箭头表示各栏内的执行先后，颜色区分当前有效与已经过期的操作。
 direction: down
 **.style.font-size: 20
 **.style.border-radius: 10
 (** -> **)[*].style.font-size: 18
 
-mount: 提交 P001
-start: setup P001\n建立监听 {
-  style.fill: "#f6ffed"
-  style.stroke: "#389e0d"
-}
-check: 根 StrictMode · 仅开发首次检查 {
-  style.fill: "#f4f8ff"
-  style.stroke-dash: 4
-  stop: cleanup P001\n移除刚才的监听
-  restart: setup P001\n重新建立监听
-  stop -> restart
-}
-change: 提交 P002\n依赖发生变化
-old: cleanup P001\n清理旧闭包的监听
-next: setup P002\n建立新监听 {
-  style.fill: "#f6ffed"
-  style.stroke: "#389e0d"
-}
-remove: 组件移除
-end: cleanup P002\n释放最后的监听
+lifecycle: Effect 的启停 {
+  direction: down
+  mount: 提交 P001
+  start: setup P001\n建立监听 {
+    style.fill: "#f6ffed"
+    style.stroke: "#389e0d"
+  }
+  check: 根 StrictMode · 仅开发首次检查 {
+    style.fill: "#f4f8ff"
+    style.stroke-dash: 4
+    stop: cleanup P001\n移除刚才的监听
+    restart: setup P001\n重新建立监听
+    stop -> restart
+  }
+  change: 提交 P002\n依赖发生变化
+  old: cleanup P001\n清理旧闭包的监听
+  next: setup P002\n建立新监听 {
+    style.fill: "#f6ffed"
+    style.stroke: "#389e0d"
+  }
+  remove: 组件移除
+  end: cleanup P002\n释放最后的监听
 
-mount -> start
-start -> check.stop: 开发检查
-check.restart -> change
-start -> change: 生产路径
-change -> old -> next -> remove -> end
+  mount -> start
+  start -> check.stop: 开发检查
+  check.restart -> change
+  start -> change: 生产路径
+  change -> old -> next -> remove -> end
+}
+
+race: 请求结果的归属 {
+  direction: down
+  first: setup P001\nignore = false\n启动请求与后续处理
+  switch: 切到 P002
+  cleanup: cleanup P001\nignore = true · abort() {
+    style.fill: "#fff1f0"
+    style.stroke: "#cf1322"
+  }
+  second: setup P002\n新的 ignore = false {
+    style.fill: "#f4f8ff"
+  }
+  current: P002 先完成\n检查自己的 ignore → 提交 {
+    style.fill: "#f6ffed"
+    style.stroke: "#389e0d"
+  }
+  stale: P001 后完成\n检查自己的 ignore → 忽略 {
+    style.fill: "#fff1f0"
+    style.stroke: "#cf1322"
+  }
+  result: 页面保留 P002\n旧结果与旧错误都不更新 state
+  first -> switch -> cleanup -> second -> current -> stale -> result
+}

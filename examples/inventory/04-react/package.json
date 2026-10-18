@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "inspect": "node labs/inspect-elements.js",
     "test": "vitest run",
-    "lint": "eslint src labs/ProductWatch.jsx labs/IntervalFixed.jsx labs/LoopFixed.jsx labs/WatchControls.jsx",
+    "lint": "eslint src labs/ProductWatch.jsx labs/IntervalFixed.jsx labs/LoopFixed.jsx labs/WatchControls.jsx labs/RequestControls.jsx labs/request-loaders.js",
     "lint:bug": "eslint labs/StaleSubscriptionBroken.jsx labs/IntervalBroken.jsx",
     "test:bug": "vitest run --config vitest.bug.config.js"
   },

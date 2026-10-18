@@ -1,0 +1,10 @@
+{
+  "id": "P006",
+  "name": "降噪耳机",
+  "category": "音频",
+  "stock": 5,
+  "priceCents": 89900,
+  "tags": [
+    "热销"
+  ]
+}

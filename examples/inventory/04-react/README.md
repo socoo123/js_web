@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C29 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；Catalog 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。
+当前参考状态：C30 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；Catalog 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、归属、Context、ref 与 Effect 回归，97 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、归属、Context、ref 与 Effect 回归，110 条通过；不包含故意失败的 labs |
 | npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
@@ -125,3 +125,11 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/effects.html?case= 后接 lifecycle / missing / stale / guard / interval / interval-answer / loop / loop-answer，分别观察正确生命周期、缺清理、旧闭包、ref 阻止重启、计时器快照和派生值循环。loop 加停止条件，由实验边界显示错误，避免持续更新；实验页仅 dev 提供。
 - npm run lint:bug 预期报两项缺依赖；npm run test:bug -- labs/effects-bugs.test.jsx 预期四项失败。两个通知组件按 ProductWatch、计时器按 IntervalFixed、筛选按 LoopFixed 修复后，两项命令都通过；仓库保留错误起点。
 - tests/effects.test.jsx 新增 11 条，正常回归累计 97 条；覆盖清理顺序、无关重渲染、卸载/重挂载、interval、派生值、标题更新/恢复、快捷键单次处理/编辑保留/注销。运行证据见 [examples/c29](../../c29/README.md)。
+
+## 请求状态与竞态（C30）
+
+- src/InventoryDetails.jsx 选择六件初始商品；ProductDetails 手工管理 idle/loading/success/error/cancelled、取消和重试。每次 Effect 独立的 ignore 保护所有异步更新，cleanup 先失效再 abort；清空选择恢复 idle。
+- src/product-api.js 使用 BASE_URL 和 Accept: application/json 请求 public/data/products 下的固定 JSON；read-product.js 检查 HTTP、JSON 与字段。详情是发布时初始快照，本地 reducer 的补货、删除和编辑不会被请求覆盖，也不会写回静态文件。
+- labs/requests.html?case= 后接 race / abort-only / answer / finally / finally-answer / http / invalid / network。固定延时位于 fetch 后续处理，Network 的传输耗时与 Console 的处理时间分别观察；network 模式只使用真实传输。
+- npm run test:bug -- labs/requests-bugs.test.jsx 预期三项失败。按 ProductDetails 的完整设计修复三个 Broken 默认导出后，三项通过；仓库保留错误起点。FinallyFixed 仅用于正常文件的 finally 时序对照，完整失败处理见 ProductDetails。
+- tests/requests.test.jsx 新增 13 条，正常回归累计 110 条。开发、生产、慢网/断网与暂停帧记录见 [examples/c30](../../c30/README.md)。
