@@ -29,4 +29,5 @@
 - CardHeader 自动进入 header slot；中文初始化、深色主题和英文组件语言通过，清除图标为 Clear，业务标题仍为中文；所有受测请求无 4xx/5xx、网络失败或 Console error。360px 无页面横向溢出；桌面截图已检查。
 - 故障注入把 HTML form 换为 UI5 Form：真实保存回归如预期失败，恢复后全通过。另在浏览器断点停在 submit，读到 event.type=submit、product.id=P002、draft.stock="3"（string）；错误版无 HTML form 祖先，保存未触发，库存保持 52。
 - 站点 `lint:lessons` 44 课零 error/warning、`check` 零诊断、`build` 及 286/286 全量输出通过；新文章/速查页导航、6 个折叠区、禁用 JS 阅读通过，51 个 HTML 页面静态资源与子路径检查通过。
+- Pages [run 39182549346](https://github.com/socoo123/js_web/actions/runs/39182549346) 成功；C44、UI5 家族速查与路线页均 HTTP 200，线上保留 6 个折叠区，课程计数为 44 / 48。
 - 未运行：React DevTools 面板内手动展开 App 的操作、Firefox/Safari、Windows、真实手机与 SAP 后端服务。Components 练习可按正文自己尝试；业务数据与回调已由真实 Chrome 和业务回归检查。
