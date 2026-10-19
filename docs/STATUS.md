@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C43 本地门禁完成，待本次 Pages 核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C43 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -32,7 +32,7 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C27、C28。** 已完成 reducer/Context、ref/外部系统、对应实验与阶段 4 代码，每课门禁及 Pages 核验通过；F1 保留。
 - **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C29、C30。** 已完成 Effect、请求竞态、实验、共用 D2 与阶段 4 标题/快捷键/详情；每课门禁与 Pages 核验通过；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
-- **2026-10-18–19：用户要求按最新计划与重做的 C03 开发 C34–C43。** React 复盘/Q3、组件库、经典 UI5 与 V2 mock 已上线；C43 原生组件、资源与 React 19 对照完成本地门禁，待 Pages 核验；F1 保留。
+- **2026-10-18–19：用户要求按最新计划与重做的 C03 开发 C34–C43。** React 复盘/Q3、组件库、经典 UI5 与 V2 mock 已上线；C43 原生组件、资源与 React 19 对照已上线，每课门禁及 Pages 核验通过；F1 保留。
 
 ## 当前状态
 
@@ -40,7 +40,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 42 / 48（C01–C42）；C43 本地门禁通过，待本次推送核验 |
+| 已发布 | 43 / 48（C01–C43）；C43 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–5、Q3 已完成；阶段 6 路由/详情/V2 mock；C43 原生组件独立实验与 7 条回归 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 14 张图，新增 C39 家族/MVC 绑定共用图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -92,7 +92,7 @@
 | C40 OpenUI5 入门：MVC 与工程 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c40-openui5-mvc-project/) | [examples/c40](../examples/c40/README.md) | [run 39124104412](https://github.com/socoo123/js_web/actions/runs/39124104412) |
 | C41 UI5 Model、绑定与业务控件 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c41-model-binding-controls/) | [examples/c41](../examples/c41/README.md) | [run 39134470004](https://github.com/socoo123/js_web/actions/runs/39134470004) |
 | C42 UI5 路由与 OData 起点 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c42-routing-odata/) | [examples/c42](../examples/c42/README.md) | [run 39144417753](https://github.com/socoo123/js_web/actions/runs/39144417753) |
-| C43 UI5 Web Components 原生使用 | 待本次推送核验 | [examples/c43](../examples/c43/README.md) | 待本次 Pages Actions |
+| C43 UI5 Web Components 原生使用 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c43-native-web-components/) | [examples/c43](../examples/c43/README.md) | [run 39180665049](https://github.com/socoo123/js_web/actions/runs/39180665049) |
 
 ## 周验收记录
 
@@ -108,7 +108,7 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C42 已发布，C43 本地门禁通过待线上核验；T0、Q1–Q3 与三张速查页完成。明细见 examples/c43。
+完整队列见 PLAN §8。C01–C43、T0、Q1–Q3 与三张速查页完成；C43 每课门禁与线上核验通过。明细见 examples/c43。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C44 UI5 Web Components for React**：按第 4 周范围推进阶段 7 表单与列表，补参考页「UI5 家族速查」。

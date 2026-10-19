@@ -29,5 +29,5 @@
 - 三个 Console 文件实际执行：注册 true/true；布尔 true true→false→boolean；Shadow 查询 heading/null/true。slot 节点仍归页面，错误 slot 不分配；改回后按正文刷新，标题恢复。运行中改成无效 slot 后，UI5 会忽略该 slot，故恢复步骤明确要求刷新。
 - 公开 input part 字间距 2px 生效，普通后代选择器未使内部输入变红；深色变量由 #f5f6f7 变为 #12171c，中文翻译及 parameters-bundle 资源请求成功；语言切 en 后图标可访问名称清除→Clear，业务标题仍为中文。
 - React 19 对照页：真实 ui5-input 事件更新 state/文字，value property 与 disabled 布尔传递正确。事件错误名反例先失败，正常命令恢复通过。
-- 网站 lint 43 课零 error；check 零诊断；全量固定输出 283/283；build 49 页与 /js_web/ 产物检查通过。课程生产页 HTTP 200、6 个折叠区展开、资源/异常、禁用 JS 阅读与实验页 360px 无溢出通过；部署待本次推送。
+- 网站 lint 43 课零 error；check 零诊断；全量固定输出 283/283；build 49 页与 /js_web/ 产物检查通过。课程生产页 HTTP 200、6 个折叠区展开、资源/异常、禁用 JS 阅读与实验页 360px 无溢出通过；[Pages run 39180665049](https://github.com/socoo123/js_web/actions/runs/39180665049) 成功；线上课程和路线均 HTTP 200，标题、6 个折叠区、43/48 与 C43 链接正确。
 - 未运行：DevTools 界面手动点选、屏幕阅读器、Firefox、Safari、Windows；真实 SAP 服务与后端持久化。
