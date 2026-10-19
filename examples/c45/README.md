@@ -20,7 +20,7 @@
 ## 排错记录：资源 URL 缺少应用 base
 
 - 入口与初始条件：开发服务 `/js_web/labs/delivery.html?case=asset`，无缓存；预期出现库存标识。
-- 复现与实际：刷新后图片损坏；Network 的 /media/inventory.svg 返回 404，Initiator 指向 img。
+- 复现与实际：刷新后图片损坏；Network 的 /media/inventory.svg 返回 404，对照 img 的 src 可见遗漏了应用目录。
 - 根因：以 / 开头的 URL 从域名根解析，跳过应用的 /js_web/。
 - 修复：img.src 使用 import.meta.env.BASE_URL 加 media/inventory.svg；asset-answer 保留完整版本。
 - 验证：正确资源返回 200、naturalWidth=96；再打开错误入口仍可复现 404。正文练习 3 可依此结构保存自己的记录。
@@ -37,4 +37,5 @@
 - 另按正文模拟 1500ms 网络延迟，加载提示持续到成功；Tab 顺序经过分类/库存/价格/热销/保存，保存按钮的焦点轮廓为 3px，Enter 提交通过。
 - 站点课程 lint 45 课零 error/warning、Astro check 零诊断、build 与全量固定输出 289/289 通过，52 个 HTML 产物路径检查通过。
 - 新文章本地 HTTP 200，六个提示/答案折叠区、C44 上一页、路线 45/48 和禁用 JS 阅读通过；桌面截图已检查。
+- Pages [run 39184048121](https://github.com/socoo123/js_web/actions/runs/39184048121) 成功；新文章与路线页均 HTTP 200，六个折叠区存在，路线为 45/48。
 - 未运行：DevTools/React DevTools 面板内的人工点击、真实触摸设备、虚拟键盘、屏幕阅读器、Firefox/Safari 与 Windows。面板路径据官方文档核对，源码暂停、堆快照、CPU profile、DOM 与事件通过独立 Chrome 检查。

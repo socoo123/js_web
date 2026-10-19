@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C45 本地门禁完成，待部署核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C45 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -30,7 +30,7 @@
 - **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C27–C30。** reducer/Context、ref、Effect/请求竞态、对应实验、共用 D2 与阶段 4 更新已上线，每课门禁与 Pages 核验通过；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18–19：用户要求按最新计划与重做的 C03 开发 C34–C44。** React 复盘/Q3、组件库、经典 UI5 与原生组件已上线；C44 阶段 7、UI5 家族速查、每课门禁与 Pages 核验完成；F1 保留。
-- **2026-10-19：用户要求按最新计划与重做的 C03 开发 C45。** 正文、阶段 4 综合排错实验、生产源码断点与性能/内存检查完成，本地门禁通过，待 Pages 核验；F1 保留。
+- **2026-10-19：用户要求按最新计划与重做的 C03 开发 C45。** 正文、阶段 4 综合排错实验、生产源码断点与性能/内存检查完成，每课门禁与 Pages 核验通过；F1 保留。
 
 ## 当前状态
 
@@ -38,7 +38,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 44 / 48（C01–C44）；C45 本地门禁完成，待部署核验 |
+| 已发布 | 45 / 48（C01–C45）；C45 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–7、Q3 完成；C45 回到阶段 4，195 条业务与 5 条浏览器回归通过 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；已有 14 张图，新增 C39 家族/MVC 绑定共用图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -92,7 +92,7 @@
 | C42 UI5 路由与 OData 起点 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c42-routing-odata/) | [examples/c42](../examples/c42/README.md) | [run 39144417753](https://github.com/socoo123/js_web/actions/runs/39144417753) |
 | C43 UI5 Web Components 原生使用 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c43-native-web-components/) | [examples/c43](../examples/c43/README.md) | [run 39180665049](https://github.com/socoo123/js_web/actions/runs/39180665049) |
 | C44 UI5 Web Components for React | [打开](https://socoo123.github.io/js_web/06-components-ui5/c44-ui5-react/) | [examples/c44](../examples/c44/README.md) | [run 39182549346](https://github.com/socoo123/js_web/actions/runs/39182549346) |
-| C45 全链路 Debug 与交付前检查 | [打开](https://socoo123.github.io/js_web/07-project/c45-debug-delivery-checks/) | [examples/c45](../examples/c45/README.md) | 本地门禁通过，待部署 |
+| C45 全链路 Debug 与交付前检查 | [打开](https://socoo123.github.io/js_web/07-project/c45-debug-delivery-checks/) | [examples/c45](../examples/c45/README.md) | [run 39184048121](https://github.com/socoo123/js_web/actions/runs/39184048121) |
 
 ## 周验收记录
 
@@ -108,7 +108,7 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C44、T0、Q1–Q3 与四张速查页已上线；C45 本地门禁通过，待 Pages 核验。明细见 examples/c45。
+完整队列见 PLAN §8。C01–C45、T0、Q1–Q3 与四张速查页完成；C45 每课门禁与线上核验通过。明细见 examples/c45。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C46 静态构建与 GitHub Pages**：继续阶段 4，讲构建/运行边界、base、资源、Actions 与 hash 路由验收。
