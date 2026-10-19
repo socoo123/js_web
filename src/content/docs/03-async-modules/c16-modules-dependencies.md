@@ -196,7 +196,7 @@ Node 中 .mjs 是 ESM，.cjs 是 CommonJS，.js 看最近的 package.json 等规
 
 ![模块依赖图：app 静态导入阶段 1 的 inventory.js，点击导出后动态导入 download.js；箭头指向依赖方。](../../../assets/diagrams/c16-esm-dependencies.svg)
 
-图画出业务复用与按需下载两条依赖，完整拆分见下表。虚线在点击导出后才加载，位置不表示请求的时间顺序。
+先读上半部：图画出业务复用与按需下载两条依赖，完整拆分见下表。虚线在点击导出后才加载，位置不表示请求的时间顺序。下半部的包安装流程在 npm 课使用。
 
 本课把 C15 的 app.js 拆为以下职责：
 

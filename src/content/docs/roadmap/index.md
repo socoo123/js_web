@@ -5,7 +5,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 <!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
 
-**已发布 45 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**已发布 46 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
 
 ## 选择你的节奏
 
@@ -78,7 +78,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 22 天 | [C43 UI5 Web Components 原生使用](../06-components-ui5/c43-native-web-components/) | 已发布 |
 | 第 22 天 | [C44 UI5 Web Components for React](../06-components-ui5/c44-ui5-react/) | 已发布 |
 | 第 23 天 | [C45 全链路 Debug 与交付前检查](../07-project/c45-debug-delivery-checks/) | 已发布 |
-| 第 23 天 | C46 静态构建与 GitHub Pages | 待发布 |
+| 第 23 天 | [C46 静态构建与 GitHub Pages](../07-project/c46-static-build-pages/) | 已发布 |
 | 第 24 天 | C47 综合项目与测试选择 | 待发布 |
 | 第 24 天 | C48 总复盘与后续路线 | 待发布 |
 

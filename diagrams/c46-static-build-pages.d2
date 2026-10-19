@@ -1,0 +1,27 @@
+# C46：实线表示构建与交付；虚线表示浏览器读取文件，hash 只在浏览器内解析。
+direction: down
+**.style.font-size: 22
+**.style.border-radius: 10
+(** -> **)[*].style.font-size: 18
+build: 构建环境 · Node {
+  style.fill: "#f4f8ff"
+  source: 源码与锁文件\nMD · JSX · CSS · JSON
+  command: Actions\nnpm ci → 检查 → build
+  source -> command
+}
+artifact: dist · 静态产物\nHTML / JS / CSS / JSON / SVG {
+  style.fill: "#f6ffed"
+  style.stroke: "#389e0d"
+}
+pages: GitHub Pages\n按 URL 返回文件\n入口 /js_web/
+browser: 浏览器 · 用户设备 {
+  style.fill: "#fffbe6"
+  document: 课程深层地址\n读取对应 index.html\n直接得到正文
+  react: "/js_web/#/products/P002\n读取首页 + JS\nReact 解析 hash"
+}
+build.command -> artifact: 构建输出
+artifact -> pages: 上传并部署同一份产物
+pages -> browser.document: 静态阅读 {style.stroke-dash: 5}
+pages -> browser.react: 浏览器交互 {style.stroke-dash: 5}
+# 不可见边只用于单列排列，两个浏览器入口互相独立。
+browser.react -> browser.document: {style.opacity: 0}

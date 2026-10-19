@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C45 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟；C36 增加本地商品快照、恢复提示、本地详情和综合故障实验。
+当前参考状态：C46 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟；C36 增加本地商品快照、恢复提示、本地详情和综合故障实验。
 
 ## 运行
 
@@ -199,3 +199,9 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - memory / memory-answer 用 MemoryProbe 与 stock-probe.js 对比 window 监听器是否在卸载时释放；错误版故意留下引用，每次比较先刷新页面。此实验页不包 StrictMode，以便三轮开启/关闭与三个监听器直接对应；正常应用继续保留 StrictMode。
 - tests/delivery.test.jsx 新增 5 条业务回归，正常测试共 195 条；npm run test:e2e:delivery 启动独立 8045 开发服务，以 Chrome 运行 3 条综合浏览器回归。原 npm run test:e2e 仍只检查正常生产应用的两条路径。
 - public/media/inventory.svg 是资源路径实验的图标。生产 build 继续只包含首页；生产源码断点、Memory 堆快照、Performance 与键盘检查、排错记录见 [examples/c45](../../c45/README.md)。无新依赖，原应用业务逻辑沿用 C36。
+
+## C46 静态交付
+
+本目录新增 `npm run check:pages` 检查已有 dist，`npm run preview:pages` 严格把 `/js_web/` 映射到静态文件（无 SPA 回退），`npm run test:e2e:pages` 构建并验收 hash 详情直达/刷新、JSON、按需报表及缺文件 404。原 `test:e2e` 继续只运行已有两条生产冒烟。
+
+个人 Pages 工作流模板在 `../../c46/deploy-react.yml`，上传本阶段整个 dist；课程仓库实际工作流仍上传根目录 Astro dist。本课没有将库存应用替换课程站。完整命令、错误 base 实验和未运行范围见 `../../c46/README.md`。

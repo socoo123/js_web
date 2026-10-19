@@ -241,9 +241,9 @@ npx --no -- semver -r "^7.0.0" 6.3.1 7.8.5 8.0.0
 
 允许临时安装时，工具会把缺失的包准备到 npm 缓存中执行，通常不会写入本项目的依赖清单；交互终端可能出现安装确认。长期要用的命令，应作为项目依赖安装，再写进 scripts，这样版本由项目的锁文件控制。全局安装的版本则独立于当前项目。
 
-![npm 安装关系图：package.json 和 package-lock.json 交给 npm ci 检查；一致后从 registry 或缓存取得包，安装到 node_modules 并建立 .bin 命令入口，不一致则失败。npm run 通过 PATH 使用本地命令。](../../../assets/diagrams/c18-npm-install-layout.svg)
+![npm 安装关系图：package.json 和 package-lock.json 交给 npm ci 检查；一致后从 registry 或缓存取得包，安装到 node_modules 并建立 .bin 命令入口，不一致则失败。npm run 通过 PATH 使用本地命令。](../../../assets/diagrams/c16-esm-dependencies.svg)
 
-从上往下读：清单写要求，锁文件写具体选择，node_modules 是安装结果。图中只画本课的单个包；包之间的依赖关系用 npm ls 阅读。
+读下半部：清单写要求，锁文件写具体选择，node_modules 是安装结果。这里画本课的单个包及命令入口；包之间的依赖关系用 npm ls 阅读。上半部回顾模块之间的导入方向。
 
 ## 常见错误与调试
 

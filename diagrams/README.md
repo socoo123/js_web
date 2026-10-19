@@ -6,11 +6,11 @@ C03 的图是新规范下的样例写法：文件首行注释说明箭头含义�
 
 固定工具：**D2 0.9.0**（根目录 `.d2-version`）、免费 Dagre 布局。字体使用 Noto Sans SC，固定到 Google Fonts 仓库提交 `a85815a42757630ce188fdad368c2dfc444d4773`。字体文件保存在被 Git 忽略的 `.cache/tools/`，脚本核对 SHA-256；SVG 内嵌使用到的字形及完整 OFL 许可，不需要浏览器下载字体。
 
-后续新增 C10 分类遍历、C12 事件循环、C16 ESM 依赖图与 C18 npm 安装布局，源码分别为 `c10-category-traversal.d2`、`c12-browser-event-loop.d2`、`c16-esm-dependencies.d2`、`c18-npm-install-layout.d2`；当前共 11 张。C16 箭头从导入方指向依赖方，虚线表示动态导入，不表示请求的时间顺序。C18 箭头表示安装的信息流，展示单个包及其 .bin 入口，逻辑依赖树另由 npm ls 读取。
+后续新增 C10 分类遍历、C12 事件循环；C16/C18 共用 `c16-esm-dependencies.d2`，上半箭头从导入方指向依赖方，虚线表示动态导入，下半箭头表示 npm 安装的信息流与本地命令入口。两部分没有时序关系。
 
-C23 的 `c23-state-snapshot.d2` 展示状态快照与更新队列；C29 的 `c29-effect-lifecycle.d2` 展示同一 Effect 的 setup/cleanup 顺序，蓝色容器表示根 StrictMode 的首次开发检查，生产路径跳过该容器。加入这两张后共 13 张；C30 继续复用 Effect 生命周期图。
+C23 的 `c23-state-snapshot.d2` 展示状态快照与更新队列；C29 的 `c29-effect-lifecycle.d2` 展示同一 Effect 的 setup/cleanup 顺序，蓝色容器表示根 StrictMode 的首次开发检查，生产路径跳过该容器。C30 继续复用 Effect 生命周期图。
 
-C39 的 `c39-ui5-family-binding.d2` 上半部展示 Fiori 对两条 UI 技术路线的设计指导与 React 库的包装关系，下半部展示经典 UI5 的 View 事件、Controller 写模型和绑定通知；当前共 14 张。
+C39 的 `c39-ui5-family-binding.d2` 上半部展示 Fiori 对两条 UI 技术路线的设计指导与 React 库的包装关系，下半部展示经典 UI5 的 View 事件、Controller 写模型和绑定通知；C46 新增 `c46-static-build-pages.d2`，实线表示构建与交付，虚线表示浏览器读取静态文件；hash 仅由浏览器解析。C16/C18 合并后，全站仍为 14 张。
 
 ## 准备与生成
 

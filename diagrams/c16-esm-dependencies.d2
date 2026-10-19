@@ -1,18 +1,33 @@
-# 箭头从导入方指向依赖方；只画业务复用与按需下载两条依赖，其余文件见正文表格。
+# C16/C18：上半部箭头指向依赖模块；下半部箭头表示安装信息流，两部分没有时序关系。
 direction: down
-**.style.font-size: 22
+**.style.font-size: 20
 **.style.border-radius: 10
 (** -> **)[*].style.font-size: 18
-
-app: app.js\n页面事件与状态
-core: ../01-core/\ninventory.js\n纯业务模块 {
+modules: 模块依赖 · 谁导入谁 {
+  style.fill: "#f4f8ff"
+  app: app.js\n页面事件与状态
+  core: ../01-core/inventory.js\n纯业务模块
+  download: download.js\n点击导出时加载
+  app -> core: 静态 import
+  app -> download: 动态 import() {style.stroke-dash: 5}
+}
+install: 包安装 · 文件从哪里来 {
   style.fill: "#f6ffed"
-  style.stroke: "#389e0d"
+  manifest: package.json\n依赖范围 · scripts
+  lock: package-lock.json\n具体版本 · 来源 · 摘要
+  ci: npm ci\n检查清单与锁
+  registry: registry / 缓存\n取得锁定内容
+  disk: node_modules/semver\n与 .bin/semver 入口
+  run: npm run versions\nPATH 找本地命令
+  reject: 安装失败\n确认是否有意改依赖 {
+    style.fill: "#fff1f0"
+    style.stroke: "#cf1322"
+  }
+  manifest -> ci
+  lock -> ci
+  ci -> reject: 不一致
+  ci -> registry: 一致
+  registry -> disk: 安装包并建立命令入口
+  disk -> run
 }
-download: download.js\n点击导出时加载
-app -> core: 静态 import
-app -> download: 动态 import() {
-  style.stroke-dash: 5
-}
-# 不可见边只约束 Dagre 的纵向排列，不是模块依赖。
-core -> download: {style.opacity: 0}
+modules -> install: {style.opacity: 0}
