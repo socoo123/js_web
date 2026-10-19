@@ -1,16 +1,33 @@
 # D2 教学图
 
-当前有 C01 生态关系图、C02 页面加载关系图、C03 输入边界图、C04 作用域查找图、C05 别名与浅复制图、C06 闭包环境图、C07 原型查找图。源码依次为 `c01-ecosystem.d2`、`c02-page-flow.d2`、`c03-value-boundary.d2`、`c04-scope.d2`、`c05-alias-copy.d2`、`c06-closure-environment.d2`、`c07-prototype-lookup.d2`，产物位于 `../src/assets/diagrams/` 的同名 SVG。已接入网站 npm 构建与 Pages Actions；编译失败会阻止发布。C02 的图展示资源与处理阶段的依赖，不是精确请求瀑布时间线。
+全站共 **14 张机制图**，源码与产物一一对应。SVG 位于 [src/assets/diagrams](../src/assets/diagrams/)，由同名 D2 源码生成；已接入网站 npm 构建与 Pages Actions，编译失败会阻止发布。
+
+| 课程 | 机制 | D2 源码 |
+| --- | --- | --- |
+| C01 | 语言、引擎、宿主与工具 | [c01-ecosystem.d2](c01-ecosystem.d2) |
+| C02 | 页面加载与脚本交互 | [c02-page-flow.d2](c02-page-flow.d2) |
+| C03 | 输入转换、校验、计算与显示 | [c03-value-boundary.d2](c03-value-boundary.d2) |
+| C04 | 作用域与绑定查找 | [c04-scope.d2](c04-scope.d2) |
+| C05 | 对象别名与浅复制 | [c05-alias-copy.d2](c05-alias-copy.d2) |
+| C06 | 闭包保留的词法环境 | [c06-closure-environment.d2](c06-closure-environment.d2) |
+| C07 | 原型链属性查找 | [c07-prototype-lookup.d2](c07-prototype-lookup.d2) |
+| C10 | 分类树 DFS / BFS | [c10-category-traversal.d2](c10-category-traversal.d2) |
+| C12 | 调用栈、任务、微任务与渲染 | [c12-browser-event-loop.d2](c12-browser-event-loop.d2) |
+| C16 / C18 | ESM 依赖图与 npm 安装布局 | [c16-esm-dependencies.d2](c16-esm-dependencies.d2) |
+| C23 | React 状态快照与更新队列 | [c23-state-snapshot.d2](c23-state-snapshot.d2) |
+| C29 / C30 | Effect 生命周期与请求竞态 | [c29-effect-lifecycle.d2](c29-effect-lifecycle.d2) |
+| C39 | UI5 家族与经典 MVC 绑定 | [c39-ui5-family-binding.d2](c39-ui5-family-binding.d2) |
+| C46 | 静态构建与 Pages 部署 | [c46-static-build-pages.d2](c46-static-build-pages.d2) |
+
+C02 展示资源与处理阶段的依赖，不是精确请求瀑布时间线。C16/C18 上半箭头从导入方指向依赖方，虚线表示动态导入，下半箭头表示 npm 安装的信息流与本地命令入口，两部分没有时序关系。
 
 C03 的图是新规范下的样例写法：文件首行注释说明箭头含义；`**` 统一字号与圆角；一个容器圈出「边界」；红色只用于拒绝分支，绿色只用于正常路径；节点文字最多 3 行。
 
 固定工具：**D2 0.9.0**（根目录 `.d2-version`）、免费 Dagre 布局。字体使用 Noto Sans SC，固定到 Google Fonts 仓库提交 `a85815a42757630ce188fdad368c2dfc444d4773`。字体文件保存在被 Git 忽略的 `.cache/tools/`，脚本核对 SHA-256；SVG 内嵌使用到的字形及完整 OFL 许可，不需要浏览器下载字体。
 
-后续新增 C10 分类遍历、C12 事件循环；C16/C18 共用 `c16-esm-dependencies.d2`，上半箭头从导入方指向依赖方，虚线表示动态导入，下半箭头表示 npm 安装的信息流与本地命令入口。两部分没有时序关系。
+C29/C30 共用 Effect 图：同一 Effect 的 setup/cleanup 按顺序执行，蓝色容器表示根 StrictMode 的首次开发检查，生产路径跳过该容器。
 
-C23 的 `c23-state-snapshot.d2` 展示状态快照与更新队列；C29 的 `c29-effect-lifecycle.d2` 展示同一 Effect 的 setup/cleanup 顺序，蓝色容器表示根 StrictMode 的首次开发检查，生产路径跳过该容器。C30 继续复用 Effect 生命周期图。
-
-C39 的 `c39-ui5-family-binding.d2` 上半部展示 Fiori 对两条 UI 技术路线的设计指导与 React 库的包装关系，下半部展示经典 UI5 的 View 事件、Controller 写模型和绑定通知；C46 新增 `c46-static-build-pages.d2`，实线表示构建与交付，虚线表示浏览器读取静态文件；hash 仅由浏览器解析。C16/C18 合并后，全站仍为 14 张。
+C39 上半部展示 Fiori 对两条 UI 技术路线的设计指导与 React 库的包装关系，下半部展示经典 UI5 的 View 事件、Controller 写模型和绑定通知；C46 实线表示构建与交付，虚线表示浏览器读取静态文件，hash 仅由浏览器解析。
 
 ## 准备与生成
 

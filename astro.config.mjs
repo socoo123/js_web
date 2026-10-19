@@ -35,6 +35,7 @@ export default defineConfig({
         ...courseSections
           .filter(([directory]) => existsSync(new URL(`./src/content/docs/${directory}`, import.meta.url)))
           .map(([directory, label]) => ({ label, items: [{ autogenerate: { directory } }] })),
+        { label: '速查手册', items: [{ autogenerate: { directory: 'reference' } }] },
       ],
     }),
   ],

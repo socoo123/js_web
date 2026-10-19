@@ -8,18 +8,26 @@ const base = '/js_web/';
 const errors = [];
 const pages = globSync('**/*.html', { cwd: dist });
 const docsRoot = fileURLToPath(new URL('../src/content/docs/', import.meta.url));
+const references = globSync('reference/*.{md,mdx}', { cwd: docsRoot })
+  .map((file) => file.replace(/\.(?:md|mdx)$/, ''));
 const lessons = globSync('**/c[0-9][0-9]-*.{md,mdx}', { cwd: docsRoot }).sort().map((file) => {
   const source = readFileSync(path.join(docsRoot, file), 'utf8');
   const diagrams = [...source.matchAll(/assets\/diagrams\/([^\s)"']+)\.svg/g)].map((match) => match[1]);
   return [path.basename(file).slice(0, 3).toUpperCase(), file.replace(/\.(?:md|mdx)$/, ''), diagrams, source];
 });
-for (const required of ['index.html', 'roadmap/index.html', 'pagefind/pagefind.js', ...lessons.map(([, slug]) => `${slug}/index.html`)]) {
+for (const required of ['index.html', 'roadmap/index.html', 'pagefind/pagefind.js', ...references.map((slug) => `${slug}/index.html`), ...lessons.map(([, slug]) => `${slug}/index.html`)]) {
   if (!existsSync(path.join(dist, required))) errors.push(`缺少输出：${required}`);
 }
 for (const page of pages) {
   const html = readFileSync(path.join(dist, page), 'utf8');
   const pageUrl = new URL(base + page.replace(/index\.html$/, ''), origin);
   if (!html.includes('lang="zh-CN"')) errors.push(`页面未设为中文：${page}`);
+  if (page !== 'index.html' && page !== '404.html') {
+    const sidebar = html.match(/<nav\b[^>]*class="[^"]*\bsidebar\b[^"]*"[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
+    for (const slug of references) {
+      if (!sidebar.includes(`href="${base}${slug}/"`)) errors.push(`${page} 的侧栏缺少速查入口：${slug}`);
+    }
+  }
   for (const tag of html.matchAll(/<(?:a|img|script|link)\b[^>]*>/g)) {
     // Starlight 的 404.html canonical 是 /404/，不是可导航的页面链接。
     if (page === '404.html' && /\brel="canonical"/.test(tag[0])) continue;
@@ -60,4 +68,4 @@ if ((roadmap.match(/data-progress\s/g) ?? []).length !== 1 || lessons.some(([id]
   errors.push('学习路线缺少进度管理或课程状态入口。');
 }
 if (errors.length) throw new Error(errors.join('\n'));
-console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口与 ${lessons.length} 课折叠区/D2 图。`);
+console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口、${references.length} 张速查导航与 ${lessons.length} 课折叠区/D2 图。`);

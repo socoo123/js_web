@@ -189,7 +189,7 @@ trailingSlash: 'always'
 Pages 自动部署已实现，最终交付验收以 PLAN §10 和 STATUS 为准：
 
 1. 仓库 Pages Source 设为 GitHub Actions。
-2. PR 只做检查与构建；main 推送/手动触发执行发布。
+2. 当前在 main 推送或手动触发时执行检查、构建与发布；尚未配置 PR 自动触发。
 3. 构建 job：contents: read，安装固定 Node、npm ci、固定 D2、检查、构建、上传 dist。
 4. 发布 job：依赖构建，仅此 job 给 pages: write、id-token: write，environment 为 github-pages。
 5. 采用 GitHub 官方 Pages actions，实施时核对版本并固定完整 commit SHA；无需在仓库提交长期 PAT。

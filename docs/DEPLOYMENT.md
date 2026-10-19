@@ -30,7 +30,7 @@ C32 的 Node 示例复用阶段 4 安装的 TanStack Query，因此全量构建�
 - `npm run setup:diagrams`：按当前 macOS/Linux 的架构下载固定 D2 和中文字体，核对 SHA-256，保存在被忽略的 `.cache/tools/`。首次准备需要网络；生成图本身可离线。
 - `npm run sync:roadmap`：从 `docs/CURRICULUM.md` 的 48 课大纲与现有文章生成路线页；已有文章显示链接，其余显示「待发布」。
 - `npm run check`：Astro 内容与类型检查。
-- `npm run build`：课程 lint 与全量固定输出示例 → 学习进度数据测试 → 同步目录 → 重建 D2 SVG → Astro 静态构建与 Pagefind 索引 → 检查 `/js_web/` 页面/资产链接、中文语言、课程折叠区与进度入口。任一步失败都会停止。
+- `npm run build`：课程 lint 与全量固定输出示例 → 学习进度数据测试 → 同步目录 → 重建 D2 SVG → Astro 静态构建与 Pagefind 索引 → 检查 `/js_web/` 页面/资产链接、中文语言、课程折叠区、进度入口与四张速查侧栏。任一步失败都会停止。
 - `npm run test:progress:browser`：生产预览运行后检查进度标记、导入导出、损坏恢复、存储受限、跨标签与禁用 JS 阅读，准备方式见根 README。默认端口 8751，可通过 `PROGRESS_BASE_URL` 指定地址。
 
 如果更新 D2 版本或字体，先核查官方来源，再同时更新下载摘要、固定版本与许可信息，不能仅改版本号。

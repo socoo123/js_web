@@ -464,3 +464,12 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - Chromium 156.0.8078.4 独立无界面上下文：键盘标记/撤销/刷新、48 课状态、跨标签同步、真实下载导出、重复/空进度合并、五类坏文件不覆盖、损坏恢复/导入/重开及取消、存储完全拒绝/写满、拒绝存储时仍可切换主题、1280/360px × 亮暗、禁用 JS 后正文/折叠答案通过，无页面异常或失败资源。可复跑脚本为 `tests/progress.browser.mjs`。
 - Chrome 155.0.8059.82 独立无界面上下文：全站 54 个可读页面共 216 组宽度/主题检查，无横向页面溢出或坏图；14 张 D2 截图、六处折叠区、代码复制、三个关键词/搜索 UI、54 页禁用 JS 阅读通过。截图与 `weekly.json` 保存在忽略目录 `.cache/qa/f1/`。未覆盖 Windows、真机或其他浏览器内核；课程原有未运行环境标注不变。
 - 提交 `4191f29` 的 [Pages run 39263906094](https://github.com/socoo123/js_web/actions/runs/39263906094) 成功；固定环境 CI 的 React 检查、内容类型与包含新进度测试的完整 build 通过。在线上 `/js_web/` 用独立 Chromium 上下文重跑同一进度回归全部通过；C01/C02/C48/路线、刷新、导出/合并/损坏恢复/故障与禁用 JS 阅读通过，无页面异常或失败资源。另核验首页/C48/路线 HTTP 200、六答案、搜索 UI 与三关键词、上一课导航和四组宽度主题。PLAN §10 最终验收 12/12 项关闭。
+
+## M1 项目 README 与遗漏复检
+
+- 2026-10-19：核对 Starlight [侧栏配置](https://starlight.astro.build/reference/configuration/#sidebar)，为四张既有参考页增加 autogenerate 侧栏组，保留 frontmatter 排序；未改课号或网址。产物门禁新增参考页输出与各正文页侧栏入口检查，旧产物因缺入口被拒绝，重建后 53 个带侧栏页面全部通过。
+- 同日：核对 [npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci/)、[Astro Pages 部署](https://docs.astro.build/en/guides/deploy/github/)与 [Astro CLI](https://docs.astro.build/en/reference/cli-reference/#astro-preview)，并读取锁定 Astro 7.3.8 的 preview --help。README 补克隆、固定环境、阶段 4 依赖、D2 准备、生产搜索与两终端浏览器回归；独立预览使用 --ignore-lock，避免复用已有进程。工作流实际仅 main 推送/手动触发，修正架构文档的 PR 检查描述，未改工作流。
+- 本地 macOS arm64 · Node 24.22.0/npm 11.19.1：根目录与阶段 4 的 npm ci 通过，未禁用 engine-strict；D2 准备/摘要校验通过。Astro check 零诊断、48 课 lint 零 error/warning、303/303 固定输出、15/15 进度数据测试、14 张 D2 重建、55 页构建与子路径/资源/速查入口门禁通过；阶段 4 lint、199 条测试与构建通过，清单与锁无改动。
+- 完整性：48 个稳定课号及各课 README 均齐全，298 个具名代码块与示例逐字一致；14 份 D2 与 SVG 同名对应，66 份仓库说明 Markdown 的本地链接无缺失。更新 D2 的完整清单与 C48 的 F1 当前状态，保留 C48 发布当时的历史验证事实；本次未重做全部逐课手工实验。
+- Chromium 156.0.8078.4：既有进度浏览器回归通过；另检查四张速查在 1280/360px × 亮暗 × 启用/禁用 JS 下的 32 次侧栏键盘跳转与直接刷新，全部通过，无页面异常或失败资源。移动菜单、速查组与参考页截图目视检查通过。
+- Chrome 155.0.8059.82：54 页/216 组宽度主题无页面横溢或坏图，14 张 D2 产物加载、六折叠区、代码复制、三关键词/搜索 UI、54 页禁用 JS 阅读通过；检查结果和截图在忽略目录 .cache/qa/readme/。已知未覆盖环境、项目级 LICENSE 缺失与未配置 PR 自动检查列入 README/STATUS，不自行选定许可证或扩展课程范围。Pages 核验待提交后执行。
