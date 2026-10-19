@@ -16,7 +16,9 @@
     "check": "astro check",
     "lint:lessons": "node scripts/lint-lessons.mjs",
     "examples": "node scripts/run-examples.mjs",
-    "build": "npm run lint:lessons && npm run examples && npm run sync:roadmap && npm run diagrams && astro build && npm run check:build",
+    "test:progress": "node --test tests/progress.test.mjs",
+    "test:progress:browser": "node tests/progress.browser.mjs",
+    "build": "npm run lint:lessons && npm run examples && npm run test:progress && npm run sync:roadmap && npm run diagrams && astro build && npm run check:build",
     "check:build": "node scripts/check-build.mjs",
     "preview": "astro preview"
   },

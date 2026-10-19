@@ -23,3 +23,8 @@
   cursor: pointer;
   font-weight: 600;
 }
+
+.lesson-completed {
+  color: var(--sl-color-text-accent);
+  font-weight: 600;
+}

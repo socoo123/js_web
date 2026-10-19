@@ -1,0 +1,11 @@
+---
+import Default from '@astrojs/starlight/components/MarkdownContent.astro';
+import LearningProgress from './LearningProgress.astro';
+
+const { id, entry } = Astro.locals.starlightRoute;
+const lessonId = entry.data.title.match(/^(C\d{2})\s/)?.[1];
+---
+
+{id === 'roadmap' && <LearningProgress />}
+<Default><slot /></Default>
+{lessonId && <LearningProgress lessonId={lessonId} />}

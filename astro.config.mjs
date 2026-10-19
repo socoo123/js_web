@@ -25,6 +25,11 @@ export default defineConfig({
       social: [{ icon: 'github', label: 'GitHub 源码与练习', href: 'https://github.com/socoo123/js_web' }],
       editLink: { baseUrl: 'https://github.com/socoo123/js_web/edit/main/' },
       customCss: ['./src/styles/custom.css'],
+      components: {
+        MarkdownContent: './src/components/CourseContent.astro',
+        ThemeProvider: './src/components/ThemeProvider.astro',
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
       sidebar: [
         { label: '学习路线与课程目录', slug: 'roadmap' },
         ...courseSections

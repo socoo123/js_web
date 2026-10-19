@@ -38,7 +38,7 @@ for (let week = 1; week <= 4; week++) {
   for (const [, day, id, rawTitle] of lessons.slice((week - 1) * 12, week * 12)) {
     const title = `${id} ${rawTitle.trim()}`;
     const slug = published.get(id);
-    output.push(`| 第 ${day} 天 | ${slug ? `[${title}](../${slug}/)` : title} | ${slug ? '已发布' : '待发布'} |`);
+    output.push(`| 第 ${day} 天 | ${slug ? `[${title}](../${slug}/)` : title} | ${slug ? `已发布<span data-lesson-status="${id}" hidden></span>` : '待发布'} |`);
   }
   output.push('');
 }

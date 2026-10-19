@@ -454,4 +454,13 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 
 - 2026-10-19：核对 MDN [语言概览](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Language_overview)、[toSorted](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted) 与 [Baseline](https://developer.mozilla.org/en-US/docs/Glossary/Baseline/Compatibility)。复盘语言内建/宿主边界、对象身份、浅复制与数字比较；兼容决策分开记录标准状态、目标环境支持和项目采用方案。复制排序降级只覆盖本课稠密数字数组，语法转译与运行时 polyfill 分开。未引入新提案或版本依赖。
 - 同日：核对 [TC39 已完成提案](https://github.com/tc39/proposals/blob/main/finished-proposals.md)、[React 版本入口](https://react.dev/versions)、[Node 维护阶段](https://nodejs.org/en/about/previous-releases)、[npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci/)与 [Vite Pages 部署](https://vite.dev/guide/static-deploy.html#github-pages)。沿用现有锁、命令与阶段 4；Stage 4/年度标准/实际环境支持分别判断，选修方向是 CURRICULUM 既有 X01–X10。实例更新依据 [React state 快照](https://react.dev/learn/state-as-a-snapshot)，不把快照误写成对象自动冻结。
-- 同日：本课七个固定输出、Node inspect、项目演示、Q4 周验收和 PLAN §10 核查的实际记录见 [examples/c48](../examples/c48/README.md)。未新增业务逻辑、依赖、D2、站点基础设施或工作流。网站学习进度 F1 仍为独立未完成项，最终核查保留该缺项。
+- 同日：本课七个固定输出、Node inspect、项目演示、Q4 周验收和 PLAN §10 核查的实际记录见 [examples/c48](../examples/c48/README.md)。未新增业务逻辑、依赖、D2、站点基础设施或工作流。C48 发布时保留的 F1 缺项由下述后续任务承接。
+
+## F1 本地学习进度与最终收尾
+
+- 2026-10-19：核对 Starlight [组件覆盖](https://starlight.astro.build/guides/overriding-components/)与[覆盖入口](https://starlight.astro.build/reference/overrides/)，并读取锁定版本 0.42.6 的 MarkdownContent/ThemeProvider/ThemeSelect/Select 实现。复用默认 MarkdownContent 和选择器，只在课程/路线页增强进度；未加入 React 或其他依赖，未改根锁、课文、示例、D2 或工作流。
+- 同日：核对 MDN [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)与 [storage 事件](https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event)。完成标记、撤销、刷新保留、逐课状态、JSON 导出/合并导入、64 KB 限制与结构/版本/课号校验；同源标签页同步。保留上一次有效记录及损坏原文，显式恢复/重新开始；写入失败不更新完成状态。存储完全禁止的浏览器实验发现 Starlight 主题直接读写存储会抛异常，覆盖组件加异常处理，保留系统主题与选择器行为。
+- 本地环境：Node 24.21.0/npm 11.7.0，安装时仅对该次命令设置 `npm_config_engine_strict=false`；项目固定版本不变。`npm run test:progress` 15/15 通过；`npm run check` 零诊断；完整 build 的 48 课 lint、303 个固定输出、14 张 D2、55 页子路径/资源/进度入口检查通过。新进度数据测试纳入 build/Pages CI，浏览器测试命令与准备方式见根 README。
+- Chromium 156.0.8078.4 独立无界面上下文：键盘标记/撤销/刷新、48 课状态、跨标签同步、真实下载导出、重复/空进度合并、五类坏文件不覆盖、损坏恢复/导入/重开及取消、存储完全拒绝/写满、拒绝存储时仍可切换主题、1280/360px × 亮暗、禁用 JS 后正文/折叠答案通过，无页面异常或失败资源。可复跑脚本为 `tests/progress.browser.mjs`。
+- Chrome 155.0.8059.82 独立无界面上下文：全站 54 个可读页面共 216 组宽度/主题检查，无横向页面溢出或坏图；14 张 D2 截图、六处折叠区、代码复制、三个关键词/搜索 UI、54 页禁用 JS 阅读通过。截图与 `weekly.json` 保存在忽略目录 `.cache/qa/f1/`。未覆盖 Windows、真机或其他浏览器内核；课程原有未运行环境标注不变。
+- 本地功能与最终门禁完成，Pages 部署与线上核验待本次推送后记录。

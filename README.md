@@ -2,12 +2,12 @@
 
 面向会 Java、尚未系统学习前端的开发者，用中文从 JavaScript 的历史讲到现代语言、数据结构、Node 与包管理、React、SAP UI5 和开源组件。
 
-当前阶段：**C01–C33 正文与练习已完成，React 库存项目已加入异步 Action 与乐观补货预览；Astro + Starlight 网站使用 GitHub Pages 自动部署。实际发布与验证记录见 [STATUS](docs/STATUS.md)。**
+当前阶段：**C01–C48 主线、七阶段库存项目与四张速查页已完成；网站支持本地学习进度。Astro + Starlight 静态站使用 GitHub Pages 自动部署，实际发布与验证记录见 [STATUS](docs/STATUS.md)。**
 
 - 网站：[Java → JavaScript 学习站](https://socoo123.github.io/js_web/)
 - 首课：[C01 JavaScript 的故事与生态地图](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)
 - 第二课：[C02 Web 基础与第一个调试现场](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/)
-- 最新课：[C33 现代 React 19 与更新速查](https://socoo123.github.io/js_web/05-react/c33-modern-react-actions/)
+- 最新课：[C48 总复盘与后续路线](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/)
 - [本地构建与自动提交/部署说明](docs/DEPLOYMENT.md)
 
 ## 课程入口
@@ -28,7 +28,28 @@
 - [C07 练习与验证记录](examples/c07/README.md)；[库存项目阶段 1](examples/inventory/01-core/README.md)。
 - [D2 教学图与构建说明](diagrams/README.md)：保留源码、SVG 与固定工具/字体信息。
 
-完整已发布清单见[学习路线](https://socoo123.github.io/js_web/roadmap/)与 [STATUS](docs/STATUS.md)。下一课为 C34 性能、加载与错误诊断；F1 学习进度功能仍在任务队列。
+完整清单见[学习路线](https://socoo123.github.io/js_web/roadmap/)与 [STATUS](docs/STATUS.md)。48 课必修主线已完结；X01–X10 是尚未展开的选修方向。
+
+## 记录学习进度
+
+每课页底点击「标记完成」，可随时「撤销完成」。学习路线显示总进度与逐课状态，并支持导出、导入 JSON；导入会合并已完成课程。进度只保存在当前浏览器，换设备前先导出备份。
+
+记录损坏时可恢复上一次有效备份、导入文件或重新开始，损坏原文会另行保留。存储权限受限时显示提示；禁用 JavaScript 仍能阅读正文与展开练习答案。
+
+网站进度测试在仓库根目录运行：
+
+```sh
+npm run test:progress
+# 先按 docs/DEPLOYMENT.md 完成安装与构建，并在另一个终端启动生产预览。
+npm run preview -- --port 8751
+# 首次使用浏览器工具时：
+cd examples/inventory/04-react
+npx playwright install chromium
+cd ../../..
+npm run test:progress:browser
+```
+
+浏览器测试复用阶段 4 的锁定 Playwright，不新增网站依赖。默认地址为 `http://127.0.0.1:8751/js_web/`；可用 `PROGRESS_BASE_URL` 指定其他生产预览或线上地址。测试使用独立浏览器上下文，截图保存在被忽略的 `.cache/qa/f1/`。`npm run build` 已包含进度数据测试和静态入口检查。
 
 ## 清理上下文后如何继续
 

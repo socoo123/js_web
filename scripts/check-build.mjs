@@ -42,6 +42,9 @@ for (const [id, slug, diagrams, source] of lessons) {
   const lessonFile = path.join(dist, `${slug}/index.html`);
   if (!existsSync(lessonFile)) continue;
   const lesson = readFileSync(lessonFile, 'utf8');
+  if ((lesson.match(/data-progress\s/g) ?? []).length !== 1 || !lesson.includes(`data-lesson="${id}"`)) {
+    errors.push(`${id} 缺少唯一的本课学习进度入口。`);
+  }
   const answers = [...lesson.matchAll(/<details\b[^>]*>([\s\S]*?)<\/details>/g)]
     .filter((match) => /<summary>\s*(提示|参考答案)/.test(match[1]));
   const sourceAnswers = [...source.matchAll(/<summary>\s*(?:提示|参考答案)/g)].length;
@@ -51,6 +54,10 @@ for (const [id, slug, diagrams, source] of lessons) {
   for (const diagram of diagrams) {
     if (!lesson.includes(diagram)) errors.push(`${id} 缺少 D2 教学图 ${diagram}。`);
   }
+}
+const roadmap = readFileSync(path.join(dist, 'roadmap/index.html'), 'utf8');
+if ((roadmap.match(/data-progress\s/g) ?? []).length !== 1 || lessons.some(([id]) => !roadmap.includes(`data-lesson-status="${id}"`))) {
+  errors.push('学习路线缺少进度管理或课程状态入口。');
 }
 if (errors.length) throw new Error(errors.join('\n'));
 console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口与 ${lessons.length} 课折叠区/D2 图。`);

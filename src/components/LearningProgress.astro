@@ -1,0 +1,65 @@
+---
+interface Props { lessonId?: string }
+const { lessonId } = Astro.props;
+const roadmap = `${import.meta.env.BASE_URL}roadmap/`;
+---
+
+<section class="learning-progress" data-progress data-lesson={lessonId} data-pagefind-ignore aria-labelledby="learning-progress-title">
+  <h2 id="learning-progress-title">{lessonId ? '本课学习进度' : '我的学习进度'}</h2>
+  <p>进度保存在当前浏览器。换设备前可导出备份，再到另一台设备导入。</p>
+  <div data-progress-controls hidden>
+    <p data-progress-summary></p>
+    <progress data-progress-meter max="48" value="0" aria-label="48 课完成进度"></progress>
+    <div class="progress-actions">
+      {lessonId && <button type="button" data-progress-toggle aria-pressed="false">标记完成</button>}
+      {lessonId && <a href={roadmap}>查看学习路线</a>}
+      {!lessonId && <>
+        <button type="button" data-progress-export>导出进度</button>
+        <button type="button" data-progress-import>导入进度</button>
+        <input data-progress-file type="file" accept="application/json,.json" aria-label="选择进度 JSON 文件" hidden />
+      </>}
+      <button type="button" data-progress-restore hidden>从本地备份恢复</button>
+      <button type="button" data-progress-restart hidden>重新开始</button>
+    </div>
+    {!lessonId && <p class="progress-note">导入会合并已完成的课程。需要重新学习时，可在对应课页撤销完成标记。</p>}
+    <p data-progress-message role="status" aria-live="polite"></p>
+  </div>
+  <noscript><p>启用 JavaScript 后可记录学习进度；课程正文和练习可以继续阅读。</p></noscript>
+</section>
+
+<script>
+  import '../scripts/learning-progress.mjs';
+</script>
+
+<style>
+  .learning-progress {
+    margin-block: 2rem;
+    padding: 1.25rem;
+    border: 1px solid var(--sl-color-hairline-light);
+    border-radius: 0.75rem;
+    background: var(--sl-color-bg-nav);
+    overflow-wrap: anywhere;
+  }
+  h2 { margin: 0; font-size: var(--sl-text-h3); line-height: 1.4; }
+  p { margin-block: 0.75rem; }
+  [hidden] { display: none !important; }
+  progress { width: 100%; height: 0.75rem; accent-color: var(--sl-color-text-accent); }
+  .progress-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+  button, a { font: inherit; }
+  button {
+    border: 1px solid var(--sl-color-gray-3);
+    border-radius: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.85rem;
+    background: var(--sl-color-bg);
+    color: var(--sl-color-white);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--sl-color-text-accent); }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  [data-progress-toggle][aria-pressed='true'] { border-color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); }
+  .progress-note { font-size: var(--sl-text-sm); }
+  [data-progress-message]:empty { display: none; }
+  [data-progress-message][data-error] { color: var(--sl-color-orange-high); }
+</style>

@@ -1,0 +1,31 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+---
+
+<!-- 保留 Starlight 的首屏主题与图标行为；存储被禁用时使用系统主题。 -->
+<script is:inline>
+  window.StarlightThemeProvider = (() => {
+    let storedTheme;
+    try { storedTheme = localStorage.getItem('starlight-theme'); } catch {}
+    if (!['light', 'dark'].includes(storedTheme)) storedTheme = undefined;
+    const theme = storedTheme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.dataset.theme = theme;
+    return {
+      updatePickers(theme = storedTheme || 'auto') {
+        document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+          const select = picker.querySelector('select');
+          if (select) select.value = theme;
+          const template = document.querySelector('#theme-icons');
+          const icon = template?.content.querySelector('.' + theme);
+          const old = picker.querySelector('svg.label-icon');
+          if (icon && old) old.replaceChildren(...icon.cloneNode(true).childNodes);
+        });
+      },
+    };
+  })();
+</script>
+<template id="theme-icons">
+  <Icon name="sun" class="light" />
+  <Icon name="moon" class="dark" />
+  <Icon name="laptop" class="auto" />
+</template>

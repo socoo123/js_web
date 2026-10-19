@@ -1,6 +1,6 @@
 # 静态网站架构与部署规划
 
-状态：C01–C07、Astro/Starlight 静态骨架、首页/路线页、D2 npm 管线与 Pages Actions 已实现；用户要求逐篇发布。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。React islands、学习进度和 C08 起的正文待后续实施。
+状态：48 课主线、四张速查页、七阶段库存项目、14 张 D2 图与本地学习进度已实现。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。课程 React 示例使用独立阶段工程，站点尚无需要 React island 的交互示例。
 
 ## 技术选择
 
@@ -11,7 +11,7 @@
 | 长篇中文课程、目录和移动阅读 | Starlight 提供文档站骨架，减少重复搭建导航 |
 | 代码显示与复制 | 使用现有 Expressive Code 能力，保留文件名/高亮/差异标记 |
 | 课程正文 | Markdown 为主；需要嵌入组件时使用 MDX；构建成真实 HTML |
-| React 示例 | Astro 官方 React 集成；只有少量需要交互的示例加载 React |
+| React 示例 | 独立 Vite + React 练习工程；需要站内演示时再按需接入 island |
 | 搜索 | Starlight 默认 Pagefind 静态索引，测试中文分词与英文 API 搜索 |
 | 进度 | 浏览器 localStorage；不引入账号/后端 |
 | 关键图 | D2 构建期生成 SVG，浏览器只显示图 |
@@ -45,7 +45,7 @@ React islands 默认仍会在构建期预渲染。`client:load` 只决定客户�
 
 ## 目录草图
 
-以下为总体目录方向；当前已有网站配置、首页、路线页、C01–C05、示例、图构建与 Pages 工作流；React 组件、其他课正文和持久化学习进度待实施：
+以下为当前主要目录；React 练习在阶段工程中，站点进度使用原生浏览器脚本：
 
 ```text
 js_web/
@@ -62,7 +62,7 @@ js_web/
 │   └── STATUS.md
 ├── src/
 │   ├── content/docs/
-│   │   ├── index.mdx
+│   │   ├── index.md
 │   │   ├── roadmap/
 │   │   ├── 01-history-web/
 │   │   ├── 02-language-data/
@@ -72,7 +72,9 @@ js_web/
 │   │   ├── 06-components-ui5/
 │   │   ├── 07-project/
 │   │   └── reference/
-│   ├── components/            # Progress、少量可信 React 演示
+│   ├── components/            # 课程内容包装、进度与存储受限时的主题组件
+│   ├── lib/                   # 进度格式、校验、备份与恢复
+│   ├── scripts/               # 学习进度的客户端增强
 │   ├── assets/diagrams/       # D2 构建生成 SVG
 │   └── styles/
 ├── diagrams/                  # D2 源文件
@@ -80,7 +82,7 @@ js_web/
 │   ├── cNN/                   # 每课的独立例子、.expected.txt 与 README
 │   ├── shared/                # PLAN §3.1 固定样例数据
 │   └── inventory/             # 贯穿项目的 7 个阶段目录（PLAN §3.2）
-├── scripts/                   # D2 构建、路线同步、产物检查；T0 加 lint-lessons、run-examples
+├── scripts/                   # D2、路线同步、产物检查、课程 lint 与固定输出检查
 ├── public/                    # 静态数据与可下载练习资料
 ├── tests/                     # 必要的站点关键行为验收
 ├── astro.config.mjs
@@ -94,7 +96,7 @@ js_web/
 
 ## 内容模型
 
-**当前约定**：课程 frontmatter 只用 `title`、`description`、`sidebar.order`；课号、周次、前置、时间写在页首信息行（见 CONTENT_GUIDE §3），验证明细写在 examples README。下面的扩展字段是备选设计，没有实施。如果以后需要（例如学习进度要读取课程元数据），先扩展 `src/content.config.ts` 的 schema，再批量写入。
+**当前约定**：课程 frontmatter 只用 `title`、`description`、`sidebar.order`；课号、周次、前置、时间写在页首信息行（见 CONTENT_GUIDE §3），验证明细写在 examples README。学习进度读取标题开头的稳定课号，不新增字段。下面的扩展字段是备选设计，没有实施；以后确需它们时，先扩展 `src/content.config.ts` 的 schema，再批量写入。
 
 备选的扩展字段：
 
@@ -119,13 +121,15 @@ lastReviewed: 2026-10-15
 
 ## 进度与搜索
 
-进度键：`js_web:progress:v1`。数据包含 schemaVersion、completedLessonIds、lastLessonId、updatedAt。
+进度键：`js_web:progress:v1`。已实现的格式为 `{"version":1,"completed":["C01","C02"]}`，只记录主动标记完成的课号。原设想的最近阅读位置和更新时间没有纳入 F1。
 
 - localStorage 不可用、JSON 损坏或包含已删除课号时，页面继续可读并给出恢复方式。
 - 完成标记由学习者控制；翻页不等于学会。
-- 导入校验结构、ID 和版本；导出纯 JSON。
+- 导入校验结构、C01–C48 课号、版本和 64 KB 大小限制，去重后合并；导出纯 JSON。
+- 保存前把上一份有效记录写入 `js_web:progress:v1:backup`。读取损坏时先提示，用户可恢复备份、导入文件或重新开始；修复前把损坏原文保留到 `js_web:progress:v1:damaged`。写入失败不显示保存成功。
+- 同源标签页通过 `storage` 事件更新状态；禁用 JS 时隐藏操作控件，保留正文、路线和恢复说明。
 - 默认只保存在当前浏览器，不宣称 GitHub 会同步学习进度。
-- 进度与最近阅读区域在客户端增强，不阻塞静态正文。
+- `CourseContent.astro` 复用 Starlight 的 MarkdownContent，只在课程页底和路线页添加进度。主题组件沿用 Starlight 图标与选择器，对存储读写加异常处理。
 
 搜索采用静态索引；在生产构建后验证“闭包”“状态快照”“断点”“单元测试”“UI5”“useEffect”“npm ci”等查询。开发服务器里能显示页面不代表搜索索引正确。
 
@@ -173,16 +177,16 @@ trailingSlash: 'always'
 | npm run dev | 网站本地开发 |
 | npm run diagrams | D2 生成 SVG |
 | npm run check | 内容 schema、Astro/类型、必要链接检查 |
-| npm run build | 先生成图再构建静态网站 |
+| npm run build | 课程/示例/进度测试、同步路线、D2、静态构建与产物检查 |
 | npm run preview | 检查生产产物与搜索 |
-| npm run test | 有价值的站点业务测试，按实施需要配置 |
-| npm run test:e2e | 关键路径浏览器验收，按实施需要配置 |
+| npm run test:progress | Node 内置运行器检查进度校验、合并、备份与故障恢复 |
+| npm run test:progress:browser | 对生产预览检查进度交互、存储故障、跨标签与静态阅读 |
 
-`dev`、`diagrams`、`check`、`build`、`preview` 已实现；`test` 与 `test:e2e` 尚未配置，按后续实际需求创建。课程用的 UT 练习与网站自身测试分开组织，避免把“教框架”误当成“给每个静态段落写测试”。
+上述命令均已实现。浏览器验收复用阶段 4 的锁定 Playwright，准备与运行方式见根 README；进度数据测试接入 build。课程用的 UT 练习与网站自身测试分开组织。
 
 ## GitHub Actions 部署计划
 
-Pages 已按用户提前部署的要求实现；M6 仍负责完整课程的最终交付验收：
+Pages 自动部署已实现，最终交付验收以 PLAN §10 和 STATUS 为准：
 
 1. 仓库 Pages Source 设为 GitHub Actions。
 2. PR 只做检查与构建；main 推送/手动触发执行发布。
