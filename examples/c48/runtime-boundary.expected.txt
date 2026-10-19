@@ -1,0 +1,4 @@
+内建数组 function
+页面节点 undefined
+Node 进程 object
+请求能力 function
