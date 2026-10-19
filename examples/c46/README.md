@@ -27,5 +27,5 @@
 - 错误 base 实验：构建 --base=/ 后，产物检查按预期失败（缺少 base 正确的 JS 入口）；严格预览首页 HTTP 200，但 /assets/ 下 JS/CSS 各 404，页面无库存标题。恢复正常 build 后产物检查与专用 E2E 通过。
 - 阶段 4 Hooks lint、195/195 业务回归、严格静态 E2E 1/1 与原生产冒烟 2/2 通过；按需报表可加载。根站点 lint 46 课零 error/warning、Astro check 零诊断、build 与固定输出 293/293、53 个 HTML 路径检查通过。
 - 本地课程深层页及刷新 HTTP 200；4 个提示/答案折叠区、C45 上一页、路线 46/48、禁用 JS 阅读通过。C16/C18 加载同一共用 SVG，C46 部署图的 hash/中文/连线已检查；本课 360/1280px 亮暗无页面横向溢出。
-- Pages 部署核验待完成。
-- 未运行：个人库存仓库的 Actions 发布、GitHub Settings 人工点击、Firefox/Safari、Windows 和真实手机。正式课程仓库的 Pages 发布另行记录。
+- Pages [run 39243733535](https://github.com/socoo123/js_web/actions/runs/39243733535) 构建与部署成功（提交 7f680c9）；新文章与路线页 HTTP 200，四个折叠区与 D2 引用存在，路线显示 46/48。线上浏览器复检深层刷新、共用图、亮暗宽度和禁用 JS 阅读通过；个人库存部署模板仍未执行。
+- 未运行：个人库存仓库的 Actions 发布、GitHub Settings 人工点击、Firefox/Safari、Windows 和真实手机。课程仓库实际部署见上一条。

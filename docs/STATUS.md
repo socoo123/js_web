@@ -1,15 +1,14 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C46 本地门禁通过，待 Pages 部署核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C46 已上线，每课门禁与线上核验完成；下一项 F1）。
 
 ## 续做时按这个顺序读
 
 1. 本文件的「下一步」。
 2. [PLAN](PLAN.md)：总约束、项目数据与阶段、门禁、任务队列。
 3. [CONTENT_GUIDE](CONTENT_GUIDE.md)：写作硬约束，写任何课程之前必须读完。
-4. 范例课 [C03](../src/content/docs/02-language-data/c03-values-types.md) 及其 [examples/c03](../examples/c03/README.md)：新规范写出来的样子。
-5. [CURRICULUM](CURRICULUM.md)：本课那一行，以及本周的写作范围。
-6. 上一课的「小结」和「项目进度」。
+4. 范例课 [C03](../src/content/docs/02-language-data/c03-values-types.md) 及其 [examples/c03](../examples/c03/README.md)，再读 [CURRICULUM](CURRICULUM.md) 本课那一行和本周范围。
+5. 上一课的「小结」和「项目进度」。
 
 ## 用户要求的变更记录
 
@@ -30,7 +29,7 @@
 - **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C27–C30。** reducer/Context、ref、Effect/请求竞态、对应实验、共用 D2 与阶段 4 更新已上线，每课门禁与 Pages 核验通过；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18–19：用户要求按最新计划与重做的 C03 开发 C34–C44。** React 复盘/Q3、组件库、经典 UI5 与原生组件已上线；C44 阶段 7、UI5 家族速查、每课门禁与 Pages 核验完成；F1 保留。
-- **2026-10-19：用户要求按最新计划与重做的 C03 开发 C45、C46。** C45 排错课已上线；C46 正文、静态预览、产物检查、部署模板与 D2 完成，本地门禁通过，待 Pages 核验；F1 保留。
+- **2026-10-19：用户要求按最新计划与重做的 C03 开发 C45、C46。** C45 排错课与 C46 部署课已上线；阶段 4 静态预览、产物检查、部署模板与 D2 完成，每课门禁及 Pages 核验通过；F1 保留。
 
 ## 当前状态
 
@@ -38,7 +37,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 45 / 48（C01–C45）；C46 本地门禁通过，待部署核验 |
+| 已发布 | 46 / 48（C01–C46）；C46 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–7、Q3 完成；C46 继续阶段 4，195 条业务与 3 条生产浏览器回归通过 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；14 张图；C16/C18 合并共用，新增 C46 静态交付图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -93,7 +92,7 @@
 | C43 UI5 Web Components 原生使用 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c43-native-web-components/) | [examples/c43](../examples/c43/README.md) | [run 39180665049](https://github.com/socoo123/js_web/actions/runs/39180665049) |
 | C44 UI5 Web Components for React | [打开](https://socoo123.github.io/js_web/06-components-ui5/c44-ui5-react/) | [examples/c44](../examples/c44/README.md) | [run 39182549346](https://github.com/socoo123/js_web/actions/runs/39182549346) |
 | C45 全链路 Debug 与交付前检查 | [打开](https://socoo123.github.io/js_web/07-project/c45-debug-delivery-checks/) | [examples/c45](../examples/c45/README.md) | [run 39184048121](https://github.com/socoo123/js_web/actions/runs/39184048121) |
-| C46 静态构建与 GitHub Pages | [待上线](https://socoo123.github.io/js_web/07-project/c46-static-build-pages/) | [examples/c46](../examples/c46/README.md) | 本地门禁通过，待部署核验 |
+| C46 静态构建与 GitHub Pages | [打开](https://socoo123.github.io/js_web/07-project/c46-static-build-pages/) | [examples/c46](../examples/c46/README.md) | [run 39243733535](https://github.com/socoo123/js_web/actions/runs/39243733535) |
 
 ## 周验收记录
 
@@ -104,11 +103,12 @@
 - C36 / 第三周验收（2026-10-18）：41 页共 164 组宽度/亮暗检查、13 张 D2、折叠答案/复制、竞态/乐观/故障搜索与禁用 JS 阅读通过；库存 v2 本地快照/详情/校验、源码映射与 190 条回归、2 条生产 E2E 通过。
 
 ## 已知问题（不阻塞）
+
 - Starlight 自定义 404 有一条路由优先级提示，404.html 正常；上游 Pages Actions 有 Node 20 弃用提示，runner 实际使用 Node 24，部署成功，升级时复查。
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C45 已上线，C46 本地门禁通过、待部署核验；T0、Q1–Q3 与四张速查页完成。明细见 examples/c46。
+完整队列见 PLAN §8。C01–C46、T0、Q1–Q3 与四张速查页完成；C46 每课门禁与线上核验通过。明细见 examples/c46。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
 2. **C47 综合项目与测试选择**：继续阶段 4，按风险补齐 UT、RTL 与 Playwright 回归。
