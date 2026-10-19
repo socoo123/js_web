@@ -7,6 +7,6 @@ import "./styles.css";
 const root = createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
-    <HashRouter><App /></HashRouter>
+    <HashRouter useTransitions={false}><App /></HashRouter>
   </StrictMode>,
 );

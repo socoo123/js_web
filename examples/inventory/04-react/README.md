@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C46 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟；C36 增加本地商品快照、恢复提示、本地详情和综合故障实验。
+当前参考状态：C47 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟；C36 增加本地商品快照、恢复提示、本地详情和综合故障实验。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、请求、Action 与报表等回归，195 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、请求、Action 与报表等回归，199 条通过；不包含故意失败的 labs |
 | npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
@@ -205,3 +205,22 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 本目录新增 `npm run check:pages` 检查已有 dist，`npm run preview:pages` 严格把 `/js_web/` 映射到静态文件（无 SPA 回退），`npm run test:e2e:pages` 构建并验收 hash 详情直达/刷新、JSON、按需报表及缺文件 404。原 `test:e2e` 继续只运行已有两条生产冒烟。
 
 个人 Pages 工作流模板在 `../../c46/deploy-react.yml`，上传本阶段整个 dist；课程仓库实际工作流仍上传根目录 Astro dist。本课没有将库存应用替换课程站。完整命令、错误 base 实验和未运行范围见 `../../c46/README.md`。
+
+
+## C47 综合项目与测试选择
+
+风险计划按最小可观察范围安排；本课新增五条回归，保留已有正常/边界/竞态检查：
+
+| 风险与操作 | 文件/层级 | 通过条件 |
+| --- | --- | --- |
+| 已有好快照，尝试写入字符串库存 | tests/final-core.test.jsx / 函数 UT | 报错且旧原文保留 |
+| P002 改价，再删除其他商品，序列化恢复 | tests/final-core.test.jsx / 业务集成 | 只剩 P002，库存 0、价格 29 分，原样例不变 |
+| 三位小数价格失败，修正为 0.29/库存 3 后保存快照并重挂载 | tests/final-workflows.test.jsx / RTL 集成 | 错误说明和焦点正确；恢复为 55 件、26348.87 元 |
+| P002 请求收到 P001 的 HTTP 200，再重试正确响应 | tests/final-workflows.test.jsx / RTL 请求集成 | 错误商品不展示，用户重试后成功 |
+| 连续键盘搜索、编辑、保存快照、刷新、详情与返回 | e2e/pages.spec.js / 严格静态浏览器冒烟 | 搜索词完整、焦点可达；本地 3 件/0.29 元，独立 mock 仍为 0 件/129.00 元 |
+
+`npm test` 共 199 条；`npm run test:e2e:pages` 共两条。单独运行核心/RTL 用例：`npm test -- tests/final-core.test.jsx tests/final-workflows.test.jsx`。原 `npm run test:e2e` 仍为两条生产冒烟。
+
+生产入口 HashRouter 设置 `useTransitions={false}`：当前受控搜索直接以 URL 为来源，要求每次输入同步提交，避免连续字符被旧值还原。没有改 StrictMode；六条数据使用同步导航即可。新增浏览器回归曾在默认路由配置下失败，修复后保持连续输入而非整串 fill。
+
+正文的键盘、360px 表单/错误焦点、快照保存后未存修改丢弃、损坏保留与清除检查已用后台 Chromium 复检；真实手机与输入法未运行。命令、故障实验与发布记录见 [examples/c47](../../c47/README.md)。

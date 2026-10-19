@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C46 已上线，每课门禁与线上核验完成；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C47 本地门禁完成，待 Pages 核验；下一项 F1）。
 
 ## 续做时按这个顺序读
 
@@ -25,11 +25,10 @@
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C22，并协助配置 React DevTools。** 已完成 props/组合/渲染课程、阶段 4 列表与调试实验；Chrome 扩展原已安装，Components 与 Profiler 入口已确认可用，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C23，调试避开正在使用的窗口。** 已完成状态快照课程、D2 与阶段 4 盘点交互；使用独立后台 Chrome 验证，F1 保留队列。
 - **2026-10-17：用户要求按最新计划与重做的 C03 开发 C24。** 已完成数组/key/派生数据、阶段 4 商品操作、Q2 与 Java ↔ JS 速查，每课门禁及 Pages 核验通过；F1 保留。
-- **2026-10-17：用户要求按最新计划与重做的 C03 开发 C25、C26。** 表单校验、可访问性、状态归属与阶段 4 编辑区完成，每课门禁及 Pages 核验通过；F1 保留。
-- **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C27–C30。** reducer/Context、ref、Effect/请求竞态、对应实验、共用 D2 与阶段 4 更新已上线，每课门禁与 Pages 核验通过；F1 保留。
+- **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C25–C30。** 表单、可访问性、状态归属、reducer/Context、ref、Effect/请求竞态及阶段 4 更新已上线，每课门禁与 Pages 核验通过；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18–19：用户要求按最新计划与重做的 C03 开发 C34–C44。** React 复盘/Q3、组件库、经典 UI5 与原生组件已上线；C44 阶段 7、UI5 家族速查、每课门禁与 Pages 核验完成；F1 保留。
-- **2026-10-19：用户要求按最新计划与重做的 C03 开发 C45、C46。** C45 排错课与 C46 部署课已上线；阶段 4 静态预览、产物检查、部署模板与 D2 完成，每课门禁及 Pages 核验通过；F1 保留。
+- **2026-10-19：用户要求按最新计划与重做的 C03 开发 C45–C47。** C45 排错与 C46 部署已上线；C47 风险计划、五条回归与连续搜索修复完成本地门禁，待 Pages 核验；F1 保留。
 
 ## 当前状态
 
@@ -37,8 +36,8 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 46 / 48（C01–C46）；C46 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–7、Q3 完成；C46 继续阶段 4，195 条业务与 3 条生产浏览器回归通过 |
+| 已发布 | 46 / 48（C01–C46）；C47 本地完成，待部署核验 |
+| 贯穿项目 | 阶段 1–7、Q3 完成；C47 阶段 4 的 199 条核心/组件与 2 条严格静态浏览器回归通过 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；14 张图；C16/C18 合并共用，新增 C46 静态交付图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | 未实施（F1） |
@@ -93,6 +92,7 @@
 | C44 UI5 Web Components for React | [打开](https://socoo123.github.io/js_web/06-components-ui5/c44-ui5-react/) | [examples/c44](../examples/c44/README.md) | [run 39182549346](https://github.com/socoo123/js_web/actions/runs/39182549346) |
 | C45 全链路 Debug 与交付前检查 | [打开](https://socoo123.github.io/js_web/07-project/c45-debug-delivery-checks/) | [examples/c45](../examples/c45/README.md) | [run 39184048121](https://github.com/socoo123/js_web/actions/runs/39184048121) |
 | C46 静态构建与 GitHub Pages | [打开](https://socoo123.github.io/js_web/07-project/c46-static-build-pages/) | [examples/c46](../examples/c46/README.md) | [run 39243733535](https://github.com/socoo123/js_web/actions/runs/39243733535) |
+| C47 综合项目与测试选择 | [打开](https://socoo123.github.io/js_web/07-project/c47-project-testing-strategy/) | [examples/c47](../examples/c47/README.md) | 待 Pages 部署核验 |
 
 ## 周验收记录
 
@@ -108,10 +108,10 @@
 
 ## 下一步
 
-完整队列见 PLAN §8。C01–C46、T0、Q1–Q3 与四张速查页完成；C46 每课门禁与线上核验通过。明细见 examples/c46。
+完整队列见 PLAN §8。C01–C46、T0、Q1–Q3 与四张速查页已上线；C47 本地门禁完成，待 Pages 核验。明细见 examples/c47。
 
 1. **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复。
-2. **C47 综合项目与测试选择**：继续阶段 4，按风险补齐 UT、RTL 与 Playwright 回归。
+2. **C48 总复盘与后续路线**：完成补缺表、Q4 周验收及 PLAN §10 最终验收。
 
 ## 本文件的更新规则
 
