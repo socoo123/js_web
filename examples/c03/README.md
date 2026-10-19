@@ -16,7 +16,7 @@
 | prediction.js | `node prediction.js` | 练习 1 |
 | inventory-broken.js | `node inventory-broken.js` | 练习 2 的起始代码（输出是错误结果） |
 | inventory-answer.js | `node inventory-answer.js` | 练习 2 参考答案 |
-| restock.html + restock.js | 本地网页 | 「常见错误与调试」：补货变成 123 |
+| restock.html + restock.js | 本地网页 | 数值转换后的补货；原始故障复现见下文 |
 | restock-fixed.js | 参考 | 修复后的 restock.js |
 | JavaNumbers.java | `java JavaNumbers.java` | 第 2 节 Java 对照表 |
 
@@ -26,6 +26,8 @@
 - 浏览器 Console：在 Chrome 打开任意网页，按正文顺序粘贴。
 - 本地网页：在本目录运行 `python3 -m http.server 8000 --bind 127.0.0.1`，打开 `http://127.0.0.1:8000/restock.html`。
 - Java：需要 JDK 11 及以上，在本目录运行 `java JavaNumbers.java`。
+
+当前 `restock.js` 保留已完成的数值转换：库存 12 补货 3 显示 15。要复现正文中的 123 问题，先把加法行改回 `stock = stock + amount;`，再按正文设置断点。带完整输入校验的实现见 `restock-fixed.js`。
 
 ## 练习 2 的验收输入
 
@@ -45,4 +47,5 @@
   - `restock.html`：第 9 行断点命中 `handleRestock`，Local 中 `amount` 为字符串 `"3"`，Script 中 `stock` 第一次为数字 12、第二次为字符串 `"123"`；页面依次显示 123、1233。
   - 换成 `restock-fixed.js` 后，补货 3 显示 15；输入 `""`、`"3.8"`、`"0"` 时提示「请输入 1–99999 的整数。」，库存保持 15。
 - 2026-10-15 · Java 21.0.2：`java JavaNumbers.java` 输出 `2`、`0.30000000000000004`、`Infinity`、`NaN`、`0.3`、`ArithmeticException: / by zero`、`NumberFormatException: For input string: "3件"`。
+- 2026-10-19 · 按用户要求提交已有的 `Number(amount)` 修改。Node 24.22.0 下固定输出 12/12 与语法检查通过；Chromium 156.0.8078.4 实际打开本地网页，连续补货 3 后库存依次为 15、18，反馈正确，无页面异常。原始故障的历史记录保留，复现方式见上文。
 - 未运行：在 DevTools 界面上手动点击的操作路径（面板名称按 Chrome 官方文档核对）、Firefox、Safari、Windows。

@@ -4,9 +4,9 @@ const feedback = document.querySelector("#feedback");
 let stock = 12;
 
 function handleRestock() {
-  // 有问题的写法：直接拿输入框的 value 参与加法
+  // 先把输入框的字符串转成数字；完整输入校验见 restock-fixed.js
   const amount = amountInput.value;
-  stock = stock + amount;
+  stock = stock + Number(amount);
   stockNode.textContent = String(stock);
   feedback.textContent = "已补货 " + amount + " 件。";
 }
