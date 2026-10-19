@@ -1,0 +1,4 @@
+string number
+0 3
+false true
+总库存 55 · 库存价值 26735.00 元

@@ -1,0 +1,13 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--sapBackgroundColor); color: var(--sapTextColor); font: 1rem/1.6 system-ui, sans-serif; }
+main { max-width: 1200px; padding: 1rem; margin: auto; }
+h1 { font-size: 1.65rem; } h2 { font-size: 1.2rem; }
+.toolbar, .settings, .actions { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin: 1rem 0; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.workspace > *, .editor, ui5-card { min-width: 0; width: 100%; }
+.editor { background: var(--sapGroup_ContentBackground); border: 1px solid var(--sapGroup_ContentBorderColor); border-radius: .5rem; padding: 1rem; }
+ui5-input, ui5-select { width: 100%; }
+.toolbar ui5-input { width: min(100%, 20rem); }
+.field-error { color: var(--sapNegativeTextColor); margin: .2rem 0; }
+.settings select { font: inherit; color: inherit; background: var(--sapField_Background); padding: .25rem; }
+@media (max-width: 700px) { .workspace { grid-template-columns: minmax(0, 1fr); } }

@@ -1,0 +1,29 @@
+{
+  "name": "inventory-ui5-react",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 8044 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 8144 --strictPort",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:production": "playwright test --config playwright.production.config.js"
+  },
+  "dependencies": {
+    "@ui5/webcomponents": "2.27.2",
+    "@ui5/webcomponents-base": "2.27.2",
+    "@ui5/webcomponents-fiori": "2.27.2",
+    "@ui5/webcomponents-icons": "2.27.2",
+    "@ui5/webcomponents-react": "2.27.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@vitejs/plugin-react": "6.1.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  }
+}
