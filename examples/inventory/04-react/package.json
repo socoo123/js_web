@@ -9,12 +9,13 @@
     "preview": "vite preview",
     "inspect": "node labs/inspect-elements.js",
     "test": "vitest run",
-    "lint": "eslint src labs/ProductWatch.jsx labs/IntervalFixed.jsx labs/LoopFixed.jsx labs/WatchControls.jsx labs/RequestControls.jsx labs/request-loaders.js labs/useCounter.js labs/HookCounters.jsx labs/StoredNotes.jsx labs/query-main.jsx labs/actions-main.jsx labs/SimpleActionForm.jsx labs/SignatureFixed.jsx labs/StatusScopeFixed.jsx labs/RefPropInput.jsx labs/CustomElementStock.jsx labs/PromiseProduct.jsx labs/performance-main.jsx labs/performance-data.js labs/PerfBroken.jsx labs/PerfFixed.jsx labs/SlowList.jsx labs/TransitionFilter.jsx labs/StaleMemoFixed.jsx labs/LazyReportLab.jsx labs/CrashReport.jsx labs/review-main.jsx labs/ReviewSummaryFixed.jsx labs/ReviewSummaryCase.jsx labs/ReviewQueryFixed.jsx labs/ReviewQueryView.jsx labs/ReviewQueryCase.jsx labs/ReviewStorageFixed.jsx",
+    "lint": "eslint src labs/ProductWatch.jsx labs/IntervalFixed.jsx labs/LoopFixed.jsx labs/WatchControls.jsx labs/RequestControls.jsx labs/request-loaders.js labs/useCounter.js labs/HookCounters.jsx labs/StoredNotes.jsx labs/query-main.jsx labs/actions-main.jsx labs/SimpleActionForm.jsx labs/SignatureFixed.jsx labs/StatusScopeFixed.jsx labs/RefPropInput.jsx labs/CustomElementStock.jsx labs/PromiseProduct.jsx labs/performance-main.jsx labs/performance-data.js labs/PerfBroken.jsx labs/PerfFixed.jsx labs/SlowList.jsx labs/TransitionFilter.jsx labs/StaleMemoFixed.jsx labs/LazyReportLab.jsx labs/CrashReport.jsx labs/review-main.jsx labs/ReviewSummaryFixed.jsx labs/ReviewSummaryCase.jsx labs/ReviewQueryFixed.jsx labs/ReviewQueryView.jsx labs/ReviewQueryCase.jsx labs/ReviewStorageFixed.jsx labs/delivery-main.jsx labs/MemoryProbe.jsx labs/stock-probe.js",
     "lint:bug": "eslint labs/StaleSubscriptionBroken.jsx labs/IntervalBroken.jsx",
     "test:bug": "vitest run --config vitest.bug.config.js",
     "lint:c31-bug": "eslint labs/useStaleRequest.js",
     "lint:c34-bug": "eslint labs/StaleMemoBroken.jsx",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:delivery": "playwright test --config playwright.delivery.config.js"
   },
   "dependencies": {
     "@tanstack/react-query": "5.104.4",

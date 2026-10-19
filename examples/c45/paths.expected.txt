@@ -1,0 +1,3 @@
+/media/inventory.svg
+/js_web/media/inventory.svg
+/js_web/data/products/P002.json

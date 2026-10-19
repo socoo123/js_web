@@ -1,6 +1,6 @@
 # 库存项目 · 阶段 4：React
 
-当前参考状态：C36 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟；C36 增加本地商品快照、恢复提示、本地详情和综合故障实验。
+当前参考状态：C45 完成。InventoryProvider 用纯 reducer 保存商品，通过 Context 连接目录、统计与编辑区；URL 保存筛选，Page 保存 editingId，ProductForm 保存草稿与错误，按商品 key 切换时重置。支持新增、补货、删除、编辑与键盘操作；InventoryCounter 支持取消和替换延时记录，Effect 同步标签页标题与搜索快捷键。C31 接入 hash 路由、请求 Hook 与本机备注；C32/C33 给详情加入 Query 缓存、可写 mock 与 Action，列表仍是本地 reducer 数据。C34 加入按需加载的分类报表与局部错误边界；C35 加入 RTL/user-event 行为测试和 Playwright 跨页冒烟；C36 增加本地商品快照、恢复提示、本地详情和综合故障实验。
 
 ## 运行
 
@@ -18,7 +18,7 @@ npm run dev -- --host 127.0.0.1
 | 命令 | 作用与结果 |
 | --- | --- |
 | npm run inspect | 不使用 JSX，在 Node 中观察 React 元素的 type、props 和 DOM 方法缺失 |
-| npm test | 卡片、状态、表单、请求、Action 与报表等回归，190 条通过；不包含故意失败的 labs |
+| npm test | 卡片、状态、表单、请求、Action 与报表等回归，195 条通过；不包含故意失败的 labs |
 | npm run lint | 应用与正确的 Effect 实验通过两条 Hooks 规则检查 |
 | npm run build | 应用首页构建到本目录 dist，包含 source maps |
 | npm run preview -- --host 127.0.0.1 | 读取已有 dist，通常为 http://127.0.0.1:4173/js_web/ |
@@ -190,3 +190,12 @@ tests/state.test.jsx 使用 happy-dom 和 React act 检查真实组件事件；�
 - labs/review.html?case=summary / query / storage 保留三个错误起点；对应 summary-answer / query-answer / storage-answer 提供答案。存储实验仅写 js_web:c36:broken:v1，不改商品快照。
 - npm run test:bug -- labs/review-bugs.test.jsx 原始起点三项失败，按正文修好三个 Broken 文件后通过；仓库保留错误起点。正常 tests/review.test.jsx 新增 19 条，共 190 条；生产 E2E 共 2 条，覆盖新增详情、快照恢复与损坏清除。
 - Q3 的业务、浏览器、source maps 与全站周验收记录见 [examples/c36](../../c36/README.md)；本阶段产物仍供本地使用，课程 Pages 发布静态正文。
+
+
+## 全链路 Debug 与交付前检查（C45）
+
+- labs/delivery.html?case=asset / asset-answer 对比域名根与应用 base 的资源路径；request / request-answer 对比数据 404 与正确请求；html-response 演示默认 Accept 下的 Vite HTML 回退。请求视图复用 ProductDetails、readProductResponse 与正常 fetchProduct。
+- state / state-answer 复用 C24 的同引用更新故障；overflow / overflow-answer 在 360px 对照最小宽度约束；storage 使用独立 js_web:c45:products:v1，复用库存快照恢复逻辑并保留坏原文。
+- memory / memory-answer 用 MemoryProbe 与 stock-probe.js 对比 window 监听器是否在卸载时释放；错误版故意留下引用，每次比较先刷新页面。此实验页不包 StrictMode，以便三轮开启/关闭与三个监听器直接对应；正常应用继续保留 StrictMode。
+- tests/delivery.test.jsx 新增 5 条业务回归，正常测试共 195 条；npm run test:e2e:delivery 启动独立 8045 开发服务，以 Chrome 运行 3 条综合浏览器回归。原 npm run test:e2e 仍只检查正常生产应用的两条路径。
+- public/media/inventory.svg 是资源路径实验的图标。生产 build 继续只包含首页；生产源码断点、Memory 堆快照、Performance 与键盘检查、排错记录见 [examples/c45](../../c45/README.md)。无新依赖，原应用业务逻辑沿用 C36。
