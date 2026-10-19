@@ -1,0 +1,18 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: var(--sapTextColor, #1d2d3e);
+  background: var(--sapBackgroundColor, #f5f6f7);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 58rem; margin: auto; padding: 1.25rem; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1.25rem; }
+.toolbar label { display: grid; gap: .4rem; }
+select { font: inherit; padding: .35rem; max-width: 100%; }
+ui5-card { display: block; width: 100%; max-width: 36rem; }
+.card-body { padding: 1rem; }
+#amount-label { display: block; margin-bottom: .4rem; }
+ui5-input { width: 100%; margin-bottom: 1rem; }
+#feedback { min-height: 1.5em; }
+a { color: var(--sapLinkColor, #0064d9); }
+select:focus-visible, a:focus-visible { outline: 2px solid var(--sapLinkColor, #0064d9); outline-offset: 3px; }

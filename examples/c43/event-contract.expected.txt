@@ -1,0 +1,1 @@
+inventory-restock P002 3

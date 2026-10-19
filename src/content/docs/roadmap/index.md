@@ -5,7 +5,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 <!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
 
-**已发布 42 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**已发布 43 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
 
 ## 选择你的节奏
 
@@ -75,7 +75,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 20 天 | [C40 OpenUI5 入门：MVC 与工程](../06-components-ui5/c40-openui5-mvc-project/) | 已发布 |
 | 第 21 天 | [C41 UI5 Model、绑定与业务控件](../06-components-ui5/c41-model-binding-controls/) | 已发布 |
 | 第 21 天 | [C42 UI5 路由与 OData 起点](../06-components-ui5/c42-routing-odata/) | 已发布 |
-| 第 22 天 | C43 UI5 Web Components 原生使用 | 待发布 |
+| 第 22 天 | [C43 UI5 Web Components 原生使用](../06-components-ui5/c43-native-web-components/) | 已发布 |
 | 第 22 天 | C44 UI5 Web Components for React | 待发布 |
 | 第 23 天 | C45 全链路 Debug 与交付前检查 | 待发布 |
 | 第 23 天 | C46 静态构建与 GitHub Pages | 待发布 |

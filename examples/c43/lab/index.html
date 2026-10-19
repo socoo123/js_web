@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <title>原生 UI5 Web Components · 库存补货</title>
+  </head>
+  <body>
+    <main>
+      <h1>原生组件 · 库存补货</h1>
+      <p>初始商品与前几课一致。补货只保存在本页内存，刷新恢复。</p>
+      <div class="toolbar">
+        <label>商品 <select id="product"></select></label>
+        <label>主题 <select id="theme">
+          <option value="sap_horizon">Horizon 浅色</option>
+          <option value="sap_horizon_dark">Horizon 深色</option>
+        </select></label>
+        <label>组件语言 <select id="language">
+          <option value="zh-CN">中文</option><option value="en">English</option>
+        </select></label>
+      </div>
+      <p id="summary"></p>
+      <ui5-card id="card" accessible-name="商品补货">
+        <ui5-card-header id="heading" slot="header" title-text="机械键盘"
+          subtitle-text="P001 · 外设"></ui5-card-header>
+        <div class="card-body">
+          <p id="stock"></p>
+          <label id="amount-label">补货数量（1–99999 的整数）</label>
+          <ui5-input id="amount" value="3" show-clear-icon
+            accessible-name-ref="amount-label"></ui5-input>
+          <ui5-button id="save" design="Emphasized" icon="add">补货</ui5-button>
+          <p id="feedback" role="status" aria-live="polite"></p>
+        </div>
+      </ui5-card>
+      <p id="draft" aria-live="polite"></p>
+      <p id="settings" role="status"></p>
+      <p>可在 Elements 查看 header slot，在 Network 查看语言与主题资源。</p>
+      <a href="./react.html">查看 React 19 直接使用同一组件</a>
+      <noscript>请启用 JavaScript 后运行补货实验。</noscript>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
