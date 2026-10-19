@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C48 本地每课门禁、Q4 与最终核查完成，待 Pages 核验；下一项 F1）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-19（C48 已上线，每课门禁、Q4 与线上核验完成；最终验收仅余 F1）。
 
 ## 续做时按这个顺序读
 
@@ -28,7 +28,7 @@
 - **2026-10-17–18：用户要求按最新计划与重做的 C03 开发 C25–C30。** 表单、可访问性、状态归属、reducer/Context、ref、Effect/请求竞态及阶段 4 更新已上线，每课门禁与 Pages 核验通过；F1 保留。
 - **2026-10-18：用户要求按最新计划与重做的 C03 开发 C31–C33。** C31 自定义 Hooks/路由、C32 Query 缓存已上线；C33 Action/乐观预览、更新索引与每课门禁、Pages 核验完成；F1 保留。
 - **2026-10-18–19：用户要求按最新计划与重做的 C03 开发 C34–C44。** React 复盘/Q3、组件库、经典 UI5 与原生组件已上线；C44 阶段 7、UI5 家族速查、每课门禁与 Pages 核验完成；F1 保留。
-- **2026-10-19：用户要求按最新计划与重做的 C03 开发 C45–C48。** C45–C47 已上线；C48 总复盘、补缺表、每课本地门禁与 Q4 完成，待 Pages；最终核查仅余 F1。
+- **2026-10-19：用户要求按最新计划与重做的 C03 开发 C45–C48。** C45–C47 已上线；C48 总复盘、补缺表、每课门禁、Q4 与 Pages 核验完成；最终核查仅余 F1。
 
 ## 当前状态
 
@@ -36,7 +36,7 @@
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
-| 已发布 | 48 / 48 篇正文（C01–C48）；C48 本地门禁通过，待 Pages 核验 |
+| 已发布 | 48 / 48（C01–C48）；C48 每课门禁与线上核验通过 |
 | 贯穿项目 | 阶段 1–7、Q3 完成；C48 七阶段复检通过；阶段 4 的 199 条核心/组件与 2 条静态浏览器回归通过 |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；14 张图；C16/C18 合并共用，新增 C46 静态交付图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
@@ -93,7 +93,7 @@
 | C45 全链路 Debug 与交付前检查 | [打开](https://socoo123.github.io/js_web/07-project/c45-debug-delivery-checks/) | [examples/c45](../examples/c45/README.md) | [run 39184048121](https://github.com/socoo123/js_web/actions/runs/39184048121) |
 | C46 静态构建与 GitHub Pages | [打开](https://socoo123.github.io/js_web/07-project/c46-static-build-pages/) | [examples/c46](../examples/c46/README.md) | [run 39243733535](https://github.com/socoo123/js_web/actions/runs/39243733535) |
 | C47 综合项目与测试选择 | [打开](https://socoo123.github.io/js_web/07-project/c47-project-testing-strategy/) | [examples/c47](../examples/c47/README.md) | [run 39253230340](https://github.com/socoo123/js_web/actions/runs/39253230340) |
-| C48 总复盘与后续路线 | [打开](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/) | [examples/c48](../examples/c48/README.md) | 待 Pages 核验 |
+| C48 总复盘与后续路线 | [打开](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/) | [examples/c48](../examples/c48/README.md) | [run 39257555264](https://github.com/socoo123/js_web/actions/runs/39257555264) |
 
 ## 周验收记录
 
@@ -110,7 +110,7 @@
 
 ## 下一步
 
-C01–C48 正文、T0、Q1–Q4 与四张速查页完成；C48 待 Pages 核验。PLAN §10 已核查，学习进度一项未完成，明细见 examples/c48。下一项 **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复，完成后复核 §10 剩余项。
+C01–C48、T0、Q1–Q4 与四张速查页已完成上线核验。PLAN §10 已核查，学习进度一项未完成，明细见 examples/c48。下一项 **F1 本地学习进度**：按 PLAN §8 实施「标记完成」、路线状态、导入导出与损坏恢复，完成后复核 §10 剩余项。
 
 ## 本文件的更新规则
 
