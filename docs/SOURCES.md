@@ -174,9 +174,9 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 
 ## C06 函数、闭包与高阶操作
 
-- 2026-10-16：重新读取 [Node 官方下载页](https://nodejs.org/en/download)与[发布状态](https://nodejs.org/en/about/previous-releases)，确认 Node 24 为 LTS，下载页当前版本为 24.22.0。正文使用主版本与 `node --version`、`node 文件名.js`，安装向导未实际重装。
-- 同日：核对 MDN 的[函数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Functions)、[箭头函数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Arrow_functions)、[默认参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Default_parameters)、[rest 参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/rest_parameters)与[闭包](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Closures)。区分函数值/调用结果、定义位置/调用栈、共享绑定/每次工厂调用独立绑定，以及同步回调与异步执行。
-- 同日：按 [Java lambda 体规范](https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27.2)核对 final/effectively final 的局部变量捕获限制；按 [Chrome Scope 调试参考](https://developer.chrome.com/docs/devtools/javascript/reference#scope)核对操作路径，实际断点与单步读取 count、var/let 捕获结果。运行记录见 [examples/c06](../examples/c06/README.md)。
+- 2026-10-16：重新读取 [Node 官方下载页](https://nodejs.org/en/download)与[发布状态](https://nodejs.org/en/about/previous-releases)，确认 Node 24 为 LTS，下载页当前版本为 24.22.0。2026-10-20 再核对：最新 LTS 仍为 24.22.0，26.12.0 为 Current、23 为 EOL；沿用仓库 Node 24 基线，并按 [Homebrew node@24](https://formulae.brew.sh/formula/node@24)补充 `brew install node@24` 和 PATH 切换步骤。官方图形安装向导未实际重装。
+- 2026-10-16：核对 MDN 的[函数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Functions)、[箭头函数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Arrow_functions)、[默认参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Default_parameters)、[rest 参数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/rest_parameters)与[闭包](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Closures)。区分函数值/调用结果、定义位置/调用栈、共享绑定/每次工厂调用独立绑定，以及同步回调与异步执行。
+- 2026-10-16：按 [Java lambda 体规范](https://docs.oracle.com/javase/specs/jls/se25/html/jls-15.html#jls-15.27.2)核对 final/effectively final 的局部变量捕获限制；按 [Chrome Scope 调试参考](https://developer.chrome.com/docs/devtools/javascript/reference#scope)核对操作路径，实际断点与单步读取 count、var/let 捕获结果。运行记录见 [examples/c06](../examples/c06/README.md)。
 
 ## C07 this、原型与 class
 

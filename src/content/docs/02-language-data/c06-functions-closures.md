@@ -24,11 +24,29 @@ sidebar:
 
 ### 准备 Node 和示例
 
-1. 打开 [Node 官方下载页](https://nodejs.org/en/download)，选择 **Node 24 LTS** 和你的操作系统。
-2. Windows/macOS 下载官方安装包并按向导安装；其他系统按页面对应说明安装。
-3. 重开终端，运行 `node --version`，看到 `v24.` 开头即可。
+本课使用 **Node 24 LTS**（长期支持版）。[官方版本表](https://nodejs.org/en/about/previous-releases)目前把 Node 26 列为 Current、Node 23 列为 EOL（已结束支持）；开始学习时选择仍受支持的 LTS，安装该主版本的最新补丁。
+
+1. 首次安装：打开 [Node 官方下载页](https://nodejs.org/en/download)，选择 **Node 24 LTS** 和你的操作系统。
+2. Windows/macOS 可下载官方安装包并按向导安装；已有 Node 的电脑沿用原来的安装工具，Homebrew 用户见下面的步骤。
+3. 重开终端，运行 `node --version` 和 `npm --version`；前者应以 `v24.` 开头，后者应打印版本号。
 4. 下载或克隆 [课程仓库](https://github.com/socoo123/js_web)，在终端进入 `examples/c06`。
 5. 运行 `node function-values.js`；下面带文件名的 JS 代码都可以这样运行，无需安装第三方包。
+
+<details>
+<summary>macOS 已经用 Homebrew 安装过 Node：升级并切换到 Node 24</summary>
+
+在任意目录的终端执行，安装 [Homebrew 的 node@24](https://formulae.brew.sh/formula/node@24)：
+
+```sh
+brew install node@24
+export PATH="$(brew --prefix node@24)/bin:$PATH"
+node --version
+npm --version
+```
+
+`node@24` 安装 Node 24 的最新补丁；第二行让当前终端优先使用它。把第二行也加入 `~/.zshrc`，新开的 zsh 终端才会保持这个选择。预期 `node --version` 以 `v24.` 开头；如果仍显示旧版本，运行 `command -v node` 检查命令路径，应指向 Homebrew 的 `opt/node@24/bin/node`。
+
+</details>
 
 Node 是运行 JS 的程序。这里先把它当成 Java 的 `java` 命令：把文件交给运行时执行。阅读课程和运行这些例子，也不需要先启动网站工程。每个文件单独运行，变量相互独立；短片段也能粘贴到浏览器 Console。
 
