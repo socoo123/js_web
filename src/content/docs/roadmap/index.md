@@ -14,37 +14,37 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 先读示例、亲手运行，再做预测与排错练习。每课包含 Java 对照和操作说明，库存管理项目贯穿全程。
 
-V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 3 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。
+V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 22 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。
 
 ## 第 1 周：历史、语言、结构与浏览器
 
 | 主线学习日 | 课程 | 状态 |
 | --- | --- | --- |
-| 第 1 天 | [C01 JavaScript 的故事与生态地图](../01-history-web/c01-story-ecosystem/) | 已发布<span data-lesson-status="C01" hidden></span> |
-| 第 1 天 | [C02 Web 基础与第一个调试现场](../01-history-web/c02-web-debugging/) | 已发布<span data-lesson-status="C02" hidden></span> |
+| 第 1 天 | [C01 JavaScript 的故事与生态地图](../01-history-web/c01-story-ecosystem/) | 已接工作区<span data-lesson-status="C01" hidden></span> |
+| 第 1 天 | [C02 Web 基础与第一个调试现场](../01-history-web/c02-web-debugging/) | 已接工作区<span data-lesson-status="C02" hidden></span> |
 | 第 2 天 | [C03 值、类型、转换与比较](../02-language-data/c03-values-types/) | 已接工作区<span data-lesson-status="C03" hidden></span> |
-| 第 2 天 | [C04 变量、作用域与控制流](../02-language-data/c04-scope-control/) | 已发布<span data-lesson-status="C04" hidden></span> |
-| 第 3 天 | [C05 对象、引用与数据交换](../02-language-data/c05-objects-json/) | 已发布<span data-lesson-status="C05" hidden></span> |
-| 第 3 天 | [C06 函数、闭包与高阶操作](../02-language-data/c06-functions-closures/) | 已发布<span data-lesson-status="C06" hidden></span> |
-| 第 4 天 | [C07 this、原型与 class](../02-language-data/c07-this-prototypes/) | 已发布<span data-lesson-status="C07" hidden></span> |
-| 第 4 天 | [C08 Array 与业务数据处理](../02-language-data/c08-arrays-processing/) | 已发布<span data-lesson-status="C08" hidden></span> |
-| 第 5 天 | [C09 Object、Map、Set 与弱集合](../02-language-data/c09-maps-sets/) | 已发布<span data-lesson-status="C09" hidden></span> |
-| 第 5 天 | [C10 栈、队列、树与复杂度](../02-language-data/c10-stacks-queues-trees/) | 已发布<span data-lesson-status="C10" hidden></span> |
-| 第 6 天 | [C11 DOM、事件、表单与页面调试](../03-async-modules/c11-dom-events-forms/) | 已发布<span data-lesson-status="C11" hidden></span> |
-| 第 6 天 | [C12 从回调到 Promise：执行顺序](../03-async-modules/c12-callbacks-promises/) | 已发布<span data-lesson-status="C12" hidden></span> |
+| 第 2 天 | [C04 变量、作用域与控制流](../02-language-data/c04-scope-control/) | 已接工作区<span data-lesson-status="C04" hidden></span> |
+| 第 3 天 | [C05 对象、引用与数据交换](../02-language-data/c05-objects-json/) | 已接工作区<span data-lesson-status="C05" hidden></span> |
+| 第 3 天 | [C06 函数、闭包与高阶操作](../02-language-data/c06-functions-closures/) | 已接工作区<span data-lesson-status="C06" hidden></span> |
+| 第 4 天 | [C07 this、原型与 class](../02-language-data/c07-this-prototypes/) | 已接工作区<span data-lesson-status="C07" hidden></span> |
+| 第 4 天 | [C08 Array 与业务数据处理](../02-language-data/c08-arrays-processing/) | 已接工作区<span data-lesson-status="C08" hidden></span> |
+| 第 5 天 | [C09 Object、Map、Set 与弱集合](../02-language-data/c09-maps-sets/) | 已接工作区<span data-lesson-status="C09" hidden></span> |
+| 第 5 天 | [C10 栈、队列、树与复杂度](../02-language-data/c10-stacks-queues-trees/) | 已接工作区<span data-lesson-status="C10" hidden></span> |
+| 第 6 天 | [C11 DOM、事件、表单与页面调试](../03-async-modules/c11-dom-events-forms/) | 已接工作区<span data-lesson-status="C11" hidden></span> |
+| 第 6 天 | [C12 从回调到 Promise：执行顺序](../03-async-modules/c12-callbacks-promises/) | 已接工作区<span data-lesson-status="C12" hidden></span> |
 
 ## 第 2 周：现代 JS、运行时、工具与 React 起步
 
 | 主线学习日 | 课程 | 状态 |
 | --- | --- | --- |
-| 第 7 天 | [C13 async/await、请求与 Network](../03-async-modules/c13-async-await-fetch/) | 已发布<span data-lesson-status="C13" hidden></span> |
-| 第 7 天 | [C14 原生页面、存储与错误处理](../03-async-modules/c14-storage-errors/) | 已发布<span data-lesson-status="C14" hidden></span> |
-| 第 8 天 | [C15 CSS 布局与响应式：排版库存页](../03-async-modules/c15-css-layout-responsive/) | 已发布<span data-lesson-status="C15" hidden></span> |
-| 第 8 天 | [C16 模块、依赖与组织代码](../03-async-modules/c16-modules-dependencies/) | 已发布<span data-lesson-status="C16" hidden></span> |
-| 第 9 天 | [C17 Node 与浏览器的边界](../04-runtime-tooling/c17-node-browser/) | 已发布<span data-lesson-status="C17" hidden></span> |
-| 第 9 天 | [C18 npm：项目、版本与可复现安装](../04-runtime-tooling/c18-npm-reproducible-installs/) | 已发布<span data-lesson-status="C18" hidden></span> |
-| 第 10 天 | [C19 Yarn、pnpm、Bun 的职责与选择](../04-runtime-tooling/c19-yarn-pnpm-bun/) | 已发布<span data-lesson-status="C19" hidden></span> |
-| 第 10 天 | [C20 构建工具与第一次 UT](../04-runtime-tooling/c20-vite-vitest/) | 已发布<span data-lesson-status="C20" hidden></span> |
+| 第 7 天 | [C13 async/await、请求与 Network](../03-async-modules/c13-async-await-fetch/) | 已接工作区<span data-lesson-status="C13" hidden></span> |
+| 第 7 天 | [C14 原生页面、存储与错误处理](../03-async-modules/c14-storage-errors/) | 已接工作区<span data-lesson-status="C14" hidden></span> |
+| 第 8 天 | [C15 CSS 布局与响应式：排版库存页](../03-async-modules/c15-css-layout-responsive/) | 已接工作区<span data-lesson-status="C15" hidden></span> |
+| 第 8 天 | [C16 模块、依赖与组织代码](../03-async-modules/c16-modules-dependencies/) | 已接工作区<span data-lesson-status="C16" hidden></span> |
+| 第 9 天 | [C17 Node 与浏览器的边界](../04-runtime-tooling/c17-node-browser/) | 已接工作区<span data-lesson-status="C17" hidden></span> |
+| 第 9 天 | [C18 npm：项目、版本与可复现安装](../04-runtime-tooling/c18-npm-reproducible-installs/) | 已接工作区<span data-lesson-status="C18" hidden></span> |
+| 第 10 天 | [C19 Yarn、pnpm、Bun 的职责与选择](../04-runtime-tooling/c19-yarn-pnpm-bun/) | 已接工作区<span data-lesson-status="C19" hidden></span> |
+| 第 10 天 | [C20 构建工具与第一次 UT](../04-runtime-tooling/c20-vite-vitest/) | 已接工作区<span data-lesson-status="C20" hidden></span> |
 | 第 11 天 | [C21 React 来由、JSX 与第一个组件](../05-react/c21-react-jsx-components/) | 已发布<span data-lesson-status="C21" hidden></span> |
 | 第 11 天 | [C22 Props、组合与渲染模型](../05-react/c22-props-composition-render/) | 已发布<span data-lesson-status="C22" hidden></span> |
 | 第 12 天 | [C23 useState：状态快照与更新队列](../05-react/c23-state-snapshot-queue/) | 已接工作区（前置试做）<span data-lesson-status="C23" hidden></span> |

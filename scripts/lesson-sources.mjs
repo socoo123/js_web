@@ -18,14 +18,18 @@ export function importedContent(source, mdx = true) {
   const code = []; const prose = []; const components = [];
   function visit(node) {
     if (node.type === 'mdxjsEsm') {
-      const declaration = node.data?.estree?.body?.[0];
-      if (declaration?.type !== 'ImportDeclaration') throw new Error('课程 MDX 只允许 import 受控组件，不执行内联导出/变量');
-      const name = declaration.source.value;
-      if (!/^\.\.\/.*\/components\/(CodeCompare|CodeExcerpt|LessonTask|LabOverview)\.astro$/.test(name)) throw new Error(`课程 MDX 导入不在受控清单：${name}`);
+      for (const declaration of node.data?.estree?.body ?? []) {
+        if (declaration.type !== 'ImportDeclaration') throw new Error('课程 MDX 只允许 import 受控组件，不执行内联导出/变量');
+        const name = declaration.source.value;
+        const expected = name.match(/^\.\.\/.*\/components\/(CodeCompare|CodeExcerpt|LessonTask|LabOverview)\.astro$/)?.[1];
+        if (!expected) throw new Error(`课程 MDX 导入不在受控清单：${name}`);
+        if (declaration.specifiers.length !== 1 || declaration.specifiers[0].type !== 'ImportDefaultSpecifier' || declaration.specifiers[0].local.name !== expected) throw new Error('课程组件必须使用同名默认导入');
+      }
     }
     if (node.type === 'mdxFlowExpression' || node.type === 'mdxTextExpression') throw new Error('课程正文不允许内联 MDX 表达式；代码放进受控片段清单');
     if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
       const component = node.name;
+      if (component === 'script' || component === 'style') throw new Error('课程的脚本/样式代码必须放在受控源码片段中');
       for (const attr of node.attributes ?? []) {
         if (attr.type !== 'mdxJsxAttribute' || (attr.value !== null && typeof attr.value !== 'string')) throw new Error('课程 JSX 不允许表达式属性或 spread');
       }
@@ -48,7 +52,7 @@ export function importedContent(source, mdx = true) {
           const row = catalog.lessons.find((lesson) => lesson.lessonId === id);
           if (!row?.implemented) throw new Error(`任务尚未发行：${id}`);
           code.push({ code: Object.values(row.commands).join('\n') });
-          prose.push(row.title, ...row.acceptance, ...row.files, row.trial?.description ?? '', '完整参考解（答案）下载本课起点，仅补课/恢复，在同一工作区持续修改');
+          prose.push(row.title, ...row.acceptance, ...row.files, row.trial?.description ?? '', '完整参考解（答案）下载本课起点，仅补课/恢复，在同一工作区持续修改。跨课沿用正在运行的服务。首次运行或切换界面时启动 dev；切换前用 Ctrl+C 停止旧服务，改完源码再运行 check。');
         }
       }
     }

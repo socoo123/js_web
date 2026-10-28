@@ -41,3 +41,7 @@
 - 全站 lint 19 课零 error/warning；check 零诊断；build 的 196/196 固定输出示例与 23 页产物检查通过。
 - [Pages run 38996724990](https://github.com/socoo123/js_web/actions/runs/38996724990) 成功；线上 C19 与路线页 HTTP 200，正文包含新课标题/代码，路线页显示 19/48 并链接 C19。
 - 未运行：Windows/Linux 本地实验、Bun 测试/打包、workspaces 应用；后两项在正文只作职责与组织方式说明。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C19` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

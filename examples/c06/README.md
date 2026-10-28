@@ -38,3 +38,7 @@
 - 全站门禁：六课 lint 零 error/warning，Node 固定输出 69/69，`check`、`build` 通过；本地 1280px/360px、亮暗模式、折叠答案、复制、搜索与禁用 JS 阅读通过。
 - Pages：[run 38844828221](https://github.com/socoo123/js_web/actions/runs/38844828221) 成功；新课、路线和搜索入口返回 200，文章与 D2 与本地生产产物逐字一致。
 - 未运行：Windows/macOS 图形安装向导、DevTools 界面上的手动点击、Firefox、Safari。面板路径依据 Chrome 官方文档核对，断点与作用域内容按上述协议实测。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C06` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

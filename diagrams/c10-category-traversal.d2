@@ -1,35 +1,27 @@
-# 箭头表示父子关系；节点上的两组序号表示从左到右的访问顺序。
+# 与库存工作区的 buildCategoryTree 使用相同的六商品与四分类。
+# 节点序号表示 children 数组顺序下的 DFS / BFS 访问次序。
 direction: down
-
-**.style.font-size: 20
+**.style.font-size: 18
 **.style.border-radius: 10
-(** -> **)[*].style.font-size: 18
 
-root: 库存分类\nDFS ① · BFS ① {
-  style.fill: "#f4f8ff"
-}
-equipment: 设备\nDFS ② · BFS ② {
-  style.fill: "#f4f8ff"
-}
-accessories: 配件\nDFS ⑥ · BFS ③ {
-  style.fill: "#f6ffed"
-  style.stroke: "#389e0d"
-}
-peripherals: 外设\nDFS ③ · BFS ④ {
-  style.fill: "#f6ffed"
-  style.stroke: "#389e0d"
-}
-screens: 显示器\nDFS ④ · BFS ⑤ {
-  style.fill: "#f6ffed"
-  style.stroke: "#389e0d"
-}
-audio: 音频\nDFS ⑤ · BFS ⑥ {
-  style.fill: "#f6ffed"
-  style.stroke: "#389e0d"
-}
-
+root: 全部商品\nDFS 1 · BFS 1 { style.fill: "#f4f8ff" }
+peripherals: 外设\nDFS 2 · BFS 2 { style.fill: "#f6ffed" }
+displays: 显示器\nDFS 5 · BFS 3 { style.fill: "#f6ffed" }
+accessories: 配件\nDFS 7 · BFS 4 { style.fill: "#f6ffed" }
+audio: 音频\nDFS 10 · BFS 5 { style.fill: "#f6ffed" }
+p001: P001\nDFS 3 · BFS 6
+p002: P002\nDFS 4 · BFS 7
+p003: P003\nDFS 6 · BFS 8
+p004: P004\nDFS 8 · BFS 9
+p005: P005\nDFS 9 · BFS 10
+p006: P006\nDFS 11 · BFS 11
+root -> peripherals
+root -> displays
 root -> accessories
-root -> equipment
-equipment -> audio
-equipment -> screens
-equipment -> peripherals
+root -> audio
+peripherals -> p001
+peripherals -> p002
+displays -> p003
+accessories -> p004
+accessories -> p005
+audio -> p006

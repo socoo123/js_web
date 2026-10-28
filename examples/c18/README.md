@@ -34,3 +34,7 @@
 - 全站 lint 18 课零 error/warning，check 零诊断，build 的 193/193 示例与 22 页产物检查通过；D2 中文及连线通过本地 SVG 预览检查。
 - [Pages run 38994824234](https://github.com/socoo123/js_web/actions/runs/38994824234) 成功；线上课程、C18 D2 资源和路线页均为 HTTP 200，路线页显示 18/48 并包含 C18 链接。
 - 未运行：Windows、Linux 本地命令实验。构建与部署记录由 STATUS 和对应 Actions 保留。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C18` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

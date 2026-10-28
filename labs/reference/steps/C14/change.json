@@ -1,0 +1,8 @@
+{
+  "previous": "C13",
+  "files": [
+    "src/services/storage.js",
+    "src/vanilla/app.js",
+    "src/vanilla/index.html"
+  ]
+}

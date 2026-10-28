@@ -6,7 +6,7 @@
 
 ## 怎么使用这张表
 
-C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。每课默认以上一课完成状态为前置；C01 从 C00 骨架开始。表中路径均相对拟建的 `labs/inventory/`，不是现在已经存在的文件。正常跟做使用自己的连续工作副本；起点包只用于补课与恢复。
+C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。每课默认以上一课完成状态为前置；C01 从 C00 骨架开始。表中路径均相对 `labs/inventory/`；逐批实现范围见 STATUS 和 catalog，未接入的课保留旧版入口。正常跟做使用自己的连续工作副本；起点包只用于补课与恢复。
 
 每行是一章的必做增量。预测输出、修 bug、项目步骤合并围绕这一增量，不再布置三套独立 demo。对照列指定 Java/JS 卡片的主题，不要求每个前端机制都能翻译成 Java。没有等价机制时明确写“经验类比”，不虚构 Java API。
 
@@ -38,7 +38,7 @@ C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。�
 | 7 | C13 async/await、请求与 Network | 把同一个 loader 改为静态 JSON 请求，在 app.js 增加取消和加载/空/错态 | Java Future 等待 / await 当前函数；HTTP 状态判断 | 404、非 JSON、离线分别可定位；快换筛选时前请求取消；串行/并发、forEach(async) 用页内对照说明 |
 | 7 | C14 原生页面、存储与错误处理 | 新增 `src/services/storage.js`，接入 app.js 的保存、恢复、导入导出 | Java 序列化与异常处理经验 / localStorage + JSON | 刷新保留修改；坏 JSON 和字段错误不覆盖好副本；可恢复/导出；明确本浏览器状态不等于服务器数据 |
 | 8 | C15 CSS 布局与响应式：排版库存页 | 只修改 `src/vanilla/styles.css` 和必要 HTML，用 Flex/Grid 排工具栏与卡片 | JavaFX/Swing 布局管理器经验 / CSS 布局声明，明确非 API 等价 | 360/768/1280px 分别单/双/四列；无整页横滚；键盘焦点可见；用 Computed 找固定宽度溢出 |
-| 8 | C16 模块、依赖与组织代码 | 把已有 inventory.js 拆为 `src/core/{validation,summary,filters,collections,history,tree}.js` 与 facade；更新 app.js 入口 | Java import/package / ESM 绑定与 URL；CommonJS 对照 | 拆分前后业务测试不变；无循环依赖与 404；给出文件搬移清单；查两个特性的标准阶段和环境支持 |
+| 8 | C16 模块、依赖与组织代码 | 把已有 inventory.js 拆为 `src/core/{validation,stock,summary,filters,collections,history,tree}.js` 与 facade；更新 app.js 入口 | Java import/package / ESM 绑定与 URL；CommonJS 对照 | 拆分前后业务测试不变；无循环依赖与 404；给出文件搬移清单；查两个特性的标准阶段和环境支持 |
 | 9 | C17 Node 与浏览器的边界 | 在 `src/cli/report.js` 复用 summary 读取 data/products.json 并输出报表 | Java Files/Path / fs/promises 与 URL/path；JVM / Node 宿主 | 从不同终端目录调用仍可找数据；6/52/2634800；inspect 断点可命中；能解释 process、Buffer/stream 的用途 |
 | 9 | C18 npm：项目、版本与可复现安装 | 在练习根 package.json 补充 report/test scripts；统一入口启动隔离的锁不一致实验 | Maven pom/依赖树 / package.json、lock、scripts；类比边界 | 主工作区安装可复现；隔离副本的 npm ci 因清单/锁不一致失败；理解依赖类型/semver，不改站点根锁 |
 | 10 | C19 Yarn、pnpm、Bun 的职责与选择 | 统一入口在 `.lab/sandboxes/` 比较两种工具，把结果写进 notes/tooling.md | Maven/Gradle 是构建工具的经验 / 运行时、包管理、测试、构建分别归位 | 同数据报告一致；记录锁/解析差异；主项目无额外管理器锁；覆盖 Yarn 两代、PnP、pnpm、Bun、Corepack 定位 |

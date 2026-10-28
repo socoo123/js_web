@@ -25,6 +25,15 @@ export async function filesIn(root, prefix = '') {
   }
   return files;
 }
+async function identify(root, checkpoint) {
+  const trial = catalog.lessons.find((row) => row.trial?.start === checkpoint || row.trial?.end === checkpoint);
+  const start = trial?.trial?.start === checkpoint;
+  const title = checkpoint === 'C00' ? 'C00 初始工程' : trial ? `${trial.lessonId} 试做${start ? '参考起点' : '完整参考解'}（${checkpoint}）` : `${checkpoint} 完成参考解`;
+  const task = trial?.lessonId ?? (checkpoint === 'C00' ? 'C01' : checkpoint);
+  await writeFile(path.join(root, 'checkpoint.json'), JSON.stringify({ release: catalog.release, checkpoint, kind: checkpoint === 'C00' ? 'starter' : start ? 'trial-start' : 'reference' }, null, 2) + '\n');
+  const description = checkpoint === 'C00' ? '这是最小商品卡片骨架，后续能力由你逐章加入。' : start ? `这是 ${task} 明确前置的试做起点；不代表此前所有课程已连续完成。` : '这是已完成的参考解。通常作为下一课的参考起点或用于补课对照；不是 C00 初始工程。';
+  await writeFile(path.join(root, 'README.md'), `# 库存工作区 · ${title}\n\n发行版：${catalog.release}。${description}\n\n需要 Node 24。在本目录执行一次 npm ci，再按课内说明执行 npm run lab -- start ${task} 和 npm run lab -- dev。打开终端给出的地址。跨课继续自己的源码，不自动复制答案。\n\n暂停时在 notes/next.md 记录当前课、已改文件、观察结果和下一步。check 检查实际工作文件，不会标记网页课程完成。restore 只写新目录，非空则拒绝；compare 只读显示差异。\n\n课程与升级说明：https://socoo123.github.io/js_web/labs/\n`);
+}
 export async function materialize(checkpoint, target) {
   if (!/^[CP]\d{2}$/.test(checkpoint)) throw new Error(`错误快照：${checkpoint}`);
   if (checkpoint.startsWith('P')) {
@@ -37,7 +46,7 @@ export async function materialize(checkpoint, target) {
     for (const file of change.files) {
       const to = safePath(target, file); await mkdir(path.dirname(to), { recursive: true }); await cp(safePath(path.join(dir, 'files'), file), to);
     }
-    await writeFile(path.join(target, 'checkpoint.json'), JSON.stringify({ release: catalog.release, checkpoint }, null, 2) + '\n');
+    await identify(target, checkpoint);
     return target;
   }
   await mkdir(target, { recursive: true });
@@ -68,7 +77,7 @@ export async function materialize(checkpoint, target) {
     }
     checkpoints.push(id);
   }
-  await writeFile(path.join(target, 'checkpoint.json'), JSON.stringify({ release: catalog.release, checkpoint }, null, 2) + '\n');
+  await identify(target, checkpoint);
   return target;
 }
 export async function bundle(root) {

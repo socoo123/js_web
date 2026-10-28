@@ -1,0 +1,153 @@
+---
+title: C14 原生页面、存储与错误处理
+description: 给原生库存页加入本地保存、损坏恢复和 JSON 导入导出，用 Application 面板定位刷新后数据丢失的问题。
+sidebar:
+  order: 14
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 7 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C13 的工作区 · 运行：本地网页，Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+P004 改成 8 后刷新又回到 3，因为页面只改了内存。这一课保存独立 JSON 快照，提供导入、导出和损坏恢复。先验证下一份数据，再切换页面；坏文件或写入失败都要保住已有成果。
+
+<LessonTask lessonId="C14" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c14-string-snapshot" />
+
+<a id="1-localstorage-存的是字符串快照"></a>
+
+## 1. localStorage 保存字符串，不保存引用
+
+新增 src/services/storage.js，先写上方卡中的 snapshot 部分。格式是 version 为 1、products 为商品数组；命名空间为 js_web:inventory:vanilla:v2，与网站学习进度分开。
+
+**先猜一猜：** 读取并 JSON.parse 后修改对象，存储会立刻跟着变吗？
+
+不会。内存对象与存储文本是两份值，重新编码并 setItem 才能持久化。localStorage 同步读写字符串，同源标签可见；不同源或浏览器不自动共享。限制存储或配额满时，访问和写入都可能抛错。
+
+<a id="2-json-能解析还要符合业务规则"></a>
+
+## 2. 解析、校验、备份、替换按顺序发生
+
+继续写入保存与读取部分：
+
+<CodeExcerpt snippetId="c14-save" />
+
+encodeSnapshot 在接触旧存储前完成 decodeSnapshot 校验。有效旧值写入 backup，损坏旧值写入 damaged，再写新值。写入抛错时调用者保留当前内存状态，不能先显示成功。
+
+JSON.parse 只检查语法。`{"stock":"3"}` 能解析，但不符合商品契约。名称、分类、库存、整数分、标签及唯一 id 仍由共享规则检查。表单可以转换文本；导入 JSON 应拒绝错误字段类型。
+
+**先猜一猜：** 非法新值在 encodeSnapshot 就失败，旧 JSON 会被备份或覆盖吗？
+
+都不会，副作用尚未开始。Java 的序列化也不能代替业务字段验证。
+
+<a id="3-启动时先读副本失败时给恢复路径"></a>
+
+## 3. 恢复前保留坏原文，启动失败仍有入口
+
+storage.js 接上恢复函数：
+
+<CodeExcerpt snippetId="c14-recover" />
+
+它先确认备份有效，再保存坏原文与替换当前值。没有有效备份则提示导入导出文件，保留现状。
+
+app.js 顶部从 storage.js 导入 saveProducts、readProducts、recoverProducts、decodeSnapshot、encodeSnapshot。在 commit 中，校验之后、`products = next` 之前插入 `saveProducts(localStorage, next)`。把 filters 的 input 监听恢复为 render，筛选不再请求初始数据覆盖本地编辑。
+
+HTML 加 id 为 recover 的“恢复备份”按钮，type 为 button，初始 hidden。app.js 增加以下 boot 部分，末尾的 reloadProducts() 改为 boot()：
+
+<CodeExcerpt snippetId="c14-boot" />
+
+已有合法快照就显示它，没有快照才请求初始数据。损坏时保留错误说明和恢复按钮；恢复成功才切换内存。
+
+<a id="4-事件负责协调渲染只读取状态"></a>
+
+## 4. 导入与导出交换同一种快照
+
+HTML 加 id 为 export 的普通“导出快照”按钮，以及 label 包裹的 id 为 import、type 为 file 的输入，accept 为 application/json。app.js 接上：
+
+<CodeExcerpt snippetId="c14-transfer" />
+
+导出通过 Blob 和临时对象 URL 下载后释放。导入读取 File 文本，先 decodeSnapshot，再经 commit 持久化与切换。accept 是选择提示，不能代替内容校验；finally 清空输入，使同一文件可以再次选择。
+
+这份快照只表达本浏览器中的练习库存。网站 F1 完成课号有自己的键和导入格式。
+
+<a id="一份数据三个位置"></a>
+
+<a id="源决定共享范围键名决定业务归属"></a>
+
+<a id="校验分三层"></a>
+
+<a id="表单转换json-校验"></a>
+
+<a id="保留坏原文显式恢复"></a>
+
+<a id="catch-放在能决定下一步的地方"></a>
+
+<a id="5-导出快照校验后整份导入"></a>
+
+<a id="文件后缀只是选择提示"></a>
+
+<a id="写了默认值坏-json-仍让页面停住"></a>
+
+<a id="练习-1修改对象以后哪份数据变了"></a>
+
+<a id="练习-2失败提示正确库存却偷偷变了"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：先保存两次合法编辑以产生备份，在 Application → Local Storage 把本课键改为 `{broken`，刷新显示读取失败。
+2. **工具**：查看该键与 :backup，Sources 在 decodeSnapshot 的 JSON.parse 暂停异常。
+3. **证据**：当前原文不能解析，backup 仍有效，HTML 和恢复按钮仍存在。
+4. **原因**：持久文本也是外部输入，刷新不会使坏 JSON 恢复。
+5. **修复**：通过恢复按钮走 recoverProducts；保持 try/catch 与先校验再替换。
+6. **确认**：恢复后六项可见，:damaged 保留坏原文。导入 stock 为字符串的文件应报错，原存储与商品不变。`check C14` 用隔离浏览器和内存存储检查。
+
+## 练习
+
+:::tip[自己尝试 · 本地网页]
+完成接入，把 P004 改为 8，刷新确认；导出文件后演练坏 JSON 恢复。再导入字段错误的副本，确认拒绝且旧数据不变。操作前保存有效导出文件。
+:::
+
+<details>
+<summary>提示</summary>
+
+commit 顺序决定失败后哪份数据有效。请求、编辑与导入都通过它，恢复单独检查备份。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+先校验并写入，再替换数组和 render。若 setItem 失败，旧内存与页面仍对应；若 decodeSnapshot 失败，保存不会开始。恢复先保留损坏原文再替换。
+
+</details>
+
+## 项目进度
+
+- 刷新恢复编辑，导入导出同一种格式。
+- 损坏、拒绝导入和写入失败有明确反馈。
+- 非法新值不覆盖有效快照，F1 不受影响。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C14、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- 持久层保存文本，运行时仍需验证。
+- 副作用在校验后，成功提示在写入后。
+- 备份、坏原文和显式恢复各有职责。
+
+自测：JSON 合法为何还会拒绝？存储失败为何不能先更新页面？库存文件能直接导入学习进度吗？
+
+## 延伸阅读
+
+- [MDN：localStorage](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/localStorage)
+- [MDN：Blob.text](https://developer.mozilla.org/zh-CN/docs/Web/API/Blob/text)
+- [MDN：createObjectURL](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c14)（按需参考）

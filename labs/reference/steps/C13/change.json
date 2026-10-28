@@ -1,0 +1,7 @@
+{
+  "previous": "C12",
+  "files": [
+    "src/services/load-products.js",
+    "src/vanilla/app.js"
+  ]
+}

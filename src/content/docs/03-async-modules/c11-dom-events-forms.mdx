@@ -1,0 +1,145 @@
+---
+title: C11 DOM、事件、表单与页面调试
+description: 把库存数据接到原生网页，掌握安全更新 DOM、事件委托和表单校验，用断点定位重复触发与意外删除。
+sidebar:
+  order: 11
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 1 周 · 第 6 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C10 的工作区 · 运行：本地网页，Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+上一课的规则已经能统计和撤销。这一课把同一组六商品显示出来：搜索 P004、编辑库存、保存或取消，列表和汇总一起更新。把数据、输入文本、DOM 节点分成三种值，再用一个稳定监听器连接它们。
+
+<LessonTask lessonId="C11" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c11-identity-event" />
+
+<a id="1-dom查到的是节点对象"></a>
+
+## 1. DOM 是浏览器中的节点树
+
+继续修改 src/vanilla，不搬动业务规则。把 index.html 换成以下结构；保留 module 脚本，表单、反馈和列表各有稳定的 id。
+
+<CodeExcerpt snippetId="c11-html" />
+
+label 包住输入或通过 for 关联输入，点击文字也能聚焦。button 的 type 区分提交和普通点击；hidden 使关闭的编辑区不进入键盘顺序。DOM 是浏览器对象，Java 的普通对象不会自动变成网页节点。
+
+app.js 不再只显示 P001。依次写入本节到第 4 节的几个部分，组合成同一个文件。先准备状态和提交入口：
+
+<CodeExcerpt snippetId="c11-setup" />
+
+commit 先检查下一份数据，再替换当前值；render 只读数据。输入错误时旧数组仍有效。window 上的两个值供 Console 观察。
+
+## 2. 显示文字用 textContent
+
+每次 render 根据当前筛选生成卡片，再替换列表的子节点。这里始终保留 #list 本身。
+
+<CodeExcerpt snippetId="c11-render" />
+
+**先猜一猜：** 商品名是 `<img src=x onerror=alert(1)>` 时，会出现图片还是文字？
+
+它显示成文字。textContent 写文本节点，不把数据解析成 HTML。innerHTML 会解析标签与事件属性，不能拿它拼接导入的商品名。[DOM 操作](https://developer.mozilla.org/zh-CN/docs/Web/API/Document_Object_Model/Introduction)与 Java 控件树都是对象操作，但 HTML 解析是新的输入边界。
+
+querySelector 返回第一个节点，找不到是 null。querySelectorAll 返回静态 NodeList：查询后新插入的节点不会自动出现在原列表中，重新查询才会看到新成员。
+
+<a id="3-事件沿树传播向父节点委托"></a>
+
+## 3. 事件委托一次，更新始终按 id
+
+把下面部分接到 render 后。openEditor 只把库存复制到输入框，尚未保存就不会修改业务数组。
+
+<CodeExcerpt snippetId="c11-select" />
+
+事件经过捕获、目标、冒泡。列表监听器利用冒泡接收内部按钮点击：target 是最初命中的节点，currentTarget 是执行监听的 #list。closest 从按钮内部文字或图标找到按钮，contains 限定事件归属。
+
+**先猜一猜：** 筛选后 P004 排在第 0 行，应修改 products[0] 吗？
+
+不应该。第 0 行只是当前位置；dataset.id 仍为 P004。上方 Java/JS 卡中的 save 监听就接在此处，调用 parseStock 后再 updateStock。Java 的业务主键同样不应被 UI 行号代替。
+
+<a id="4-表单先校验再把文本写回数据"></a>
+
+## 4. 表单提交、焦点与重新渲染
+
+save 监听来自上方对照卡。preventDefault 阻止表单默认导航，try/catch 把业务错误显示在输入附近。即使 inputmode 提示数字键盘，value 仍是字符串；空白必须经过业务校验。
+
+最后接上以下部分：
+
+<CodeExcerpt snippetId="c11-finish" />
+
+取消只隐藏编辑区；保存或取消后把焦点送回原商品按钮。筛选让按钮消失时回到搜索框，避免焦点落到 body。
+
+<a id="innerhtml-会把输入解释成结构和行为"></a>
+
+<a id="商品列表只注册一个监听器"></a>
+
+<a id="业务入口也接收检查过的数字"></a>
+
+<a id="保存只改数据再更新相关页面"></a>
+
+<a id="点第二次库存却加了两件"></a>
+
+<a id="输入关键词后整个列表不见了"></a>
+
+<a id="练习-1两个箭头函数是同一个监听器吗"></a>
+
+<a id="练习-2让筛选后的按钮继续能编辑"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：在 app.js 把 #list 的 click 注册移进 render，并将按钮判断临时简化为 `if (!button) return`。筛选后点击，一次补了多件。
+2. **工具**：Chrome Sources → Event Listener Breakpoints → Mouse → click；在补货 commit 行设断点。
+3. **证据**：一次点击多次停在同一行，Call Stack 来自不同匿名监听；Elements → Event Listeners 能看到注册项累积。
+4. **原因**：每次创建的箭头函数都是新对象，addEventListener 不替你去重；省略 contains 归属检查后，重绘前的旧目标仍被后续监听处理。
+5. **修复**：监听移出 render，恢复 contains 边界，只绑定到稳定的 #list；删除错误注册后整页重新加载。
+6. **确认**：两次各补 1 件，P004 从 3 到 4 再到 5；筛选 P004 保存为 8，P001 仍为 12。若列表消失，Elements 右键 #list → Break on → Node removal，追踪删除祖先的调用。
+
+## 练习
+
+:::tip[自己尝试 · 本地网页]
+在当前工作区完成六商品页。搜索 P004，输入 8 后取消，再保存空白，最后保存 8。验收：取消与非法提交保留 3，保存后为 8；清空搜索后 P001 仍为 12。把 P001 名称临时改为上面的标签文本，只出现文字。
+:::
+
+<details>
+<summary>提示</summary>
+
+依次写入 setup、render、select、上方卡中的 save、finish。保留 id 与选择器一致，监听放在函数之外。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+业务状态只在 commit 成功后切换。取消没有 commit，空白在 parseStock 失败，只有最后的合法 8 改变 P004。textContent 不会生成 img 节点。
+
+</details>
+
+## 项目进度
+
+- 六商品初始汇总为 52 件、2,634,800 分。
+- 列表重绘后按钮有效；编辑、取消和错误焦点可用。
+- `npm run lab -- check C11` 检查当前页面和原规则。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C11、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- 数据、DOM 和表单文本分别负责业务、显示与编辑。
+- 委托利用冒泡，身份取 id，监听只注册一次。
+- textContent 显示数据；校验失败保留旧数据。
+
+自测：target 与 currentTarget 有何区别？第 0 行为什么不能当主键？取消为何不用写回旧值？
+
+## 延伸阅读
+
+- [MDN：事件冒泡](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting/Event_bubbling)
+- [MDN：textContent](https://developer.mozilla.org/zh-CN/docs/Web/API/Node/textContent)
+- [MDN：submit 事件](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLFormElement/submit_event)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c11)（按需参考）

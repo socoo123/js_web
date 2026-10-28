@@ -1,0 +1,174 @@
+---
+title: C13 async/await、请求与 Network
+description: 用 async/await 组织串行与并发请求，处理 HTTP 和 JSON 错误，并用 Network 排查库存页的加载问题。
+sidebar:
+  order: 13
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 7 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C12 的工作区 · 运行：本地网页，Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+让上一课的页面真的请求静态 products.json。在 Network 看清 URL、状态和响应，再把取消接到页面重载。所有请求只访问本地静态文件，快速输入时旧请求会被取消。
+
+<LessonTask lessonId="C13" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c13-http-status" />
+
+<a id="1-async-返回-promiseawait-取成功值"></a>
+
+## 1. async/await 让依赖顺序回到代码顺序
+
+用上方卡的 JS 替换整个 load-products.js。async 总是返回 Promise；return 普通值成为成功结果，throw 会拒绝。await 只暂停当前 async 函数，主线程能继续处理其他事件。
+
+**先猜一猜：** 等待已经完成的 Promise，“读取结束”会先于“调用结束”吗？
+
+```js
+async function inspectLoad() {
+  await Promise.resolve();
+  console.log("读取结束");
+}
+inspectLoad();
+console.log("调用结束"); // 先调用结束，再读取结束
+```
+
+await 后续进入微任务。Java Future.get 可阻塞调用线程；这里让出执行。try/catch 要覆盖 await；直接 return 稍后拒绝的 Promise，当前 catch 捕获不到那次拒绝，需 return await 才进入当前异常分支。
+
+<a id="2-依赖决定串行独立操作可以并发"></a>
+
+## 2. fetch 的响应分两步处理
+
+fetch 先给 Response，读取 body 是后续异步工作。loader 先判断 response.ok，再读文本，用既有 importProducts 校验 JSON 语法、商品字段及重复 id。
+
+统一入口把 data/products.json 原样复制为开发和构建用的静态资源；改数据仍只改 data 文件。默认 `./products.json` 相对页面 URL 解析，不相对 loader 文件解析。
+
+| 现场 | Network / Console 证据 | 页面应该做什么 |
+| --- | --- | --- |
+| 404 | Status 404，Response 可能是 HTML | 显示 HTTP 404，停止解析 |
+| 200 但非 JSON | Response 是错误正文 | 显示解析错误，结束加载 |
+| 离线 | 请求 failed，fetch 拒绝 | 显示失败并保留重试 |
+| 空数组 | Response 为 [] | 显示没有商品，属于成功空态 |
+
+协议、主机、端口共同决定同源。跨源响应能否被脚本读取由服务器 CORS 响应头决定；no-cors 的不透明响应不能用来读 JSON。前端不能替服务器开放权限。[fetch 使用方式](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch)。
+
+<a id="3-foreach-不会收集异步回调的结果"></a>
+
+## 3. 取消前次请求，清理当前请求
+
+把 app.js 的 reload 部分替换为：
+
+<CodeExcerpt snippetId="c13-reload" />
+
+发起新请求前取消旧 controller，signal 同时传给 fetch。AbortError 是主动取消，无需显示失败。finally 只清理自己对应的 pending，旧请求不能擦掉新请求的位置。
+
+把 filters 的 input 监听改为 `() => { render(); reloadProducts(); }`。先按当前数据筛选，再请求静态数据；这是取消练习，下一课持久化接入后筛选只读本地状态。
+
+Network 勾 Disable cache，使用慢速网络输入 P 再输入 P004：前次显示 canceled，最终只显示 P004。浏览器取消不代表服务器撤销已执行的业务，本课请求为只读。
+
+<a id="4-fetch拿到响应再读取-json"></a>
+
+## 4. 等待一组任务：顺序由依赖决定
+
+**先猜一猜：** 对 async 回调使用 forEach，外面 await forEach 就能等所有加载吗？
+
+```js
+const counts = [];
+await [1, 2].forEach(async (value) => {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  counts.push(value);
+});
+console.log(counts.length); // → 0
+```
+
+forEach 返回 undefined，不收集回调 Promise。互不依赖的任务先 map 为 Promise 数组，再 await Promise.all；依赖前项结果则用 for...of 中逐次 await。
+
+```js
+const counts = await Promise.all([1, 2].map(async (value) => {
+  await Promise.resolve();
+  return value;
+}));
+console.log(counts.length); // → 2
+```
+
+Promise.all 任一拒绝就拒绝，不自动取消其他任务；保留每项成败用 allSettled。并发是等待重叠，不等于同时执行多段 JS 同步循环。
+
+<a id="await-让出的是当前函数"></a>
+
+<a id="把失败放回-trycatch-的控制流"></a>
+
+<a id="all-和-allsettled整组成功还是保留部分成功"></a>
+
+<a id="三种失败三个排查入口"></a>
+
+<a id="cors浏览器能发出请求不等于允许脚本读取"></a>
+
+<a id="5-abortcontroller取消上一次搜索"></a>
+
+<a id="6-network把页面现象对应到一次请求"></a>
+
+<a id="404-最后却报-json-解析错误"></a>
+
+<a id="try-里面-return-promisecatch-却没有执行"></a>
+
+<a id="练习-1await-普通值以后谁先继续"></a>
+
+<a id="练习-2让批量报告真正等完"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：删除实际 loader 中 response.ok 判断，点击模拟失败，出现 JSON 解析错误。
+2. **工具**：Network 选 missing.json，查看 Headers → Status Code 和 Response；Sources 在读取 body 后设断点。
+3. **证据**：HTTP 404 已得到 Response，正文不是商品 JSON，response.ok 为 false。
+4. **原因**：fetch 不因普通 HTTP 错误自动拒绝，解析失败只是下游症状。
+5. **修复**：恢复解析前的状态判断，调用者区分 AbortError。
+6. **确认**：404 显示 HTTP 404；离线失败后可重试；正常与 [] 分别显示六项和空态。`npm run lab -- check C13` 检查实际 loader。
+
+## 练习
+
+:::tip[自己尝试 · 本地网页]
+替换 loader 与 reload 部分，完成 404 故障。在 Network 的本地响应覆盖中把 products.json 改成 []，再改为非 JSON。最后关闭覆盖、恢复网络，快速输入观察取消。每种状态结束加载后都可重试。
+:::
+
+<details>
+<summary>提示</summary>
+
+记录 HTTP 层、正文解析层和主动取消，观察 Initiator 找请求来源。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+读取文本成功只证明拿到了 body。404 在解析前拒绝，importProducts 继续校验业务结构；[] 是成功结果；取消不显示失败，最后一个 controller 能正常结束。
+
+</details>
+
+## 项目进度
+
+- 请求仍使用固定数据，Network 可以追踪真实资源。
+- 正常、空、错误和取消有不同表现。
+- 当前文件检查与前置规则通过。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C13、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- await 表达当前函数的依赖，不阻塞线程。
+- HTTP 状态、格式、业务结构是三层检查。
+- Promise.all 收集并发结果，AbortController 显式取消。
+
+自测：404 为什么能得到 Response？await forEach 得到什么？旧请求 finally 为何核对身份？
+
+## 延伸阅读
+
+- [MDN：async 函数](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/async_function)
+- [MDN：AbortController](https://developer.mozilla.org/zh-CN/docs/Web/API/AbortController)
+- [MDN：Promise.all](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c13)（按需参考）

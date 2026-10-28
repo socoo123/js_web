@@ -49,7 +49,9 @@ try {
   await browserScene(language, 'C03', 'broken');
   check(language, 'C03', false, /入口 parseStock/);
   let source = await readFile(path.join(language, 'src/core/inventory.js'), 'utf8');
-  source = source.slice(0, source.indexOf('// 有问题的写法：C03')) + snippet('c03-parser').code + '\n\n' + snippet('c03-restock').code + '\n';
+  const faulty = /\/\/ 有问题的写法[^\n]*\nexport function restockProduct\([\s\S]*?\n}\n/;
+  if (!faulty.test(source)) throw new Error('C03 起点缺少可定位的原始输入接口');
+  source = source.replace(faulty, '') + snippet('c03-parser').code + '\n\n' + snippet('c03-restock').code + '\n';
   await write(language, 'src/core/inventory.js', source); check(language, 'C03'); await browserScene(language, 'C03');
   await write(language, 'src/core/inventory.js', source.replace('stock ?? 12', 'stock || 12')); check(language, 'C03', false, /初始库存 0/);
   await write(language, 'src/core/inventory.js', source); check(language, 'C03');

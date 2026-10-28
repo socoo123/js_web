@@ -38,3 +38,7 @@ Node 只用于可选的 URL 例子。在本目录运行 `node url-resolution.js`
 - 2026-10-15 · [Pages run 38761177588](https://github.com/socoo123/js_web/actions/runs/38761177588) 成功；文章与新版 SVG 均返回 200，内容逐字节等于本地构建。
 - 本课重构时 T0 尚未实现，使用忽略目录中的临时脚本核对内容规则、代码块与文件一致性、Node 输出。
 - 未运行：手动点击 DevTools 面板（路径按 Chrome 官方文档核对）、其他浏览器、Windows、真实手机。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C02` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
-import { readFile, mkdir } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 import { globSync } from 'node:fs';
 import path from 'node:path';
 import { chromium, expect } from '../labs/inventory/node_modules/@playwright/test/index.mjs';
 import { comparison } from '../labs/sources.mjs';
+import catalog from '../labs/catalog.json' with { type: 'json' };
 
 const base = process.env.REVISION_BASE_URL ?? 'http://127.0.0.1:8874/js_web/';
 const qa = path.resolve('.cache/qa/v2/site-review'); await mkdir(qa, { recursive: true });
 const routes = globSync('**/*.html', { cwd: 'dist' }).filter((route) => !route.startsWith('demos/')).map((route) => route.replace(/index\.html$/, ''));
-const trials = ['02-language-data/c03-values-types/', '05-react/c23-state-snapshot-queue/', '06-components-ui5/c41-model-binding-controls/'];
+const trials = catalog.lessons.filter((row) => row.migrated).map((row) => row.slug + '/');
+const copyRoute = '02-language-data/c03-values-types/';
 const errors = []; let geometry = 0;
 const browser = await chromium.launch();
 try {
@@ -34,7 +36,7 @@ try {
       }
     }
   }
-  await page.goto(base + trials[0]);
+  await page.goto(base + copyRoute);
   for (let side = 0; side < 2; side++) {
     const column = page.locator('.compare-side').nth(side); const expected = comparison('c03-input-number')[side === 0 ? 'left' : 'right'].code;
     const button = column.getByRole('button', { name: '复制到剪贴板' }); await button.focus(); await page.keyboard.press('Enter');

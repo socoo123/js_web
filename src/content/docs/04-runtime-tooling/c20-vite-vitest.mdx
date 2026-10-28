@@ -1,0 +1,179 @@
+---
+title: C20 构建工具与第一次 UT
+description: 用 Vite 构建原生库存页，从 source map 回到源码，用 Vitest 检查统计、边界和错误输入。
+sidebar:
+  order: 20
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 10 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C19 的工作区 · 运行：本地网页，Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+让已有库存规则变成可执行断言，再构建当前原生页。空白不能被当成 0，改错代码要真正让测试变红。本课加一小段 TypeScript 对照，理解转译与类型检查的分工，日常代码继续用 JS。
+
+<LessonTask lessonId="C20" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c20-boundary-assert" />
+
+<a id="1-vite开发时服务源码交付时生成产物"></a>
+
+## 1. Vite 服务源码，构建生成静态产物
+
+工作区的启动入口一直调用 Vite。现在新增根级 vite.config.js：
+
+<CodeExcerpt snippetId="c20-config" />
+
+统一入口负责选择 src/vanilla、复制固定静态数据、设置输出路径；本文件补构建源码映射和测试发现规则。保留 package.json 的 lab/report，把 test 改为 `vitest run --config vite.config.js`。
+
+| 动作 | 做什么 | 不等于什么 |
+| --- | --- | --- |
+| 转译 | 把 TS/JSX 等语法转为 JS | 类型正确 |
+| 打包 | 追踪模块、组织资源与输出 | 业务正确 |
+| 类型检查 | 静态分析类型关系 | 外部 JSON 合法 |
+| 测试 | 用输入与断言检查行为 | 穷尽所有输入 |
+
+**先猜一猜：** 把 lowStock 误写为 stock 小于等于 5，构建会因此失败吗？
+
+通常不会，语法与打包都有效，但会把 P002 的 0 库存也算进去。要由业务断言捕获。
+
+<a id="2-静态产物和-source-map从生成文件回到源码"></a>
+
+## 2. 第一批 UT：正常、空、非法与不变性
+
+新增 tests/core/inventory.test.js。先写导入：
+
+<CodeExcerpt snippetId="c20-test-imports" />
+
+接上上方 Java/JS 卡中的 tests 部分，测试直接导入你自己的 src/core/inventory.js。describe 分组，it 是用例，expect 给出期望。Arrange 准备输入、Act 调用、Assert 比较结果，沿用 JUnit 的组织经验。
+
+toBe 适合数值与身份，toEqual 比较结构。toThrow 要传一个尚未执行的函数，否则异常会在断言接管前发生。异步测试需要 return/await Promise，不能让用例先结束。
+
+<a id="3-第一条-ut让业务规则成为可执行的断言"></a>
+
+## 3. 文本金额和草稿也有运行时边界
+
+在 src/core/validation.js 加以下价格转换及草稿辅助函数，由已有 facade 自动导出。价格单位仍为整数分；文本按小数位拼接，避免先乘浮点 100 引入误差。
+
+<CodeExcerpt snippetId="c20-price" />
+
+<CodeExcerpt snippetId="c20-form-draft" />
+
+接着在测试文件加入：
+
+<CodeExcerpt snippetId="c20-price-tests" />
+
+**先猜一猜：** 测试只写输入 3 能否抓住删除判空后把空白当 0 的错误？
+
+不能。空白、小数、越界与合法 0 是不同分区，必须独立选输入。草稿还要检查 tags 独立，保存时的字段校验与 TypeScript 类型无关。
+
+<a id="4-选边界数据让测试发现真正的错"></a>
+
+## 4. 生产文件与 source map
+
+在工作区执行：
+
+```sh
+npm test
+npm run lab -- check C20
+npm run lab -- build
+```
+
+静态产物在 dist/src-vanilla，默认资源 base 为 /js_web/demos/inventory/。本机预览需把此目录挂到相同子路径；例如在工作区执行 `python3 -m http.server 8070 --directory .lab/preview` 前，创建 .lab/preview/js_web/demos/inventory 并复制 dist/src-vanilla 内的产物进去。打开 http://127.0.0.1:8070/js_web/demos/inventory/。
+
+Sources 开启 JavaScript source maps，在源文件 app.js 的保存行设断点，再编辑 P004。生成代码位置映射回原源码；映射必须对应本次构建，改源码后重新 build 才会更新静态预览。
+
+<a id="5-typescript-短桥接能转成-js不等于类型正确"></a>
+
+## 5. TypeScript 短桥接：类型会被擦除
+
+在工作区执行 `npm run lab -- experiment types`。工具只在 .lab/sandboxes 内写一份 price.ts：
+
+```ts
+const stock: number = "3";
+console.log(stock + 1);
+```
+
+Vite 转译这段仍能生成 JS，运行输出 31；独立 tsc 类型检查报 string 不能赋给 number。照终端打印的命令，在隔离文件把字符串改为数字后再检查，应通过，运行结果为 4。
+
+类型标注、接口、泛型帮助编辑与静态分析，运行时不保留这些约束。即使 `JSON.parse(text)` 被断言为 Product，真实输入仍可能缺字段；共享校验继续必需。[Vite 的 TypeScript 职责](https://vite.dev/guide/features.html#typescript)。
+
+<a id="四种动作分别检查什么"></a>
+
+<a id="source-map-保存位置关系"></a>
+
+<a id="数字用-tobe对象内容用-toequal"></a>
+
+<a id="先让测试失败再修业务"></a>
+
+<a id="空集合和非法输入是两种契约"></a>
+
+<a id="异步结果要等待"></a>
+
+<a id="低库存测试多出一种商品"></a>
+
+<a id="源码保存了preview-仍显示旧页面"></a>
+
+<a id="练习-1预测四种检查的结果"></a>
+
+<a id="练习-2修复并守住低库存边界"></a>
+
+<a id="练习-3从构建产物回到补货源码"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：在实际 validation.js 删除 parseStock 的判空分支，保留 Number 转换，运行 npm test。
+2. **工具**：Vitest 失败报告，定位“拒绝非法库存”用例及输入空白。
+3. **证据**：期望抛错，实际没有抛错；Number(空白) 为 0。构建仍可通过。
+4. **原因**：语法有效不代表业务边界正确，单测之前漏选了输入分区。
+5. **修复**：恢复判空，保留空白/合法零/非法/越界回归，不删除断言。
+6. **确认**：原用例先红后绿，check C20、build 和生产页面都通过。再完成 TS 实验，分别确认转译与类型检查结果。
+
+## 练习
+
+:::tip[自己尝试 · Node]
+完成当前文件的测试与配置，演练 parseStock 故障并修复。构建后在严格子路径打开页面，命中一次映射源码断点；完成 TS 的错误与修复，结束第二个 Lab。
+:::
+
+<details>
+<summary>提示</summary>
+
+测试只导入学员源码，构建只生成产物。对每个失败先写输入、期望、实际，再改实现。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+空白断言先失败证明它能抓住这次回归；恢复边界后通过。source map 连接本次产物与源码，TS 实验说明静态类型检查是独立步骤，不能代替运行时校验。
+
+</details>
+
+## 项目进度
+
+- 正常、空、非法和不变性 UT 通过，并实际经历一次失败。
+- 原生页筛选/编辑/存储恢复、三档布局、Node 报告一致。
+- 生产页和资源在指定子路径运行，L2 完成。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C20、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- 构建、类型检查、测试各有明确输入与目标。
+- 边界断言保护已知业务风险，测试的是当前文件。
+- TypeScript 类型被擦除，JSON 仍需校验。
+
+自测：build 成功证明什么？toThrow 为什么接函数？类型断言能验证导入快照吗？
+
+## 延伸阅读
+
+- [Vite：构建](https://vite.dev/guide/build)
+- [Vitest：入门](https://vitest.dev/guide/)
+- [TypeScript：面向 Java 程序员](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes-oop.html)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c20)（按需参考）

@@ -1,8 +1,9 @@
-import { readFile, writeFile, mkdir, realpath } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, realpath, copyFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 export const workspace = fileURLToPath(new URL('../', import.meta.url));
 export const catalog = JSON.parse(await readFile(new URL('./catalog.json', import.meta.url)));
@@ -32,16 +33,25 @@ export function entryFor(id) {
 }
 export async function viteConfig(id, production = false) {
   const entry = entryFor(id);
+  const publicDir = path.join(workspace, '.lab/public');
+  await mkdir(publicDir, { recursive: true });
+  await copyFile(path.join(workspace, 'data/products.json'), path.join(publicDir, 'products.json'));
   const plugins = Number(id.slice(1)) >= 21 ? [(await import('@vitejs/plugin-react')).default()] : [];
-  return {
-    configFile: false, root: path.join(workspace, entry), plugins,
+  const { mergeConfig } = await import("vite");
+  const own = path.join(workspace, "vite.config.js");
+  const overrides = existsSync(own) ? (await import(pathToFileURL(own))).default : {};
+  return mergeConfig({
+    configFile: false, publicDir, root: path.join(workspace, entry), appType: 'mpa', plugins,
     base: production ? (process.env.LAB_BASE ?? '/js_web/demos/inventory/') : '/',
     server: { host: '127.0.0.1', port: 8060, strictPort: true, fs: { allow: [workspace] } },
     build: { outDir: path.join(workspace, 'dist', entry.replaceAll('/', '-')), emptyOutDir: true, sourcemap: true },
-  };
+  }, overrides);
 }
 async function main() {
   const [command = 'status', rawId, target] = process.argv.slice(2);
+  if (command === 'experiment') {
+    const { experiment } = await import('./experiments.mjs'); await experiment(rawId); return;
+  }
   const state = await readState();
   const id = (rawId ?? state.lessonId).toUpperCase();
   const lesson = catalog.lessons.find((lesson) => lesson.lessonId === id);
@@ -62,6 +72,15 @@ async function main() {
     return;
   }
   if (!lesson.implemented) throw new Error(`${id} 工作区检查尚未发行。`);
+  if (command === 'console') {
+    const { start } = await import('node:repl');
+    const core = await import(pathToFileURL(path.join(workspace, 'src/core/inventory.js')));
+    const products = JSON.parse(await readFile(path.join(workspace, 'data/products.json')));
+    console.log('inventory 是当前业务模块；products 是固定数据的独立副本。改完源码后用 Ctrl+D 退出并重新进入，加载新代码。');
+    const session = start({ prompt: '库存> ' });
+    session.context.inventory = core; session.context.products = products;
+    return;
+  }
   if (command === 'check') {
     try {
       await run(process.execPath, ['tools/check.mjs', id]);
@@ -93,7 +112,7 @@ async function main() {
     }
     return;
   }
-  throw new Error('命令：status | start Cnn | dev | check Cnn | report | build | compare Cnn | restore Cnn 新目录');
+  throw new Error('命令：status | start Cnn | dev | console | check Cnn | report | build | compare Cnn | restore Cnn 新目录 | experiment lock/managers/types');
 }
 if (process.argv[1] && existsSync(process.argv[1]) && await realpath(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main().catch((error) => { console.error(error.message); process.exitCode = 1; });

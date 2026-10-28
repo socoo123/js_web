@@ -1,0 +1,15 @@
+{
+  "previous": "C15",
+  "files": [
+    "src/core/validation.js"
+  ],
+  "sharedFiles": {
+    "src/core/stock.js": "labs/reference/core/stock.js",
+    "src/core/tree.js": "labs/reference/core/tree.js",
+    "src/core/inventory.js": "labs/reference/core/inventory.js",
+    "src/core/history.js": "labs/reference/core/history.js",
+    "src/core/filters.js": "labs/reference/core/filters.js",
+    "src/core/collections.js": "labs/reference/core/collections.js",
+    "src/core/summary.js": "labs/reference/core/summary.js"
+  }
+}

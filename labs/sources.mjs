@@ -46,7 +46,9 @@ export function extractRegion(source, region) {
 export function resolveSource(ref) {
   const filename = ref.checkpoint ? checkpointFile(ref.checkpoint, ref.file) : checkedPath(ref.source);
   if (!ref.checkpoint && !ref.source.startsWith('labs/reference/')) throw new Error('对照来源必须位于受控参考目录');
-  const code = extractRegion(readFileSync(filename, 'utf8').replaceAll('\r\n', '\n'), ref.region);
+  const source = readFileSync(filename, 'utf8').replaceAll('\r\n', '\n');
+  if (ref.jsonKey && (!/^[a-zA-Z]+$/.test(ref.jsonKey) || !Object.hasOwn(JSON.parse(source), ref.jsonKey))) throw new Error('JSON 来源缺少约定字段');
+  const code = ref.jsonKey ? JSON.stringify({ [ref.jsonKey]: JSON.parse(source)[ref.jsonKey] }, null, 2) : extractRegion(source, ref.region);
   return { ...ref, code };
 }
 export const pairs = pairsData;

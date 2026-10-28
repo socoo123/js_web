@@ -1,4 +1,15 @@
 import { validateProducts } from "./validation.js";
+// region total-stock
+export function totalStock(products) {
+  let total = 0;
+  for (const product of products) {
+    if (!Number.isInteger(product.stock)) throw new TypeError("库存必须是整数");
+    total += product.stock;
+  }
+  return total;
+}
+// endregion total-stock
+
 // region summary
 export function summarize(products) {
   validateProducts(products);
@@ -16,3 +27,5 @@ export function summarize(products) {
   return summary;
 }
 // endregion summary
+
+export function stockValue(product) { return product.stock * product.priceCents; }

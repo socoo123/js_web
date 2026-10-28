@@ -1,0 +1,350 @@
+---
+title: C08 Array 与业务数据处理
+description: 用数组方法筛选、排序和统计商品，分清修改与复制，把库存模块推进成可用的报表。
+sidebar:
+  order: 8
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 1 周 · 第 4 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C05、C06、C07 · 运行：Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+给同一个库存模块增加查询、数值排序和汇总。界面后面会复用这些函数，现在先用六商品输入确认顺序和统计。查询不能悄悄改掉原数组，汇总也要保留售罄与低库存的业务口径。
+
+<LessonTask lessonId="C08" />
+
+在当前工作区运行 `npm run lab -- console`，会进入 Node 的“库存>”提示符。`inventory` 是你当前文件的模块，`products` 是独立的固定数据副本；改完代码后用 Ctrl+D 退出，再重新进入。需要观察 Sources/Scope 时，沿用本地库存页的 Console。
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c08-sort-stream" />
+
+## 1. Array 是可变长的对象
+
+JS 的数组从下标 0 开始，用 `length` 读长度。它更像可变长的列表：元素类型可以不同，业务代码仍应让一组数据保持同一种结构。
+
+```js title="array-basics.js"
+import { products } from "../shared/products.js";
+
+const ids = ["P001", "P002", "P003", "P004", "P005", "P006"];
+console.log(ids.length); // → 6
+console.log(ids[0], ids[5]); // → P001 P006
+console.log(ids[6]); // → undefined
+ids[0] = "待复核";
+console.log(ids[0], products[0].id); // → 待复核 P001
+let totalStock = 0;
+for (const product of products) totalStock += product.stock;
+console.log(totalStock); // → 52
+```
+
+`ids` 存的是字符串，替换一个位置只影响这个数组。`const` 仍允许修改数组内容。
+
+越界读取得到 `undefined`，继续读取它的 `.id` 才抛 `TypeError`；Java 数组或 `List.get` 会在越界时直接抛异常。有效下标满足 `index >= 0 && index < products.length`。
+
+需要累加外部变量、提前 `break` 或 `continue` 时，继续用 `for...of`。后面的方法则把常见循环的意图起了名字。
+
+## 2. 筛选、变换和查询，各自返回什么
+
+### `filter` 留下商品，`map` 生成结果
+
+[`filter`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) 的回调回答「保留吗」，返回布尔判断；[`map`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/map) 的回调回答「变成什么」，返回新元素。低库存定义为 1–5 件，库存 0 单独归到售罄。
+
+```js title="pipeline.js"
+import { products } from "../shared/products.js";
+
+const lowStock = products.filter(product => product.stock > 0 && product.stock <= 5);
+const labels = lowStock.map(product => `${product.id}：${product.stock} 件`);
+console.log(labels.join("；")); // → P004：3 件；P006：5 件
+console.log(products.length, lowStock.length); // → 6 2
+console.log(lowStock[0] === products[3]); // → true
+```
+
+先挑出扩展坞和耳机，再转成两个字符串。`join` 将它们拼成一行，数组仍是两项。
+
+`filter` 返回新的数组，选中的商品对象仍是原来的对象，所以最后一行是 `true`。`map` 返回的元素则由回调决定：这里是新字符串；写成 `product => product` 就仍是同一批对象引用。
+
+回调一般接收 `(element, index, array)`，只用元素时写一个参数就够了。链式调用里，下一步的 `index` 从它收到的数组重新计算；筛出两项后再 `map`，下标是 0 和 1。
+
+Java Stream 的 `filter`、`map` 等终止操作才执行；JS 则立即遍历并返回数组，两步就有两次遍历和一个中间数组。库存这六项数据，优先写清业务意图。
+
+### `find` 找一个，`some` 和 `every` 回答真假
+
+只想知道有没有售罄商品，用 `some`；需要那件商品，才用 `find`。`every` 检查所有元素是否符合规则。这三者一旦能确定结果，就会停止检查。
+
+```js title="queries.js"
+import { products } from "../shared/products.js";
+
+const soldOut = products.find(product => product.stock === 0);
+console.log(soldOut?.id); // → P002
+console.log(products.find(product => product.id === "P999")); // → undefined
+console.log(products.some(product => product.stock === 0)); // → true
+console.log(products.every(product => product.stock > 0)); // → false
+console.log([].some(() => true), [].every(() => false)); // → false true
+```
+
+`find` 返回第一项或 `undefined`，可用 `?.` 读取。它解决 Java `findFirst` 那样的问题，返回值却没有 Optional 外壳。
+
+空数组的 `some` 是 `false`，因为找不到一个满足条件的元素；[`every`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/every) 是 `true`，因为也找不到反例，回调一次都没运行。这和 Java Stream 的 `anyMatch`、`allMatch` 相同。若业务要求「至少有一件商品，而且全部有货」，条件应是 `products.length > 0 && products.every(product => product.stock > 0)`。
+
+遍历只是为了打印时用 `forEach`，它丢弃回调返回值，自己的返回值也是 `undefined`；生成下一步要用的数组时用 `map`。`forEach` 回调里的 `return` 只结束本次回调，提前结束整个遍历仍用普通循环。
+
+<details>
+<summary>可选机制实验</summary>
+
+:::tip[自己尝试 · Node]
+1. 在 `examples/c08` 运行 `node pipeline.js` 和 `node queries.js`。
+2. 将 `pipeline.js` 的条件改成 `product.stock <= 5`，再运行。
+3. 把下界 `product.stock > 0` 加回去，恢复低库存定义。
+
+预期：去掉下界后，结果会多出售罄的 `P002：0 件`。恢复后仍只有 P004 和 P006，原商品数组长度保持 6。
+:::
+
+
+</details>
+## 3. 排序：默认按字符串，数字要给比较器
+
+### `sort()` 为什么把 12 排在 3 前面
+
+**先猜一猜：** 库存是数字，下面会按数值从小到大排吗？`result` 和 `stocks` 是不是同一个数组？
+
+```js title="default-sort.js"
+import { products } from "../shared/products.js";
+
+const stocks = products.map(product => product.stock);
+const result = stocks.sort();
+console.log(result.join(", ")); // → 0, 12, 25, 3, 5, 7
+console.log(result === stocks); // → true
+```
+
+[`sort`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) 默认把元素转成字符串，按 UTF-16 码元顺序比较。`"12"` 的第一个字符是 `"1"`，排在 `"3"` 前面。这里改变的是比较方式，数组元素仍然是数字。
+
+`sort` 原地调整顺序并返回同一个数组，`result` 只是别名。保留旧顺序需要副本。
+
+### 比较器返回负数、零或正数
+
+数字升序用 `(a, b) => a - b`，降序用 `(a, b) => b - a`；商品按库存排序则比较 `.stock`。[`toSorted`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted) 使用同样的比较规则，返回新数组。
+
+```js title="sorted-copy.js"
+import { products } from "../shared/products.js";
+
+const stocks = products.map(product => product.stock);
+const ascending = stocks.toSorted((a, b) => a - b);
+console.log(ascending.join(", ")); // → 0, 3, 5, 7, 12, 25
+console.log(stocks.join(", ")); // → 12, 0, 7, 3, 25, 5
+const byStock = products.toSorted((a, b) => a.stock - b.stock);
+console.log(byStock.map(product => product.id).join(", "));
+// → P002, P004, P006, P003, P001, P005
+```
+
+和 Java `Comparator` 一样：负数表示 a 在前，0 表示排序地位相同，正数表示 a 在后。差值即可，无需压成 -1、0、1。
+
+`(a, b) => a > b` 只返回布尔值，转成 0 或 1 后缺了负数，破坏比较器约定。交换参数应交换正负，同值应返回 0；比较过程保持数据不变。
+
+`toSorted` 已纳入 ES2023，Node 24 支持；浏览器目标环境查 MDN 的兼容表。已有数组还可写 `[...stocks].sort((a, b) => a - b)`，先浅复制再排序。
+
+### 稳定排序保留相同排序地位的先后关系
+
+需求换成「有货在前，售罄在后」，有货商品之间仍按原列表顺序排列。把售罄判断转成 0 或 1，就能分成两组。
+
+```js title="stable-sort.js"
+import { products } from "../shared/products.js";
+
+const availableFirst = products.toSorted(
+  (a, b) => Number(a.stock === 0) - Number(b.stock === 0),
+);
+console.log(availableFirst.map(product => product.id).join(", "));
+// → P001, P003, P004, P005, P006, P002
+console.log(availableFirst === products); // → false
+console.log(availableFirst[0] === products[0]); // → true
+```
+
+五件有货商品两两比较得到 0，所以保持 P001、P003、P004、P005、P006 的顺序，售罄的 P002 排到最后。这就是**稳定性**：比较结果为 0 的元素保留排序前的相对顺序。`sort` 从 ES2019 起要求稳定，`toSorted` 也遵循这个规则。
+
+Java 对象列表排序也有稳定性约定。稳定性与是否修改输入分别判断；上例新的是数组容器，商品对象仍共享。
+
+## 4. 先分清方法是否修改输入
+
+下面这张表覆盖本课常用操作。「不修改」指方法自身的操作；回调里写 `product.stock = 0`，仍会修改商品对象。
+
+| 方法 | 得到什么 | 方法自身修改原数组吗 |
+| --- | --- | --- |
+| `forEach(fn)` | `undefined`，用于执行操作 | 否 |
+| `map(fn)` | 每项变换后的新数组 | 否 |
+| `filter(fn)` | 符合条件的新数组 | 否 |
+| `find(fn)` | 第一项或 `undefined` | 否 |
+| `some(fn)` / `every(fn)` | 布尔值 | 否 |
+| `reduce(fn, initial)` | 累积结果 | 否 |
+| `slice(start, end)` | 指定区间的新数组 | 否 |
+| `splice(start, count, ...items)` | 被删除元素组成的数组 | **是**，删除或插入 |
+| `sort(compareFn)` | 同一个数组 | **是**，排序 |
+| `toSorted(compareFn)` | 排序后的新数组 | 否 |
+| `reverse()` | 同一个数组 | **是**，反转 |
+
+### `slice` 是截取，`splice` 是修改
+
+`slice(0, 2)` 取下标 0 和 1，终点 2 不包含在内；`splice(1, 1)` 则从下标 1 起删除 1 项，原数组会缩短。
+
+```js title="slice-splice.js"
+const ids = ["P001", "P002", "P003"];
+const firstTwo = ids.slice(0, 2);
+console.log(firstTwo.join(", ")); // → P001, P002
+console.log(ids.join(", ")); // → P001, P002, P003
+const removed = ids.splice(1, 1);
+console.log(removed.join(", ")); // → P002
+console.log(ids.join(", ")); // → P001, P003
+```
+
+Java 的 `subList` 是原列表的视图，而 JS `slice` 返回独立数组容器。名字接近不代表共享关系也相同。
+
+需要保留原数组的反转或增删时，ES2023 还提供 `toReversed()` 和 `toSpliced(start, count, ...items)`。后者返回的是**修改后的完整新数组**，与 `splice` 返回删除项不同。它们和 `toSorted` 一样都已定稿，Node 24 可用。
+
+### 复制数组以后，改对象仍要复制那一项
+
+C05 讲过浅复制：新数组里保存原对象的引用。给 P002 补货，又希望保留旧数据时，用 `map` 替换目标商品，目标对象再用展开复制。
+
+```js title="update-copy.js"
+import { products } from "../shared/products.js";
+
+const updated = products.map(product => product.id === "P002"
+  ? { ...product, stock: product.stock + 3 }
+  : product);
+console.log(updated[1].stock, products[1].stock); // → 3 0
+console.log(updated[1] === products[1]); // → false
+console.log(updated[0] === products[0]); // → true
+```
+
+数组和 P002 对象是新的，其余商品继续共享。Java 新建 `ArrayList` 也仍共享元素；复制容器只隔离增删和顺序。
+
+### 空位与显式的 `undefined` 不一样
+
+**先猜一猜：** `new Array(3)` 是否相当于三个已初始化的元素？下面的回调会调用几次？
+
+```js title="sparse.js"
+const slots = new Array(3);
+const mapped = slots.map(() => 0);
+console.log(slots.length); // → 3
+console.log(mapped[0], Object.hasOwn(mapped, 0)); // → undefined false
+console.log(Object.hasOwn([undefined], 0)); // → true
+console.log([...slots].map(() => 0).join(", ")); // → 0, 0, 0
+```
+
+`new Array(3)` 只有长度，三个下标位置都不存在，叫**空位**。`map` 跳过空位，回调调用 0 次，结果也留下空位；`[undefined]` 则确实有下标 0，只是值为 `undefined`。
+
+展开或 `for...of` 读取空位时得到 `undefined`，所以 `[...slots]` 先得到三个真正的元素，接着 `map` 才执行三次。
+
+Java 的 `new int[3]` 已填入三个 0，JS 的 `new Array(3)` 没做这件事。库存列表保持连续即可：从数据生成数组、用筛选移除商品。`delete products[1]` 只留下空位、长度仍为 6；移除元素用 `filter` 或 `splice`。
+
+## 5. reduce：让上一步的结果进入下一步
+
+[`reduce`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce) 把一组元素累积成一个结果。回调前两个参数是「到目前为止的结果」和「当前元素」，返回值会成为下一次的累积结果。
+
+```js title="totals.js"
+import { products } from "../shared/products.js";
+
+const totalStock = products.reduce((total, product) => total + product.stock, 0);
+const totalValueCents = products.reduce(
+  (total, product) => total + product.stock * product.priceCents, 0,
+);
+console.log(totalStock); // → 52
+console.log(totalValueCents); // → 2634800
+console.log((totalValueCents / 100).toFixed(2)); // → 26348.00
+console.log([].reduce((total, product) => total + product.stock, 0)); // → 0
+```
+
+最后那个 `0` 是初始值。总件数依次经过 `0 → 12 → 12 → 19 → 22 → 47 → 52`。P002 的库存为 0，这一步也照常执行，只是总数不变。
+
+库存价值是每件商品的「库存 × 单价」之和，单位一直是分；全部相加完成后才除以 100，显示为 `26348.00` 元。方法只负责累积，金额的单位由数据约定决定。
+
+初始值还定义了空列表的答案：没有商品，总件数就是 0。如果省略初始值，`reduce` 会取第一个元素当累积结果，从第二项开始执行；商品数组的第一个元素是对象，并不是数字 0，空数组则直接抛 `TypeError`。这种统计统一显式给初始值，返回的类型和空列表行为都清楚。
+
+Java 中可写 `mapToInt(Product::getStock).sum()`；JS 靠回调选择字段。需要多步分支时，也可回到普通循环。
+
+## 常见错误与调试
+
+### 省掉数值比较器后，商品顺序不对
+
+**现象与触发**：把 sortByStock 的 .sort((left,right)=>left.stock-right.stock) 临时改成 .sort()。
+
+**工具**：保持当前库存页，F12 → Sources，用文件搜索打开 src/core/inventory.js，在本课函数设置断点；浏览器 Console 可直接调用 window.inventory 中的函数。工作区的 check 同时读取这个实际文件。
+
+**证据**：Console 比较结果 id：商品对象默认转换成字符串，没有按 stock 的数值排序。只检查数组长度仍会得到 6，不能说明顺序正确。
+
+**原因**：默认 sort 按字符串比较，不会替你选择商品的数值字段。
+
+**修复**：恢复数值比较器，并在副本上排序。map 的代码块体也需要显式 return，避免把结果变成 undefined。
+
+**确认**：结果 id 次序完全符合验收，原数组仍为 P001–P006；汇总值与空列表结果正确。
+
+## 练习
+
+### 完成不污染原数组的库存查询
+
+:::tip[自己尝试 · Node]
+1. 加入对照卡中的 sortByStock，库存升序应为 P002/P004/P006/P003/P001/P005。
+2. 添加 summarize(products)，返回 count、stock、valueCents、soldOut、lowStock；空数组各项为 0，低库存只算 1–5 件，超安全整数范围报错。
+3. 添加 selectProducts，按 query 匹配 id/名称并按 category 筛选；添加 updateStock(products,id,stock)，返回新数组与目标新对象。
+4. 把排序器临时改为默认 sort，比较实际 id 次序与原数组，再恢复数值比较器。
+5. 在同一工作区运行 npm run lab -- check C08；把当前课、观察结果和下一步写进 notes/next.md。
+
+预期：6 件商品、52 总库存、2634800 分、1 件售罄、2 件低库存；排序与更新不修改输入。
+:::
+
+<details>
+<summary>提示</summary>
+
+sort 会修改调用它的数组，先展开副本。价格仍用整数分；空数组给明确初始值，低库存排除 0。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+排序使用对照卡；下面三段补齐同一查询入口的统计、筛选和不可变更新。它们使用此前的字段规则。
+
+<CodeExcerpt snippetId="c08-summary" />
+
+<CodeExcerpt snippetId="c08-select-products" />
+
+<CodeExcerpt snippetId="c08-update-stock" />
+
+完整参考解在任务卡内；[旧机制文件与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c08)按需查看。
+
+</details>
+
+## 项目进度
+
+- 6 件商品、52 总库存、2634800 分、1 件售罄、2 件低库存；排序与更新不修改输入。
+- 全部修改接在自己的 src/core/inventory.js 中，代码检查使用独立输入，固定数据不被污染。
+- 暂停点为本课检查通过；下次继续同一工作区，按课程页增加下一项能力。
+
+## 小结
+
+- 先看所需结果：变换用 `map`，筛选用 `filter`，找一个用 `find`，判断用 `some` / `every`。
+- `sort` 默认按字符串排序且修改原数组；数字用比较器，保留输入顺序用 `toSorted`。
+- 新数组只隔离容器，商品对象仍可能共享；修改某一项时再复制那个对象。
+- 空位是下标不存在，`map` 会跳过；库存数据保持连续数组。
+- `reduce` 把回调返回值传到下一步，显式初始值保证空数组也有明确结果。
+
+自测：
+
+1. 只想知道有没有低库存，为什么选 `some` 而不是先筛出全部？
+2. 比较器为什么不能只返回 `a.stock > b.stock`？
+3. 稳定排序和是否修改原数组，各自描述什么？
+4. `toSorted` 后修改某件商品的库存，原数组为什么也可能看到变化？
+5. 为什么 `new Array(3).map(() => 0)` 不能初始化三个 0？
+
+下一课比较 Object、Map 和 Set，为库存建立 id 索引、按分类分组，并给标签去重。
+
+## 延伸阅读
+
+- [MDN：Array，复制方法与修改方法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array)
+- [MDN：map 与回调返回值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+- [MDN：sort、比较器与稳定性](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
+- [MDN：toSorted](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted)
+- [MDN：reduce 与初始值](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+- [Chrome DevTools：暂停后检查变量](https://developer.chrome.com/docs/devtools/javascript/reference#scope)

@@ -1,0 +1,145 @@
+---
+title: C19 Yarn、pnpm、Bun 的职责与选择
+description: 在隔离目录比较 Yarn PnP、pnpm 链接布局与 Bun，修复隐藏依赖，按运行时和安装方式选择工具。
+sidebar:
+  order: 19
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 10 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C18 的工作区 · 运行：Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+在同一工作区发起一次工具比较：npm 与 pnpm 在各自隔离副本安装同一个小依赖，再执行同一份报表。你记录锁和解析路径的差异，主工程继续使用 npm。Yarn、Bun 与 Corepack 的定位也放在这张地图里。
+
+<LessonTask lessonId="C19" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c19-same-report" />
+
+<a id="1-先分开看谁安装谁执行"></a>
+
+## 1. 先分清谁安装，谁执行
+
+运行时执行 JS 并提供宿主 API，包管理器解析、安装、锁定依赖。Node 是运行时；npm、Yarn、pnpm 是包管理器；Bun 同时提供运行时、包管理、测试和构建等命令，需按子命令判断职责。
+
+**先猜一猜：** package scripts 写着 node src/cli/report.js，经 pnpm run report 执行时，运行时会变为 pnpm 吗？
+
+不会，仍是 Node。上方对照卡的纯规则输出应保持 52，依赖布局不能改变同一组业务输入的统计。
+
+在工作区执行：
+
+```sh
+npm run lab -- experiment managers
+```
+
+工具在 .lab/sandboxes/managers-* 下创建 npm 与 pnpm 两个副本，仅复制你当前的 core、cli、data；各声明同一 semver 依赖。终端打印目录、安装日志、6/52/2634800 报告与实际解析路径。pnpm 通过固定版本的临时调用准备，不修改全局安装或主清单。
+
+<a id="2-yarn先认版本再认安装方式"></a>
+
+## 2. Yarn 要先认两代与链接方式
+
+Yarn Classic 指 1.x，Modern 指后续版本线。Modern 常用 PnP，以 .pnp.cjs 记录依赖解析，不一定生成传统 node_modules；也可以按项目配置使用 node-modules linker。旧教程中“没有 node_modules 就没安装成功”不适用于所有方式。
+
+Corepack 管项目选择的包管理器版本，与依赖锁分工不同；是否预装取决于 Node 发行版与环境，先检查实际命令，不把它当永久内置事实。现代 Yarn 官方安装路径使用 Corepack，本课程实验不要求更改全局工具。
+
+workspaces 用于同仓库多个包的关系，peerDependencies 表达消费者需提供的宿主依赖；例如插件常要求兼容的 React。它们不是复制一份依赖目录的同义词。[Yarn PnP](https://yarnpkg.com/features/pnp)。
+
+<a id="3-pnpm共享存储按依赖关系建立链接"></a>
+
+## 3. pnpm 的存储与解析路径
+
+pnpm 使用内容寻址存储，并按依赖关系组织链接。实验中 semver 的真实路径经过 node_modules/.pnpm；npm 的布局通常更扁平。硬链接/符号链接与 PnP 都在改变安装和解析，不改变 JavaScript 的模块语法。
+
+**先猜一猜：** 某包出现在磁盘或传递依赖树中，就能在自己的业务模块直接 import 吗？
+
+业务直接使用的包应在本包清单显式声明。提升或祖先目录可能让未声明依赖偶然可解析，换环境便失效；严格解析策略更容易暴露问题。
+
+在两个副本内查看 package.json 和 semver 的打印路径。记录 npm 的 package-lock.json 与 pnpm 的 pnpm-lock.yaml，检查主工作区没有新增其他管理器锁。
+
+<a id="4-bun同一个命令名承担多种职责"></a>
+
+## 4. Bun 的多个职责分别验证
+
+Bun 运行时使用 JavaScriptCore，Node 使用 V8。bun install 安装包，bun run 分发脚本，bun test 运行测试，bun build 构建。若脚本明确调用 node，不能仅凭外层命令名认定已切换运行时；需要看具体选项和实际 process 信息。
+
+Bun 提供许多 Node 兼容 API，但兼容性要落到项目使用的 fs、stream、模块解析与原生扩展。能跑一个算术例子不足以证明应用兼容；选择时比较当前项目的测试结果、团队约定和工具生态。[Bun 的 Node 兼容说明](https://bun.com/docs/runtime/nodejs-apis)。
+
+本次必做比较已经包含两种包管理器，无需为了认识地图装遍所有工具。把实际结果写在 notes/tooling.md：版本、报表、锁名、解析路径、运行时、主锁检查，以及团队选择理由。
+
+<a id="corepack-管工具版本锁文件管项目依赖"></a>
+
+<a id="准备三份相同的实验材料"></a>
+
+<a id="workspaces一个仓库管理多个包"></a>
+
+<a id="隐藏依赖磁盘上有项目却没声明"></a>
+
+<a id="5-选择与锁文件沿着项目已有约定走"></a>
+
+<a id="why-说包已安装import-却失败"></a>
+
+<a id="清单改了冻结安装失败"></a>
+
+<a id="练习-1预测谁在执行-js"></a>
+
+<a id="练习-2修复漏声明保留严格解析"></a>
+
+<a id="练习-3写一份工具选择记录"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：在打印出的 pnpm 副本中，从 package.json 删除 semver 声明，再执行安装并尝试解析 semver。
+2. **工具**：对照清单、安装树和终端打印的绝对解析路径；可在该副本运行 node --input-type=module -e 'console.log(import.meta.resolve("semver"))'。
+3. **证据**：清单未声明该包；解析可能失败，也可能退到上级工作区的 node_modules，已不再使用副本自己的依赖。
+4. **原因**：代码依赖了清单之外的安装布局。
+5. **修复**：在此隔离副本显式恢复 semver 的固定声明并安装，不通过放宽全局提升规则掩盖。
+6. **确认**：解析回到副本局部路径，两个报告一致，主锁和主源码没有变化。若尝试 Bun，另记录运行时与 API 检查，不能沿用 Node 结果。
+
+## 练习
+
+:::tip[自己尝试 · Node]
+运行 managers 实验，完成一次漏声明的解析观察与修复。新建 notes/tooling.md 记录两个工具的实际结果，并说明为什么主工作区继续使用 npm。check C19 继续验证当前业务与报告。
+:::
+
+<details>
+<summary>提示</summary>
+
+比较的是同一份源码与数据。记录相对布局即可，不需要把个人绝对路径提交进课程。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+两种工具都执行 node，因此结果相同；解析路径与锁名不同。漏声明即使暂时能跑也形成环境依赖，恢复显式声明后才能把可用性建立在本包输入上。
+
+</details>
+
+## 项目进度
+
+- 两工具报表同为 6/52/2634800。
+- notes/tooling.md 有观察与选择理由。
+- 其他管理器锁只在 .lab/sandboxes 内。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C19、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- 运行时、安装、脚本、测试与构建分别判断。
+- Yarn 两代与 PnP、pnpm 链接采用不同解析布局。
+- 直接依赖显式声明，换运行时单独复测。
+
+自测：pnpm run 是否换运行时？Corepack 固定的是哪种版本？未声明依赖为何有时仍能解析？
+
+## 延伸阅读
+
+- [Yarn：安装与 Corepack](https://yarnpkg.com/getting-started/install)
+- [pnpm：安装](https://pnpm.io/installation)
+- [Bun：运行时](https://bun.com/docs/runtime)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c19)（按需参考）

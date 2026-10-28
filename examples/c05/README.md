@@ -41,3 +41,7 @@
 - Pages [run 38842751440](https://github.com/socoo123/js_web/actions/runs/38842751440) 成功；线上文章和新版 D2 返回 200，字节内容与本地生产构建一致。
 - 重构时的临时核对脚本和结果在忽略目录 `.cache/qa/c05-*`，不是课程运行依赖；后续完成的 T0 已提供永久门禁。
 - 未运行：DevTools 界面逐项人工点击、Firefox、Safari、Windows。面板路径已按 Chrome 官方文档核对，断点与单步经协议实测。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C05` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

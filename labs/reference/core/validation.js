@@ -13,6 +13,7 @@ export function parseStock(text) {
 }
 // endregion stock-input
 
+// region price
 export function parsePriceCents(text) {
   if (typeof text !== "string" || !/^\d+(?:\.\d{1,2})?$/.test(text.trim())) {
     throw new RangeError("价格必须为非负数，最多两位小数");
@@ -22,15 +23,26 @@ export function parsePriceCents(text) {
   if (!Number.isSafeInteger(cents)) throw new RangeError("价格超出安全整数分范围");
   return cents;
 }
+// endregion price
 export function validateProduct(product) {
   const errors = {};
-  if (!product || typeof product !== "object" || Array.isArray(product)) return { product: "需要商品对象" };
-  if (typeof product.id !== "string" || !/^P\d{3}$/.test(product.id)) errors.id = "编号需要 P 加三位数字";
-  if (typeof product.name !== "string" || product.name.trim().length < 1 || product.name.trim().length > 40) errors.name = "名称需要 1–40 个字符";
-  if (!categories.includes(product.category)) errors.category = "分类无效";
-  if (!Number.isInteger(product.stock) || product.stock < 0 || product.stock > 99999) errors.stock = "库存必须是 0–99999 的整数";
-  if (!Number.isSafeInteger(product.priceCents) || product.priceCents < 0) errors.priceCents = "价格必须是非负安全整数分";
-  if (!Array.isArray(product.tags) || product.tags.some((tag) => typeof tag !== "string")) errors.tags = "标签必须是字符串数组";
+  if (!product || typeof product !== "object" || Array.isArray(product))
+    return { product: "需要商品对象" };
+  if (typeof product.id !== "string" || !/^P\d{3}$/.test(product.id))
+    errors.id = "编号需要 P 加三位数字";
+  if (typeof product.name !== "string"
+      || product.name.trim().length < 1
+      || product.name.trim().length > 40)
+    errors.name = "名称需要 1–40 个字符";
+  if (!categories.includes(product.category))
+    errors.category = "分类无效";
+  if (!Number.isInteger(product.stock) || product.stock < 0 || product.stock > 99999)
+    errors.stock = "库存必须是 0–99999 的整数";
+  if (!Number.isSafeInteger(product.priceCents) || product.priceCents < 0)
+    errors.priceCents = "价格必须是非负安全整数分";
+  if (!Array.isArray(product.tags)
+      || [...product.tags].some((tag) => typeof tag !== "string"))
+    errors.tags = "标签必须是字符串数组";
   return errors;
 }
 export function validateProducts(products) {
@@ -44,6 +56,7 @@ export function validateProducts(products) {
   }
   return products;
 }
+// region form-draft
 export function formatPriceCents(cents) {
   return `${Math.trunc(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
 }
@@ -59,3 +72,22 @@ export function parseDraft(draft) {
   for (const [field, message] of Object.entries(validateProduct(value))) if (field !== "stock" && field !== "priceCents") errors[field] = message;
   return { value: Object.keys(errors).length ? null : value, errors, hasErrors: Object.keys(errors).length > 0 };
 }
+
+// endregion form-draft
+
+// region draft
+export function createDraft(product) {
+  return { ...product, tags: [...product.tags] };
+}
+// endregion draft
+
+// region import-products
+export function importProducts(text) {
+  const products = JSON.parse(text);
+  validateProducts(products);
+  return products.map((product) => ({
+    id: product.id, name: product.name.trim(), category: product.category,
+    stock: product.stock, priceCents: product.priceCents, tags: [...product.tags],
+  }));
+}
+// endregion import-products

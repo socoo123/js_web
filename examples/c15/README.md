@@ -44,3 +44,7 @@
   - 生产预览 /js_web/ 下文章与路线页返回 200；文章有 12 个代码块和 6 个提示/答案折叠区；360/1280px 无页面横向溢出，禁用 JS 后仍可阅读并展开答案。
 - 未运行：DevTools 界面手动点击、Firefox、Safari、真实手机；面板入口核对官方文档。只改示例 CSS，站点主题沿用 C12 周验收。
 - 同日：[Pages Actions 38927024152](https://github.com/socoo123/js_web/actions/runs/38927024152) 成功；线上文章与路线页返回 200，HTML 与本地构建逐字节一致。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C15` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

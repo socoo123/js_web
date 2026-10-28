@@ -1,5 +1,7 @@
 # V2 实际验证记录
 
+本次续作：[R5 · C01–C20 连续迁移](R5.md)，发行版2026.10-v2.2。下面保留R1–R4的历史证据。
+
 发行版：2026.10-v2.1。2026-10-28 · macOS arm64 · Node 24.22.0 / npm 11.19.1 / Java 21.0.2 / Chromium 156.0.8078.4。旧 examples 通过不代表新工作区通过。
 
 | 任务 | 实际执行范围 | 结果 |
@@ -33,4 +35,4 @@ C23/P22→P23 与 C41/P40→P41 是 R4 的前置试做，不代表 C04–C22/C40
 
 提交 `11259e9`；[Pages run 40684581291](https://github.com/socoo123/js_web/actions/runs/40684581291) build/deploy 成功。线上 C03/C23/C41 与 Lab 入口 HTTP 200，8 个快照双格式下载及 SHA-256 全部通过。实际发布字节冻结于 labs/releases/2026.10-v2.1；后续 R5 使用新发行版，不覆盖旧包。
 
-本机线上核验使用 npm 已配置的可信 CA 文件（NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem），保持 TLS 验证。后续任务为 R5：C01–C20 的正式连续工作区迁移。
+本机线上核验使用 npm 已配置的可信 CA 文件（NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem），保持 TLS 验证。R5 续作与当前范围见上方记录，后续为 R6 React 正式连续迁移。

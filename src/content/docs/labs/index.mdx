@@ -4,12 +4,13 @@ description: 一次下载，在同一个库存工作区按课程持续修改，�
 ---
 
 import LabOverview from '../../../components/LabOverview.astro';
+import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
 一个工作区，从商品卡片到静态交付。每课接续你自己的修改；五个 Lab 是阶段产出，共用数据、规则和依赖。
 
 ## 第一次开始
 
-使用 Node 24。在新目录下载并解压 [C00 初始工程](/js_web/downloads/inventory/2026.10-v2.1/C00.tar.gz)，或使用仓库的 `labs/inventory/`。解压文件位于当前目录，不要解压到已有作业里。
+使用 Node 24。在新目录下载并解压 <WorkspaceDownload label="C00 初始工程" />，或使用仓库的 `labs/inventory/`。解压文件位于当前目录，不要解压到已有作业里。
 
 在库存工作区执行一次：
 
@@ -21,7 +22,7 @@ npm run lab -- dev
 
 打开终端打印的地址，应看到「P001 机械键盘 · 库存 12 件」。启动脚本是提供好的骨架，工具原理在运行时与工程课解释。网站本身无需本地安装。
 
-本发行版在 macOS 上首次安装约 3 分钟，依赖约 516 MB；实际时间由网络和缓存决定。首次使用 OpenUI5 时，UI5 CLI 还会下载对应框架资源。其余课继续在同一目录修改，日常不用重装。
+本发行版在 macOS 上首次安装约 3 分钟，依赖约 545 MB；实际时间由网络和缓存决定。首次使用 OpenUI5 时，UI5 CLI 还会下载对应框架资源。其余课继续在同一目录修改，日常不用重装。
 
 ## 下一次学习与暂停
 
@@ -49,7 +50,13 @@ npm run lab -- restore C02 ../inventory-recovery
 npm run lab -- compare C03
 ```
 
-只读显示差异。完整答案默认在课内折叠。下载绑定发行版 `2026.10-v2.1`；[校验清单](/js_web/downloads/inventory/2026.10-v2.1/manifest.json)列出源码与包的 SHA-256。包中含练习锁文件，不含依赖、缓存、个人数据或教师参考目录。
+只读显示差异。完整答案默认在课内折叠。下载绑定一个发行版；<WorkspaceDownload manifest />列出源码与包的 SHA-256。包中含练习锁文件，不含依赖、缓存、个人数据或教师参考目录。
+
+## 从较早发行版继续
+
+已用上一发行版时，先保留旧目录和自己导出的数据。把新的 C00 另存到新目录，再把自己的 src 与 notes 搬入；保留新包的 tools、清单和锁，在新目录执行一次 npm ci 后继续当前课。先比较文件再搬移，正常升级不从完成参考解开始。
+
+当前连续路线已接到 C20。C23/C41 的前置试做与自己的日常工作副本分别保留，后续按课程顺序接回；旧发行包继续可下载。
 
 ## 阶段路线
 

@@ -1,0 +1,179 @@
+---
+title: C16 模块、依赖与组织代码
+description: 用 ES 模块拆分库存页，理解导入导出、加载路径与循环依赖，复用浏览器和 Node 的业务代码。
+sidebar:
+  order: 16
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 8 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C15 的工作区 · 运行：本地网页，Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+inventory.js 已经包含校验、统计、索引、历史和树。本课只搬移已有函数，保留 app.js 的导入入口与所有业务结果。拆分后可以读清模块依赖；网页与稍后的 Node 报表都复用这一组纯规则。
+
+<LessonTask lessonId="C16" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c16-module-export" />
+
+<a id="1-导出什么外部才能导入什么"></a>
+
+## 1. 具名导出与默认导出是不同接口
+
+ESM 用 export/import 建立显式依赖，模块各有作用域并按严格模式执行。本项目 package.json 已有 type:module，网页入口已有 type=module。
+
+```js
+// validation.js：具名导出
+export function parseStock(text) { /* 搬入已有函数体 */ }
+// 其他模块：名称必须匹配，并写 .js 扩展名
+import { parseStock } from "./validation.js";
+```
+
+这段展示接口位置，函数体保留你原有的实现。default export 用不带花括号的导入，可在本地另起名字；具名导入的别名使用 as。浏览器按 URL 找文件，不会自动尝试补 .js；裸包名需构建工具或 import map 解析。
+
+<a id="2-模块有自己的作用域导入的是活绑定"></a>
+
+## 2. 按能力搬移，依赖只往底层走
+
+先保存并通过 check C15，再按下表移动完整函数，包含已有 export。除 import 行与 facade 外，函数体不变。
+
+| 新文件 | 从原 inventory.js 搬入 | 文件顶部新增依赖 |
+| --- | --- | --- |
+| validation.js | categories、parseStock、validateProduct(s)、createDraft、importProducts | 无 |
+| stock.js | initialStock、restockProduct、updateStock | validation 的 parseStock |
+| summary.js | stockValue、totalStock、summarize | validation 的 validateProducts |
+| filters.js | createCategoryFilter、createCounter、createProductSelectors、selectProducts | 无 |
+| collections.js | Inventory、queryWithCallback、sortByStock、indexProducts、groupByCategory、uniqueTags | validation 的 validateProducts、createDraft |
+| history.js | createHistory、createTaskQueue | validation 的 createDraft；stock 的 restockProduct |
+| tree.js | buildCategoryTree、walkDepthFirst、walkBreadthFirst | collections 的 groupByCategory |
+
+stock.js 使 history 直接依赖底层补货规则。各模块不能反过来从 facade 导入，否则 facade 转发它们时形成环。
+
+旧 inventory.js 只保留上方卡的转发导出与 describeProduct。app.js、loader、storage 的导入地址都不用改变。
+
+<figure class="diagram-scroll" tabindex="0">
+
+![ESM 依赖图与包安装布局](../../../assets/diagrams/c16-esm-dependencies.svg)
+
+</figure>
+
+左侧从业务入口向依赖读取，右侧表示包安装后如何解析。源码依赖关系与磁盘安装布局是两个层次。
+
+<a id="3-路径由谁解析决定模块能否找到"></a>
+
+## 3. 活绑定、初始化与动态加载
+
+**先猜一猜：** 模块导出 let count，函数把它加一，导入者稍后读 count 能看到新值吗？
+
+能。ESM 导入是只读活绑定，导入者不能重新赋值，导出模块更新后仍能读到新值。同一模块 URL 的正常导入只初始化一次。普通 `const before = count` 则保存当时值。
+
+```js
+// counter.js
+export let count = 0;
+export function next() { count++; }
+```
+
+```js
+// caller.js，页内预测
+import { count, next } from "./counter.js";
+const before = count;
+next();
+console.log(before, count); // → 0 1
+```
+
+循环引用时在依赖初始化前读取 let/const 可能触发暂时性死区。优先调整依赖方向，而不是四处延迟执行掩盖问题。动态 import() 在执行到时返回 Promise，适合按需加载；它不意味着每次创建独立模块。
+
+Node 还支持 CommonJS 的 require/module.exports；其解析与导出模型不同。`.cjs` 明确 CommonJS，`.mjs` 明确 ESM；本工作区统一使用 ESM。
+
+<a id="4-按职责组织依赖让业务逻辑可以复用"></a>
+
+## 4. 标准年份、提案阶段与环境支持分别查
+
+**先猜一猜：** 某特性到了 Stage 4，所有浏览器就都能运行吗？
+
+不是。Stage 4 表示标准流程完成，年度版本与部署环境支持还要分别确认。课程主线使用已发布的语法；未完成提案不进入必做代码。
+
+| 特性 | 标准归属 | 当前工作区 Node 24 |
+| --- | --- | --- |
+| Array.prototype.toSorted | ES2023 正式标准 | typeof [].toSorted 为 function |
+| Promise.withResolvers | ES2024 正式标准 | typeof Promise.withResolvers 为 function |
+
+在 `npm run lab -- console` 输入两条 typeof 核对当前运行时。浏览器目标还应查官方兼容资料；构建工具可转部分语法，却不会自动补齐所有运行时 API。
+
+<a id="静态导入和动态导入"></a>
+
+<a id="浏览器按-url-找文件"></a>
+
+<a id="裸名称和包解析"></a>
+
+<a id="看懂旧项目的-commonjs"></a>
+
+<a id="循环依赖为什么危险"></a>
+
+<a id="5-新特性能否使用要分别回答三个问题"></a>
+
+<a id="页面一直停在等待脚本"></a>
+
+<a id="模块拿到了却没有这个导出"></a>
+
+<a id="练习-1预测初始化与活绑定"></a>
+
+<a id="练习-2修好三种加载错误"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：在当前 stock.js 把具名 parseStock 导入改为默认导入，页面出现模块没有 default 导出的错误。
+2. **工具**：Console 看第一条模块错误，Network 确认 validation.js 实际 200；Sources 查看导出语句。
+3. **证据**：文件已下载，但只导出了名为 parseStock 的函数，没有 default。
+4. **原因**：接口匹配错误与资源 404 是不同故障。
+5. **修复**：恢复花括号具名导入与完整 .js 路径，保持单向依赖。
+6. **确认**：check C16 的原有规则全通过，网页仍为 6/52/2634800，编辑与存储仍正常。
+
+## 练习
+
+:::tip[自己尝试 · 本地网页]
+按搬移清单完成拆分；演练默认/具名导入错误后修复。最后比较重构前后的固定统计、P004 编辑、刷新恢复，并查清表中两个特性的标准年份和环境支持。
+:::
+
+<details>
+<summary>提示</summary>
+
+每搬完一组再看首个错误。facade 只向外转发，底层文件不应导入 facade。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+函数体保持原样，仅替换文件边界和 import。两种运行环境都导入 facade，就能复用相同能力；无宿主 API 的业务模块不会因拆分而依赖 document 或 fs。
+
+</details>
+
+## 项目进度
+
+- 八个模块和单向依赖清楚，旧入口保持。
+- 纯规则、原生页、持久化与响应式检查通过。
+- 重构没有额外改变字段或计算规则。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C16、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- 具名与默认导入匹配不同接口，路径按宿主规则解析。
+- ESM 导入活绑定，循环初始化可能触发 TDZ。
+- 标准状态与环境支持分别核对。
+
+自测：HTTP 200 为什么仍会报模块错误？before 与 count 为何不同？为什么 history 不从 facade 导入？
+
+## 延伸阅读
+
+- [MDN：JavaScript 模块](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Modules)
+- [Node：ESM](https://nodejs.org/download/release/latest-v24.x/docs/api/esm.html)
+- [TC39：完成提案与标准归属](https://github.com/tc39/proposals/blob/main/finished-proposals.md)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c16)（按需参考）

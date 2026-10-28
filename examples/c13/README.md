@@ -38,3 +38,7 @@
   - 生产预览 /js_web/ 下文章与路线返回 200，16 个代码块、4 个答案折叠区存在；页面无未捕获脚本错误。
 - 未运行：DevTools 界面手动点击、Firefox、Safari、真实手机；面板入口按 Chrome 官方文档核对。本课未改站点样式，沿用 C12 周验收。
 - 同日：[Pages Actions 38919408362](https://github.com/socoo123/js_web/actions/runs/38919408362) 成功；文章与路线页返回 200，HTML 与本地构建逐字节一致。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C13` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

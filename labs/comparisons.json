@@ -71,5 +71,460 @@
       "verified": true
     },
     "difference": "两侧都通过约定的更新入口通知观察者。JSONModel.setProperty 会检查相关绑定；Java Bean 本身没有 UI5 的模型名、绑定路径或 XML View。"
+  },
+  "c01-host-value": {
+    "title": "同一份库存价值计算",
+    "input": "P001，stock=12，priceCents=39900",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C01HostValue.java",
+      "region": "value",
+      "caption": "main 中的库存价值计算",
+      "output": "478800 分",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C01",
+      "file": "src/core/inventory.js",
+      "region": "value",
+      "caption": "在 inventory.js 中定义函数",
+      "output": "stockValue(products[0]) 返回 478800 分",
+      "verified": true
+    },
+    "difference": "Java 需要声明数值类型；JS 的普通数字是 Number。这里先用整数分计算，网页显示交给浏览器。"
+  },
+  "c02-output-dom": {
+    "title": "文本输出与 DOM 更新",
+    "input": "P001 的 12 件与单价 39900 分",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C02OutputDom.java",
+      "region": "output",
+      "caption": "main 中的两条文本输出",
+      "output": "终端打印商品行和库存价值",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C02",
+      "file": "src/vanilla/app.js",
+      "region": "render",
+      "caption": "读取当前商品并更新已有 HTML 节点",
+      "output": "页面的商品标题和价值段落分别更新",
+      "verified": true,
+      "resultLabel": "页面结果"
+    },
+    "difference": "Java 的终端输出追加文本；浏览器通过 DOM 改变已有节点。HTML 结构、CSS 布局和 DOM 是这里要学的新机制。"
+  },
+  "c04-block-total": {
+    "title": "遍历元素，累计当前库存",
+    "input": "固定六商品库存 12、0、7、3、25、5",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C04BlockTotal.java",
+      "region": "total",
+      "caption": "totalStock 方法",
+      "output": "totalStock 返回 52",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C04",
+      "file": "src/core/inventory.js",
+      "region": "total-stock",
+      "caption": "for-of 的 product 是当前商品",
+      "output": "totalStock(products) 返回 52",
+      "verified": true
+    },
+    "difference": "Java 的字段是 int；JS 在运行时确认库存值是整数。for-of 直接取元素，省去手写下标的边界。"
+  },
+  "c05-draft-copy": {
+    "title": "取消草稿后，原商品仍保留原标签",
+    "input": "P001 的 tags=[\"热销\"]，只给草稿加“仅草稿”",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C05DraftCopy.java",
+      "region": "draft",
+      "caption": "main 中的标签副本",
+      "output": "原 tags=[热销]；草稿 tags=[热销, 仅草稿]",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C05",
+      "file": "src/core/inventory.js",
+      "region": "draft",
+      "caption": "复制后在 Console 修改返回草稿的 tags",
+      "output": "createDraft 后给 draft.tags 加标签，原 tags 仍是 [\"热销\"]",
+      "verified": true
+    },
+    "difference": "两种语言都需要复制将被修改的容器。JS 展开对象只复制外层，tags 要单独展开。"
+  },
+  "c06-filter-closure": {
+    "title": "一次创建，保留自己的分类条件",
+    "input": "固定六商品，筛选分类“外设”",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C06FilterClosure.java",
+      "region": "factory",
+      "caption": "createCategoryFilter 方法",
+      "output": "P001,P002",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C06",
+      "file": "src/core/inventory.js",
+      "region": "category-filter",
+      "caption": "返回的函数之后交给 Array.filter",
+      "output": "products.filter(createCategoryFilter(\"外设\")) 得 P001/P002",
+      "verified": true
+    },
+    "difference": "Java lambda 捕获的局部变量需要 effectively final；JS 闭包保留词法绑定，每次调用工厂产生独立环境。"
+  },
+  "c07-bound-method": {
+    "title": "把查询交给回调时，谁保留接收者",
+    "input": "当前 Inventory 中 P004 的库存 3",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C07BoundMethod.java",
+      "region": "receiver",
+      "caption": "main 中的绑定方法引用",
+      "output": "方法引用查询得到 3",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C07",
+      "file": "src/core/inventory.js",
+      "region": "bound-query",
+      "caption": "调用原型方法前绑定当前库存实例",
+      "output": "queryWithCallback(inventory,\"P004\").stock 得 3",
+      "verified": true
+    },
+    "difference": "Java 的绑定方法引用保留对象；JS 只取出方法值时会丢失接收者。bind 返回带指定 this 的新函数。"
+  },
+  "c08-sort-stream": {
+    "title": "按数值排序，保留原始顺序",
+    "input": "六商品原库存值",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C08SortStream.java",
+      "region": "sort",
+      "caption": "sortByStock 方法",
+      "output": "P002/P004/P006/P003/P001/P005",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C08",
+      "file": "src/core/inventory.js",
+      "region": "sort-stock",
+      "caption": "副本排序后返回新的数组",
+      "output": "sortByStock 返回同样顺序，原数组不变",
+      "verified": true
+    },
+    "difference": "Java Stream 的 sorted 返回新流；JS sort 会改数组，所以先创建副本，再给数值比较器。"
+  },
+  "c09-id-map": {
+    "title": "业务 id 作为索引键",
+    "input": "固定六商品，查询 P004",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C09IdMap.java",
+      "region": "index",
+      "caption": "indexProducts 方法",
+      "output": "库存 3，Map 大小 6",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C09",
+      "file": "src/core/inventory.js",
+      "region": "id-index",
+      "caption": "Map.set/get 与业务 id",
+      "output": "库存 3，Map.size 为 6",
+      "verified": true
+    },
+    "difference": "字符串 id 在两侧都按值匹配。对象键另有差异：Java 可用 equals/hashCode；JS Map 的对象键按身份匹配。"
+  },
+  "c10-queue-tree": {
+    "title": "用队列按层访问分类树",
+    "input": "六商品构成的四分类树",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C10QueueTree.java",
+      "region": "bfs",
+      "caption": "breadthFirst 方法",
+      "output": "全部商品→四分类→P001/P002/P003/P004/P005/P006",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C10",
+      "file": "src/core/inventory.js",
+      "region": "bfs",
+      "caption": "visit 回调接收当前节点",
+      "output": "回调收集到相同访问次序，每个节点一次",
+      "verified": true
+    },
+    "difference": "Java ArrayDeque 提供头部出队；JS 用数组和头索引避免反复 shift。返回列表与调用回调是两种收集结果的方式。"
+  },
+  "c11-identity-event": {
+    "title": "事件携带稳定商品编号",
+    "input": "筛选只显示 P004，将库存 3 改为 8",
+    "left": {
+      "label": "Java 经验类比",
+      "lang": "java",
+      "source": "labs/reference/java/C11IdentityEvent.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "P004=8, P001=12",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C11",
+      "file": "src/vanilla/app.js",
+      "region": "save",
+      "caption": "保存监听；依赖下文的 setup 与 openEditor",
+      "output": "P004 显示库存 8 件，P001 仍为 12",
+      "verified": true
+    },
+    "difference": "Java 回调和 DOM 事件都需要传递业务身份。浏览器的表单值仍是文本，先校验，再按 editingId 更新；可见列表下标不代表原始数组位置。"
+  },
+  "c12-future-chain": {
+    "title": "把异步结果接回调用链",
+    "input": "六商品模拟加载",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C12FutureChain.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "6",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C12",
+      "file": "src/services/load-products.js",
+      "region": "load",
+      "caption": "",
+      "output": "loadProducts() 成功得到六商品数组",
+      "verified": true
+    },
+    "difference": "thenCompose 与 then 返回内层异步结果都把等待接到链上。Java 的 supplyAsync 可在执行器线程运行；Promise 回调本身不创建线程。"
+  },
+  "c13-http-status": {
+    "title": "先判断 HTTP，再读取业务数据",
+    "input": "服务器返回 HTTP 404",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C13HttpStatus.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "HTTP 404",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C13",
+      "file": "src/services/load-products.js",
+      "region": "load",
+      "caption": "",
+      "output": "loadProducts({ url: \"./missing.json\" }) 拒绝，消息 HTTP 404",
+      "verified": true
+    },
+    "difference": "两侧都先检查状态。fetch 收到 404 响应时仍成功得到 Response；只有随后显式抛错，调用链才进入错误处理。"
+  },
+  "c14-string-snapshot": {
+    "title": "持久层保存独立文本",
+    "input": "P004 的库存 3 被编码为文本",
+    "left": {
+      "label": "Java 经验类比",
+      "lang": "java",
+      "source": "labs/reference/java/C14StringSnapshot.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "{\"version\":1,\"products\":[]}",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C14",
+      "file": "src/services/storage.js",
+      "region": "snapshot",
+      "caption": "",
+      "output": "encodeSnapshot([]) 返回 {\"version\":1,\"products\":[]}",
+      "verified": true
+    },
+    "difference": "这里借 Java 的字符串容器理解值的边界。localStorage 也只存字符串，读取后需解析和校验；Java Map 没有浏览器的同源、配额与持久化机制。"
+  },
+  "c15-layout-budget": {
+    "title": "先算卡片空间，再声明布局",
+    "input": "1280px 视口，main 上限 1216px、内边距各 16px，四列间隔 16px",
+    "left": {
+      "label": "Java 经验类比",
+      "lang": "java",
+      "source": "labs/reference/java/C15LayoutBudget.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "284",
+      "verified": true
+    },
+    "right": {
+      "label": "CSS",
+      "lang": "css",
+      "checkpoint": "C15",
+      "file": "src/vanilla/styles.css",
+      "caption": "",
+      "output": "1280px 四列；768px 两列；360px 单列",
+      "verified": true
+    },
+    "difference": "Java 片段只算几何预算。CSS 让浏览器随容器尺寸重算布局；Grid/Flex 的轨道、内在尺寸和媒体查询没有 Java 语法的一一对应。"
+  },
+  "c16-module-export": {
+    "title": "模块入口组织可复用规则",
+    "input": "P001 库存价值 478800 分",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C16ModuleExport.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "478800",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C16",
+      "file": "src/core/inventory.js",
+      "caption": "",
+      "output": "从 inventory.js 导入 stockValue，P001 仍返回 478800",
+      "verified": true
+    },
+    "difference": "Java 的类与包限定名称；ESM 按 URL 建立模块图。facade 只转发原来的函数，拆文件不改变业务规则。"
+  },
+  "c17-file-base": {
+    "title": "文件路径要有稳定基准",
+    "input": "读取工作区内 data/products.json",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C17FileBase.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "file:/workspace/data/products.json",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C17",
+      "file": "src/cli/report.js",
+      "region": "report",
+      "caption": "",
+      "output": "商品数 6；总库存 52；总价值 2634800 分",
+      "verified": true
+    },
+    "difference": "两侧按模块文件位置解析相对路径。process.cwd() 是启动目录，import.meta.url 是当前模块地址；命令从别处执行也应找到同一数据。"
+  },
+  "c18-script-command": {
+    "title": "脚本名称指向具体命令",
+    "input": "运行报表命令",
+    "left": {
+      "label": "Java 经验类比",
+      "lang": "java",
+      "source": "labs/reference/java/C18ScriptCommand.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "node src/cli/report.js",
+      "verified": true
+    },
+    "right": {
+      "label": "package.json",
+      "lang": "json",
+      "checkpoint": "C18",
+      "file": "package.json",
+      "jsonKey": "scripts",
+      "caption": "",
+      "output": "npm run report 由 Node 执行 src/cli/report.js",
+      "verified": true
+    },
+    "difference": "Java ProcessBuilder 保存命令及参数；npm scripts 保存可按名调用的命令文本。npm 负责分发，report.js 的宿主仍是 Node。"
+  },
+  "c19-same-report": {
+    "title": "换安装工具后业务输入不变",
+    "input": "同一六商品数据中的库存总量",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C19SameReport.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "52",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C19",
+      "file": "src/cli/report.js",
+      "region": "report",
+      "caption": "",
+      "output": "npm 与 pnpm 两个副本都打印 6 / 52 / 2634800",
+      "verified": true
+    },
+    "difference": "依赖布局与锁文件可以不同，纯业务结果应一致。两次脚本都调用 node；pnpm 安装依赖不等于给业务脚本更换运行时。"
+  },
+  "c20-boundary-assert": {
+    "title": "把输入边界变成断言",
+    "input": "库存文本 \"0\" 与空白",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C20BoundaryAssert.java",
+      "region": "compare",
+      "caption": "main 中的可运行片段",
+      "output": "零库存与空白边界通过",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C20",
+      "file": "tests/core/inventory.test.js",
+      "region": "tests",
+      "caption": "",
+      "output": "Vitest 正常值、空白、非法值与更新检查通过",
+      "verified": true
+    },
+    "difference": "Java 片段用 AssertionError 展示失败契约；Vitest 负责组织 JS 用例并显示输入、期望、实际。要测运行时数据，TypeScript 声明代替不了这条断言。"
   }
 }

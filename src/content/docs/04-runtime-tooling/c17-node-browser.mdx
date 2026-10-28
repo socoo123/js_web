@@ -1,0 +1,150 @@
+---
+title: C17 Node 与浏览器的边界
+description: 分清 JS 与宿主的职责，用 Node 读取库存文件、接收参数、生成报告，并用 inspect 找到路径和异步错误。
+sidebar:
+  order: 17
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 9 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C16 的工作区 · 运行：Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+把网页里的统计放到命令行运行：读取工作区自己的固定数据，复用自己的 summarize，输出 6、52、2634800。再从另一个目录调用，报表仍找到同一文件。这一课明确 JavaScript、引擎、运行时与宿主 API 的边界。
+
+<LessonTask lessonId="C17" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c17-file-base" />
+
+<a id="1-同一门语言不同的宿主能力"></a>
+
+## 1. 同一门语言，不同宿主能力
+
+新增 src/cli/report.js，写入上方对照卡的完整 JS。浏览器与 Node 都能执行共享规则；document 属于浏览器，fs 属于 Node，不能把报表模块导入网页。
+
+**先猜一猜：** 在工作区 `npm run lab -- console` 中，下面三个 typeof 是什么？
+
+```js
+console.log(typeof document); // → undefined
+console.log(typeof process);  // → object
+console.log(typeof fetch);    // → function
+```
+
+Node 使用 V8 执行 JS，提供进程、文件和网络能力；I/O 可由系统或线程池处理，完成后再调度 JS 回调。await 不会为业务函数开线程，重计算仍可阻塞当前 JS 执行。Java JVM 也需要标准库与操作系统配合，不能把引擎和宿主能力混为一谈。
+
+<a id="2-文件读取先确定路径的基准"></a>
+
+## 2. 路径先确定基准，再读取文件
+
+report 的 new URL 相对 import.meta.url 定位。readFile 返回 Promise，指定 utf8 得到字符串，否则得到 Buffer；解析后 summarize 同时执行业务校验。
+
+在工作区运行 `npm run lab -- report`，输出商品数 6、总库存 52、总价值 2634800 分。再退到工作区父目录，运行 `node inventory/src/cli/report.js`；若你的工作目录名称不同，替换 inventory。输出相同。
+
+**先猜一猜：** `readFile("data/products.json")` 从哪个目录开始找？
+
+从 process.cwd()，即启动进程的目录，不是源文件目录。读用户指定文件时 cwd 可以是正确基准；读取模块自带资源时应使用模块 URL。URL 与操作系统路径互转可用 node:url 的 fileURLToPath/pathToFileURL，不手工删除 file: 前缀。
+
+<a id="3-命令行参数和环境变量都是输入"></a>
+
+## 3. 参数、环境变量与退出状态都是接口
+
+process.argv 前两项是可执行程序和入口，后面才是用户参数。process.env 的值通常是字符串或 undefined，需要转换并校验。
+
+```js
+const text = process.env.LOW_STOCK_LIMIT ?? "5";
+const limit = Number(text);
+if (!Number.isInteger(limit) || limit < 0) throw new Error("阈值需要非负整数");
+console.log(limit); // 未设置变量时 → 5
+```
+
+错误时可设置 process.exitCode=1，让调用脚本知道失败。异步写文件要 await 成功后再报完成；try/catch 需覆盖 await。不要提前 process.exit(0) 截断尚未完成的输出或 I/O。
+
+<a id="4-buffer-与-stream字节和分块"></a>
+
+## 4. Buffer、stream 与 inspect 各解决什么
+
+Buffer 表示字节，字符串长度与 UTF-8 字节数可能不同；stream 分块处理，适合大文件，pipe/pipeline 处理背压与错误。当前六商品文件很小，用 readFile 更直接。
+
+```js
+const bytes = Buffer.from("库", "utf8");
+console.log(bytes.length); // → 3
+console.log(bytes.toString("utf8")); // → 库
+```
+
+在工作区运行 `node --inspect-brk=127.0.0.1:9229 src/cli/report.js`，Chrome 打开 chrome://inspect → Open dedicated DevTools for Node。在 readFile 与 summarize 行设断点，继续执行后看 products 与 summary；这次调试的是 Node 进程，不是网页 Console。完成后结束该进程。
+
+Java 调试器也能附着进程，Node inspect 让调试器查看该进程的 JS 栈和作用域。
+
+<a id="v8-跑-js系统处理-io结果再回到-js"></a>
+
+<a id="写文件等待成功再告诉调用者完成了"></a>
+
+<a id="退出状态也是脚本的输出"></a>
+
+<a id="在示例目录能运行回到仓库根目录就找不到文件"></a>
+
+<a id="trycatch-包住了读取却没接住错误"></a>
+
+<a id="练习-1预测异步读取的值和类型"></a>
+
+<a id="练习-2修复路径和错误处理"></a>
+
+<a id="练习-3生成分类报告"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：在实际 report.js 把文件 URL 改为相对字符串 data/products.json，从父目录运行，得到 ENOENT。
+2. **工具**：用 inspect 在 readFile 行暂停，Watch 添加 process.cwd()、import.meta.url 和 file。
+3. **证据**：cwd 是父目录，模块 URL 仍指向 src/cli/report.js；相对字符串缺少稳定文件基准。
+4. **原因**：把启动目录当成模块目录。
+5. **修复**：恢复 new URL 与 import.meta.url，保持浏览器模块不依赖 fs。
+6. **确认**：两个 cwd 得到相同报表，check C17 会从不同目录调用当前 report.js；故意改 summarize 后它也应反映当前代码。
+
+## 练习
+
+:::tip[自己尝试 · Node]
+完成 report.js，分别从工作区和父目录运行，演练 ENOENT 并用 inspect 找证据。恢复模块 URL 后记录三个固定值与断点位置，运行 check C17。
+:::
+
+<details>
+<summary>提示</summary>
+
+查看错误栈的首个业务文件位置，先比较 cwd 与模块 URL，不用把数据复制到多个目录。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+report 与页面都导入 src/core/inventory.js；只把读取文件这一宿主步骤放在 cli。模块 URL 保持不变，因此 cwd 改变不会改变数据来源。
+
+</details>
+
+## 项目进度
+
+- 页面与 Node 使用同一规则、同一固定数据。
+- 两个启动目录均得到 6/52/2634800。
+- inspect 能观察实际读取与汇总。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C17、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- JavaScript 规则可共享，宿主 API 需隔离。
+- cwd 与模块 URL 是不同基准。
+- Buffer 处理字节，stream 处理分块，退出状态告诉调用者结果。
+
+自测：fetch 存在是否说明 Node 有 DOM？为什么 Buffer 的长度可能不同？await 为什么不等于新线程？
+
+## 延伸阅读
+
+- [Node：fs/promises](https://nodejs.org/download/release/latest-v24.x/docs/api/fs.html#promises-api)
+- [Node：调试指南](https://nodejs.org/en/learn/getting-started/debugging)
+- [Node：Buffer](https://nodejs.org/download/release/latest-v24.x/docs/api/buffer.html)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c17)（按需参考）

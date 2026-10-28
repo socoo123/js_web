@@ -1,0 +1,39 @@
+{
+  "name": "inventory-learning-workspace",
+  "version": "2.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "lab": "node tools/lab.mjs",
+    "report": "node src/cli/report.js",
+    "test": "vitest run --config vite.config.js"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.104.4",
+    "@ui5/webcomponents": "2.27.2",
+    "@ui5/webcomponents-base": "2.27.2",
+    "@ui5/webcomponents-fiori": "2.27.2",
+    "@ui5/webcomponents-icons": "2.27.2",
+    "@ui5/webcomponents-react": "2.27.3",
+    "antd": "6.6.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
+    "@ui5/cli": "4.0.71",
+    "@vitejs/plugin-react": "6.1.2",
+    "happy-dom": "21.0.4",
+    "semver": "7.8.5",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  }
+}

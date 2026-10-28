@@ -38,3 +38,7 @@
 - 同日 · 内容 lint 17 课零 error / warning，Astro check 零诊断；完整 build 通过，固定输出 189/189，21 个 HTML 的子路径/资源/折叠区检查通过；8 个带文件名代码块与源码逐字一致。
 - 同日 · [Pages run 38989123796](https://github.com/socoo123/js_web/actions/runs/38989123796) 成功；C17、路线页及 C16 返回 200，路线页为 17/48，C16 下一课链接指向 C17。此线上 HTML 检查不计为浏览器执行验证。
 - 未运行：浏览器对照、Windows / PowerShell、Linux 本机与 Chrome 图形调试客户端。正文未提供未实测的图形客户端步骤。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C17` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

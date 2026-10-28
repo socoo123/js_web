@@ -1,0 +1,157 @@
+---
+title: C12 从回调到 Promise：执行顺序
+description: 预测任务与微任务的执行顺序，连接 Promise 链、处理失败，并为库存模块加入模拟异步加载。
+sidebar:
+  order: 12
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 1 周 · 第 6 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C11 的工作区 · 运行：本地网页，Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+六商品现在一打开就出现在内存。把它改成“等待加载”：开始显示加载中，成功显示六项，失败保留可重试入口。Promise、微任务和错误传播都围绕这个 loader 展开，页面仍是上一课的同一个文件。
+
+<LessonTask lessonId="C12" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c12-future-chain" />
+
+<a id="1-调用栈回调只是一个函数"></a>
+
+## 1. 回调描述完成后要做什么
+
+同步函数直接返回数据；异步加载在稍后给出结果。新增 src/services/load-products.js，写入上方对照卡的 JS。import seed 使用 JSON 导入属性；delay 模拟等待，fail 用来确定地演练失败。
+
+Promise 的 executor 立即执行；resolve/reject 只能确定一次结果，pending 之后进入 fulfilled 或 rejected。then 返回新 Promise，回调接收成功值；catch 接收拒绝原因。
+
+把 app.js 的 seed import 改为 `import { loadProducts } from "../services/load-products.js"`，初始 products 改为 `[]`。其他规则与 DOM 函数保留。
+
+<a id="2-浏览器先执行当前代码再处理微任务"></a>
+
+## 2. 主线程、任务与微任务各在什么时候执行
+
+Promise 回调进入微任务队列；setTimeout 回调是后续任务。同步栈清空后先运行微任务，再有机会处理下个任务。
+
+**先猜一猜：** 在当前网页 Console 一次执行下面代码，先看到 3 还是 2？
+
+```js
+console.log(1);
+setTimeout(() => console.log(4), 0);
+Promise.resolve().then(() => console.log(3));
+console.log(2); // 完整输出：1、2、3、4
+```
+
+输出 1、2、3、4。0 表示满足计时条件后可以排队，不能抢占同步代码。Java CompletableFuture 可以把工作交给线程池；这段 Promise 不增加线程。
+
+![调用栈、任务队列与微任务队列的执行顺序](../../../assets/diagrams/c12-browser-event-loop.svg)
+
+先看当前任务的同步调用，再看微任务检查点，最后看后续任务。浏览器可在任务之间渲染；持续递归排微任务或做大量同步计算都会延迟交互。
+
+<a id="3-promise把一次未来结果变成对象"></a>
+
+## 3. 返回内层 Promise，等待才能接成链
+
+loadProducts 内第一层 then 必须 return 内层 Promise。then 的返回值决定下一步：普通值成为成功值，Promise 被继续等待，throw 变成拒绝。
+
+**先猜一猜：** 去掉 `return new Promise(...)` 的 return，调用者会一直等计时器吗？
+
+不会。回调隐式返回 undefined，外层链先成功，下一步拿到 undefined。内层计时器仍会执行，但结果已经脱离调用链。延长 delay 不能修复缺失的依赖关系。
+
+```js
+Promise.resolve(12)
+  .then((stock) => stock + 3)
+  .then((stock) => Promise.resolve(stock * 2))
+  .then(console.log); // → 30
+```
+
+Java thenApply 对应普通映射，thenCompose 继续异步组合；JS 的 then 会吸收返回 Promise 的最终状态。
+
+<a id="4-用链表达先后依赖return-连接每一步"></a>
+
+## 4. 页面只在末端决定显示与收尾
+
+在 HTML 筛选表单后加两个普通按钮：id 为 reload 的“重新加载”和 id 为 fail 的“模拟失败”，type 都是 button。app.js 增加以下部分，放在最后一次启动之前：
+
+<CodeExcerpt snippetId="c12-reload" />
+
+把文件末尾 render() 改成 reloadProducts()。成功先 commit，再显示加载完成；失败显示原因；finally 总会恢复按钮。catch 返回备用值使后续链恢复成功，要继续传播就重新 throw。
+
+finally 通常做清理，不替换业务结果；它自己抛错或返回拒绝 Promise 时才改变结局。计时器里的异常要在回调中捕获并 reject；外面的 try/catch 不能穿越已经结束的调用栈。
+
+<a id="异步回调的-return-返回给谁"></a>
+
+<a id="把旧式回调包装一次"></a>
+
+<a id="5-失败沿链传播catch-决定是否恢复"></a>
+
+<a id="finally-专门做收尾"></a>
+
+<a id="异常要在发生的位置进入链"></a>
+
+<a id="6-异步等待让出主线程重计算仍会阻塞"></a>
+
+<a id="漏-return下一步先拿到了-undefined"></a>
+
+<a id="catch-吞掉错误失败后还显示成功"></a>
+
+<a id="练习-1预测一个任务内部的微任务"></a>
+
+<a id="练习-2给失败的加载一个明确的备用数量"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：在实际 loader 中去掉内层 Promise 前的 return，刷新页面。commit 收到 undefined，不能显示六项。
+2. **工具**：Sources 打开 load-products.js，在 then 回调末尾和 app.js 的 commit(loaded) 设断点。
+3. **证据**：先进入 commit，loaded 是 undefined，计时器尚未完成。
+4. **原因**：外层 then 没有接入内层异步任务。
+5. **修复**：补回 return，末端 catch 显示错误，finally 恢复按钮。
+6. **确认**：成功有 6 项，模拟失败可见且重新加载按钮可用，再加载又得到 6 项。运行 `npm run lab -- check C12`。
+
+## 练习
+
+:::tip[自己尝试 · 本地网页]
+只在当前 loader、app 和 HTML 增加异步加载。完成一次漏 return 故障再修复；成功与失败各操作一次，记录状态何时开始、何时收尾。
+:::
+
+<details>
+<summary>提示</summary>
+
+需要返回 loader 的 Promise；禁用状态在 finally 结束。不要另加长计时器猜测加载完成。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+loader 返回内层任务，reloadProducts 又返回整条链；调用者和测试等待同一个完成信号。拒绝进入 catch，finally 恢复按钮。
+
+</details>
+
+## 项目进度
+
+- 主界面成功 6 项，失败可见并能重试。
+- 能解释输出顺序及漏 return 的 undefined。
+- 第一周检查：P001 补货/撤销、P004 编辑/取消、分类树和非法输入仍通过。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C12、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- Promise 表示一次异步结果，回调遵循事件循环。
+- 返回值建立依赖，throw 与拒绝沿链传播。
+- catch 决定恢复还是传播，finally 共同收尾。
+
+自测：executor 与 then 谁先执行？catch 返回 0 后为何成功？外层 try/catch 能抓住计时器的错误吗？
+
+## 延伸阅读
+
+- [MDN：使用 Promise](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Using_promises)
+- [MDN：执行模型](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Execution_model)
+- [MDN：finally](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c12)（按需参考）

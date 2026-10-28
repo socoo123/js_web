@@ -1,0 +1,160 @@
+---
+title: C15 CSS 布局与响应式：排版库存页
+description: 用 Flex 排工具栏、Grid 排商品卡片，做出手机单列到桌面四列的库存页，并在 DevTools 定位溢出。
+sidebar:
+  order: 15
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 8 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C14 的工作区 · 运行：本地网页，Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+库存页能保存了，接着让它在手机、平板和桌面都能操作。本课只改样式：360px 单列、768px 两列、1280px 四列，工具栏可换行，长名称不撑破页面。你会用浏览器计算后的尺寸解释问题，而不是凭感觉调宽度。
+
+<LessonTask lessonId="C15" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c15-layout-budget" />
+
+<a id="1-先算盒子width-到底包括什么"></a>
+
+## 1. 盒模型决定实际占用的空间
+
+把 styles.css 换成上方对照卡中的 CSS。星号规则统一 border-box，width 包含内容、内边距和边框，外边距仍另算；main 的 max-width 限制大屏阅读区，padding 给窄屏留边。
+
+**先猜一猜：** content-box 下 width 为 300px、两侧 padding 各 16px、border 各 1px，实际外框多宽？
+
+是 334px；换成 border-box 外框为 300px，内容区缩为 266px。Java 布局管理器也有尺寸预算，但 CSS 还会处理内容内在尺寸与层叠。
+
+```css
+* { box-sizing: border-box; }
+main { max-width: 76rem; margin: auto; padding: 1rem; }
+```
+
+在 Elements → Computed 看盒模型数字，选中 main 和 article 比较外框与内容区；同时检查 viewport meta，否则手机可能使用放大的布局视口。
+
+<a id="2-flex让工具栏沿一个方向分配空间"></a>
+
+## 2. Flex 排工具栏，Grid 排卡片
+
+工具栏沿一个主轴分配空间，开启 flex-wrap 后放不下的控件换行；align-items 调整交叉轴对齐，gap 设置项目间距。
+
+```css
+#filters { display: flex; flex-wrap: wrap; gap: .6rem; align-items: end; }
+#filters label { display: flex; flex-direction: column; min-width: 0; }
+#list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+```
+
+Grid 声明列轨道。minmax(0, 1fr) 把最小轨道设为 0，让长内容可以收缩；卡片本身也要 min-width:0，文本再由 overflow-wrap 换行。只给父容器 width:100% 不会消除子元素的最小尺寸。
+
+**先猜一猜：** 已声明四列时只筛到 P004，它会自动横跨四列吗？
+
+不会。卡片仍占一列，其他轨道为空；显式轨道数量没有随商品数量改变。auto-fit 与 auto-fill 会处理自动轨道和空轨道，适合另一种按可用空间自动排布的需求，本课用固定断点得到确定的单、双、四列。
+
+<a id="3-grid用列轨道排商品卡片"></a>
+
+## 3. 移动优先，媒体查询逐步增加列数
+
+基础样式先满足窄屏；宽度超过 42rem 增两列，超过 70rem 增四列。
+
+```css
+@media (min-width: 42rem) {
+  #list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 70rem) {
+  #list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+```
+
+桌面同时满足两条查询，后面的同优先级声明胜出。媒体查询不增加选择器权重，仍沿用 C02 的层叠规则。用 DevTools 设备模式设 360、768、1280px，查看 Grid overlay 的轨道，不只看窗口大致尺寸。
+
+<a id="4-移动优先先保证窄屏成立再增加列数"></a>
+
+## 4. 焦点与反馈也属于可用布局
+
+保留 :focus-visible 的清楚外框，控件可通过 Tab 到达；隐藏编辑区使用 hidden，展开后聚焦库存。feedback 和 stock-error 预留一行，错误出现时减少页面跳动。
+
+```css
+:focus-visible { outline: 3px solid #1266bb; outline-offset: 3px; }
+#feedback, #stock-error { min-height: 1.8em; }
+```
+
+可以用 CSS 自定义属性把文字、背景和边框色集中管理，通过 prefers-color-scheme 或主题属性替换变量值。颜色不能独自承担错误含义，仍需保留文字与 aria-invalid。
+
+<a id="容器随屏幕缩放同时限制阅读宽度"></a>
+
+<a id="主轴对齐和间距各管一件事"></a>
+
+<a id="多条媒体查询会同时生效"></a>
+
+<a id="5-变量和焦点把可读可操作写进样式"></a>
+
+<a id="看得清提示也找得到键盘焦点"></a>
+
+<a id="手机页面可以向右拖出一大块空白"></a>
+
+<a id="明明写了四列桌面还是两列"></a>
+
+<a id="练习-1先算空间再开浏览器"></a>
+
+<a id="练习-2修复溢出并解释一个没生效的改动"></a>
+
+<a id="练习-3把布局加回库存页"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：在当前 styles.css 临时给 article 加 min-width:600px，360px 下页面能向右滚。
+2. **工具**：Elements 选卡片 → Computed，开启 Grid overlay；Console 比较 document.documentElement.scrollWidth 与 innerWidth。
+3. **证据**：视口 360，卡片最小宽度 600，页面宽度超过视口；父容器宽度本身正常。
+4. **原因**：子元素最小尺寸挡住了轨道收缩。
+5. **修复**：恢复 min-width:0、minmax(0,1fr) 与文本换行；不靠隐藏整页 overflow 裁掉内容。
+6. **确认**：三种视口无整页横滚，列数为 1/2/4。Tab 能看到每个控件的焦点，搜索和编辑仍可完成。
+
+## 练习
+
+:::tip[自己尝试 · 本地网页]
+完成响应式 CSS，演练一次 600px 卡片故障再修复。三种宽度下都用键盘筛选 P004、保存 8，并检查错误反馈没有被裁掉。运行 check C15。
+:::
+
+<details>
+<summary>提示</summary>
+
+从 Computed 找真正生效的 min-width；来源面板可以看到覆盖它的声明。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+卡片、轨道、文本三个层级都允许收缩后，窄屏内容会在本列换行。桌面仍按媒体查询建立四列，清楚的 focus-visible 让键盘操作有位置反馈。
+
+</details>
+
+## 项目进度
+
+- 三档宽度分别为单、双、四列。
+- 无整页横滚，长文本和表单可用。
+- 本课只改 styles.css，业务与存储结果保持。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C15、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- border-box 明确外框预算，margin 仍在外面。
+- Flex 组织一维工具栏，Grid 组织二维卡片。
+- 允许收缩与清楚焦点共同保证窄屏操作。
+
+自测：四列只有一项时占几列？媒体查询是否增加权重？为什么不能靠 overflow:hidden 修溢出？
+
+## 延伸阅读
+
+- [MDN：盒模型](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Styling_basics/Box_model)
+- [MDN：Grid](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_grid_layout)
+- [MDN：Flexbox](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_flexible_box_layout)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c15)（按需参考）

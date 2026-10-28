@@ -1,5 +1,5 @@
 {
-  "release": "2026.10-v2.1",
+  "release": "2026.10-v2.2",
   "labs": [
     {
       "labId": "L1",
@@ -46,7 +46,9 @@
       "acceptance": [
         "P001 价值 478800 分；能区分 JS、浏览器、Node/Bun 与 npm；保留历史到年度标准及提案状态的阅读"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c01-host-value"
+      ],
       "errorIds": [
         "C01-main"
       ],
@@ -62,7 +64,7 @@
         "check": "npm run lab -- check C01"
       },
       "implemented": true,
-      "migrated": false,
+      "migrated": true,
       "trial": null
     },
     {
@@ -75,8 +77,8 @@
       "startCheckpoint": "C01",
       "endCheckpoint": "C02",
       "files": [
-        "src/core/inventory.js",
         "src/vanilla/index.html",
+        "src/vanilla/styles.css",
         "src/vanilla/app.js"
       ],
       "task": "修改 `src/vanilla/index.html`、`styles.css`、`app.js` 的单商品卡片、label 和脚本路径",
@@ -84,7 +86,9 @@
       "acceptance": [
         "卡片显示 P001/12；label 对应输入；Network 无脚本 404；360px 基本可读，断点可命中"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c02-output-dom"
+      ],
       "errorIds": [
         "C02-main"
       ],
@@ -100,7 +104,7 @@
         "check": "npm run lab -- check C02"
       },
       "implemented": true,
-      "migrated": false,
+      "migrated": true,
       "trial": null
     },
     {
@@ -151,14 +155,16 @@
       "startCheckpoint": "C03",
       "endCheckpoint": "C04",
       "files": [
-        "inventory.js"
+        "src/core/inventory.js"
       ],
       "task": "在同一 `inventory.js` 写循环统计、异常分支，替换有问题的变量作用域",
       "comparisonTheme": "Java 块作用域与 final / let、const、var；for-each / for-of",
       "acceptance": [
         "总库存 52；空集合 0；不访问越界元素；能在 Scope 找到 TDZ/变量覆盖，解释 const 对象仍可变"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c04-block-total"
+      ],
       "errorIds": [
         "C04-main"
       ],
@@ -173,8 +179,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C04"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -187,14 +193,16 @@
       "startCheckpoint": "C04",
       "endCheckpoint": "C05",
       "files": [
-        "inventory.js"
+        "src/core/inventory.js"
       ],
       "task": "在 `inventory.js` 创建编辑草稿和导入转换，隔离 tags；从 JSON 还原业务数据",
       "comparisonTheme": "引用副本传参 / 引用副本传参；浅复制 / 展开；JSON 与对象",
       "acceptance": [
         "修改草稿 tags 后取消，原商品不变；非法 JSON 不替换数据；解释 JSON 对日期/undefined 等的表示边界"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c05-draft-copy"
+      ],
       "errorIds": [
         "C05-main"
       ],
@@ -209,8 +217,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C05"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -223,14 +231,16 @@
       "startCheckpoint": "C05",
       "endCheckpoint": "C06",
       "files": [
-        "inventory.js"
+        "src/core/inventory.js"
       ],
       "task": "在 `inventory.js` 增加分类筛选工厂与独立操作计数器；任务仍在库存入口执行",
       "comparisonTheme": "Java Predicate/lambda 捕获 / 函数值、词法闭包；默认参数/rest 短对照",
       "acceptance": [
         "外设筛选得到 P001/P002；两个工厂/计数器互不影响；修复循环闭包并观察 Scope"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c06-filter-closure"
+      ],
       "errorIds": [
         "C06-main"
       ],
@@ -245,8 +255,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C06"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -259,14 +269,16 @@
       "startCheckpoint": "C06",
       "endCheckpoint": "C07",
       "files": [
-        "inventory.js"
+        "src/core/inventory.js"
       ],
       "task": "在 `inventory.js` 把库存查询封装为 Inventory，修复作为回调的方法；保持业务数据可提取",
       "comparisonTheme": "Java 方法引用 / 脱离对象的 JS 方法；class / 原型属性查找",
       "acceptance": [
         "直接查询与回调查询结果一致；解释 this 和箭头函数差异；能指出实例/原型各有何属性"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c07-bound-method"
+      ],
       "errorIds": [
         "C07-main"
       ],
@@ -281,8 +293,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C07"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -295,14 +307,16 @@
       "startCheckpoint": "C07",
       "endCheckpoint": "C08",
       "files": [
-        "inventory.js"
+        "src/core/inventory.js"
       ],
       "task": "在 `inventory.js` 增加筛选、数值排序、汇总；从一次查询链解释数组 API",
       "comparisonTheme": "Stream 的 filter/map/reduce / Array；Comparator / sort 比较器",
       "acceptance": [
         "原数据总库存 52、总价值 2634800 分；按库存升序 P002/P004/P006/P003/P001/P005；原数组顺序不变"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c08-sort-stream"
+      ],
       "errorIds": [
         "C08-main"
       ],
@@ -317,8 +331,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C08"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -331,14 +345,16 @@
       "startCheckpoint": "C08",
       "endCheckpoint": "C09",
       "files": [
-        "inventory.js"
+        "src/core/inventory.js"
       ],
       "task": "在 `inventory.js` 增加 ID Map、分类分组、标签去重；弱集合只保留小范围机制对照",
       "comparisonTheme": "HashMap 的 equals/hashCode / Map 身份键；HashSet / Set",
       "acceptance": [
         "P004 查到扩展坞；分类种数 2/1/2/1；标签热销/新品；重复 ID 拒绝；能解释弱键为何不可枚举"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c09-id-map"
+      ],
       "errorIds": [
         "C09-main"
       ],
@@ -353,8 +369,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C09"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -367,14 +383,16 @@
       "startCheckpoint": "C09",
       "endCheckpoint": "C10",
       "files": [
-        "inventory.js"
+        "src/core/inventory.js"
       ],
       "task": "在 `inventory.js` 增加撤销栈、任务队列、分类树 DFS/BFS；完成 L1 收尾",
       "comparisonTheme": "Deque / Array 栈与头索引队列；树对象与遍历",
       "acceptance": [
         "补 P001 3 件后撤销回 12；多次撤销顺序正确；DFS/BFS 各节点恰访问一次；大数据计时只比较量级"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c10-queue-tree"
+      ],
       "errorIds": [
         "C10-main"
       ],
@@ -389,8 +407,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C10"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -403,6 +421,7 @@
       "startCheckpoint": "C10",
       "endCheckpoint": "C11",
       "files": [
+        "src/vanilla/index.html",
         "src/vanilla/app.js"
       ],
       "task": "把 `src/vanilla/app.js` 扩为六商品列表、委托事件和库存编辑；语义结构在 index.html",
@@ -410,7 +429,9 @@
       "acceptance": [
         "筛选后编辑 P004 不改 P001；单击只补一次；商品名以文本渲染；用事件/DOM 断点找重复监听与意外删除"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c11-identity-event"
+      ],
       "errorIds": [
         "C11-main"
       ],
@@ -425,8 +446,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C11"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -439,14 +460,18 @@
       "startCheckpoint": "C11",
       "endCheckpoint": "C12",
       "files": [
-        "src/services/load-products.js"
+        "src/services/load-products.js",
+        "src/vanilla/app.js",
+        "src/vanilla/index.html"
       ],
       "task": "在 `src/services/load-products.js` 加模拟异步加载，app.js 展示状态与收尾",
       "comparisonTheme": "CompletableFuture 链 / Promise 链；线程与事件循环边界",
       "acceptance": [
         "成功有 6 项；失败可见；漏 return 用例能解释并修复；预测同步、微任务、任务顺序，完成第一周检查"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c12-future-chain"
+      ],
       "errorIds": [
         "C12-main"
       ],
@@ -461,8 +486,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C12"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -483,7 +508,9 @@
       "acceptance": [
         "404、非 JSON、离线分别可定位；快换筛选时前请求取消；串行/并发、forEach(async) 用页内对照说明"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c13-http-status"
+      ],
       "errorIds": [
         "C13-main"
       ],
@@ -498,8 +525,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C13"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -512,14 +539,18 @@
       "startCheckpoint": "C13",
       "endCheckpoint": "C14",
       "files": [
-        "src/services/storage.js"
+        "src/services/storage.js",
+        "src/vanilla/app.js",
+        "src/vanilla/index.html"
       ],
       "task": "新增 `src/services/storage.js`，接入 app.js 的保存、恢复、导入导出",
       "comparisonTheme": "Java 序列化与异常处理经验 / localStorage + JSON",
       "acceptance": [
         "刷新保留修改；坏 JSON 和字段错误不覆盖好副本；可恢复/导出；明确本浏览器状态不等于服务器数据"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c14-string-snapshot"
+      ],
       "errorIds": [
         "C14-main"
       ],
@@ -534,8 +565,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C14"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -555,7 +586,9 @@
       "acceptance": [
         "360/768/1280px 分别单/双/四列；无整页横滚；键盘焦点可见；用 Computed 找固定宽度溢出"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c15-layout-budget"
+      ],
       "errorIds": [
         "C15-main"
       ],
@@ -570,8 +603,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C15"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -584,14 +617,23 @@
       "startCheckpoint": "C15",
       "endCheckpoint": "C16",
       "files": [
-        "src/core/{validation,summary,filters,collections,history,tree}.js"
+        "src/core/validation.js",
+        "src/core/stock.js",
+        "src/core/tree.js",
+        "src/core/inventory.js",
+        "src/core/history.js",
+        "src/core/filters.js",
+        "src/core/collections.js",
+        "src/core/summary.js"
       ],
       "task": "把已有 inventory.js 拆为 `src/core/{validation,summary,filters,collections,history,tree}.js` 与 facade；更新 app.js 入口",
       "comparisonTheme": "Java import/package / ESM 绑定与 URL；CommonJS 对照",
       "acceptance": [
         "拆分前后业务测试不变；无循环依赖与 404；给出文件搬移清单；查两个特性的标准阶段和环境支持"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c16-module-export"
+      ],
       "errorIds": [
         "C16-main"
       ],
@@ -606,8 +648,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C16"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -627,7 +669,9 @@
       "acceptance": [
         "从不同终端目录调用仍可找数据；6/52/2634800；inspect 断点可命中；能解释 process、Buffer/stream 的用途"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c17-file-base"
+      ],
       "errorIds": [
         "C17-main"
       ],
@@ -642,8 +686,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C17"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -663,7 +707,9 @@
       "acceptance": [
         "主工作区安装可复现；隔离副本的 npm ci 因清单/锁不一致失败；理解依赖类型/semver，不改站点根锁"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c18-script-command"
+      ],
       "errorIds": [
         "C18-main"
       ],
@@ -678,8 +724,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C18"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -692,14 +738,16 @@
       "startCheckpoint": "C18",
       "endCheckpoint": "C19",
       "files": [
-        ".lab/sandboxes/"
+        "notes/tooling.md"
       ],
       "task": "统一入口在 `.lab/sandboxes/` 比较两种工具，把结果写进 notes/tooling.md",
       "comparisonTheme": "Maven/Gradle 是构建工具的经验 / 运行时、包管理、测试、构建分别归位",
       "acceptance": [
         "同数据报告一致；记录锁/解析差异；主项目无额外管理器锁；覆盖 Yarn 两代、PnP、pnpm、Bun、Corepack 定位"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c19-same-report"
+      ],
       "errorIds": [
         "C19-main"
       ],
@@ -714,8 +762,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C19"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -728,14 +776,19 @@
       "startCheckpoint": "C19",
       "endCheckpoint": "C20",
       "files": [
-        "tests/core/"
+        "tests/core/inventory.test.js",
+        "vite.config.js",
+        "package.json",
+        "src/core/validation.js"
       ],
       "task": "在 `tests/core/` 写统计/校验 UT；配置 Vite 构建原生页；TS 桥接使用提供的小片段",
       "comparisonTheme": "JUnit AAA / Vitest；编译、转译、打包、类型检查边界",
       "acceptance": [
         "正常/空/非法用例能先红后绿；生产页可运行；source map 回源码；知道 TS 类型不会校验 JSON；L2 验收"
       ],
-      "comparisonIds": [],
+      "comparisonIds": [
+        "c20-boundary-assert"
+      ],
       "errorIds": [
         "C20-main"
       ],
@@ -750,8 +803,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C20"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -867,7 +920,7 @@
       "trial": {
         "start": "P22",
         "end": "P23",
-        "description": "已提供六商品 React 静态列表、props 与共享规则；它是 R4 试做起点，不代表 C04–C22 已迁移。"
+        "description": "已提供六商品 React 静态列表、props 与共享规则；这是明确前置的试做起点，正式连续路线仍需接回并验收。"
       }
     },
     {

@@ -1,0 +1,278 @@
+// C00 只提供一张可读的卡片；业务能力在课程中逐步加入。
+export function describeProduct(product) {
+  return `${product.id} ${product.name} · 库存 ${product.stock} 件`;
+}
+
+export function stockValue(product) {
+  return product.stock * product.priceCents;
+}
+
+// region stock-input
+export function parseStock(text) {
+  if (typeof text !== "string" || text.trim() === "") {
+    throw new RangeError("请输入库存，空白无效");
+  }
+  const stock = Number(text);
+  if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+    throw new RangeError("库存必须是 0–99999 的整数");
+  }
+  return stock;
+}
+// endregion stock-input
+
+// region restock
+export function initialStock(stock) {
+  return stock ?? 12;
+}
+
+export function restockProduct(product, text) {
+  const amount = parseStock(text);
+  const stock = initialStock(product.stock);
+  const nextStock = parseStock(String(stock + amount));
+  return { ...product, stock: nextStock };
+}
+// endregion restock
+
+// region total-stock
+export function totalStock(products) {
+  let total = 0;
+  for (const product of products) {
+    if (!Number.isInteger(product.stock)) throw new TypeError("库存必须是整数");
+    total += product.stock;
+  }
+  return total;
+}
+// endregion total-stock
+
+// region draft
+export function createDraft(product) {
+  return { ...product, tags: [...product.tags] };
+}
+// endregion draft
+
+// region validate-product
+export const categories = ["外设", "显示器", "配件", "音频"];
+export function validateProduct(product) {
+  const errors = {};
+  if (!product || typeof product !== "object" || Array.isArray(product))
+    return { product: "需要商品对象" };
+  if (typeof product.id !== "string" || !/^P\d{3}$/.test(product.id))
+    errors.id = "编号需要 P 加三位数字";
+  if (typeof product.name !== "string"
+      || product.name.trim().length < 1
+      || product.name.trim().length > 40)
+    errors.name = "名称需要 1–40 个字符";
+  if (!categories.includes(product.category))
+    errors.category = "分类无效";
+  if (!Number.isInteger(product.stock) || product.stock < 0 || product.stock > 99999)
+    errors.stock = "库存必须是 0–99999 的整数";
+  if (!Number.isSafeInteger(product.priceCents) || product.priceCents < 0)
+    errors.priceCents = "价格必须是非负安全整数分";
+  if (!Array.isArray(product.tags)
+      || [...product.tags].some((tag) => typeof tag !== "string"))
+    errors.tags = "标签必须是字符串数组";
+  return errors;
+}
+// endregion validate-product
+// region validate-list
+export function validateProducts(products) {
+  if (!Array.isArray(products)) throw new TypeError("需要商品数组");
+  const ids = new Set();
+  for (const product of products) {
+    const errors = validateProduct(product);
+    if (Object.keys(errors).length) throw new TypeError(JSON.stringify(errors));
+    if (ids.has(product.id)) throw new TypeError(`重复编号 ${product.id}`);
+    ids.add(product.id);
+  }
+  return products;
+}
+// endregion validate-list
+
+// region import-products
+export function importProducts(text) {
+  const products = JSON.parse(text);
+  validateProducts(products);
+  return products.map((product) => ({
+    id: product.id, name: product.name.trim(), category: product.category,
+    stock: product.stock, priceCents: product.priceCents, tags: [...product.tags],
+  }));
+}
+// endregion import-products
+
+// region category-filter
+export function createCategoryFilter(category) {
+  return (product) => product.category === category;
+}
+// endregion category-filter
+// region counter
+export function createCounter() {
+  let count = 0;
+  return () => ++count;
+}
+// endregion counter
+// region selectors
+export function createProductSelectors(products) {
+  const selectors = [];
+  for (const product of products) {
+    selectors.push(() => product.id);
+  }
+  return selectors;
+}
+// endregion selectors
+
+// region inventory-class
+export class Inventory {
+  constructor(products) {
+    validateProducts(products);
+    this.products = products.map(createDraft);
+  }
+  getById(id) {
+    return this.products.find((product) => product.id === id) ?? null;
+  }
+  toProducts() {
+    return this.products.map(createDraft);
+  }
+}
+// endregion inventory-class
+// region bound-query
+export function queryWithCallback(inventory, id) {
+  const lookup = inventory.getById.bind(inventory);
+  return lookup(id);
+}
+// endregion bound-query
+
+// region summary
+export function summarize(products) {
+  validateProducts(products);
+  const summary = { count: 0, stock: 0, valueCents: 0, soldOut: 0, lowStock: 0 };
+  for (const product of products) {
+    summary.count++;
+    summary.stock += product.stock;
+    summary.valueCents += product.stock * product.priceCents;
+    summary.soldOut += Number(product.stock === 0);
+    summary.lowStock += Number(product.stock >= 1 && product.stock <= 5);
+    if (!Number.isSafeInteger(summary.stock) || !Number.isSafeInteger(summary.valueCents)) {
+      throw new RangeError("汇总超出安全整数范围");
+    }
+  }
+  return summary;
+}
+// endregion summary
+// region sort-stock
+export function sortByStock(products) {
+  return [...products].sort((left, right) => left.stock - right.stock);
+}
+// endregion sort-stock
+// region select-products
+export function selectProducts(products, { query = "", category = "全部" } = {}) {
+  const keyword = query.trim().toLowerCase();
+  return products.filter((product) =>
+    (category === "全部" || product.category === category) &&
+    (product.id.toLowerCase().includes(keyword) || product.name.toLowerCase().includes(keyword)));
+}
+// endregion select-products
+// region update-stock
+export function updateStock(products, id, stock) {
+  if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+    throw new RangeError("库存必须是 0–99999 的整数");
+  }
+  if (!products.some((product) => product.id === id)) throw new RangeError(`商品不存在：${id}`);
+  return products.map((product) => product.id === id ? { ...product, stock } : product);
+}
+// endregion update-stock
+
+// region id-index
+export function indexProducts(products) {
+  const byId = new Map();
+  for (const product of products) {
+    if (byId.has(product.id)) throw new TypeError(`重复编号 ${product.id}`);
+    byId.set(product.id, product);
+  }
+  return byId;
+}
+// endregion id-index
+// region groups-tags
+export function groupByCategory(products) {
+  const groups = new Map();
+  for (const product of products) {
+    const items = groups.get(product.category) ?? [];
+    items.push(product);
+    groups.set(product.category, items);
+  }
+  return groups;
+}
+export function uniqueTags(products) {
+  return [...new Set(products.flatMap((product) => product.tags))];
+}
+// endregion groups-tags
+
+// region history-start
+export function createHistory(initial) {
+  const products = initial.map(createDraft);
+  const history = [];
+  return {
+    getProducts: () => products.map(createDraft),
+    restock(id, text) {
+      const product = products.find((item) => item.id === id);
+      if (!product) throw new RangeError(`商品不存在：${id}`);
+      const next = restockProduct(product, text);
+      history.push({ id, stock: product.stock });
+      product.stock = next.stock;
+    },
+// endregion history-start
+// region history-end
+    undo() {
+      const before = history.pop();
+      if (!before) return false;
+      products.find((item) => item.id === before.id).stock = before.stock;
+      return true;
+    },
+  };
+}
+// endregion history-end
+// region queue
+export function createTaskQueue() {
+  const tasks = [];
+  let head = 0;
+  return {
+    enqueue(task) {
+      if (task === null || task === undefined) throw new TypeError("任务不能为空");
+      tasks.push(task);
+    },
+    dequeue() {
+      if (head === tasks.length) return null;
+      const task = tasks[head];
+      tasks[head++] = undefined;
+      return task;
+    },
+  };
+}
+// endregion queue
+// region category-tree
+export function buildCategoryTree(products) {
+  const children = [];
+  for (const [name, items] of groupByCategory(products)) {
+    const leaves = items.map((product) => ({ name: product.id, children: [] }));
+    children.push({ name, children: leaves });
+  }
+  return { name: "全部商品", children };
+}
+// endregion category-tree
+// region dfs
+export function walkDepthFirst(node, visit) {
+  if (!node) return;
+  visit(node);
+  for (const child of node.children ?? []) walkDepthFirst(child, visit);
+}
+// endregion dfs
+// region bfs
+export function walkBreadthFirst(root, visit) {
+  if (!root) return;
+  const queue = [root];
+  for (let head = 0; head < queue.length; head++) {
+    const node = queue[head];
+    visit(node);
+    queue.push(...(node.children ?? []));
+  }
+}
+// endregion bfs

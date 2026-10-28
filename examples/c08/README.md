@@ -45,3 +45,7 @@
 - 同日：全量示例 96/96；课程 lint 零 error / warning，Astro check 零问题，完整 build 与 `/js_web/` 产物检查通过。
 - 同日：[Pages run 38868560351](https://github.com/socoo123/js_web/actions/runs/38868560351) 构建与部署成功；新课及路线页返回 200，两页 HTML 的 SHA-256 均与本地构建一致。
 - 未运行：在 DevTools 界面上手动点击、Firefox、Safari、Windows。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C08` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

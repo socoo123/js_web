@@ -96,5 +96,362 @@
     "file": "adapters/openui5/webapp/view/EditDialog.fragment.xml",
     "region": null,
     "verified": true
+  },
+  "c01-value": {
+    "lang": "js",
+    "checkpoint": "C01",
+    "file": "src/core/inventory.js",
+    "region": "value",
+    "verified": true
+  },
+  "c02-render": {
+    "lang": "js",
+    "checkpoint": "C02",
+    "file": "src/vanilla/app.js",
+    "region": "render",
+    "verified": true
+  },
+  "c04-total-stock": {
+    "lang": "js",
+    "checkpoint": "C04",
+    "file": "src/core/inventory.js",
+    "region": "total-stock",
+    "verified": true
+  },
+  "c05-draft": {
+    "lang": "js",
+    "checkpoint": "C05",
+    "file": "src/core/inventory.js",
+    "region": "draft",
+    "verified": true
+  },
+  "c05-import-products": {
+    "lang": "js",
+    "checkpoint": "C05",
+    "file": "src/core/inventory.js",
+    "region": "import-products",
+    "verified": true
+  },
+  "c06-category-filter": {
+    "lang": "js",
+    "checkpoint": "C06",
+    "file": "src/core/inventory.js",
+    "region": "category-filter",
+    "verified": true
+  },
+  "c06-counter": {
+    "lang": "js",
+    "checkpoint": "C06",
+    "file": "src/core/inventory.js",
+    "region": "counter",
+    "verified": true
+  },
+  "c06-selectors": {
+    "lang": "js",
+    "checkpoint": "C06",
+    "file": "src/core/inventory.js",
+    "region": "selectors",
+    "verified": true
+  },
+  "c07-inventory-class": {
+    "lang": "js",
+    "checkpoint": "C07",
+    "file": "src/core/inventory.js",
+    "region": "inventory-class",
+    "verified": true
+  },
+  "c07-bound-query": {
+    "lang": "js",
+    "checkpoint": "C07",
+    "file": "src/core/inventory.js",
+    "region": "bound-query",
+    "verified": true
+  },
+  "c08-summary": {
+    "lang": "js",
+    "checkpoint": "C08",
+    "file": "src/core/inventory.js",
+    "region": "summary",
+    "verified": true
+  },
+  "c08-sort-stock": {
+    "lang": "js",
+    "checkpoint": "C08",
+    "file": "src/core/inventory.js",
+    "region": "sort-stock",
+    "verified": true
+  },
+  "c08-select-products": {
+    "lang": "js",
+    "checkpoint": "C08",
+    "file": "src/core/inventory.js",
+    "region": "select-products",
+    "verified": true
+  },
+  "c08-update-stock": {
+    "lang": "js",
+    "checkpoint": "C08",
+    "file": "src/core/inventory.js",
+    "region": "update-stock",
+    "verified": true
+  },
+  "c09-id-index": {
+    "lang": "js",
+    "checkpoint": "C09",
+    "file": "src/core/inventory.js",
+    "region": "id-index",
+    "verified": true
+  },
+  "c09-groups-tags": {
+    "lang": "js",
+    "checkpoint": "C09",
+    "file": "src/core/inventory.js",
+    "region": "groups-tags",
+    "verified": true
+  },
+  "c10-history-start": {
+    "lang": "js",
+    "checkpoint": "C10",
+    "file": "src/core/inventory.js",
+    "region": "history-start",
+    "verified": true
+  },
+  "c10-history-end": {
+    "lang": "js",
+    "checkpoint": "C10",
+    "file": "src/core/inventory.js",
+    "region": "history-end",
+    "verified": true
+  },
+  "c10-queue": {
+    "lang": "js",
+    "checkpoint": "C10",
+    "file": "src/core/inventory.js",
+    "region": "queue",
+    "verified": true
+  },
+  "c10-category-tree": {
+    "lang": "js",
+    "checkpoint": "C10",
+    "file": "src/core/inventory.js",
+    "region": "category-tree",
+    "verified": true
+  },
+  "c10-dfs": {
+    "lang": "js",
+    "checkpoint": "C10",
+    "file": "src/core/inventory.js",
+    "region": "dfs",
+    "verified": true
+  },
+  "c10-bfs": {
+    "lang": "js",
+    "checkpoint": "C10",
+    "file": "src/core/inventory.js",
+    "region": "bfs",
+    "verified": true
+  },
+  "c05-validate-product": {
+    "lang": "js",
+    "checkpoint": "C05",
+    "file": "src/core/inventory.js",
+    "region": "validate-product",
+    "verified": true
+  },
+  "c05-validate-list": {
+    "lang": "js",
+    "checkpoint": "C05",
+    "file": "src/core/inventory.js",
+    "region": "validate-list",
+    "verified": true
+  },
+  "c02-setup": {
+    "lang": "js",
+    "checkpoint": "C02",
+    "file": "src/vanilla/app.js",
+    "region": "setup",
+    "verified": true
+  },
+  "c02-events": {
+    "lang": "js",
+    "checkpoint": "C02",
+    "file": "src/vanilla/app.js",
+    "region": "events",
+    "verified": true
+  },
+  "c02-html": {
+    "lang": "html",
+    "checkpoint": "C02",
+    "file": "src/vanilla/index.html",
+    "region": null,
+    "verified": true
+  },
+  "c02-css": {
+    "lang": "css",
+    "checkpoint": "C02",
+    "file": "src/vanilla/styles.css",
+    "region": null,
+    "verified": true
+  },
+  "c11-setup": {
+    "lang": "js",
+    "checkpoint": "C11",
+    "file": "src/vanilla/app.js",
+    "region": "setup",
+    "verified": true
+  },
+  "c11-render": {
+    "lang": "js",
+    "checkpoint": "C11",
+    "file": "src/vanilla/app.js",
+    "region": "render",
+    "verified": true
+  },
+  "c11-select": {
+    "lang": "js",
+    "checkpoint": "C11",
+    "file": "src/vanilla/app.js",
+    "region": "select",
+    "verified": true
+  },
+  "c11-finish": {
+    "lang": "js",
+    "checkpoint": "C11",
+    "file": "src/vanilla/app.js",
+    "region": "finish",
+    "verified": true
+  },
+  "c11-html": {
+    "lang": "html",
+    "checkpoint": "C11",
+    "file": "src/vanilla/index.html",
+    "region": null,
+    "verified": true
+  },
+  "c12-reload": {
+    "lang": "js",
+    "checkpoint": "C12",
+    "file": "src/vanilla/app.js",
+    "region": "reload",
+    "verified": true
+  },
+  "c13-reload": {
+    "lang": "js",
+    "checkpoint": "C13",
+    "file": "src/vanilla/app.js",
+    "region": "reload",
+    "verified": true
+  },
+  "c14-transfer": {
+    "lang": "js",
+    "checkpoint": "C14",
+    "file": "src/vanilla/app.js",
+    "region": "transfer",
+    "verified": true
+  },
+  "c14-boot": {
+    "lang": "js",
+    "checkpoint": "C14",
+    "file": "src/vanilla/app.js",
+    "region": "boot",
+    "verified": true
+  },
+  "c12-loader": {
+    "lang": "js",
+    "checkpoint": "C12",
+    "file": "src/services/load-products.js",
+    "region": "load",
+    "verified": true
+  },
+  "c13-loader": {
+    "lang": "js",
+    "checkpoint": "C13",
+    "file": "src/services/load-products.js",
+    "region": "load",
+    "verified": true
+  },
+  "c14-snapshot": {
+    "lang": "js",
+    "checkpoint": "C14",
+    "file": "src/services/storage.js",
+    "region": "snapshot",
+    "verified": true
+  },
+  "c14-save": {
+    "lang": "js",
+    "checkpoint": "C14",
+    "file": "src/services/storage.js",
+    "region": "save",
+    "verified": true
+  },
+  "c14-recover": {
+    "lang": "js",
+    "checkpoint": "C14",
+    "file": "src/services/storage.js",
+    "region": "recover",
+    "verified": true
+  },
+  "c15-css": {
+    "lang": "css",
+    "checkpoint": "C15",
+    "file": "src/vanilla/styles.css",
+    "region": null,
+    "verified": true
+  },
+  "c16-facade": {
+    "lang": "js",
+    "checkpoint": "C16",
+    "file": "src/core/inventory.js",
+    "region": null,
+    "verified": true
+  },
+  "c17-report": {
+    "lang": "js",
+    "checkpoint": "C17",
+    "file": "src/cli/report.js",
+    "region": "report",
+    "verified": true
+  },
+  "c20-config": {
+    "lang": "js",
+    "checkpoint": "C20",
+    "file": "vite.config.js",
+    "region": null,
+    "verified": true
+  },
+  "c20-test-imports": {
+    "lang": "js",
+    "checkpoint": "C20",
+    "file": "tests/core/inventory.test.js",
+    "region": "imports",
+    "verified": true
+  },
+  "c20-tests": {
+    "lang": "js",
+    "checkpoint": "C20",
+    "file": "tests/core/inventory.test.js",
+    "region": "tests",
+    "verified": true
+  },
+  "c20-price-tests": {
+    "lang": "js",
+    "checkpoint": "C20",
+    "file": "tests/core/inventory.test.js",
+    "region": "price-tests",
+    "verified": true
+  },
+  "c20-price": {
+    "lang": "js",
+    "checkpoint": "C20",
+    "file": "src/core/validation.js",
+    "region": "price",
+    "verified": true
+  },
+  "c20-form-draft": {
+    "lang": "js",
+    "checkpoint": "C20",
+    "file": "src/core/validation.js",
+    "region": "form-draft",
+    "verified": true
   }
 }

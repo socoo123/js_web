@@ -20,6 +20,13 @@ test('缺来源、越界、区域缺失或重复、未运行原因缺失均拒�
 test('MDX 不能用代码字符串、表达式、slot 或任意 import 绕过门禁', () => {
   for (const source of ['<CodeCompare pairId={"c03-input-number"} />', '<CodeCompare pairId="c03-input-number" code="hidden" />', '<CodeCompare pairId="c03-input-number">hidden</CodeCompare>', 'export const code = "hidden";', 'import Code from "./answer.js";', '<div title={"hidden"} />']) assert.throws(() => importedContent(source));
 });
+test('同一个 ESM 节点中的第二个声明与导入别名也必须检查', () => {
+  const first = 'import CodeCompare from "../../../components/CodeCompare.astro";\n';
+  assert.throws(() => importedContent(first + 'export const hidden = "code";'));
+  assert.throws(() => importedContent(first + 'import Answer from "./answer.js";'));
+  assert.throws(() => importedContent('import CodeCompare from "../../../components/LessonTask.astro";'));
+  assert.throws(() => importedContent('<script src="./answer.js" />'));
+});
 test('导入的两侧累加到普通课 16 块限制，26 行片段失败', () => {
   const source = Array(9).fill('<CodeCompare pairId="c03-input-number" />').join('\n\n');
   const blocks = importedContent(source).code.map((ref) => ({ lines: ref.code.split('\n') }));

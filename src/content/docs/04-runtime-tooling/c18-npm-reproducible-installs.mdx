@@ -1,0 +1,147 @@
+---
+title: C18 npm：项目、版本与可复现安装
+description: 给库存报表配置 npm scripts，分清依赖类别和版本范围，读懂锁文件，并复现、修复 npm ci 的安装失败。
+sidebar:
+  order: 18
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 9 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C17 的工作区 · 运行：Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+工作区一直用 npm 安装与启动，现在读懂这层入口：清单声明什么、锁固定什么、scripts 实际执行谁。本课只补两个脚本，并在统一入口创建隔离副本复现一次安装失败，不破坏你的工作区。
+
+<LessonTask lessonId="C18" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c18-script-command" />
+
+<a id="1-packagejson项目清单也是命令入口"></a>
+
+## 1. package.json 声明依赖与命令
+
+在工作区 package.json 的 scripts 中保留 lab，增加上方卡的 report 与 test。现有依赖版本保持不变。运行 `npm run report` 输出同一报表；`npm test` 先调用当前 C18 检查，下一课工具之后再替换为自己写的 UT。
+
+package.json 的 dependencies 是应用运行所需包，devDependencies 是开发、构建、测试工具；两者都会在普通 npm ci 安装。private:true 防止误发布此练习包，type:module 决定 .js 模块模式。网站与练习各有独立清单，不能去网站根目录混装 React 或 UI5。
+
+**先猜一猜：** npm run report 的运行时是 npm 还是 Node？
+
+是 Node。npm 查脚本名称、准备本地 node_modules/.bin 到 PATH，再调用命令。类似 Maven 调度插件时，构建系统与真正执行工作的工具仍有职责边界。
+
+<a id="2-依赖类别按谁需要它来分"></a>
+
+## 2. 版本范围与锁回答不同问题
+
+语义版本通常是 major.minor.patch。`^1.2.3` 允许兼容的大版本内更新，`~1.2.3` 通常限小版本内；0.x 的 ^ 约束更窄。范围表达可接受集合，不能代替测试兼容性。
+
+package-lock.json 固定解析后的版本、依赖图、下载位置与完整性摘要。安装布局受平台条件与工具配置影响；同一锁是可复现安装的关键输入。
+
+| 动作 | 清单/锁的角色 | 用途 |
+| --- | --- | --- |
+| npm install | 按清单解析，必要时更新锁 | 有意增删或升级依赖 |
+| npm ci | 要求清单与已有锁一致，重建 node_modules | 干净安装、CI |
+| npm ls / npm explain | 查看已装依赖树与来源 | 排依赖问题 |
+
+**先猜一猜：** 只把清单的版本改成锁不接受的版本，npm ci 会顺手更新锁吗？
+
+不会，它会失败。更新依赖应通过 install 并审查清单与锁的差异；ci 不是升级命令。[npm ci 官方规则](https://docs.npmjs.com/cli/v11/commands/npm-ci/)。
+
+<a id="3-版本范围允许什么与装了什么分开看"></a>
+
+## 3. 从同一入口启动隔离故障
+
+在工作区执行：
+
+```sh
+npm run lab -- experiment lock
+```
+
+工具在 .lab/sandboxes/lock-* 创建独立清单和锁，先锁定 semver 的一个版本，再有意把隔离清单改为不一致版本。终端输出该副本绝对目录和预期的 npm ci 错误；工具确认抓到这次错误后正常结束。
+
+进入打印出的隔离目录，运行 `npm install --package-lock-only --ignore-scripts`，再运行 `npm ci --ignore-scripts`。现在两者一致，应安装成功。回到原工作区继续，主锁无需改动。
+
+<a id="4-锁文件与安装先确定这次有没有改依赖"></a>
+
+## 4. 检查变更范围与供应链输入
+
+安装可执行包时可能运行生命周期脚本。故障实验只需要解析布局，使用 ignore-scripts；正常工程所需构建脚本则按项目约定执行。npm audit 提供已知漏洞线索，升级仍需判断影响和复测。
+
+提交前查看 git diff -- package.json package-lock.json，确认修改是自己的预期；不要把 node_modules 或凭据放进仓库。锁摘要校验下载内容，不证明依赖的业务逻辑正确。
+
+monorepo 的 workspaces 可以在一份约定下管理多个包；本课程现阶段只维护一个练习工程，adapter 不再各建锁。
+
+<a id="registry包从哪里来"></a>
+
+<a id="install-和-ci-各用在哪里"></a>
+
+<a id="看树是谁把包带进来的"></a>
+
+<a id="5-本地命令npm-exec-与-npx"></a>
+
+<a id="只改清单npm-ci-就失败了"></a>
+
+<a id="在仓库根目录运行却提示找不到-report"></a>
+
+<a id="练习-1预测清单与锁中的值"></a>
+
+<a id="练习-2修复安装流程"></a>
+
+<a id="练习-3通过脚本生成分类报告"></a>
+
+## 常见错误与调试
+
+1. **现象与触发**：运行 experiment lock，隔离副本的 npm ci 报清单与锁不同步。
+2. **工具**：读终端错误中的 Invalid/Missing，再打开打印目录内的两个 JSON；主目录文件保持原样。
+3. **证据**：清单声明的 semver 与 lock 中版本不同，失败发生在安装契约检查。
+4. **原因**：ci 要求输入一致，不负责改写依赖选择。
+5. **修复**：只在隔离目录用 install 更新锁，再用 ci 验证。
+6. **确认**：副本 ci 成功；主工作区 report/test 可用，git diff 不出现无关锁变更。
+
+## 练习
+
+:::tip[自己尝试 · Node]
+给当前清单加 report/test，运行它们。完成 lock 隔离实验和修复，记录失败信息、修复动作与主锁保持不变的证据。
+:::
+
+<details>
+<summary>提示</summary>
+
+先确认终端 cwd 是工具打印的隔离目录。只修改 scripts 不会改变依赖解析，依赖版本更改才需要更新锁。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+npm ci 拒绝的是两个输入不一致。用 install 形成新的匹配锁后再 ci，是先决定依赖再复现安装；主项目始终使用原有 npm 锁。
+
+</details>
+
+## 项目进度
+
+- report/test 两个脚本均可用。
+- 副本失败后能修复，主锁未被故障污染。
+- 能区分清单范围、锁解析与磁盘安装。
+
+暂停时保存当前文件，在 notes/next.md 写下当前课 C18、观察结果与下一步；下次继续同一个目录。
+
+## 小结
+
+- npm 是包管理器与脚本入口。
+- install 可以更新锁，ci 验证并消费锁。
+- 锁、工具版本和配置共同构成安装输入。
+
+自测：^ 与锁分别固定什么？devDependencies 是否默认不装？ci 失败应该先删锁吗？
+
+## 延伸阅读
+
+- [npm：package.json](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/)
+- [npm：scripts](https://docs.npmjs.com/cli/v11/using-npm/scripts/)
+- [npm：语义版本](https://docs.npmjs.com/about-semantic-versioning)
+- [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c18)（按需参考）

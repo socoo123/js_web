@@ -38,3 +38,7 @@
 - 同日：正文 10 个完整 JS 代码块与示例逐字一致，3 个项目片段来自 app.js；内容 lint 零 error/warning，astro check 零诊断，build 与全量 125/125 示例通过；本地 /js_web/ 预览返回 200，标题、代码块、折叠答案和路线页通过。
 - 同日：[Pages Actions 38913333294](https://github.com/socoo123/js_web/actions/runs/38913333294) 成功；文章与路线页均返回 200，HTML 与本地构建逐字节一致。
 - 未运行：在 DevTools 界面上手动点击的路径、Firefox、Safari、真实手机；面板名称依据 Chrome 官方文档。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C11` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

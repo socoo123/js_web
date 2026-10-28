@@ -13,6 +13,7 @@ const end = lesson.trial?.end ?? lesson.endCheckpoint;
   <p><strong>{lesson.labId} · 本课只完成这一项</strong></p>
   {lesson.trial ? <p>试做前置：{lesson.trial.description}。本课提供单独标明的参考起点；连续课程迁移完成前，用新目录跟做。</p> : <p>接续 {lesson.previousLesson === 'C00' ? '初始骨架' : lesson.previousLesson + ' 的自己的代码'}，工作目录：<code>labs/inventory/</code>。</p>}
   <p>改动文件：{lesson.files.map((file, i) => <>{i > 0 && '、'}<code>{file}</code></>)}</p>
+  <p>跨课沿用正在运行的服务。首次运行或切换界面时启动 dev；切换前用 Ctrl+C 停止旧服务，改完源码再运行 check。</p>
   <Code code={`${lesson.commands.start}\n${lesson.commands.dev}\n${lesson.commands.check}`} lang="sh" title="在库存工作区执行" />
   <ul>{lesson.acceptance.map((item) => <li>{item}</li>)}</ul>
   <p><a href={`${download}${start}.tar.gz`}>下载本课起点（仅补课/恢复）</a> · <a href={`${base}labs/`}>一次安装与恢复说明</a></p>

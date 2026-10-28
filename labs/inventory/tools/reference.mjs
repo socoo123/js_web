@@ -4,15 +4,25 @@ import path from 'node:path';
 import os from 'node:os';
 import { gunzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
+import { get as httpsGet } from 'node:https';
 import { workspace, catalog } from './lab.mjs';
 
 const base = `https://socoo123.github.io/js_web/downloads/inventory/${catalog.release}/`;
 async function get(name) {
   const local = path.resolve(workspace, '../../public/downloads/inventory', catalog.release, name);
   if (existsSync(local)) return readFile(local);
-  const response = await fetch(new URL(name, base));
-  if (!response.ok) throw new Error(`参考包尚未可用：HTTP ${response.status} ${response.url}`);
-  return Buffer.from(await response.arrayBuffer());
+  // npm forwards an explicitly configured public CA bundle to its scripts.
+  // Keep certificate/hostname verification enabled, including behind a local proxy.
+  const ca = process.env.npm_config_cafile ? await readFile(process.env.npm_config_cafile) : undefined;
+  return new Promise((resolve, reject) => {
+    const request = httpsGet(new URL(name, base), { ...(ca ? { ca } : {}), timeout: 30000 }, (response) => {
+      if (response.statusCode !== 200) { response.resume(); reject(new Error(`参考包尚未可用：HTTP ${response.statusCode} ${new URL(name, base)}`)); return; }
+      const chunks = []; let size = 0;
+      response.on('data', (chunk) => { size += chunk.length; if (size > 64 * 1024 * 1024) request.destroy(new Error('参考包超过 64 MB')); else chunks.push(chunk); });
+      response.on('end', () => resolve(Buffer.concat(chunks))); response.on('error', reject);
+    });
+    request.on('timeout', () => request.destroy(new Error('参考包下载超时'))); request.on('error', reject);
+  });
 }
 export function validateBundle(bundle, release = catalog.release) {
   if (bundle.release !== release || !bundle.files || typeof bundle.files !== 'object') throw new Error('参考包发行版不匹配');
@@ -54,7 +64,7 @@ export async function compare(id) {
   const data = await load(id);
   let changed = 0;
   for (const [name, expected] of Object.entries(data.files)) {
-    if (!/^(src|adapters|tests|notes)\//.test(name)) continue;
+    if (!/^(src|adapters|tests|notes)\//.test(name) && !/^(package(?:-lock)?\.json|vite\.config\.js)$/.test(name)) continue;
     const file = path.join(workspace, name);
     const actual = existsSync(file) ? await readFile(file, 'utf8') : '';
     if (actual === expected) continue;

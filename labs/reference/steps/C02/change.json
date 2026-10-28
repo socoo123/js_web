@@ -1,8 +1,8 @@
 {
   "previous": "C01",
   "files": [
-    "src/core/inventory.js",
     "src/vanilla/app.js",
-    "src/vanilla/index.html"
+    "src/vanilla/index.html",
+    "src/vanilla/styles.css"
   ]
 }

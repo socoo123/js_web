@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>库存工作台</title><link rel="stylesheet" href="./styles.css">
+<main>
+  <h1>库存工作台</h1>
+  <form id="filters" role="search">
+    <label>搜索 <input name="query" placeholder="名称或编号"></label>
+    <label>分类 <select name="category"><option>全部</option>
+      <option>外设</option><option>显示器</option><option>配件</option><option>音频</option>
+    </select></label>
+  </form>
+  <button type="button" id="reload">重新加载</button><button type="button" id="fail">模拟失败</button>
+  <button type="button" id="export">导出快照</button><label>导入快照 <input type="file" id="import" accept="application/json"></label>
+  <button type="button" id="recover" hidden>恢复备份</button>
+  <p id="summary" aria-live="polite"></p><p id="feedback" role="status"></p>
+  <section id="list" aria-label="商品列表"></section>
+  <form id="editor" hidden>
+    <h2 id="edit-title">编辑库存</h2>
+    <label for="stock">库存</label><input id="stock" name="stock" inputmode="numeric" aria-describedby="stock-error">
+    <p id="stock-error" role="alert"></p>
+    <button type="submit">保存</button><button type="button" id="cancel">取消</button>
+  </form>
+</main><script type="module" src="./app.js"></script></html>

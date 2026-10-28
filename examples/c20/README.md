@@ -42,3 +42,7 @@
 - TS 独立预览实际显示 123；转换并重建后实际显示 15。
 - 未运行：在 DevTools UI 中手工点击的操作路径（按 Chrome 官方文档核对）、Firefox、Safari、Windows。无线上库存应用部署，本课线上发布的是教程正文。
 - Pages：[run 38997587821](https://github.com/socoo123/js_web/actions/runs/38997587821) 成功；C20 地址 HTTP 200，标题/正文正确；路线页 20 / 48 与新课链接正确。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C20` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。

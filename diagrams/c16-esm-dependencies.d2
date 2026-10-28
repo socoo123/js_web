@@ -6,10 +6,13 @@ direction: down
 modules: 模块依赖 · 谁导入谁 {
   style.fill: "#f4f8ff"
   app: app.js\n页面事件与状态
-  core: ../01-core/inventory.js\n纯业务模块
-  download: download.js\n点击导出时加载
+  core: src/core/inventory.js\n公开入口 facade
+  rules: validation / stock / summary 等\n已有纯业务函数
+  storage: src/services/storage.js\n持久化适配
   app -> core: 静态 import
-  app -> download: 动态 import() {style.stroke-dash: 5}
+  app -> storage: 静态 import
+  storage -> core: 复用校验与统计
+  core -> rules: 转发导出
 }
 install: 包安装 · 文件从哪里来 {
   style.fill: "#f6ffed"
@@ -17,8 +20,8 @@ install: 包安装 · 文件从哪里来 {
   lock: package-lock.json\n具体版本 · 来源 · 摘要
   ci: npm ci\n检查清单与锁
   registry: registry / 缓存\n取得锁定内容
-  disk: node_modules/semver\n与 .bin/semver 入口
-  run: npm run versions\nPATH 找本地命令
+  disk: node_modules\n锁定依赖与本地工具
+  run: npm run report\n调用 Node 报表
   reject: 安装失败\n确认是否有意改依赖 {
     style.fill: "#fff1f0"
     style.stroke: "#cf1322"

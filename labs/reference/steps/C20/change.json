@@ -1,0 +1,11 @@
+{
+  "previous": "C19",
+  "files": [
+    "tests/core/inventory.test.js",
+    "vite.config.js",
+    "package.json"
+  ],
+  "sharedFiles": {
+    "src/core/validation.js": "labs/reference/core/validation.js"
+  }
+}

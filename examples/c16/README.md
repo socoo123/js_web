@@ -45,3 +45,7 @@
 - ES2026 探测：Node 中所查 Map/WeakMap Upsert、Iterator.concat、四个 Uint8Array 编解码方法与 Math.sumPrecise 缺失；JSON context.source、Error.isError、Array.fromAsync 存在；Chrome 中所查方法均存在，JSON source 可读取。
 - 未运行：DevTools 界面手动点击、Firefox、Safari、真实手机；面板入口按官方文档核对。网站主题与配置未改，沿用周验收。
 - 同日：[Pages Actions 38984292309](https://github.com/socoo123/js_web/actions/runs/38984292309) 成功；课程、速查页与路线页均返回 200，HTML 与本地构建逐字节一致；线上 D2 返回 200、image/svg+xml。
+
+## V2 连续工作区
+
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C16` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。
