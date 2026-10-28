@@ -9,6 +9,10 @@
 3. `docs/CONTENT_GUIDE.md`：写作硬约束。**写或改任何课程之前必须读完。**
 4. `docs/CURRICULUM.md`：本课那一行和本周的写作范围。
 
+## 当前改版任务
+
+2026-10-28：用户要求先 review 贯穿大项目、几个 Lab、Java/JS 并排和逐章错误方案，再交另一位 agent 实现；当前提案为 5 个 Lab。旧 PLAN 已由新的改版计划替代；新目录和 Lab 命令按 R 任务逐步落地，实际范围以 STATUS 与练习 README 为准。用户已明确授权实施与逐批发布；先读 STATUS「下一步」确认 R 任务阶段，不能把试做通过当成全部迁移完成。逐章错误见 `docs/DEBUG_TESTING.md`，页面规格与审阅稿见 `docs/ARCHITECTURE.md`、`docs/review/lesson-layout.html`。
+
 ## 用户的要求（不可改变）
 
 - 读者只会 Java，是有编程基础的前端初学者；不能跳过 HTML/CSS 和浏览器基础。

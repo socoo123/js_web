@@ -1,6 +1,10 @@
 import { existsSync, readFileSync, statSync, globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { importedContent } from './lesson-sources.mjs';
+import catalog from '../labs/catalog.json' with { type: 'json' };
+import { createHash } from 'node:crypto';
+import { gunzipSync } from 'node:zlib';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const origin = 'https://socoo123.github.io';
@@ -50,6 +54,14 @@ for (const [id, slug, diagrams, source] of lessons) {
   const lessonFile = path.join(dist, `${slug}/index.html`);
   if (!existsSync(lessonFile)) continue;
   const lesson = readFileSync(lessonFile, 'utf8');
+  const row = catalog.lessons.find((row) => row.lessonId === id);
+  if (row?.migrated) {
+    const imported = importedContent(source);
+    const cards = imported.components.filter((item) => item.component === 'CodeCompare');
+    if (!lesson.includes(`data-lesson-task="${id}"`)) errors.push(`${id} 缺少静态任务卡`);
+    for (const card of cards) if (!lesson.includes(`data-comparison="${card.id}"`)) errors.push(`${id} 缺少静态代码对照 ${card.id}`);
+    if ((lesson.match(/class="[^\"]*\bcompare-side\b[^\"]*"/g) ?? []).length !== cards.length * 2) errors.push(`${id} 对照没有静态渲染两侧`);
+  }
   if ((lesson.match(/data-progress\s/g) ?? []).length !== 1 || !lesson.includes(`data-lesson="${id}"`)) {
     errors.push(`${id} 缺少唯一的本课学习进度入口。`);
   }
@@ -61,6 +73,22 @@ for (const [id, slug, diagrams, source] of lessons) {
   }
   for (const diagram of diagrams) {
     if (!lesson.includes(diagram)) errors.push(`${id} 缺少 D2 教学图 ${diagram}。`);
+  }
+}
+for (const lab of catalog.labs) if (!existsSync(path.join(dist, `labs/${lab.labId.toLowerCase()}/index.html`))) errors.push(`缺少 Lab 页：${lab.labId}`);
+const releaseManifest = path.join(dist, `downloads/inventory/${catalog.release}/manifest.json`);
+if (!existsSync(releaseManifest)) errors.push('缺少版本化快照清单');
+else {
+  const manifest = JSON.parse(readFileSync(releaseManifest, 'utf8'));
+  const hash = (data) => createHash('sha256').update(data).digest('hex');
+  for (const [id, entry] of Object.entries(manifest.checkpoints)) {
+    const dir = path.dirname(releaseManifest);
+    for (const [suffix, expected] of [['json.gz', entry.sha256], ['tar.gz', entry.archiveSha256]]) {
+      const file = path.join(dir, `${id}.${suffix}`);
+      if (!existsSync(file) || hash(readFileSync(file)) !== expected) errors.push(`快照缺失或校验失败：${id}.${suffix}`);
+    }
+    const bundle = JSON.parse(gunzipSync(readFileSync(path.join(dir, `${id}.json.gz`))).toString());
+    for (const [file, digest] of Object.entries(entry.files)) if (hash(bundle.files[file] ?? '') !== digest) errors.push(`快照源码校验失败：${id}/${file}`);
   }
 }
 const roadmap = readFileSync(path.join(dist, 'roadmap/index.html'), 'utf8');

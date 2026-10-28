@@ -1,0 +1,7 @@
+{
+  "previous": "C00",
+  "files": [
+    "src/core/inventory.js",
+    "notes/runtime.md"
+  ]
+}

@@ -43,3 +43,9 @@
 - 本地静态 C23 HTTP 200；Chrome 核对标题、D2、6 个练习折叠区与路线页 23 / 48；禁用 JavaScript 后正文仍可阅读。未执行全站周验收（按计划在 C24 后进行）。
 - Pages：[run 39020278502](https://github.com/socoo123/js_web/actions/runs/39020278502) 构建与部署成功；线上 C23 HTTP 200，标题、6 个答案折叠区、D2 资源正确，路线页 HTTP 200 且为 23 / 48。
 - 未运行：Firefox、Safari、Windows；原生 DevTools 界面的手动点击路径。
+
+## V2 工作区试做
+
+- 2026-10-28 · 发行版 `2026.10-v2.1` · 起点 `P22` → 终点 `P23`；两条 React 状态用例、真实页面连续与延迟交错通过。原例子保留为可选参考，不是当前主线工作目录。
+- 在练习工作区执行 `npm run lab -- check C23`。教师从起点按正文片段跟做并修改实际文件验证先红后绿：`npm run test:lab-walkthrough`。
+- 详细环境、错误证据、范围与限制见 [V2 验证](../../labs/records/README.md)。C23/C41 的试做前置单独提供，连续路线仍需 R6/R7 验收。

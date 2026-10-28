@@ -1,0 +1,1795 @@
+{
+  "release": "2026.10-v2.1",
+  "labs": [
+    {
+      "labId": "L1",
+      "title": "库存规则与数据",
+      "description": "从商品卡片到可撤销的库存规则"
+    },
+    {
+      "labId": "L2",
+      "title": "可用的原生库存页",
+      "description": "列表、请求、存储、布局与第一批测试"
+    },
+    {
+      "labId": "L3",
+      "title": "React 库存应用",
+      "description": "从组件到状态、表单、异步与测试"
+    },
+    {
+      "labId": "L4",
+      "title": "组件库与 UI5 适配",
+      "description": "同一规则与编辑场景，四种界面"
+    },
+    {
+      "labId": "L5",
+      "title": "调试与静态交付",
+      "description": "从排错到可恢复的静态交付"
+    }
+  ],
+  "lessons": [
+    {
+      "lessonId": "C01",
+      "labId": "L1",
+      "title": "JavaScript 的故事与生态地图",
+      "day": 1,
+      "slug": "01-history-web/c01-story-ecosystem",
+      "previousLesson": "C00",
+      "startCheckpoint": "C00",
+      "endCheckpoint": "C01",
+      "files": [
+        "src/core/inventory.js",
+        "notes/runtime.md"
+      ],
+      "task": "在 `src/core/inventory.js` 增加 P001 库存价值输出；在 `notes/runtime.md` 标明语言、宿主、工具；骨架已提供数据和启动方式",
+      "comparisonTheme": "`System.out.println` / `console.log`；同一库存运算在不同宿主运行",
+      "acceptance": [
+        "P001 价值 478800 分；能区分 JS、浏览器、Node/Bun 与 npm；保留历史到年度标准及提案状态的阅读"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C01-main"
+      ],
+      "error": {
+        "trigger": "在 Node 里访问 document，或把 npm 当成执行 JS 的语言；运行宿主探测",
+        "evidence": "Console/终端：document 未定义，而浏览器中有 DOM；查看实际启动命令",
+        "repair": "把浏览器 API 留在界面层；纯库存计算两端结果一致；P001 价值 478800 分",
+        "risk": "初始骨架要求先学 npm/React 才能打印；把 Bun 只归为包管理器；沿用过时标准年份"
+      },
+      "commands": {
+        "start": "npm run lab -- start C01",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C01"
+      },
+      "implemented": true,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C02",
+      "labId": "L1",
+      "title": "Web 基础与第一个调试现场",
+      "day": 1,
+      "slug": "01-history-web/c02-web-debugging",
+      "previousLesson": "C01",
+      "startCheckpoint": "C01",
+      "endCheckpoint": "C02",
+      "files": [
+        "src/core/inventory.js",
+        "src/vanilla/index.html",
+        "src/vanilla/app.js"
+      ],
+      "task": "修改 `src/vanilla/index.html`、`styles.css`、`app.js` 的单商品卡片、label 和脚本路径",
+      "comparisonTheme": "Java 输出字符串 / HTML 元素与 DOM；明确浏览器布局是新知识",
+      "acceptance": [
+        "卡片显示 P001/12；label 对应输入；Network 无脚本 404；360px 基本可读，断点可命中"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C02-main"
+      ],
+      "error": {
+        "trigger": "app.js 拼成 ap.js，卡片出现但按钮不工作；页面用固定宽度撑破手机",
+        "evidence": "Network 的脚本请求 404；Elements/Computed 显示超出可用宽度",
+        "repair": "改正确相对路径、流式宽度；刷新有脚本执行，360px 无整页横滚；断点能命中",
+        "risk": "开发服务 fallback 用 HTML 200 掩盖脚本错误；省略 label、语义结构与脚本加载解释"
+      },
+      "commands": {
+        "start": "npm run lab -- start C02",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C02"
+      },
+      "implemented": true,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C03",
+      "labId": "L1",
+      "title": "值、类型、转换与比较",
+      "day": 2,
+      "slug": "02-language-data/c03-values-types",
+      "previousLesson": "C02",
+      "startCheckpoint": "C02",
+      "endCheckpoint": "C03",
+      "files": [
+        "src/core/inventory.js"
+      ],
+      "task": "在 `src/core/inventory.js` 修复输入转换与默认值，接通卡片补货；覆盖 Number、空值、相等、整数分",
+      "comparisonTheme": "`Integer.parseInt` / `Number`；可空默认值 / `??`；对象身份与值",
+      "acceptance": [
+        "输入 3 后 P001 从 12 到 15；空白、3件、负数、小数不保存；合法库存 0 保留；解释 Number/BigInt 与精度"
+      ],
+      "comparisonIds": [
+        "c03-input-number"
+      ],
+      "errorIds": [
+        "C03-main"
+      ],
+      "error": {
+        "trigger": "输入框的 3 是字符串，12 + \"3\" 得 123；Number(空白) 得 0；`stock",
+        "evidence": "",
+        "repair": "12` 把售罄复活",
+        "risk": "Sources：amount 的 typeof 为 string，空文本 trim 后为空；观察默认值操作数"
+      },
+      "commands": {
+        "start": "npm run lab -- start C03",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C03"
+      },
+      "implemented": true,
+      "migrated": true,
+      "trial": null
+    },
+    {
+      "lessonId": "C04",
+      "labId": "L1",
+      "title": "变量、作用域与控制流",
+      "day": 2,
+      "slug": "02-language-data/c04-scope-control",
+      "previousLesson": "C03",
+      "startCheckpoint": "C03",
+      "endCheckpoint": "C04",
+      "files": [
+        "inventory.js"
+      ],
+      "task": "在同一 `inventory.js` 写循环统计、异常分支，替换有问题的变量作用域",
+      "comparisonTheme": "Java 块作用域与 final / let、const、var；for-each / for-of",
+      "acceptance": [
+        "总库存 52；空集合 0；不访问越界元素；能在 Scope 找到 TDZ/变量覆盖，解释 const 对象仍可变"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C04-main"
+      ],
+      "error": {
+        "trigger": "循环写 `i <= products.length`，读取最后一个 undefined 导致异常/NaN；var 覆盖外层变量",
+        "evidence": "条件断点停在 i=length；Scope 显示 product 未定义或共享变量",
+        "repair": "改 for-of 或 `< length`；总库存 52、空列表 0；let/const 作用域正确",
+        "risk": "为了防报错每处塞默认值，掩盖真正越界；将 const 写成冻结对象"
+      },
+      "commands": {
+        "start": "npm run lab -- start C04",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C04"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C05",
+      "labId": "L1",
+      "title": "对象、引用与数据交换",
+      "day": 3,
+      "slug": "02-language-data/c05-objects-json",
+      "previousLesson": "C04",
+      "startCheckpoint": "C04",
+      "endCheckpoint": "C05",
+      "files": [
+        "inventory.js"
+      ],
+      "task": "在 `inventory.js` 创建编辑草稿和导入转换，隔离 tags；从 JSON 还原业务数据",
+      "comparisonTheme": "引用副本传参 / 引用副本传参；浅复制 / 展开；JSON 与对象",
+      "acceptance": [
+        "修改草稿 tags 后取消，原商品不变；非法 JSON 不替换数据；解释 JSON 对日期/undefined 等的表示边界"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C05-main"
+      ],
+      "error": {
+        "trigger": "`{...product}` 复制后修改 draft.tags，取消也改变原商品；解析成功即信任 JSON",
+        "evidence": "Sources 比较 draft.tags===product.tags 得 true；查看导入字段类型",
+        "repair": "复制被修改的嵌套路径；解析后校验结构；取消不改 tags；坏数据不替换好数据",
+        "risk": "用最终复杂深克隆库掩盖引用教学；把 Java/JS 参数描述成按引用传参"
+      },
+      "commands": {
+        "start": "npm run lab -- start C05",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C05"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C06",
+      "labId": "L1",
+      "title": "函数、闭包与高阶操作",
+      "day": 3,
+      "slug": "02-language-data/c06-functions-closures",
+      "previousLesson": "C05",
+      "startCheckpoint": "C05",
+      "endCheckpoint": "C06",
+      "files": [
+        "inventory.js"
+      ],
+      "task": "在 `inventory.js` 增加分类筛选工厂与独立操作计数器；任务仍在库存入口执行",
+      "comparisonTheme": "Java Predicate/lambda 捕获 / 函数值、词法闭包；默认参数/rest 短对照",
+      "acceptance": [
+        "外设筛选得到 P001/P002；两个工厂/计数器互不影响；修复循环闭包并观察 Scope"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C06-main"
+      ],
+      "error": {
+        "trigger": "用 var 循环创建函数，点击三个操作都读到最后一个值；复用外部计数器导致实例共享",
+        "evidence": "Scope/Watch：回调捕获同一绑定；分别调用两个工厂",
+        "repair": "用每次迭代的 let 绑定或显式参数；计数器输出 1/2 与独立的 1；筛选工厂不串分类",
+        "risk": "把闭包说成创建时复制值；正文机制实验正确，实际库存入口仍读共享全局变量"
+      },
+      "commands": {
+        "start": "npm run lab -- start C06",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C06"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C07",
+      "labId": "L1",
+      "title": "this、原型与 class",
+      "day": 4,
+      "slug": "02-language-data/c07-this-prototypes",
+      "previousLesson": "C06",
+      "startCheckpoint": "C06",
+      "endCheckpoint": "C07",
+      "files": [
+        "inventory.js"
+      ],
+      "task": "在 `inventory.js` 把库存查询封装为 Inventory，修复作为回调的方法；保持业务数据可提取",
+      "comparisonTheme": "Java 方法引用 / 脱离对象的 JS 方法；class / 原型属性查找",
+      "acceptance": [
+        "直接查询与回调查询结果一致；解释 this 和箭头函数差异；能指出实例/原型各有何属性"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C07-main"
+      ],
+      "error": {
+        "trigger": "`run(inventory.getById)` 丢失 this，直接调用却正常；箭头方法 this 指向外层",
+        "evidence": "Sources 看 this 和 Call Stack，普通回调中的 this 为 undefined（ESM/严格模式）",
+        "repair": "bind 或保留调用接收者；两种调用都查到 P004；能解释箭头函数无自己的 this",
+        "risk": "为修回调全改成箭头而不解释；将 Inventory 可变实例直接带入 React state"
+      },
+      "commands": {
+        "start": "npm run lab -- start C07",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C07"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C08",
+      "labId": "L1",
+      "title": "Array 与业务数据处理",
+      "day": 4,
+      "slug": "02-language-data/c08-arrays-processing",
+      "previousLesson": "C07",
+      "startCheckpoint": "C07",
+      "endCheckpoint": "C08",
+      "files": [
+        "inventory.js"
+      ],
+      "task": "在 `inventory.js` 增加筛选、数值排序、汇总；从一次查询链解释数组 API",
+      "comparisonTheme": "Stream 的 filter/map/reduce / Array；Comparator / sort 比较器",
+      "acceptance": [
+        "原数据总库存 52、总价值 2634800 分；按库存升序 P002/P004/P006/P003/P001/P005；原数组顺序不变"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C08-main"
+      ],
+      "error": {
+        "trigger": "sort 未传比较器按文本排序；map 的大括号体漏 return；sort 修改源列表",
+        "evidence": "Console 看结果与原数组顺序；断点见回调得到商品却返回 undefined",
+        "repair": "数值比较器与副本排序；数组映射有返回；库存升序为 P002/P004/P006/P003/P001/P005；总值不变",
+        "risk": "只测“列表长度是 6”漏掉顺序/身份；参考解偷偷修改固定数据"
+      },
+      "commands": {
+        "start": "npm run lab -- start C08",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C08"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C09",
+      "labId": "L1",
+      "title": "Object、Map、Set 与弱集合",
+      "day": 5,
+      "slug": "02-language-data/c09-maps-sets",
+      "previousLesson": "C08",
+      "startCheckpoint": "C08",
+      "endCheckpoint": "C09",
+      "files": [
+        "inventory.js"
+      ],
+      "task": "在 `inventory.js` 增加 ID Map、分类分组、标签去重；弱集合只保留小范围机制对照",
+      "comparisonTheme": "HashMap 的 equals/hashCode / Map 身份键；HashSet / Set",
+      "acceptance": [
+        "P004 查到扩展坞；分类种数 2/1/2/1；标签热销/新品；重复 ID 拒绝；能解释弱键为何不可枚举"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C09-main"
+      ],
+      "error": {
+        "trigger": "写 `byId[id]=product`，Map 展开似乎有数据但 size=0；用新对象键查询旧对象",
+        "evidence": "Console：size=0、has=false、Object.hasOwn=true；两个内容相同键不相等",
+        "repair": "使用 set/get；身份键语义单独对照 Java；P004 查到库存3、去重两标签、重复 ID 拒绝",
+        "risk": "错把 Map 说成按 Java equals 比内容；把弱集合做成可枚举业务索引"
+      },
+      "commands": {
+        "start": "npm run lab -- start C09",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C09"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C10",
+      "labId": "L1",
+      "title": "栈、队列、树与复杂度",
+      "day": 5,
+      "slug": "02-language-data/c10-stacks-queues-trees",
+      "previousLesson": "C09",
+      "startCheckpoint": "C09",
+      "endCheckpoint": "C10",
+      "files": [
+        "inventory.js"
+      ],
+      "task": "在 `inventory.js` 增加撤销栈、任务队列、分类树 DFS/BFS；完成 L1 收尾",
+      "comparisonTheme": "Deque / Array 栈与头索引队列；树对象与遍历",
+      "acceptance": [
+        "补 P001 3 件后撤销回 12；多次撤销顺序正确；DFS/BFS 各节点恰访问一次；大数据计时只比较量级"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C10-main"
+      ],
+      "error": {
+        "trigger": "历史栈保存商品引用，补货后旧值也变了；空队列/空树未处理",
+        "evidence": "断点比较 history[0] 与商品的身份，单步观察同时改变",
+        "repair": "存旧字段值或独立快照；连续补货可逆序撤销至12；空栈返回明确结果；三种遍历节点完整",
+        "risk": "撤销又记录一次历史导致来回振荡；用一次时间结果承诺算法快固定倍数"
+      },
+      "commands": {
+        "start": "npm run lab -- start C10",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C10"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C11",
+      "labId": "L2",
+      "title": "DOM、事件、表单与页面调试",
+      "day": 6,
+      "slug": "03-async-modules/c11-dom-events-forms",
+      "previousLesson": "C10",
+      "startCheckpoint": "C10",
+      "endCheckpoint": "C11",
+      "files": [
+        "src/vanilla/app.js"
+      ],
+      "task": "把 `src/vanilla/app.js` 扩为六商品列表、委托事件和库存编辑；语义结构在 index.html",
+      "comparisonTheme": "Java 监听器 / addEventListener；对象标识 / DOM dataset.id",
+      "acceptance": [
+        "筛选后编辑 P004 不改 P001；单击只补一次；商品名以文本渲染；用事件/DOM 断点找重复监听与意外删除"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C11-main"
+      ],
+      "error": {
+        "trigger": "每次 render 添加监听，第二次点击补两次；按可见索引编辑错商品；innerHTML 插入商品名",
+        "evidence": "Event Listener Breakpoints 多次命中不同回调；dataset.id 与数组索引不一致；观察生成节点",
+        "repair": "稳定祖先上委托一次，按 id 更新，文本用 textContent；两次各补1；过滤后只改P004；恶意标签只显示文本",
+        "risk": "故障修在示例里，主 app 仍重复绑定；事件委托忽略嵌套点击的 closest 边界"
+      },
+      "commands": {
+        "start": "npm run lab -- start C11",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C11"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C12",
+      "labId": "L2",
+      "title": "从回调到 Promise：执行顺序",
+      "day": 6,
+      "slug": "03-async-modules/c12-callbacks-promises",
+      "previousLesson": "C11",
+      "startCheckpoint": "C11",
+      "endCheckpoint": "C12",
+      "files": [
+        "src/services/load-products.js"
+      ],
+      "task": "在 `src/services/load-products.js` 加模拟异步加载，app.js 展示状态与收尾",
+      "comparisonTheme": "CompletableFuture 链 / Promise 链；线程与事件循环边界",
+      "acceptance": [
+        "成功有 6 项；失败可见；漏 return 用例能解释并修复；预测同步、微任务、任务顺序，完成第一周检查"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C12-main"
+      ],
+      "error": {
+        "trigger": "then 中启动异步却漏 return，下一步先得到 undefined；抛错后 loading 不结束",
+        "evidence": "Sources/日志显示下一步先执行；Promise 链未包含内层任务",
+        "repair": "return 内层 Promise，末端统一错误/收尾；成功6项、失败可见、finally执行；顺序可解释",
+        "risk": "靠长 setTimeout 让假流程“看起来正确”；把 Promise 说成新建线程"
+      },
+      "commands": {
+        "start": "npm run lab -- start C12",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C12"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C13",
+      "labId": "L2",
+      "title": "async/await、请求与 Network",
+      "day": 7,
+      "slug": "03-async-modules/c13-async-await-fetch",
+      "previousLesson": "C12",
+      "startCheckpoint": "C12",
+      "endCheckpoint": "C13",
+      "files": [
+        "src/services/load-products.js",
+        "src/vanilla/app.js"
+      ],
+      "task": "把同一个 loader 改为静态 JSON 请求，在 app.js 增加取消和加载/空/错态",
+      "comparisonTheme": "Java Future 等待 / await 当前函数；HTTP 状态判断",
+      "acceptance": [
+        "404、非 JSON、离线分别可定位；快换筛选时前请求取消；串行/并发、forEach(async) 用页内对照说明"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C13-main"
+      ],
+      "error": {
+        "trigger": "fetch 404 不检查 ok，最后报 JSON 解析错；forEach(async) 后统计先执行",
+        "evidence": "Network 的404与HTML响应；断点见 response.ok=false；异步项尚未结束",
+        "repair": "先检查HTTP再解析；并发用 Promise.all 等待；取消前次请求；404/空/离线均退出loading",
+        "risk": "用公共 API 的偶然可用性验收；把所有错误都显示成“网络差”；越级写完整竞态课程"
+      },
+      "commands": {
+        "start": "npm run lab -- start C13",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C13"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C14",
+      "labId": "L2",
+      "title": "原生页面、存储与错误处理",
+      "day": 7,
+      "slug": "03-async-modules/c14-storage-errors",
+      "previousLesson": "C13",
+      "startCheckpoint": "C13",
+      "endCheckpoint": "C14",
+      "files": [
+        "src/services/storage.js"
+      ],
+      "task": "新增 `src/services/storage.js`，接入 app.js 的保存、恢复、导入导出",
+      "comparisonTheme": "Java 序列化与异常处理经验 / localStorage + JSON",
+      "acceptance": [
+        "刷新保留修改；坏 JSON 和字段错误不覆盖好副本；可恢复/导出；明确本浏览器状态不等于服务器数据"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C14-main"
+      ],
+      "error": {
+        "trigger": "损坏 JSON 导致白屏；保存前未校验，先覆盖好副本再报错",
+        "evidence": "Application 看原始坏文本；Sources 看 parse/validate/setItem 顺序",
+        "repair": "try/catch、结构校验、成功后再替换；保留可恢复备份；拒绝非法导入且旧数据不变",
+        "risk": "检查脚本清空真实localStorage；新存储格式迁移破坏用户学习进度键"
+      },
+      "commands": {
+        "start": "npm run lab -- start C14",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C14"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C15",
+      "labId": "L2",
+      "title": "CSS 布局与响应式：排版库存页",
+      "day": 8,
+      "slug": "03-async-modules/c15-css-layout-responsive",
+      "previousLesson": "C14",
+      "startCheckpoint": "C14",
+      "endCheckpoint": "C15",
+      "files": [
+        "src/vanilla/styles.css"
+      ],
+      "task": "只修改 `src/vanilla/styles.css` 和必要 HTML，用 Flex/Grid 排工具栏与卡片",
+      "comparisonTheme": "JavaFX/Swing 布局管理器经验 / CSS 布局声明，明确非 API 等价",
+      "acceptance": [
+        "360/768/1280px 分别单/双/四列；无整页横滚；键盘焦点可见；用 Computed 找固定宽度溢出"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C15-main"
+      ],
+      "error": {
+        "trigger": "卡片或长文字 min-width 撑破360px；只删outline让键盘焦点不可见",
+        "evidence": "Elements→Computed/Flex/Grid，比较 scrollWidth 与视口；Tab检查",
+        "repair": "minmax/min-width/换行与盒模型按来源修复；360/768/1280布局正常，焦点清楚",
+        "risk": "只隐藏overflow遮住内容；并排代码加入后整页横滚；亮暗主题对比不足"
+      },
+      "commands": {
+        "start": "npm run lab -- start C15",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C15"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C16",
+      "labId": "L2",
+      "title": "模块、依赖与组织代码",
+      "day": 8,
+      "slug": "03-async-modules/c16-modules-dependencies",
+      "previousLesson": "C15",
+      "startCheckpoint": "C15",
+      "endCheckpoint": "C16",
+      "files": [
+        "src/core/{validation,summary,filters,collections,history,tree}.js"
+      ],
+      "task": "把已有 inventory.js 拆为 `src/core/{validation,summary,filters,collections,history,tree}.js` 与 facade；更新 app.js 入口",
+      "comparisonTheme": "Java import/package / ESM 绑定与 URL；CommonJS 对照",
+      "acceptance": [
+        "拆分前后业务测试不变；无循环依赖与 404；给出文件搬移清单；查两个特性的标准阶段和环境支持"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C16-main"
+      ],
+      "error": {
+        "trigger": "未设 module、命名/默认导出混用、路径漏扩展名；循环引用初始化过早",
+        "evidence": "Console首个语法/导出错误；Network真实URL；依赖链与初始化位置",
+        "repair": "明确ESM入口和导入名；按单向依赖拆模块；重构前后同一业务向量通过",
+        "risk": "一次拆分同时改业务行为导致难定位；生成器引用最终路径，早期快照无法运行"
+      },
+      "commands": {
+        "start": "npm run lab -- start C16",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C16"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C17",
+      "labId": "L2",
+      "title": "Node 与浏览器的边界",
+      "day": 9,
+      "slug": "04-runtime-tooling/c17-node-browser",
+      "previousLesson": "C16",
+      "startCheckpoint": "C16",
+      "endCheckpoint": "C17",
+      "files": [
+        "src/cli/report.js"
+      ],
+      "task": "在 `src/cli/report.js` 复用 summary 读取 data/products.json 并输出报表",
+      "comparisonTheme": "Java Files/Path / fs/promises 与 URL/path；JVM / Node 宿主",
+      "acceptance": [
+        "从不同终端目录调用仍可找数据；6/52/2634800；inspect 断点可命中；能解释 process、Buffer/stream 的用途"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C17-main"
+      ],
+      "error": {
+        "trigger": "fs按process.cwd找文件，从别的目录启动失败；浏览器代码打入fs",
+        "evidence": "Node inspect 看cwd、import.meta.url和目标路径；ENOENT堆栈",
+        "repair": "按模块URL定位固定数据；隔离宿主适配；不同cwd得到6/52/2634800",
+        "risk": "只在作者目录成功；report偷偷读参考解而不是学员模块；输出混入环境路径无法固定核对"
+      },
+      "commands": {
+        "start": "npm run lab -- start C17",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C17"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C18",
+      "labId": "L2",
+      "title": "npm：项目、版本与可复现安装",
+      "day": 9,
+      "slug": "04-runtime-tooling/c18-npm-reproducible-installs",
+      "previousLesson": "C17",
+      "startCheckpoint": "C17",
+      "endCheckpoint": "C18",
+      "files": [
+        "package.json"
+      ],
+      "task": "在练习根 package.json 补充 report/test scripts；统一入口启动隔离的锁不一致实验",
+      "comparisonTheme": "Maven pom/依赖树 / package.json、lock、scripts；类比边界",
+      "acceptance": [
+        "主工作区安装可复现；隔离副本的 npm ci 因清单/锁不一致失败；理解依赖类型/semver，不改站点根锁"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C18-main"
+      ],
+      "error": {
+        "trigger": "清单版本与锁不一致，npm ci失败；随手改主锁或误把npm ci当升级命令",
+        "evidence": "隔离副本的npm错误；对照清单与锁；git diff确认修改范围",
+        "repair": "在隔离副本解释install/ci的不同；主工程可复现安装；两个scripts可用",
+        "risk": "让教学故障破坏站点根package-lock；使用未提供锁文件的起点却要求npm ci"
+      },
+      "commands": {
+        "start": "npm run lab -- start C18",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C18"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C19",
+      "labId": "L2",
+      "title": "Yarn、pnpm、Bun 的职责与选择",
+      "day": 10,
+      "slug": "04-runtime-tooling/c19-yarn-pnpm-bun",
+      "previousLesson": "C18",
+      "startCheckpoint": "C18",
+      "endCheckpoint": "C19",
+      "files": [
+        ".lab/sandboxes/"
+      ],
+      "task": "统一入口在 `.lab/sandboxes/` 比较两种工具，把结果写进 notes/tooling.md",
+      "comparisonTheme": "Maven/Gradle 是构建工具的经验 / 运行时、包管理、测试、构建分别归位",
+      "acceptance": [
+        "同数据报告一致；记录锁/解析差异；主项目无额外管理器锁；覆盖 Yarn 两代、PnP、pnpm、Bun、Corepack 定位"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C19-main"
+      ],
+      "error": {
+        "trigger": "依赖未声明，靠某种安装布局偶然可用；把Bun运行成功等同所有Node API兼容",
+        "evidence": "读package.json及解析路径；两工具隔离运行同一报告并记录差异",
+        "repair": "显式依赖、分别核验运行时API；至少两工具得到相同业务值；锁只留在隔离目录",
+        "risk": "静默重写主锁；把Corepack当固定内置事实；为了比较装遍所有工具而拖慢主线"
+      },
+      "commands": {
+        "start": "npm run lab -- start C19",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C19"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C20",
+      "labId": "L2",
+      "title": "构建工具与第一次 UT",
+      "day": 10,
+      "slug": "04-runtime-tooling/c20-vite-vitest",
+      "previousLesson": "C19",
+      "startCheckpoint": "C19",
+      "endCheckpoint": "C20",
+      "files": [
+        "tests/core/"
+      ],
+      "task": "在 `tests/core/` 写统计/校验 UT；配置 Vite 构建原生页；TS 桥接使用提供的小片段",
+      "comparisonTheme": "JUnit AAA / Vitest；编译、转译、打包、类型检查边界",
+      "acceptance": [
+        "正常/空/非法用例能先红后绿；生产页可运行；source map 回源码；知道 TS 类型不会校验 JSON；L2 验收"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C20-main"
+      ],
+      "error": {
+        "trigger": "只测正常值让空白库存被当0；Vite构建通过就以为类型检查也通过",
+        "evidence": "Vitest边界断言先失败；独立类型检查显示与构建不同结果；source map断点",
+        "repair": "写正常/空/非法用例，修业务边界；build与typecheck职责分清；用当前学员文件先红后绿",
+        "risk": "test脚本实际上导入教师答案；为满足通过率删失败断言；TS变成先修课"
+      },
+      "commands": {
+        "start": "npm run lab -- start C20",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C20"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C21",
+      "labId": "L3",
+      "title": "React 来由、JSX 与第一个组件",
+      "day": 11,
+      "slug": "05-react/c21-react-jsx-components",
+      "previousLesson": "C20",
+      "startCheckpoint": "C20",
+      "endCheckpoint": "C21",
+      "files": [
+        "src/react/{main,App,ProductCard}.jsx"
+      ],
+      "task": "在 `src/react/{main,App,ProductCard}.jsx` 渲染同一固定库存；保留原生入口便于对照",
+      "comparisonTheme": "Java 拼文本/调用函数 / JSX 表达式和组件；声明式 UI 的新机制",
+      "acceptance": [
+        "六张卡片与原生数据一致；能解释 JSX 编译、createRoot、Fragment；不重建数据/校验规则"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C21-main"
+      ],
+      "error": {
+        "trigger": "组件小写、JSX表达式写错、每次渲染重新createRoot",
+        "evidence": "Console组件/语法信息；Elements与Components对照；检查入口调用次数",
+        "repair": "组件大写、表达式正确、入口建root一次；六商品文字正确",
+        "risk": "用新建脚手架重复覆盖L2；从全功能App开始让JSX课已经依赖Query/Context"
+      },
+      "commands": {
+        "start": "npm run lab -- start C21",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C21"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C22",
+      "labId": "L3",
+      "title": "Props、组合与渲染模型",
+      "day": 11,
+      "slug": "05-react/c22-props-composition-render",
+      "previousLesson": "C21",
+      "startCheckpoint": "C21",
+      "endCheckpoint": "C22",
+      "files": [
+        "ProductList.jsx",
+        "Toolbar.jsx"
+      ],
+      "task": "拆 `ProductList.jsx`、`Toolbar.jsx` 与 App；props 单向传递和 children 组合",
+      "comparisonTheme": "Java 方法参数 / props；函数返回 / render 与 commit 的边界",
+      "acceptance": [
+        "从 Components 定位传错 name；渲染不修改 props；商品卡与工具栏职责明确"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C22-main"
+      ],
+      "error": {
+        "trigger": "修改props商品或render时写存储，父组件数据被污染；条件表达式渲染多余0",
+        "evidence": "Components看props变化来源；断点命中render副作用；观察DOM文本",
+        "repair": "纯渲染、事件回调更新；明确条件比较；重渲染不改原数据",
+        "risk": "Java普通方法与React生命周期混为一谈；提前引Context绕过props教学"
+      },
+      "commands": {
+        "start": "npm run lab -- start C22",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C22"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C23",
+      "labId": "L3",
+      "title": "useState：状态快照与更新队列",
+      "day": 12,
+      "slug": "05-react/c23-state-snapshot-queue",
+      "previousLesson": "C22",
+      "startCheckpoint": "C22",
+      "endCheckpoint": "C23",
+      "files": [
+        "src/react/StockActions.jsx",
+        "src/react/App.jsx"
+      ],
+      "task": "在 `StockActions.jsx` 和 App 接入 P001 连续补货、延迟补货；复用 core 的更新能力",
+      "comparisonTheme": "Java 连续可变赋值 / React 同一渲染快照、函数式更新",
+      "acceptance": [
+        "连点补三件从 12 到 15；延迟补三件期间立即补一件最终 16；解释闭包旧值及 Hooks 规则"
+      ],
+      "comparisonIds": [
+        "c23-state-queue"
+      ],
+      "errorIds": [
+        "C23-main"
+      ],
+      "error": {
+        "trigger": "三次setStock(stock+1)只加1；延迟回调覆盖中途的补货",
+        "evidence": "Components与Sources：同一次回调stock一直12，三次都提交13",
+        "repair": "用函数式更新；12→15；延迟+3期间立即+1最终16；当前回调仍读旧快照可解释",
+        "risk": "示例错误/正确没有相同起始值；拿Java可变字段断言React setter应同步改局部变量"
+      },
+      "commands": {
+        "start": "npm run lab -- start C23",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C23"
+      },
+      "implemented": true,
+      "migrated": true,
+      "trial": {
+        "start": "P22",
+        "end": "P23",
+        "description": "已提供六商品 React 静态列表、props 与共享规则；它是 R4 试做起点，不代表 C04–C22 已迁移。"
+      }
+    },
+    {
+      "lessonId": "C24",
+      "labId": "L3",
+      "title": "数组更新、key 与派生数据",
+      "day": 12,
+      "slug": "05-react/c24-arrays-keys-derived",
+      "previousLesson": "C23",
+      "startCheckpoint": "C23",
+      "endCheckpoint": "C24",
+      "files": [
+        "src/react/App.jsx",
+        "src/react/ProductList.jsx"
+      ],
+      "task": "App 将商品集合统一放 state，ProductList 用 id，添加增删/排序/筛选和派生汇总",
+      "comparisonTheme": "Java 集合操作 / 不可变更新；对象 ID / React key 的身份语义",
+      "acceptance": [
+        "任意商品补货都同步统计；删/排后草稿不串行；不存第二份过滤结果；第二周验收"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C24-main"
+      ],
+      "error": {
+        "trigger": "原地改数组再set同一引用；index key导致排序后草稿错位；派生列表另存state",
+        "evidence": "Components状态身份；输入草稿后排序观察商品id与UI错配",
+        "repair": "不可变更新、业务id作为key、渲染时派生；筛选/统计和库存一致",
+        "risk": "为保证每次重建用随机key丢掉全部状态；只测文本数量未测商品身份"
+      },
+      "commands": {
+        "start": "npm run lab -- start C24",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C24"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C25",
+      "labId": "L3",
+      "title": "表单、校验与可访问性",
+      "day": 13,
+      "slug": "05-react/c25-forms-validation-accessibility",
+      "previousLesson": "C24",
+      "startCheckpoint": "C24",
+      "endCheckpoint": "C25",
+      "files": [
+        "ProductEditor.jsx"
+      ],
+      "task": "新增 `ProductEditor.jsx` 调用 core 校验，完成名称/库存/元输入与错误焦点",
+      "comparisonTheme": "Java DTO 校验 / 字符串表单边界与受控组件",
+      "acceptance": [
+        "空名称、空库存、负数、非法价格拒绝；0 合法；纯键盘能编辑、保存、看到错误并聚焦"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C25-main"
+      ],
+      "error": {
+        "trigger": "Number空文本变0；元乘100留下小数误差；错误提示未关联输入",
+        "evidence": "RTL填空/非法价格；Sources看原始文本；Accessibility/label检查",
+        "repair": "调用core转换、字段错误和焦点；0合法、空白拒绝、合法价格存整数分；键盘完成保存",
+        "risk": "UI自己的校验与core分叉；只设input min/required就假设导入数据也安全"
+      },
+      "commands": {
+        "start": "npm run lab -- start C25",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C25"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C26",
+      "labId": "L3",
+      "title": "状态提升、保留与重置",
+      "day": 13,
+      "slug": "05-react/c26-state-ownership-reset",
+      "previousLesson": "C25",
+      "startCheckpoint": "C25",
+      "endCheckpoint": "C26",
+      "files": [
+        "src/react/App.jsx",
+        "src/react/ProductEditor.jsx"
+      ],
+      "task": "修改 App 与 ProductEditor，确立 selectedId/草稿归属、切换商品和取消行为",
+      "comparisonTheme": "Java 对象字段生命周期 / 组件位置、类型、key 的状态保留",
+      "acceptance": [
+        "改 P001 草稿后取消，再开 P002 看到库存 0；提交才改业务数据；列表/统计同步"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C26-main"
+      ],
+      "error": {
+        "trigger": "从props初始化state后切P002仍显示P001草稿；关闭弹窗未重置",
+        "evidence": "Components：product.id变化而draft仍旧；按取消→换商品复现",
+        "repair": "明确选中id和草稿所有者，按业务切换重建/重置；P002初始0且取消不改源数据",
+        "risk": "不分“关闭再打开同一件”和“切换另一件”；Effect双向同步造成循环与草稿丢失"
+      },
+      "commands": {
+        "start": "npm run lab -- start C26",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C26"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C27",
+      "labId": "L3",
+      "title": "useReducer 与 Context",
+      "day": 14,
+      "slug": "05-react/c27-reducer-context",
+      "previousLesson": "C26",
+      "startCheckpoint": "C26",
+      "endCheckpoint": "C27",
+      "files": [
+        "inventory-reducer.js",
+        "InventoryProvider.jsx"
+      ],
+      "task": "增加 `inventory-reducer.js`、`InventoryProvider.jsx`，收拢增删改 action",
+      "comparisonTheme": "Java 命令分发/纯函数经验 / reducer action；Context 的订阅边界",
+      "acceptance": [
+        "reducer 不改输入；未知 action 有明确策略和测试；跨层只共享必要数据，UI 草稿仍本地"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C27-main"
+      ],
+      "error": {
+        "trigger": "reducer修改原state；未知action返回undefined；所有UI草稿进Context",
+        "evidence": "单元测试冻结/保留before引用并比较；检查Provider值与action分支",
+        "repair": "纯函数返回新值；明确未知action错误；有变化才改业务状态，草稿留局部",
+        "risk": "将用例只写成点击UI而无规则测试；引入Context后形成第二份商品来源"
+      },
+      "commands": {
+        "start": "npm run lab -- start C27",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C27"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C28",
+      "labId": "L3",
+      "title": "useRef 与外部系统",
+      "day": 14,
+      "slug": "05-react/c28-refs-external-systems",
+      "previousLesson": "C27",
+      "startCheckpoint": "C27",
+      "endCheckpoint": "C28",
+      "files": [
+        "src/react/StockActions.jsx",
+        "src/react/ProductEditor.jsx"
+      ],
+      "task": "在 StockActions 和 ProductEditor 增加聚焦、取消句柄与取消操作",
+      "comparisonTheme": "Java 可变句柄 / ref；ref 与 state 并列区分",
+      "acceptance": [
+        "保存后焦点正确；取消盘点后不再补货；ref 改动不作为 UI 渲染依据"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C28-main"
+      ],
+      "error": {
+        "trigger": "用ref保存可见库存，改变后UI不刷新；取消后定时任务仍回写",
+        "evidence": "Components的state没变；Sources看ref与timer/abort句柄；取消后观察",
+        "repair": "可见数据放state，ref放DOM/句柄；取消后不更新；提交后焦点正确",
+        "risk": "每次render建外部资源；误把ref当“绕过渲染”的通用state替代品"
+      },
+      "commands": {
+        "start": "npm run lab -- start C28",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C28"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C29",
+      "labId": "L3",
+      "title": "useEffect 深入与清理",
+      "day": 15,
+      "slug": "05-react/c29-effects-cleanup",
+      "previousLesson": "C28",
+      "startCheckpoint": "C28",
+      "endCheckpoint": "C29",
+      "files": [
+        "useInventoryShortcuts.js"
+      ],
+      "task": "新增 `useInventoryShortcuts.js`，为当前库存页同步标题/键盘监听，补 setup/cleanup",
+      "comparisonTheme": "Java 订阅/取消订阅 / Effect 生命周期；非构造器类比",
+      "acceptance": [
+        "挂载/切换/卸载后监听数量正确；StrictMode 开发检查下只执行一次业务动作；派生汇总不靠 Effect"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C29-main"
+      ],
+      "error": {
+        "trigger": "Effect缺cleanup造成重复快捷键；依赖每次新对象引发循环；闭包用旧值",
+        "evidence": "setup/cleanup日志、事件断点、React Hooks lint；观察挂载/卸载计数",
+        "repair": "稳定必要依赖、对称清理；一次操作一次业务变化；保留StrictMode",
+        "risk": "以禁用StrictMode或忽略lint作为修复；把按钮保存与派生汇总塞入Effect"
+      },
+      "commands": {
+        "start": "npm run lab -- start C29",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C29"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C30",
+      "labId": "L3",
+      "title": "请求状态与竞态调试",
+      "day": 15,
+      "slug": "05-react/c30-requests-races",
+      "previousLesson": "C29",
+      "startCheckpoint": "C29",
+      "endCheckpoint": "C30",
+      "files": [
+        "src/services/product-api.js"
+      ],
+      "task": "新增 ProductDetail 与 `src/services/product-api.js`，完成手工详情请求状态机",
+      "comparisonTheme": "Java Future 取消经验 / AbortSignal 与过期响应守卫",
+      "acceptance": [
+        "P001 慢→P002 快最终只显示 P002；卸载不回写；404/取消/失败/loading 状态准确"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C30-main"
+      ],
+      "error": {
+        "trigger": "P001慢响应在P002快响应后覆盖；旧请求finally关掉新loading",
+        "evidence": "Network显示完成顺序；断点看当前id与返回id；可控延迟复现",
+        "repair": "Abort与过期守卫覆盖成功/失败/finally；最终P002，取消不报业务失败，卸载不回写",
+        "risk": "只mock最终数据没有乱序；固定sleep偶然通过；复用同一个AbortController导致请求立即取消"
+      },
+      "commands": {
+        "start": "npm run lab -- start C30",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C30"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C31",
+      "labId": "L3",
+      "title": "自定义 Hooks 与路由",
+      "day": 16,
+      "slug": "05-react/c31-custom-hooks-routing",
+      "previousLesson": "C30",
+      "startCheckpoint": "C30",
+      "endCheckpoint": "C31",
+      "files": [
+        "useProductRequest.js"
+      ],
+      "task": "提取 `useProductRequest.js`、本地快照 Hook，App 增加列表/详情 hash 路由与 URL 筛选",
+      "comparisonTheme": "Java 复用函数/实例 / Hook 复用逻辑；路径参数 / 浏览器 URL",
+      "acceptance": [
+        "分享并刷新 P004 详情可用；不存在 ID 显示不存在；两个 Hook 实例状态独立；本地改动可恢复"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C31-main"
+      ],
+      "error": {
+        "trigger": "两次调用Hook误以为共享状态；依赖漏id；Pages详情刷新404",
+        "evidence": "Components看两个实例；URL/Network与Hook入参；严格静态刷新",
+        "repair": "Hook复用逻辑不共享实例；参数依赖齐全；hash详情/回退/未知id可用",
+        "risk": "抽Hook同时改变行为而无基准；用dev history fallback冒充Pages支持任意路由"
+      },
+      "commands": {
+        "start": "npm run lab -- start C31",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C31"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C32",
+      "labId": "L3",
+      "title": "认识 TanStack Query 与服务端状态",
+      "day": 16,
+      "slug": "05-react/c32-tanstack-query-server-state",
+      "previousLesson": "C31",
+      "startCheckpoint": "C31",
+      "endCheckpoint": "C32",
+      "files": [
+        "src/react/query-options.js",
+        "src/services/repository.js",
+        "src/react/ProductDetail.jsx"
+      ],
+      "task": "增加 query-options 与浏览器 mock repository，替换详情手工请求；一次明确数据归属迁移",
+      "comparisonTheme": "Java Map 缓存经验 / queryKey、失效与生命周期；不等同 HashMap",
+      "acceptance": [
+        "P001/P002 缓存隔离；修改后对应查询更新；默认重试策略可解释；持久化只由 repository 写"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C32-main"
+      ],
+      "error": {
+        "trigger": "queryKey不含id，切商品读旧缓存；mutation后未失效；UI与repository双写",
+        "evidence": "Query缓存/Network：P002无请求、key仍旧；比较UI/repository值",
+        "repair": "key含必要参数、精确失效，repository单一数据源；两ID隔离、编辑后更新",
+        "risk": "用数组索引当缓存身份；迁入Query后旧请求Effect仍在运行；自动重试导致测试拖延未控制"
+      },
+      "commands": {
+        "start": "npm run lab -- start C32",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C32"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C33",
+      "labId": "L3",
+      "title": "现代 React 19 与更新速查",
+      "day": 17,
+      "slug": "05-react/c33-modern-react-actions",
+      "previousLesson": "C32",
+      "startCheckpoint": "C32",
+      "endCheckpoint": "C33",
+      "files": [
+        "src/react/ProductEditor.jsx",
+        "src/react/StockActions.jsx"
+      ],
+      "task": "在编辑/补货流程加入异步 Action、提交中与乐观反馈，保留失败回滚",
+      "comparisonTheme": "Java try/finally 的提交流程 / Action 状态；无一一对应 API",
+      "acceptance": [
+        "防重复提交；成功更新、失败回滚且保留草稿；useActionState 参数正确；新 API 分级而非全量强制"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C33-main"
+      ],
+      "error": {
+        "trigger": "把form action单参数函数交给useActionState，formData实际是prevState；失败未回滚",
+        "evidence": "Sources看参数类型；提交失败后乐观行仍存在",
+        "repair": "正确签名与状态边界；pending防重复、成功提交、失败回滚且保留草稿",
+        "risk": "把浏览器Action写成服务器持久化；未缓存Promise直接交use；未经官方核对批量展示新API"
+      },
+      "commands": {
+        "start": "npm run lab -- start C33",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C33"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C34",
+      "labId": "L3",
+      "title": "性能、加载与错误诊断",
+      "day": 17,
+      "slug": "05-react/c34-performance-loading-errors",
+      "previousLesson": "C33",
+      "startCheckpoint": "C33",
+      "endCheckpoint": "C34",
+      "files": [
+        "src/react/App.jsx",
+        "src/react/ReportPanel.jsx"
+      ],
+      "task": "用 Profiler 测库存筛选；按需加载 ReportPanel，增加局部错误边界",
+      "comparisonTheme": "Java 缓存经验 / useMemo 依赖；任务优先级 / transition 的边界",
+      "acceptance": [
+        "测量后再选优化；补货后统计不旧；区分 lazy fallback、请求状态与渲染错误，不能用 memo 掩盖逻辑 bug"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C34-main"
+      ],
+      "error": {
+        "trigger": "useMemo空依赖留下旧总价；到处memo但卡顿仍在；用Suspense包普通fetch",
+        "evidence": "Profiler定位实际提交；补货后state变而memo值不变；观察加载边界",
+        "repair": "先正确计算再测量，声明依赖；lazy和错误边界各司其职；当前总价随库存变化",
+        "risk": "用固定毫秒阈值验收不同电脑；性能优化吞掉正确性；把渲染错、网络错、加载混成一种"
+      },
+      "commands": {
+        "start": "npm run lab -- start C34",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C34"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C35",
+      "labId": "L3",
+      "title": "React UT、集成测试与 E2E 地图",
+      "day": 18,
+      "slug": "05-react/c35-react-testing",
+      "previousLesson": "C34",
+      "startCheckpoint": "C34",
+      "endCheckpoint": "C35",
+      "files": [
+        "tests/react/"
+      ],
+      "task": "在 `tests/react/` 补表单校验、创建、失败重试；在 tests/e2e 保留一条跨页冒烟",
+      "comparisonTheme": "JUnit / Vitest；UI 用户行为 / RTL；浏览器流程 / Playwright",
+      "acceptance": [
+        "用角色/label 断言；await 用户操作和异步 UI；空库存 bug 真能被抓住；解释 Jest 定位，不再写第二套测试"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C35-main"
+      ],
+      "error": {
+        "trigger": "测试不await事件/异步；只断言内部state或mock调用，空输入bug仍绿",
+        "evidence": "失败堆栈/act警告；RTL角色查询显示真实错误；故意引入业务回归",
+        "repair": "await user-event、findBy等条件等待；用户可见行为断言；非法输入和失败重试真的红→绿",
+        "risk": "mock了被测校验函数；用timeout掩盖问题；把DOM模拟器当真实布局浏览器"
+      },
+      "commands": {
+        "start": "npm run lab -- start C35",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C35"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C36",
+      "labId": "L3",
+      "title": "React 项目复盘与故障排查",
+      "day": 18,
+      "slug": "05-react/c36-react-project-debugging",
+      "previousLesson": "C35",
+      "startCheckpoint": "C35",
+      "endCheckpoint": "C36",
+      "files": [
+        "notes/react-review.md"
+      ],
+      "task": "在当前应用定位派生统计、请求身份、存储边界三个故障，记录 notes/react-review.md",
+      "comparisonTheme": "Java 分层排错经验 / Console→Components→Network→Profiler",
+      "acceptance": [
+        "每个故障有证据/修复/复现结果；本地库存快照恢复、详情与统计一致；L3 和第三周验收"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C36-main"
+      ],
+      "error": {
+        "trigger": "商品改为1但汇总仍52；缓存串id；坏快照覆盖有效库存",
+        "evidence": "顺序查Components→Network→Application与存储调用次序",
+        "repair": "删除冗余统计state、修缓存身份、校验后持久化；对应三故障重放与回归通过",
+        "risk": "复盘又新开三个demo；只展示最终绿测，不提供原始证据和定位路径"
+      },
+      "commands": {
+        "start": "npm run lab -- start C36",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C36"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C37",
+      "labId": "L4",
+      "title": "组件生态与选择标准",
+      "day": 19,
+      "slug": "06-components-ui5/c37-component-ecosystem-selection",
+      "previousLesson": "C36",
+      "startCheckpoint": "C36",
+      "endCheckpoint": "C37",
+      "files": [
+        "notes/components.md"
+      ],
+      "task": "以当前表格/编辑需求写 notes/components.md，确定 adapter 输入输出与验收",
+      "comparisonTheme": "Java 接口/适配经验 / UI 组件契约；库与业务数据分离",
+      "acceptance": [
+        "按可访问性、主题、维护、许可选型；比较整库/primitives/代码分发；同一个商品 id 贯穿排序与编辑"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C37-main"
+      ],
+      "error": {
+        "trigger": "根据排名选库，忽略表格/弹窗契约；排序后用row.index回查原数组",
+        "evidence": "对照需求矩阵；断点显示row.id=P002但取到P001",
+        "repair": "写明输入/输出/维护/许可依据；以id作身份；排序后选中与编辑同一商品",
+        "risk": "将“选型”变成安装六个库；比较缺日期或把付费扩展写成基础功能"
+      },
+      "commands": {
+        "start": "npm run lab -- start C37",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C37"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C38",
+      "labId": "L4",
+      "title": "一个普通组件库的完整案例",
+      "day": 19,
+      "slug": "06-components-ui5/c38-antd-inventory",
+      "previousLesson": "C37",
+      "startCheckpoint": "C37",
+      "endCheckpoint": "C38",
+      "files": [
+        "adapters/antd/"
+      ],
+      "task": "在 `adapters/antd/` 替换列表与弹窗，调用同一 core/repository",
+      "comparisonTheme": "Java Bean 初值经验 / Form initialValues 与受控更新边界",
+      "acceptance": [
+        "按库存排序后编辑 P002 仍是它；取消 P001 草稿不残留；校验、空/错态、主题与焦点可用"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C38-main"
+      ],
+      "error": {
+        "trigger": "Form initialValues被当成实时值，P001改8取消后P002仍8",
+        "evidence": "Components中product=P002/0，输入DOM值仍8；检查表单挂载生命周期",
+        "repair": "按编辑会话设置/重置草稿；取消→换商品→保存行为回归；表格rowKey为id",
+        "risk": "新增AntD专属规则覆盖共享校验；只测首次打开，不测连续开关"
+      },
+      "commands": {
+        "start": "npm run lab -- start C38",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C38"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C39",
+      "labId": "L4",
+      "title": "SAP Fiori 与 UI5 家族",
+      "day": 20,
+      "slug": "06-components-ui5/c39-fiori-ui5-family",
+      "previousLesson": "C38",
+      "startCheckpoint": "C38",
+      "endCheckpoint": "C39",
+      "files": [
+        "notes/ui5-choice.md"
+      ],
+      "task": "写 notes/ui5-choice.md，对同一库存需求选择经典 UI5 或 Web Components；阅读现有 D2",
+      "comparisonTheme": "Java MVC 经验 / UI5 View/Controller/Model；Fiori 不等于框架",
+      "acceptance": [
+        "分清 SAPUI5、OpenUI5、原生 UI5 Web Components 和 React 包装库；说明静态 mock 的边界"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C39-main"
+      ],
+      "error": {
+        "trigger": "把UI5 React当作OpenUI5的React皮肤；认为直接改JSON对象会自动通知绑定",
+        "evidence": "家族/导入名对照；读Model更新契约，后续C41在真实adapter验证通知",
+        "repair": "按库与运行机制选路线；说明setProperty/绑定职责；能正确分类四个名称",
+        "risk": "为概览再建必做独立demo；复制旧React自定义事件限制；把Fiori当单一JS包"
+      },
+      "commands": {
+        "start": "npm run lab -- start C39",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C39"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C40",
+      "labId": "L4",
+      "title": "OpenUI5 入门：MVC 与工程",
+      "day": 20,
+      "slug": "06-components-ui5/c40-openui5-mvc-project",
+      "previousLesson": "C39",
+      "startCheckpoint": "C39",
+      "endCheckpoint": "C40",
+      "files": [
+        "adapters/openui5/webapp/"
+      ],
+      "task": "在 `adapters/openui5/webapp/` 配 Component、manifest、XML View、Controller，接共享规则桥接",
+      "comparisonTheme": "Java 包/类路径 / UI5 namespace、模块与资源路径",
+      "acceptance": [
+        "列表加载 6 件；Console/Network 定位模块名错误；UI5 CLI 构建能生成静态产物；不手抄第二份业务规则"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C40-main"
+      ],
+      "error": {
+        "trigger": "namespace/module名不匹配导致404；在sap.ui.define内直接粘ESM",
+        "evidence": "Network找失败模块URL；Console首个解析/加载错误；检查bridge产物",
+        "repair": "manifest、命名空间与路径一致；使用已验证的构建桥；六商品加载且静态构建可用",
+        "risk": "共享纯函数变成手工复制的第二份；本地CDN缓存掩盖离线/版本问题"
+      },
+      "commands": {
+        "start": "npm run lab -- start C40",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C40"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C41",
+      "labId": "L4",
+      "title": "UI5 Model、绑定与业务控件",
+      "day": 21,
+      "slug": "06-components-ui5/c41-model-binding-controls",
+      "previousLesson": "C40",
+      "startCheckpoint": "C40",
+      "endCheckpoint": "C41",
+      "files": [
+        "adapters/openui5/webapp/view/Inventory.view.xml",
+        "adapters/openui5/webapp/controller/Inventory.controller.js",
+        "adapters/openui5/webapp/view/EditDialog.fragment.xml"
+      ],
+      "task": "在 Inventory.view/controller、编辑 Fragment 和 i18n 中完成筛选、草稿、保存",
+      "comparisonTheme": "Java Bean/监听经验 / JSONModel.setProperty 与绑定通知",
+      "acceptance": [
+        "筛选 P004 后只改它；取消不污染源数据；汇总与语言切换正确；理解 model 名称、路径与 binding context"
+      ],
+      "comparisonIds": [
+        "c41-model-notification"
+      ],
+      "errorIds": [
+        "C41-main"
+      ],
+      "error": {
+        "trigger": "筛选后可见第一行指向P004，却按索引0写P001；直接改getData对象UI不更新；取消已污染Model",
+        "evidence": "Sources看binding context `/products/3` 与id；Model值和控件值对照",
+        "repair": "使用context/id和setProperty；草稿单独Model；P004改动只影响它，取消不写入，汇总/i18n正确",
+        "risk": "把XML绑定的模型名/相对路径写错；提前把正式Model双向绑定到可取消草稿"
+      },
+      "commands": {
+        "start": "npm run lab -- start C41",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C41"
+      },
+      "implemented": true,
+      "migrated": true,
+      "trial": {
+        "start": "P40",
+        "end": "P41",
+        "description": "已提供 OpenUI5 Component、JSONModel 六商品表格、i18n 与共享纯函数构建桥。只在 View/Controller 中接通筛选和草稿保存。"
+      }
+    },
+    {
+      "lessonId": "C42",
+      "labId": "L4",
+      "title": "UI5 路由与 OData 起点",
+      "day": 21,
+      "slug": "06-components-ui5/c42-routing-odata",
+      "previousLesson": "C41",
+      "startCheckpoint": "C41",
+      "endCheckpoint": "C42",
+      "files": [
+        "adapters/openui5/webapp/view/Detail.view.xml",
+        "adapters/openui5/webapp/controller/Detail.controller.js",
+        "adapters/openui5/webapp/manifest.json",
+        "adapters/openui5/webapp/localService/metadata.xml"
+      ],
+      "task": "增加 Detail View/Controller、manifest 路由、静态 metadata 和有限 V2 mock",
+      "comparisonTheme": "Java DTO/Repository 经验 / OData 实体集、元数据、模型请求；不是接口等价",
+      "acceptance": [
+        "P004 详情刷新/回退正常；有限过滤/排序/分页可观察；JSONModel/ODataModel、V2/V4 区分清楚"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C42-main"
+      ],
+      "error": {
+        "trigger": "用可见索引拼路由；把当前分页子集统计当全量；混用V2/V4接口",
+        "evidence": "hash参数、binding context、Network查询及metadata命名",
+        "repair": "路由传稳定id、未知id有结果；明确页数据与全量；有限V2读取/过滤/分页可观察",
+        "risk": "声称浏览器mock等于真实SAP服务；部署缺metadata/json；静态站承诺完整OData写服务"
+      },
+      "commands": {
+        "start": "npm run lab -- start C42",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C42"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C43",
+      "labId": "L4",
+      "title": "UI5 Web Components 原生使用",
+      "day": 22,
+      "slug": "06-components-ui5/c43-native-web-components",
+      "previousLesson": "C42",
+      "startCheckpoint": "C42",
+      "endCheckpoint": "C43",
+      "files": [
+        "adapters/web-components/"
+      ],
+      "task": "在 `adapters/web-components/` 替换原生库存表单输入/按钮，监听真实事件",
+      "comparisonTheme": "Java listener 经验 / CustomEvent；字段值 / attribute 与 property",
+      "acceptance": [
+        "两个组件可补货；布尔属性正确；slots、主题/i18n 资源可用；知道 Shadow DOM 边界与 React 原生支持"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C43-main"
+      ],
+      "error": {
+        "trigger": "`disabled=\"false\"`仍禁用；拿错事件字段；全局CSS无法穿透Shadow DOM",
+        "evidence": "Elements看属性存在；Console看disabled/property与event.detail；检查shadow树/slots",
+        "repair": "布尔属性按存在/移除或property；按当前事件契约取值；用支持的主题接口；补货有效",
+        "risk": "漏打包主题/i18n资源；把attribute字符串与property类型混为一谈"
+      },
+      "commands": {
+        "start": "npm run lab -- start C43",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C43"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C44",
+      "labId": "L4",
+      "title": "UI5 Web Components for React",
+      "day": 22,
+      "slug": "06-components-ui5/c44-ui5-react",
+      "previousLesson": "C43",
+      "startCheckpoint": "C43",
+      "endCheckpoint": "C44",
+      "files": [
+        "adapters/ui5-react/"
+      ],
+      "task": "在 `adapters/ui5-react/` 改列表和编辑表单，接共享规则/repository",
+      "comparisonTheme": "Java adapter 经验 / React 包装 API；继续对照原生组件与经典 UI5",
+      "acceptance": [
+        "原生 form 提交链正确；事件取值/数字转换正确；P004 编辑场景通过；L4 验收，不再重写所有 CRUD"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C44-main"
+      ],
+      "error": {
+        "trigger": "UI5布局Form被当原生form，保存未触发；包装事件沿用AntD签名",
+        "evidence": "Sources提交断点不命中；Elements没有HTML form祖先；查看实际事件对象",
+        "repair": "建正确原生表单链，按包装API取值/转换；键盘Enter与按钮均保存一次，错误阻止提交",
+        "risk": "把经典UI5绑定语法混入React props；使用废弃组件包；只通过鼠标点击验收"
+      },
+      "commands": {
+        "start": "npm run lab -- start C44",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C44"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C45",
+      "labId": "L5",
+      "title": "全链路 Debug 与交付前检查",
+      "day": 23,
+      "slug": "07-project/c45-debug-delivery-checks",
+      "previousLesson": "C44",
+      "startCheckpoint": "C44",
+      "endCheckpoint": "C45",
+      "files": [
+        "notes/debug.md"
+      ],
+      "task": "在当前 src/react 应用依次复现状态/资源/存储/布局问题，写 notes/debug.md",
+      "comparisonTheme": "Java 堆栈/调试经验 / 浏览器跨层证据与 source maps",
+      "acceptance": [
+        "每个修复可复现并回归；做键盘/手机检查；Performance/Memory 有前后证据，不凭一张快照断言泄漏"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C45-main"
+      ],
+      "error": {
+        "trigger": "补货改同一state引用所以UI不动；资源404被误当JS错；重挂载保留监听",
+        "evidence": "Console/Components/Network按层收证；source map映射；Memory前后对照",
+        "repair": "从最早可见错误定位，修引用/路径/清理；原操作复测，写证据与修复；布局/键盘一起检查",
+        "risk": "以清缓存、刷新、加日志当根因；测脚本破坏学员快照；只保存最终截图"
+      },
+      "commands": {
+        "start": "npm run lab -- start C45",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C45"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C46",
+      "labId": "L5",
+      "title": "静态构建与 GitHub Pages",
+      "day": 23,
+      "slug": "07-project/c46-static-build-pages",
+      "previousLesson": "C45",
+      "startCheckpoint": "C45",
+      "endCheckpoint": "C46",
+      "files": [
+        "tools/lab.mjs",
+        "notes/delivery.md"
+      ],
+      "task": "修改构建 base、严格静态预览和交付说明；学习个人 Pages 流程",
+      "comparisonTheme": "Java 打包部署经验 / Node 构建与浏览器运行的边界",
+      "acceptance": [
+        "`/js_web/` 及演示嵌套路径资源无 404；深层/hash 刷新可用；无开发服务器 fallback 掩盖错误，无服务端 API 假设"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C46-main"
+      ],
+      "error": {
+        "trigger": "base写 `/`，部署后入口JS404；嵌套演示仍用站点base；hash前路径不存在",
+        "evidence": "严格静态预览Network实际请求；dist/index.html引用；直接打开深层地址",
+        "repair": "站点与各演示分别配置真实base；资源、字体、图、下载和刷新可用；构建时Node与运行时浏览器分清",
+        "risk": "dev返回index.html掩盖404；Actions成功就宣称上线；发布包漏掉数据与生成规则"
+      },
+      "commands": {
+        "start": "npm run lab -- start C46",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C46"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C47",
+      "labId": "L5",
+      "title": "综合项目与测试选择",
+      "day": 24,
+      "slug": "07-project/c47-project-testing-strategy",
+      "previousLesson": "C46",
+      "startCheckpoint": "C46",
+      "endCheckpoint": "C47",
+      "files": [
+        "notes/test-plan.md",
+        "tests/react/regression.test.jsx"
+      ],
+      "task": "写 notes/test-plan.md，给目前项目补 3–5 条风险驱动回归",
+      "comparisonTheme": "JUnit 分层经验 / Vitest、RTL、Playwright 各自边界",
+      "acceptance": [
+        "至少覆盖非法快照保护、连续交互、请求失败恢复；不用快照数量充当覆盖；完成恢复与键盘验收"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C47-main"
+      ],
+      "error": {
+        "trigger": "先setItem再校验导致坏快照替换好数据；大量快照断言遗漏连续输入与重试",
+        "evidence": "UT保存前后原文比较；RTL连续输入；浏览器离线→恢复操作",
+        "repair": "校验成功再持久化；3–5条对具体风险有用的测试；拒绝非法值后旧副本逐字不变",
+        "risk": "只增加测试数量；E2E重复全部纯函数分支；假等待让竞态消失"
+      },
+      "commands": {
+        "start": "npm run lab -- start C47",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C47"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    },
+    {
+      "lessonId": "C48",
+      "labId": "L5",
+      "title": "总复盘与后续路线",
+      "day": 24,
+      "slug": "07-project/c48-review-next-steps",
+      "previousLesson": "C47",
+      "startCheckpoint": "C47",
+      "endCheckpoint": "C48",
+      "files": [
+        "notes/final-review.md"
+      ],
+      "task": "在 notes/final-review.md 记录十题自测、现场增量、排错记录和下一阶段",
+      "comparisonTheme": "Java/JS 本次最易错的对照回看；不新增业务框架",
+      "acceptance": [
+        "不看答案给当前应用加一条筛选并解释测试；现场定位一个已学故障；能说清语言→UI→工具→交付；L5/最终验收"
+      ],
+      "comparisonIds": [],
+      "errorIds": [
+        "C48-main"
+      ],
+      "error": {
+        "trigger": "`[...products]`后改内层对象，旧快照也改变；能运行答案却解释不了修复",
+        "evidence": "断点比较数组不同、商品对象相同；现场增加筛选与故障定位",
+        "repair": "复制修改路径、补回归并解释；给同项目增加一项小需求，不看参考解完成",
+        "risk": "用总测试绿替代独立操作；把完成课程/检查通过/理解机制混成一个完成标记"
+      },
+      "commands": {
+        "start": "npm run lab -- start C48",
+        "dev": "npm run lab -- dev",
+        "check": "npm run lab -- check C48"
+      },
+      "implemented": false,
+      "migrated": false,
+      "trial": null
+    }
+  ]
+}

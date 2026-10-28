@@ -33,3 +33,9 @@
 - 网站 check 零诊断；全量固定输出 277/277，build 47 页及 /js_web/ 检查通过。课程生产页 HTTP 200，正文 6 个折叠区、1280/360 无文档溢出、无失败资源/页面异常、禁用 JS 阅读正常；课程/表格/Dialog 截图已检查。
 - Pages：[run 39134470004](https://github.com/socoo123/js_web/actions/runs/39134470004) 成功；线上课程与路线均 HTTP 200，标题、6 个答案、路线 41/48 与 C41 链接正确。
 - 未运行：DevTools 界面上手动点选面板、屏幕阅读器、Firefox、Safari、Windows；真实 SAP 服务。
+
+## V2 工作区试做
+
+- 2026-10-28 · 发行版 `2026.10-v2.1` · 起点 `P40` → 终点 `P41`；共享规则向量、binding context、取消/空白拒绝/保存/中英切换通过。原例子保留为可选参考，不是当前主线工作目录。
+- 在练习工作区执行 `npm run lab -- check C41`。教师从起点按正文片段跟做并修改实际文件验证先红后绿：`npm run test:lab-walkthrough`。
+- 详细环境、错误证据、范围与限制见 [V2 验证](../../labs/records/README.md)。C23/C41 的试做前置单独提供，连续路线仍需 R6/R7 验收。

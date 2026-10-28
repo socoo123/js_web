@@ -1,0 +1,8 @@
+---
+import { Code } from '@astrojs/starlight/components';
+import { snippet } from '../../labs/sources.mjs';
+interface Props { snippetId: string }
+const ref = snippet(Astro.props.snippetId);
+---
+{!ref.verified && <p>未运行验证：{ref.reason}。请按步骤自己尝试。</p>}
+<Code code={ref.code} lang={ref.lang} title={ref.file ?? ref.source.split('/').at(-1)} />

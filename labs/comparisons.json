@@ -1,0 +1,75 @@
+{
+  "c03-input-number": {
+    "title": "先把文本变成经过校验的数量",
+    "input": "P001 库存 12，补货输入文本 \"3\"",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C03Input.java",
+      "region": "stock-input",
+      "caption": "C03Input 的 restock 方法",
+      "output": "restock(12, \"3\") → 15",
+      "verified": true
+    },
+    "right": {
+      "label": "JavaScript",
+      "lang": "js",
+      "checkpoint": "C03",
+      "file": "src/core/inventory.js",
+      "region": "restock",
+      "caption": "调用同文件的 parseStock",
+      "output": "restockProduct(P001, \"3\").stock → 15",
+      "verified": true
+    },
+    "difference": "Java 的 parseInt 转换失败会抛异常；JS 的 Number 转换失败得到 NaN，空白还会得到 0。因此 JS 入口要先判空，再检查整数与范围。"
+  },
+  "c23-state-queue": {
+    "title": "连续修改局部变量 / 排入三次状态更新",
+    "input": "P001 的初始库存 12，执行一次连续补三件",
+    "left": {
+      "label": "Java",
+      "lang": "java",
+      "source": "labs/reference/java/C23Queue.java",
+      "region": "queue",
+      "caption": "main 中的普通局部变量赋值",
+      "output": "当前局部变量为 15",
+      "verified": true
+    },
+    "right": {
+      "label": "React",
+      "lang": "jsx",
+      "checkpoint": "P23",
+      "file": "src/react/StockActions.jsx",
+      "region": "queue",
+      "caption": "一次点击的处理函数，add 复用共享更新规则",
+      "output": "下一次渲染显示 P001 当前库存 15 件",
+      "verified": true
+    },
+    "difference": "Java 的每次赋值立即改变局部变量；React setter 排入更新队列，本次事件读取的 stock 仍是 12。函数式 updater 接收队列里前一步的结果。"
+  },
+  "c41-model-notification": {
+    "title": "可观察的修改入口负责通知界面",
+    "input": "P004 从库存 3 保存为 8",
+    "left": {
+      "label": "Java 经验类比",
+      "lang": "java",
+      "source": "labs/reference/java/C41Notification.java",
+      "region": "notification",
+      "caption": "Bean 的 setter 显式发出 PropertyChangeEvent",
+      "output": "监听器打印 P004:3->8",
+      "verified": true
+    },
+    "right": {
+      "label": "OpenUI5",
+      "lang": "js",
+      "checkpoint": "P41",
+      "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
+      "region": "save",
+      "caption": "JSONModel 的保存处理函数",
+      "resultLabel": "页面结果",
+      "output": "P004 的行与可见汇总更新为 8，P001 仍为 12",
+      "verified": true
+    },
+    "difference": "两侧都通过约定的更新入口通知观察者。JSONModel.setProperty 会检查相关绑定；Java Bean 本身没有 UI5 的模型名、绑定路径或 XML View。"
+  }
+}

@@ -1,0 +1,175 @@
+---
+title: C41 UI5 Model、绑定与业务控件
+description: 在当前 OpenUI5 适配器里筛选 P004，以 binding context 创建独立草稿，校验后通过 Model 保存。
+sidebar:
+  order: 41
+---
+
+import CodeCompare from '../../../components/CodeCompare.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 4 周 · 第 21 天** · 阅读跟做约 45 分钟 · 实作约 45 分钟<br />
+> 前置：OpenUI5 Component、XML View、JSONModel 与共享库存规则 · 运行：本地 UI5 · 示例已运行验证
+
+## 这一课解决什么问题
+
+六商品表格已经能加载。现在完成同一个编辑场景：筛选 P004，打开草稿，把库存 3 改成 8；取消时仍是 3，保存时只修改 P004。筛选后它位于可见第一行，却仍对应数据中的第四件商品，不能用行号猜身份。
+
+本课起点已提供共享纯函数构建桥与中英文资源。你只修改当前工作区里的 View、Controller 和编辑 Fragment，库存规则继续来自 `src/core/`。
+
+<LessonTask lessonId="C41" />
+
+## Java 程序员先看这里
+
+<CodeCompare pairId="c41-model-notification" />
+
+左侧 Bean 的 setter 实现放在完整 Java 源文件中；它调用 PropertyChangeSupport 发通知。右侧是 UI5 的正式数据入口，不能用直接改对象字段代替。
+
+<a id="1-jsonmodel既存数据也通知绑定"></a>
+
+## 1. 模型名与绑定路径决定读哪个值
+
+`inventory` 是商品模型，`ui` 是筛选与汇总状态，`draft` 是本次编辑草稿。`{inventory>/products}` 从模型根读取数组；行内 `{inventory>stock}` 没有 `/`，相对于这一行的 binding context 读取。
+
+**先猜一猜：** 筛选 P004 只剩一行，它的 binding context 是 `/products/0` 还是 `/products/3`？
+
+答案是 `/products/3`。筛选改变绑定的可见结果，没有重排原始数组。这个路径属于模型内的数据位置，商品 id P004 才是跨界面与路由的业务身份。
+
+用下面内容替换 View 中的 Table，保留外层 mvc:View、Page/content。下一节会在同一个 content 里加 VBox，包住工具栏和 Table。
+
+<CodeExcerpt snippetId="c41-table" />
+
+列表绑定创建每一行，属性绑定显示库存，press 指向当前 Controller 的方法。命名模型必须在所有绑定里写对；把 `draft>/stock` 写成 `draft>/Stock` 就会读到 undefined。
+
+Java 集合中的索引也会因筛选投影而失去原有含义；UI5 额外提供 binding context，让你回到那条真实记录。
+
+<a id="2-属性列表表达式三种绑定各做一件事"></a>
+
+## 2. 筛选和可见汇总共用绑定结果
+
+在 Page 的 content 内用 `<VBox class="sapUiSmallMargin">` 包住下面的工具栏与 Table，并在 Table 后关闭 `</VBox>`。mvc:View 还要声明 `xmlns:core="sap.ui.core"`，供语言选项使用。
+
+<CodeExcerpt snippetId="c41-toolbar" />
+
+搜索框按 Enter 或搜索按钮才触发 search。Controller 的 onFilter 只筛选绑定，不另存一份商品数组：
+
+<CodeExcerpt snippetId="c41-filter" />
+
+空搜索使用空筛选恢复所有商品。`Contains` 条件用 OR 同时匹配名称和 id，查询 P004 时只留下扩展坞。
+
+Table 更新后，从可见行拿实际商品并复用汇总规则：
+
+<CodeExcerpt snippetId="c41-summary" />
+
+初始显示 6 件商品、总库存 52、价值 26348.00 元；筛选 P004 显示 1 件商品、库存 3、价值 897.00 元；空结果各项为 0。这里统计口径是“当前可见结果”，不是远程服务全量。Java 的 Stream filter 后求和也是同一口径。
+
+<a id="3-筛选绑定汇总当前可见结果"></a>
+
+<a id="4-dialog-与草稿输入时改草稿保存时改商品"></a>
+
+## 3. 编辑草稿与正式 Model 分开
+
+**先猜一猜：** 把输入框直接双向绑定到 `inventory>stock`，键入 8 后再点取消，正式库存还会是 3 吗？
+
+不会。TwoWay 绑定在输入更新时就已写回正式 Model。取消按钮只关闭弹窗，无法自动撤回已经发生的修改。
+
+用 context 拿商品，复制成文本草稿，放到单独的 JSONModel：
+
+<CodeExcerpt snippetId="c41-edit" />
+
+`rules.toDraft` 创建独立的 tags 数组，并把库存与元价格转成表单文本。正式 Model 不参与草稿绑定，取消时只关闭 Dialog。Java 的编辑 DTO 也需要独立生命周期；持有同一个可变对象就不能获得取消隔离。
+
+新建 `view/EditDialog.fragment.xml`：
+
+<CodeExcerpt snippetId="c41-dialog" />
+
+Label 与控件关联，错误时显示 Error 状态。`valueLiveUpdate` 让输入文本进入草稿；库存 0 的文本是 `"0"`，空字符串继续保留为空，留给共享校验判断。
+
+<a id="5-i18n界面文案也来自模型"></a>
+
+## 4. 校验后保存，formatter 只显示
+
+Java/UI5 对照卡右侧的 `onSave` 先执行 `rules.parseDraft`。名称、库存、元价格都使用共享规则：空白库存无效，0 合法，价格最多两位小数并保存为整数分。字段出错时写入 draft.errors，保持弹窗并聚焦错误字段；成功才调用 `inventory.setProperty`。
+
+`formatter.money` 来自起点提供的只读显示工具。它把整数分转成元文本，不负责反向解析表单。输入转换由 core 负责，显示 formatter 不能成为另一套校验。
+
+### 把处理函数接到同一个 Controller
+
+在 `controller/Inventory.controller.js` 中，用下面开头引入所需模块，并打开 Controller 的方法对象。之后按顺序放入 onFilter、onUpdateFinished、onEdit、对照卡中的 onSave。
+
+<CodeExcerpt snippetId="c41-header" />
+
+最后用下面内容接上取消、释放草稿、语言切换，并关闭方法对象与模块：
+
+<CodeExcerpt snippetId="c41-tail" />
+
+`rules.js` 由启动命令从当前 core 构建为 `sap.ui.define` 模块，生成文件无需手改。XML/Controller 使用经典 UI5 加载器，不能直接粘入 ESM import。更改 core 后重新启动 dev/build，桥接会重新生成；相同向量同时检查两端行为。
+
+切换语言会重新加载并恢复固定初始商品。这个阶段没有服务器保存。Java 的模型通知经验能帮助理解更新入口，模块加载和 XML 绑定则是这里的新机制。
+
+## 常见错误与调试
+
+### 筛选后保存错了商品
+
+**现象**：筛选 P004 后编辑可见第一行，保存 8，P004 仍是 3，P001 却变了。
+
+**工具**：Sources 找到当前 Controller，在 onEdit 的 `this._editPath = context.getPath()` 设断点。输入 P004 并搜索，点编辑；在暂停的 Console 分别读取 `context.getPath()`、`context.getProperty("id")`。
+
+**证据**：可见只有一行，context 却给出 `/products/3` 与 P004。若保存路径被写死为 `/products/0`，Model 的第一件会变为 8。表格可见位置不能代替源路径。
+
+**原因**：把投影中的索引误当成原数组索引。
+
+**修复**：保存 context 给出的编辑路径。草稿使用独立 Model，提交通过 setProperty；直接改 `getData()` 返回对象的字段并不会自动通知相关绑定。
+
+**确认**：重新加载固定数据，筛选 P004，改 8 后取消，重开仍是 3；再改 8 保存，P004 与可见汇总为 8，清空筛选后 P001 仍是 12。空白库存保存时弹窗保持打开。
+
+## 练习
+
+### 唯一任务：完成筛选后的可靠编辑
+
+:::tip[自己尝试 · 本地 UI5]
+1. 在当前工作区按正文修改 View、Controller，新增 Fragment；中英文资源和共享桥使用起点提供的版本。
+2. 从同一工作区运行任务卡的 start/dev，打开终端明确打印的 `http://127.0.0.1:8060/index.html`。
+3. 筛选 P004。先故意把 `_editPath` 设成 `/products/0`，用 Sources 记录真实 context；随后恢复 `context.getPath()`。
+4. 完成取消、空白拒绝、保存 8、清空筛选四步，再运行 `npm run lab -- check C41`。
+
+预期：P004 的修改不影响 P001，取消不污染正式数据；切换 English 后商品、按钮与汇总标签有对应文字。
+:::
+
+<details>
+<summary>提示</summary>
+
+检查三个入口：XML 的模型名、按钮来源的 binding context、提交时的 setProperty。错误若发生在打开弹窗时，先查是否把正式商品直接当 draft；发生在保存时，再比较 `_editPath` 与真实 id。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+正文的 View 工具栏与 Table 放进同一个 VBox；Controller 按 header→filter→summary→edit→save→tail 组成一个模块；Fragment 完整绑定 draft。规则桥从 core 生成，parseDraft 成功后只替换 `_editPath` 那一条商品。任务卡内可按需下载完整答案，不需要另建或进入一个 UI5 demo。
+
+</details>
+
+## 项目进度
+
+- 同一数据的筛选、可见统计、草稿保存/取消已经接通。
+- 名称、库存、元价格通过共享校验；tags 保留，错误不能替换有效商品。
+- 暂停记录“C41 context 与草稿检查通过，下一步详情路由与有限 OData mock”。
+
+## 小结
+
+- 命名模型与相对/绝对路径决定绑定位置。
+- 筛选后的可见行通过 context 回到真实商品。
+- 草稿与正式 Model 分离，校验成功才 setProperty。
+- formatter 负责显示，共享 core 负责业务规则。
+
+自测：为什么可见第 0 行是 `/products/3`？直接双向绑定为何无法取消？setProperty 比改对象字段多做了什么？可见汇总和服务全量统计有什么区别？
+
+## 延伸阅读
+
+- [UI5：JSONModel](https://ui5.sap.com/#/api/sap.ui.model.json.JSONModel)
+- [UI5：BindingContext](https://ui5.sap.com/#/api/sap.ui.model.Context)
+- [UI5：数据绑定教程](https://ui5.sap.com/#/topic/68b9644a253741e8a4b9e4279a35c247)
+- [UI5 CLI：配置与构建](https://ui5.github.io/cli/v4/pages/Configuration/)
+- [旧机制示例与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c41)（按需参考）

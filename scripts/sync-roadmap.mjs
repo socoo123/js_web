@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import catalog from '../labs/catalog.json' with { type: 'json' };
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const docsRoot = path.join(root, 'src/content/docs');
@@ -32,13 +33,16 @@ const output = [
   '- **4 周主线：** 每周 6 个学习日，每天按目录顺序学习 2 课，投入 3–4 小时；第 7 天休息或补课。',
   '- **8 周慢速与深化：** 每周 6 个学习日，每天按课号学习 1 课，用剩余时间练习、调试和复习。', '',
   '先读示例、亲手运行，再做预测与排错练习。每课包含 Java 对照和操作说明，库存管理项目贯穿全程。', '',
+  `V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 ${catalog.lessons.filter((row) => row.migrated).length} 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。`, '',
 ];
 for (let week = 1; week <= 4; week++) {
   output.push(`## 第 ${week} 周：${weekNames[week - 1]}`, '', '| 主线学习日 | 课程 | 状态 |', '| --- | --- | --- |');
   for (const [, day, id, rawTitle] of lessons.slice((week - 1) * 12, week * 12)) {
     const title = `${id} ${rawTitle.trim()}`;
     const slug = published.get(id);
-    output.push(`| 第 ${day} 天 | ${slug ? `[${title}](../${slug}/)` : title} | ${slug ? `已发布<span data-lesson-status="${id}" hidden></span>` : '待发布'} |`);
+    const row = catalog.lessons.find((row) => row.lessonId === id);
+    const state = row?.migrated ? `已接工作区${row.trial ? '（前置试做）' : ''}` : '已发布';
+    output.push(`| 第 ${day} 天 | ${slug ? `[${title}](../${slug}/)` : title} | ${slug ? `${state}<span data-lesson-status="${id}" hidden></span>` : '待发布'} |`);
   }
   output.push('');
 }

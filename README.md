@@ -2,7 +2,9 @@
 
 面向**会 Java、初学前端**的开发者，用中文从 HTML/CSS 和浏览器讲起，逐步掌握 JavaScript、工程工具、React、开源组件与 SAP UI5。以同一个库存管理应用贯穿课程，每课包含可运行示例、预期输出、Java 对照、调试任务和练习答案。
 
-**48 课必修主线已完结**，配套七阶段库存项目、四张速查页、14 张 D2 机制图与本地学习进度。完成与验证记录见 [STATUS](docs/STATUS.md)。
+**第一版 48 课必修主线已完结**，配套七阶段库存项目、四张速查页、14 张 D2 机制图与本地学习进度。V2 正按 [新计划](docs/PLAN.md) 逐批迁移为一个工作区、5 个 Lab；C03/C23/C41 先接入，其中 C23/C41 使用明确前置的试做快照。完成与验证记录见 [STATUS](docs/STATUS.md)。
+
+[V2 库存工作区](https://socoo123.github.io/js_web/labs/)提供初始工程、固定命令、版本化快照与恢复说明。旧 examples 链接与学习进度保留，未迁移的课程继续使用原入口。
 
 **[在线学习](https://socoo123.github.io/js_web/) · [48 课学习路线](https://socoo123.github.io/js_web/roadmap/) · [从 C01 开始](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) · [C48 自测与复盘](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/)**
 
@@ -51,6 +53,8 @@ npm run dev -- --host 127.0.0.1
 打开终端给出的 `/js_web/` 地址，默认是 `http://127.0.0.1:4321/js_web/`。阶段 4 的依赖供 C32 固定输出示例和浏览器测试复用，全量构建前需要安装。
 
 D2 准备脚本需要 Bash、curl、tar、Python 3，以及 `shasum` 或 `sha256sum`；首次下载工具与中文字体需要联网。自动准备支持 macOS/Linux 的 arm64、x64，已实测 macOS arm64 与 Linux x64；其他环境与手动准备方式见 [D2 说明](diagrams/README.md)。
+
+构建会实际运行 Java 对照，需要 JDK 21（`java --version`）。完整工作区跟做检查还需要在 `labs/inventory` 安装一次锁定依赖，并准备 Playwright Chromium：`npm ci --prefix labs/inventory`、`npm exec --prefix labs/inventory -- playwright install chromium`，然后在根目录运行 `npm run test:lab-walkthrough`。
 
 构建并检查生产预览，在仓库根目录执行：
 

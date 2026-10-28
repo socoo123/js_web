@@ -1,0 +1,8 @@
+{
+  "previous": "P40",
+  "files": [
+    "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "adapters/openui5/webapp/view/Inventory.view.xml",
+    "adapters/openui5/webapp/view/EditDialog.fragment.xml"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "previous": "C03",
+  "files": [
+    "src/react/index.html",
+    "src/react/main.jsx",
+    "src/react/App.jsx",
+    "src/react/ProductCard.jsx"
+  ],
+  "sharedFiles": {
+    "src/core/validation.js": "labs/reference/core/validation.js",
+    "src/core/inventory.js": "labs/reference/core/inventory.js",
+    "src/core/summary.js": "labs/reference/core/summary.js"
+  }
+}

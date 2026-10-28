@@ -28,3 +28,13 @@
   color: var(--sl-color-text-accent);
   font-weight: 600;
 }
+
+/* Only lessons containing the comparison component use the wider reading layout. */
+html:has(.code-compare) { --sl-content-width: 64rem; --sl-sidebar-width: 14rem; }
+body:has(.code-compare) .right-sidebar-container { display: none; }
+@media (min-width: 72rem) {
+  [data-has-sidebar][data-has-toc] body:has(.code-compare) .main-pane { width: 100%; --sl-content-margin-inline: auto; }
+}
+.code-compare .expressive-code { font-size: 14px; }
+.code-compare pre { max-width: 100%; }
+.code-compare :focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }

@@ -1,11 +1,22 @@
 ---
 import Default from '@astrojs/starlight/components/MarkdownContent.astro';
 import LearningProgress from './LearningProgress.astro';
+import catalog from '../../labs/catalog.json';
 
 const { id, entry } = Astro.locals.starlightRoute;
 const lessonId = entry.data.title.match(/^(C\d{2})\s/)?.[1];
+const revised = catalog.lessons.find((lesson) => lesson.lessonId === lessonId)?.migrated;
+const toc = Astro.locals.starlightRoute.toc;
 ---
 
 {id === 'roadmap' && <LearningProgress />}
+{revised && toc && <details class="lesson-outline"><summary>本页导航</summary><nav aria-label="本页导航">{toc.items.filter((item) => item.depth === 2).map((item) => <a href={'#' + item.slug}>{item.text}</a>)}</nav></details>}
 <Default><slot /></Default>
 {lessonId && <LearningProgress lessonId={lessonId} />}
+
+<style>
+  .lesson-outline { font-size: .85rem; padding-block: .5rem; border-bottom: 1px solid var(--sl-color-hairline-light); margin-bottom: 1.25rem; }
+  summary { cursor: pointer; }
+  nav { display: flex; flex-wrap: wrap; gap: .4rem .8rem; padding-block: .5rem; }
+  a:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }
+</style>

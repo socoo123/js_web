@@ -1,0 +1,12 @@
+---
+import catalog from '../../labs/catalog.json';
+interface Props { labId?: string }
+const { labId } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+{catalog.labs.filter((lab) => !labId || lab.labId === labId).map((lab) => <section class="lab-overview">
+  <h2 id={lab.labId.toLowerCase()}>{labId ? `${lab.labId} ${lab.title}` : <a href={`${base}labs/${lab.labId.toLowerCase()}/`}>{lab.labId} {lab.title}</a>}</h2>
+  <p>{lab.description}</p>
+  <p>在同一工作区持续修改。下列「已改版」表示课程已接入工作区；阅读完成标记不代表本地检查已通过。</p>
+  <ul>{catalog.lessons.filter((lesson) => lesson.labId === lab.labId).map((lesson) => <li><a href={`${base}${lesson.slug}/`}>{lesson.lessonId} {lesson.title}</a> · {lesson.migrated ? '已改版' : '旧版可读'}{lesson.trial && '（工作区试做）'}</li>)}</ul>
+</section>)}

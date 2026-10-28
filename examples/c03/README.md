@@ -49,3 +49,9 @@
 - 2026-10-15 · Java 21.0.2：`java JavaNumbers.java` 输出 `2`、`0.30000000000000004`、`Infinity`、`NaN`、`0.3`、`ArithmeticException: / by zero`、`NumberFormatException: For input string: "3件"`。
 - 2026-10-19 · 按用户要求提交已有的 `Number(amount)` 修改。Node 24.22.0 下固定输出 12/12 与语法检查通过；Chromium 156.0.8078.4 实际打开本地网页，连续补货 3 后库存依次为 15、18，反馈正确，无页面异常。原始故障的历史记录保留，复现方式见上文。
 - 未运行：在 DevTools 界面上手动点击的操作路径（面板名称按 Chrome 官方文档核对）、Firefox、Safari、Windows。
+
+## V2 工作区试做
+
+- 2026-10-28 · 发行版 `2026.10-v2.1` · 起点 `C02` → 终点 `C03`；工作区检查与卡片有效/空白/非法输入通过。原例子保留为可选参考，不是当前主线工作目录。
+- 在练习工作区执行 `npm run lab -- check C03`。教师从起点按正文片段跟做并修改实际文件验证先红后绿：`npm run test:lab-walkthrough`。
+- 详细环境、错误证据、范围与限制见 [V2 验证](../../labs/records/README.md)。C23/C41 的试做前置单独提供，连续路线仍需 R6/R7 验收。

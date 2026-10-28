@@ -10,3 +10,7 @@ test-results/
 .env.*
 !.env.example
 *.log
+labs/inventory/.lab/
+labs/inventory/checkpoint.json
+labs/inventory/adapters/openui5/webapp/model/rules.js
+public/downloads/inventory/

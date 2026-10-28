@@ -474,3 +474,15 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - Chromium 156.0.8078.4：既有进度浏览器回归通过；另检查四张速查在 1280/360px × 亮暗 × 启用/禁用 JS 下的 32 次侧栏键盘跳转与直接刷新，全部通过，无页面异常或失败资源。移动菜单、速查组与参考页截图目视检查通过。
 - Chrome 155.0.8059.82：54 页/216 组宽度主题无页面横溢或坏图，14 张 D2 产物加载、六折叠区、代码复制、三关键词/搜索 UI、54 页禁用 JS 阅读通过；检查结果和截图在忽略目录 .cache/qa/readme/。已知未覆盖环境、项目级 LICENSE 缺失与未配置 PR 自动检查列入 README/STATUS，不自行选定许可证或扩展课程范围。
 - 提交 819d360 的 [Pages run 39273036192](https://github.com/socoo123/js_web/actions/runs/39273036192) 构建/部署成功；线上重跑相同 32 次速查键盘导航/刷新，含移动菜单、亮暗与禁用 JS，全部通过；首页/路线/C48 HTTP 200、48/48、六答案、三关键词/搜索 UI 与静态阅读通过，无页面异常或失败资源。GitHub README 内容 blob 与本地提交一致，M1 关闭。
+
+## 2026-10-28 改版方案依据
+
+- 核对 [Starlight 内容](https://starlight.astro.build/guides/authoring-content/)与 [Code 组件](https://expressive-code.com/key-features/code-component/)：MDX/Astro 可用源码字符串构建代码卡；据此规划静态双栏组件，尚未集成到网站。
+- 核对 [npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci/)与 [Astro Pages](https://docs.astro.build/en/guides/deploy/github/)：练习发行包必须提供匹配锁文件；站点与嵌套演示分别使用真实 base。本次未升级或安装依赖。
+- 核对 [React 状态快照](https://react.dev/learn/state-as-a-snapshot)、[MDN Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)、[UI5 Web Components 定位](https://ui5.github.io/webcomponents/docs/)：对照强调状态快照/身份键/组件家族边界；页面样稿的运行与视觉检查单独记录在 docs/review/README.md。
+
+## 2026-10-28 V2 工作区与三课试做（R1–R4）
+
+- 动态安装/兼容核对：[Vite Node 要求](https://vite.dev/guide/)、[UI5 CLI 要求与命令](https://ui5.github.io/cli/v4/pages/CLI/)、[UI5 配置](https://ui5.github.io/cli/v4/pages/Configuration/)；npm 官方 registry 的 `vite@8.3.4`、`@ui5/cli@4.0.71` engines 与 `@ui5/webcomponents-react@2.27.3` peers。沿用已锁定版本，本批不升级框架；新练习只用一份 npm 安装清单/锁，UI5 adapter 清单仅用于 CLI 识别。
+- 教学与呈现：[React 状态快照](https://react.dev/learn/state-as-a-snapshot)、[更新队列](https://react.dev/learn/queueing-a-series-of-state-updates)、[JSONModel API](https://ui5.sap.com/#/api/sap.ui.model.json.JSONModel)、[Expressive Code 组件](https://expressive-code.com/key-features/code-component/)。三张 Java 对照有完整可执行源文件，JS/JSX/UI5 片段从固定参考来源按区域提取，不从学员工作副本生成正文。
+- 实测 Node 24.22.0/npm 11.19.1、Java 21.0.2、Chromium 156.0.8078.4；安装体积/时间、起点到终点、主错误的失败证据、修复与门禁详见 [V2 验证](../labs/records/README.md)。C23/C41 是明确前置的试做，未据此宣称 C01–C48 连续迁移完成；旧 examples 与 F1 保留。

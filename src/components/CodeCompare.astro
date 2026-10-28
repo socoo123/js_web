@@ -1,0 +1,52 @@
+---
+import { Code } from '@astrojs/starlight/components';
+import { comparison } from '../../labs/sources.mjs';
+interface Props { pairId: string }
+const { pairId } = Astro.props;
+const pair = comparison(pairId);
+---
+<section class="code-compare" data-comparison={pairId} aria-label={pair.title}>
+  <p class="compare-title"><strong>{pair.title}</strong></p>
+  <p class="compare-input">共同输入：{pair.input}</p>
+  <div class="compare-columns">
+    {[pair.left, pair.right].map((side) => <section class="compare-side" aria-label={side.label}>
+      <p class="side-label"><strong>{side.label}</strong> · {side.caption}</p>
+      {!side.verified && <p>未运行验证：{side.reason}。请按步骤自己尝试。</p>}
+      <Code code={side.code} lang={side.lang} title={side.file ?? side.source.split('/').at(-1)} />
+      <p class="compare-output"><strong>{side.resultLabel ?? (side.lang === 'jsx' || side.lang === 'xml' ? '页面结果' : '输出')}：</strong>{side.output}</p>
+      <p class="copy-feedback" data-copy-feedback role="status" aria-live="polite"></p>
+    </section>)}
+  </div>
+  <p class="compare-difference">{pair.difference}</p>
+</section>
+<script>
+  for (const side of document.querySelectorAll('.compare-side')) {
+    const pre = side.querySelector('pre');
+    if (pre) { pre.tabIndex = 0; pre.setAttribute('aria-label', `${side.getAttribute('aria-label')}代码，可横向滚动`); }
+  }
+  document.addEventListener('click', async (event) => {
+    const button = event.target instanceof Element ? event.target.closest('.code-compare .copy button') : null;
+    if (!(button instanceof HTMLButtonElement)) return;
+    event.stopImmediatePropagation();
+    const side = button.closest('.compare-side');
+    const feedback = side?.querySelector('[data-copy-feedback]');
+    if (!feedback) return;
+    try {
+      await navigator.clipboard.writeText((button.dataset.code ?? '').replaceAll('\u007f', '\n'));
+      feedback.textContent = `${side?.getAttribute('aria-label')}代码已复制。`;
+    } catch { feedback.textContent = '复制失败，请选中本侧代码手动复制。'; }
+  }, true);
+</script>
+<noscript><style is:inline>.expressive-code .copy { display: none !important; }</style></noscript>
+<style>
+  .code-compare { container-type: inline-size; border: 1px solid var(--sl-color-hairline-light); border-radius: .7rem; padding: 1rem; margin-block: 1.5rem; background: var(--sl-color-bg-nav); }
+  .compare-columns { display: grid; gap: 1rem; }
+  .compare-side { min-width: 0; margin: 0; }
+  .code-compare p { margin-block: .45rem; }
+  .compare-input, .side-label { font-size: .9rem; }
+  .compare-output { padding: .6rem; border-left: 3px solid var(--sl-color-text-accent); background: var(--sl-color-bg); white-space: pre-wrap; }
+  .compare-difference { border-top: 1px solid var(--sl-color-hairline-light); padding-top: .8rem; }
+  .copy-feedback { font-size: .85rem; }
+  .copy-feedback:empty { display: none; }
+  @container (min-width: 760px) { .compare-columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+</style>

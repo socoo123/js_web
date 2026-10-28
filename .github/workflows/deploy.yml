@@ -28,6 +28,18 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
+      - name: Set up Java for executable language comparisons
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install the single locked learning workspace
+        run: npm ci --prefix labs/inventory
+      - name: Install Chromium for workspace rehearsals
+        working-directory: labs/inventory
+        run: npx playwright install --with-deps chromium
+      - name: Rehearse lessons from their actual starting points
+        run: npm run test:lab-walkthrough
       - name: Install locked React example dependencies
         run: npm ci --prefix examples/inventory/04-react
       - name: Check React reference project

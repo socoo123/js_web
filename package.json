@@ -18,9 +18,13 @@
     "examples": "node scripts/run-examples.mjs",
     "test:progress": "node --test tests/progress.test.mjs",
     "test:progress:browser": "node tests/progress.browser.mjs",
-    "build": "npm run lint:lessons && npm run examples && npm run test:progress && npm run sync:roadmap && npm run diagrams && astro build && npm run check:build",
+    "build": "npm run build:labs && npm run test:labs && npm run test:comparisons && npm run lint:lessons && npm run examples && npm run test:progress && npm run sync:roadmap && npm run diagrams && astro build && npm run check:build",
     "check:build": "node scripts/check-build.mjs",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test:labs": "node --test tests/labs.test.mjs tests/lesson-sources.test.mjs",
+    "build:labs": "node scripts/build-labs.mjs",
+    "test:comparisons": "node scripts/verify-comparisons.mjs",
+    "test:lab-walkthrough": "node scripts/verify-lab-walkthrough.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.6",
@@ -34,6 +38,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "unified": "11.0.5",
+    "remark-parse": "11.0.0",
+    "remark-mdx": "3.1.1"
   }
 }

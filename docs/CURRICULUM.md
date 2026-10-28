@@ -1,161 +1,115 @@
-# 48 课课程大纲
+# 48 课改版任务与验收
 
-适用读者：会 Java、初学前端。主节奏为每天 3–4 小时、每日 2 课、每周 6 天；8 周路线每天 1 课。
+2026-10-28 · **用户已授权实施，按 STATUS 逐批迁移与发布。** 本文件替代旧大纲；总体设计见 [PLAN](PLAN.md)，逐章错误见 [DEBUG_TESTING](DEBUG_TESTING.md#revision-v2-errors)，页面规格见 [ARCHITECTURE](ARCHITECTURE.md#revision-v2-ui)。已上线情况以 STATUS 为准。
 
-课号 C01–C48 是稳定 ID，网站网址和学习进度都与它对应。哪些课已经发布，以 [STATUS](STATUS.md) 为准。构建时 `scripts/sync-roadmap.mjs` 会从本文件的表格生成线上路线页，所以表格的列格式不要改，标题里不要出现 `|`。
+<a id="revision-v2-curriculum"></a>
 
-怎么写看 [写作规范](CONTENT_GUIDE.md)。表格中的「必须讲清的内容」是范围的上限，不是必须逐项展开的清单。每周表格下面的「写作范围」进一步写明每课讲到哪里为止；写不下的内容放进选修。
+## 怎么使用这张表
 
-贯穿业务是库存管理。C01–C05 重构与后续新课统一使用 [PLAN §3](PLAN.md) 的固定样例数据，项目阶段从 C06 开始推进。
+C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。每课默认以上一课完成状态为前置；C01 从 C00 骨架开始。表中路径均相对拟建的 `labs/inventory/`，不是现在已经存在的文件。正常跟做使用自己的连续工作副本；起点包只用于补课与恢复。
 
-## 第 1 周：历史、语言、结构与浏览器
+每行是一章的必做增量。预测输出、修 bug、项目步骤合并围绕这一增量，不再布置三套独立 demo。对照列指定 Java/JS 卡片的主题，不要求每个前端机制都能翻译成 Java。没有等价机制时明确写“经验类比”，不虚构 Java API。
 
-| 日 | 课号与标题 | 必须讲清的内容 | 自己尝试与验收 |
-| --- | --- | --- | --- |
-| 1 | C01 JavaScript 的故事与生态地图 | 浏览器中的第一次库存计算；1995 起源、1997 标准化、兼容问题、ES5/Node/npm、ES2015 与年度标准、组件生态；语言/引擎/宿主/工具；Java 对照；旧教程的 var/回调/CommonJS 与特性状态 | 在 Console 预测库存和环境探测输出；修复拼写与环境错误；用自己的话解释浏览器/Node/Bun/npm/React 的职责（已按 C03 范例重构） |
-| 1 | C02 Web 基础与第一个调试现场 | HTML 语义、表单和 DOM；CSS 选择器/盒模型/Flex/Grid/响应式；URL/HTTP 与页面加载；编辑器、终端、Console、Elements、Sources；脚本加载 | 建立商品卡片 HTML/CSS/JS，调整手机布局；在 Console 查看变量，在断点处观察值，修复一个路径错误 |
-| 2 | C03 值、类型、转换与比较 | 7 种原始类型与对象；typeof；Number/BigInt、浮点数、整数精度；null/undefined；truthy；===、==、Object.is；?? 与 || | 预测并解释输出；修复价格、库存与默认值处理；比较 Java 整数除法/BigDecimal 与 JS Number |
-| 2 | C04 变量、作用域与控制流 | let/const/var、块作用域、提升与 TDZ；const 不冻结对象；if/switch、循环、for-of/for-in；异常与错误堆栈入门 | 改写 Java 统计函数；断点观察循环；修复越界访问和作用域问题，不用“对象按引用传参”的错误说法 |
-| 3 | C05 对象、引用与数据交换 | 对象字面量、属性/可选链、解构与展开；别名与浅复制；JSON 解析/序列化边界；日期/时区与字符串常见操作 | 实现商品记录转换、深层字段读取与 JSON 导入；证明浅复制仍共享内层对象 |
-| 3 | C06 函数、闭包与高阶操作 | 函数是值、声明/表达式/箭头函数、参数/默认值/rest；词法作用域、闭包；高阶函数；Java lambda 类比及边界 | 写库存筛选工厂与独立计数器；用 Scope 面板观察闭包；修复循环闭包捕获错误 |
-| 4 | C07 this、原型与 class | this 由调用方式决定；箭头函数的词法 this；call/apply/bind；属性查找与原型链；class/private 字段、组合；与 Java 类/继承的不同 | 预测方法脱离对象后的结果；用函数和 class 两种方式建模；解释实例为何能访问原型方法 |
-| 4 | C08 Array 与业务数据处理 | 遍历、map/filter/find/some/every/reduce；sort 默认规则、比较器、稳定性；修改/非修改 API；toSorted 等现代写法；稀疏数组 | 商品筛选、数字排序、统计库存、分组；避免修改输入，比较 Java Stream 和数组操作 |
-| 5 | C09 Object、Map、Set 与弱集合 | 字典选择、键类型、插入顺序、对象身份；Map/Set 操作；WeakMap/WeakSet 的用途与不可枚举性；分组与去重；迭代协议入门 | 去重标签、建立商品 ID 索引、按分类分组；解释两个内容相同对象为何是不同 Map 键 |
-| 5 | C10 栈、队列、树与复杂度 | 只讲 JS 写法和代价：Array 当栈（push/pop）；shift 的代价与头索引队列；嵌套对象表示树、递归 DFS 与队列 BFS；递归深度与改写成循环；图的邻接表用 Map 一段带过 | 撤销栈、任务队列、从分类树生成导航；用 console.time 比较 shift 和头索引在 10 万条数据上的量级差 |
-| 6 | C11 DOM、事件、表单与页面调试 | 查询/更新节点、文本与 HTML；冒泡/捕获/委托；表单与基础校验；DOM/CSS 调试、事件断点、可访问性；最小化直接操作 | 为商品列表增加筛选和编辑；用事件断点定位重复触发；用 DOM 断点定位意外删除 |
-| 6 | C12 从回调到 Promise：执行顺序 | 同步调用栈、任务/微任务、渲染概念；Promise 状态/链、异常传播、finally；异步不等于线程；浏览器与 Node 的宿主差异 | 预测一段输出顺序并用断点/日志验证；修复嵌套回调和漏 return；本周库存数据模块验收 |
+表格前两列保留“学习日 / Cnn 标题”，供 `scripts/sync-roadmap.mjs` 识别；只出现下面连续的 48 行课程记录。额外实现元数据进入 `labs/catalog.json` 后由其生成，不重复手填多份命令。
 
-第 1 周验收：能解释类型、闭包、原型的常见错误；项目阶段 1 运行 `node demo.js`，输出与 PLAN §3.1 的参考值一致。
+## Lab 1 库存规则与数据
 
-第 1 周写作范围：
+| 日 | 课号与标题 | 本课主任务与文件 | Java / JS 并排主题 | 完成标准 |
+| --- | --- | --- | --- | --- |
+| 1 | C01 JavaScript 的故事与生态地图 | 在 `src/core/inventory.js` 增加 P001 库存价值输出；在 `notes/runtime.md` 标明语言、宿主、工具；骨架已提供数据和启动方式 | `System.out.println` / `console.log`；同一库存运算在不同宿主运行 | P001 价值 478800 分；能区分 JS、浏览器、Node/Bun 与 npm；保留历史到年度标准及提案状态的阅读 |
+| 1 | C02 Web 基础与第一个调试现场 | 修改 `src/vanilla/index.html`、`styles.css`、`app.js` 的单商品卡片、label 和脚本路径 | Java 输出字符串 / HTML 元素与 DOM；明确浏览器布局是新知识 | 卡片显示 P001/12；label 对应输入；Network 无脚本 404；360px 基本可读，断点可命中 |
+| 2 | C03 值、类型、转换与比较 | 在 `src/core/inventory.js` 修复输入转换与默认值，接通卡片补货；覆盖 Number、空值、相等、整数分 | `Integer.parseInt` / `Number`；可空默认值 / `??`；对象身份与值 | 输入 3 后 P001 从 12 到 15；空白、3件、负数、小数不保存；合法库存 0 保留；解释 Number/BigInt 与精度 |
+| 2 | C04 变量、作用域与控制流 | 在同一 `inventory.js` 写循环统计、异常分支，替换有问题的变量作用域 | Java 块作用域与 final / let、const、var；for-each / for-of | 总库存 52；空集合 0；不访问越界元素；能在 Scope 找到 TDZ/变量覆盖，解释 const 对象仍可变 |
+| 3 | C05 对象、引用与数据交换 | 在 `inventory.js` 创建编辑草稿和导入转换，隔离 tags；从 JSON 还原业务数据 | 引用副本传参 / 引用副本传参；浅复制 / 展开；JSON 与对象 | 修改草稿 tags 后取消，原商品不变；非法 JSON 不替换数据；解释 JSON 对日期/undefined 等的表示边界 |
+| 3 | C06 函数、闭包与高阶操作 | 在 `inventory.js` 增加分类筛选工厂与独立操作计数器；任务仍在库存入口执行 | Java Predicate/lambda 捕获 / 函数值、词法闭包；默认参数/rest 短对照 | 外设筛选得到 P001/P002；两个工厂/计数器互不影响；修复循环闭包并观察 Scope |
+| 4 | C07 this、原型与 class | 在 `inventory.js` 把库存查询封装为 Inventory，修复作为回调的方法；保持业务数据可提取 | Java 方法引用 / 脱离对象的 JS 方法；class / 原型属性查找 | 直接查询与回调查询结果一致；解释 this 和箭头函数差异；能指出实例/原型各有何属性 |
+| 4 | C08 Array 与业务数据处理 | 在 `inventory.js` 增加筛选、数值排序、汇总；从一次查询链解释数组 API | Stream 的 filter/map/reduce / Array；Comparator / sort 比较器 | 原数据总库存 52、总价值 2634800 分；按库存升序 P002/P004/P006/P003/P001/P005；原数组顺序不变 |
+| 5 | C09 Object、Map、Set 与弱集合 | 在 `inventory.js` 增加 ID Map、分类分组、标签去重；弱集合只保留小范围机制对照 | HashMap 的 equals/hashCode / Map 身份键；HashSet / Set | P004 查到扩展坞；分类种数 2/1/2/1；标签热销/新品；重复 ID 拒绝；能解释弱键为何不可枚举 |
+| 5 | C10 栈、队列、树与复杂度 | 在 `inventory.js` 增加撤销栈、任务队列、分类树 DFS/BFS；完成 L1 收尾 | Deque / Array 栈与头索引队列；树对象与遍历 | 补 P001 3 件后撤销回 12；多次撤销顺序正确；DFS/BFS 各节点恰访问一次；大数据计时只比较量级 |
 
-- C06：开头用 5 行左右给出安装 Node 24 LTS 的步骤，此后纯语言的例子默认用 `node` 运行。闭包用 Sources 的 Scope 面板观察；循环捕获的 bug 用 `var` 和 `let` 对比。
-- C07：this 的四种调用方式各给一个短例子；不讲 `__proto__` 的历史和 `setPrototypeOf` 的性能；class 私有字段只讲用法。
-- C08：只挑 12 个左右常用数组方法，用一张表列出哪些修改原数组、哪些不修改；`sort` 默认按字符串排序必须单独演示。
-- C09：WeakMap/WeakSet 只讲一个用途示例，以及为什么不能遍历。
-- C10：不从头讲 Big O 和数据结构概念（Java 已学过），时间测量只看量级。
-- C11：`innerHTML` 与 `textContent` 的安全差异必须给一个 XSS 例子；事件委托用商品列表演示。
-- C12：事件循环只讲浏览器模型，Node 的差异用一段话说明，详细内容在 C17。
+写作边界：C01–C05 不要求学员先懂 npm/ESM，骨架的启动桥接明确为已提供部分。C07 的 class 是语言练习，不成为以后 React 的可变 state。C08 列约 12 个常用数组 API，覆盖稀疏、越界与修改性；C10 不重复讲 Java 学过的数据结构理论，图/链表只讲表达模型。每章检查读取独立副本，不让本章补货改变下一章的初始测试基准。
 
-## 第 2 周：现代 JS、运行时、工具与 React 起步
+## Lab 2 可用的原生库存页
 
-| 日 | 课号与标题 | 必须讲清的内容 | 自己尝试与验收 |
-| --- | --- | --- | --- |
-| 7 | C13 async/await、请求与 Network | async/await 与 Promise 的对应；串行与 Promise.all 并发、allSettled 处理部分失败；forEach(async) 陷阱；fetch 遇到 404 不抛异常、response.ok、JSON 解析失败；AbortController 取消上一次搜索；Network 看状态码/Response/Timing 与慢网模拟；CORS 只讲现象与原因 | 请求静态 products.json，显示加载/空/错三种状态；用 Network 模拟慢网和 404，页面提示正确 |
-| 7 | C14 原生页面、存储与错误处理 | localStorage/JSON、防损坏、导入导出；事件与渲染组织；try/catch 与用户错误提示；Application 面板、浏览器存储和刷新行为 | 完成原生库存页面 v1；损坏存储时可恢复；区分服务器数据与当前浏览器本地状态 |
-| 8 | C15 CSS 布局与响应式：排版库存页 | box-sizing 与盒模型复习；Flex 做工具栏、Grid 做商品卡片网格（repeat/minmax/auto-fill）；gap 与对齐；移动优先与媒体查询；CSS 变量；focus-visible 与对比度；DevTools 的 Flex/Grid 叠加层、设备模式、Computed 查样式来源；与 Swing/JavaFX 布局管理器类比 | 原生库存页 v1 在 360px 单列、768px 两列、1280px 四列，没有横向滚动；用 DevTools 找出并修复一处溢出 |
-| 8 | C16 模块、依赖与组织代码 | ESM import/export、静态/动态导入、模块作用域、循环依赖概念；浏览器 URL 解析与包解析；CommonJS require/module.exports；怎样判断新特性能否使用（MDN 兼容表、Node 版本、TC39 阶段） | 把库存逻辑拆成 ESM 文件，并复用阶段 1 的 inventory.js；修复导出/路径/加载错误；读懂一个 CommonJS 示例；查两个新 API 的环境支持 |
-| 9 | C17 Node 与浏览器的边界 | Node 运行 JS 的模型、V8、系统 I/O 与线程池概览；process/path/fs/promises/Buffer/基础 stream；环境变量、ESM；Node --inspect | 本地读取库存 JSON 并生成报告；调试文件路径/异步异常；解释为何浏览器没有 fs，而 Node 没有 DOM |
-| 9 | C18 npm：项目、版本与可复现安装 | package.json、scripts、dependencies/devDependencies/peerDependencies；semver、registry、install/ci、exec/npx；lockfile；Maven 类比的边界 | 建立两个脚本、阅读依赖树和锁文件；在独立练习目录验证清单/锁不一致时 npm ci 失败 |
-| 10 | C19 Yarn、pnpm、Bun 的职责与选择 | Yarn Classic/Modern、PnP/node-modules linker、workspaces；pnpm 存储/链接与隐藏依赖；Bun runtime/package manager/test/bundler；Corepack 状态；兼容性 | 选两种工具在隔离目录尝试同一小项目，记录锁文件与解析差异；主站继续只用 npm |
-| 10 | C20 构建工具与第一次 UT | Vite、转译/打包/类型检查的区别、开发服务与静态产物、source maps；Vitest 基本用法、describe/it/expect、AAA、边界数据；TypeScript 只写一节桥接（类型注解长什么样、Vite 不做类型检查），深入见 X02 | 给库存统计写正常/空值/非法输入测试，先观察失败再修复；构建页面并通过 source map 回到源码 |
-| 11 | C21 React 来由、JSX 与第一个组件 | 声明式 UI；函数组件、createRoot、JSX/Fragment、表达式/样式；React 与 DOM 的关系；Vite 练习项目；不用 CRA 开新项目 | 手写商品卡片组件，比较原生 DOM 更新；检查 JSX 的报错与编译后结构 |
-| 11 | C22 Props、组合与渲染模型 | props、children、组件拆分、单向流、纯渲染；render/commit 区分；条件渲染；React DevTools Components 查看树/props | 拆分列表/卡片/工具栏；从组件树定位错误 props；避免修改输入 props |
-| 12 | C23 useState：状态快照与更新队列 | Hooks 调用规则；事件函数；每次 render 的 state 快照、批处理、函数式更新、闭包；连续更新与延时回调；状态不等于 Java 可变字段 | 修复“加三次只加一次”和延时读取旧值；解释修复而非只背函数式写法 |
-| 12 | C24 数组更新、key 与派生数据 | 不可变对象/数组更新、map/filter；列表 key 与组件身份；派生数据/排序/过滤；状态最小化 | 商品增删改查与过滤；证明索引 key 导致编辑错位；不把过滤结果另存一份 state |
+| 日 | 课号与标题 | 本课主任务与文件 | Java / JS 并排主题 | 完成标准 |
+| --- | --- | --- | --- | --- |
+| 6 | C11 DOM、事件、表单与页面调试 | 把 `src/vanilla/app.js` 扩为六商品列表、委托事件和库存编辑；语义结构在 index.html | Java 监听器 / addEventListener；对象标识 / DOM dataset.id | 筛选后编辑 P004 不改 P001；单击只补一次；商品名以文本渲染；用事件/DOM 断点找重复监听与意外删除 |
+| 6 | C12 从回调到 Promise：执行顺序 | 在 `src/services/load-products.js` 加模拟异步加载，app.js 展示状态与收尾 | CompletableFuture 链 / Promise 链；线程与事件循环边界 | 成功有 6 项；失败可见；漏 return 用例能解释并修复；预测同步、微任务、任务顺序，完成第一周检查 |
+| 7 | C13 async/await、请求与 Network | 把同一个 loader 改为静态 JSON 请求，在 app.js 增加取消和加载/空/错态 | Java Future 等待 / await 当前函数；HTTP 状态判断 | 404、非 JSON、离线分别可定位；快换筛选时前请求取消；串行/并发、forEach(async) 用页内对照说明 |
+| 7 | C14 原生页面、存储与错误处理 | 新增 `src/services/storage.js`，接入 app.js 的保存、恢复、导入导出 | Java 序列化与异常处理经验 / localStorage + JSON | 刷新保留修改；坏 JSON 和字段错误不覆盖好副本；可恢复/导出；明确本浏览器状态不等于服务器数据 |
+| 8 | C15 CSS 布局与响应式：排版库存页 | 只修改 `src/vanilla/styles.css` 和必要 HTML，用 Flex/Grid 排工具栏与卡片 | JavaFX/Swing 布局管理器经验 / CSS 布局声明，明确非 API 等价 | 360/768/1280px 分别单/双/四列；无整页横滚；键盘焦点可见；用 Computed 找固定宽度溢出 |
+| 8 | C16 模块、依赖与组织代码 | 把已有 inventory.js 拆为 `src/core/{validation,summary,filters,collections,history,tree}.js` 与 facade；更新 app.js 入口 | Java import/package / ESM 绑定与 URL；CommonJS 对照 | 拆分前后业务测试不变；无循环依赖与 404；给出文件搬移清单；查两个特性的标准阶段和环境支持 |
+| 9 | C17 Node 与浏览器的边界 | 在 `src/cli/report.js` 复用 summary 读取 data/products.json 并输出报表 | Java Files/Path / fs/promises 与 URL/path；JVM / Node 宿主 | 从不同终端目录调用仍可找数据；6/52/2634800；inspect 断点可命中；能解释 process、Buffer/stream 的用途 |
+| 9 | C18 npm：项目、版本与可复现安装 | 在练习根 package.json 补充 report/test scripts；统一入口启动隔离的锁不一致实验 | Maven pom/依赖树 / package.json、lock、scripts；类比边界 | 主工作区安装可复现；隔离副本的 npm ci 因清单/锁不一致失败；理解依赖类型/semver，不改站点根锁 |
+| 10 | C19 Yarn、pnpm、Bun 的职责与选择 | 统一入口在 `.lab/sandboxes/` 比较两种工具，把结果写进 notes/tooling.md | Maven/Gradle 是构建工具的经验 / 运行时、包管理、测试、构建分别归位 | 同数据报告一致；记录锁/解析差异；主项目无额外管理器锁；覆盖 Yarn 两代、PnP、pnpm、Bun、Corepack 定位 |
+| 10 | C20 构建工具与第一次 UT | 在 `tests/core/` 写统计/校验 UT；配置 Vite 构建原生页；TS 桥接使用提供的小片段 | JUnit AAA / Vitest；编译、转译、打包、类型检查边界 | 正常/空/非法用例能先红后绿；生产页可运行；source map 回源码；知道 TS 类型不会校验 JSON；L2 验收 |
 
-第 2 周验收：原生页面与 Node 工具可自行完成；读懂 npm 工程；React 列表/状态能正确变化；能写一个发现业务 bug 的单测。
+写作边界：C12 仍讲浏览器事件循环，C17 才讲 Node 的宿主差异。C13 只做取消前请求，过期响应完整处理到 C30。C14 只实作 localStorage。C16 是一次有明确清单的重构，允许超过常规 1–3 个文件；不能每章搬目录。C18/C19 不把包管理器切换写进主项目。C20 TypeScript 是短桥接，深入仍选修。
 
-第 2 周写作范围：
+## Lab 3 React 库存应用
 
-- C13：竞态只演示「用 AbortController 取消上一次搜索」，过期响应与清理时序放到 C30。
-- C14：存储只用 localStorage，sessionStorage 和 IndexedDB 各一句话。
-- C15：只讲做出库存页需要的布局，动画、预处理器、CSS 框架都不讲（见 X01）。
-- C16：ES 各年度的特性列表不写进正文，放到参考页「ES 版本速查」。
-- C17：只讲 fs/promises、path、process.argv/env 和 `--inspect`；stream 和 Buffer 各一段。
-- C18：不讲发布 npm 包（见 X06）；`npm ci` 失败的练习在 `examples/c18/` 的隔离目录里做。
-- C19：每个工具一张定位表，加一个隔离目录的实验；不讲 Yarn PnP 的配置细节。
-- C21：用 Vite 创建 React 项目，写之前核对官方当前推荐的命令。
-- C23、C24：遵守下文「React 16 课的写作深度要求」。
+| 日 | 课号与标题 | 本课主任务与文件 | Java / JS 并排主题 | 完成标准 |
+| --- | --- | --- | --- | --- |
+| 11 | C21 React 来由、JSX 与第一个组件 | 在 `src/react/{main,App,ProductCard}.jsx` 渲染同一固定库存；保留原生入口便于对照 | Java 拼文本/调用函数 / JSX 表达式和组件；声明式 UI 的新机制 | 六张卡片与原生数据一致；能解释 JSX 编译、createRoot、Fragment；不重建数据/校验规则 |
+| 11 | C22 Props、组合与渲染模型 | 拆 `ProductList.jsx`、`Toolbar.jsx` 与 App；props 单向传递和 children 组合 | Java 方法参数 / props；函数返回 / render 与 commit 的边界 | 从 Components 定位传错 name；渲染不修改 props；商品卡与工具栏职责明确 |
+| 12 | C23 useState：状态快照与更新队列 | 在 `StockActions.jsx` 和 App 接入 P001 连续补货、延迟补货；复用 core 的更新能力 | Java 连续可变赋值 / React 同一渲染快照、函数式更新 | 连点补三件从 12 到 15；延迟补三件期间立即补一件最终 16；解释闭包旧值及 Hooks 规则 |
+| 12 | C24 数组更新、key 与派生数据 | App 将商品集合统一放 state，ProductList 用 id，添加增删/排序/筛选和派生汇总 | Java 集合操作 / 不可变更新；对象 ID / React key 的身份语义 | 任意商品补货都同步统计；删/排后草稿不串行；不存第二份过滤结果；第二周验收 |
+| 13 | C25 表单、校验与可访问性 | 新增 `ProductEditor.jsx` 调用 core 校验，完成名称/库存/元输入与错误焦点 | Java DTO 校验 / 字符串表单边界与受控组件 | 空名称、空库存、负数、非法价格拒绝；0 合法；纯键盘能编辑、保存、看到错误并聚焦 |
+| 13 | C26 状态提升、保留与重置 | 修改 App 与 ProductEditor，确立 selectedId/草稿归属、切换商品和取消行为 | Java 对象字段生命周期 / 组件位置、类型、key 的状态保留 | 改 P001 草稿后取消，再开 P002 看到库存 0；提交才改业务数据；列表/统计同步 |
+| 14 | C27 useReducer 与 Context | 增加 `inventory-reducer.js`、`InventoryProvider.jsx`，收拢增删改 action | Java 命令分发/纯函数经验 / reducer action；Context 的订阅边界 | reducer 不改输入；未知 action 有明确策略和测试；跨层只共享必要数据，UI 草稿仍本地 |
+| 14 | C28 useRef 与外部系统 | 在 StockActions 和 ProductEditor 增加聚焦、取消句柄与取消操作 | Java 可变句柄 / ref；ref 与 state 并列区分 | 保存后焦点正确；取消盘点后不再补货；ref 改动不作为 UI 渲染依据 |
+| 15 | C29 useEffect 深入与清理 | 新增 `useInventoryShortcuts.js`，为当前库存页同步标题/键盘监听，补 setup/cleanup | Java 订阅/取消订阅 / Effect 生命周期；非构造器类比 | 挂载/切换/卸载后监听数量正确；StrictMode 开发检查下只执行一次业务动作；派生汇总不靠 Effect |
+| 15 | C30 请求状态与竞态调试 | 新增 ProductDetail 与 `src/services/product-api.js`，完成手工详情请求状态机 | Java Future 取消经验 / AbortSignal 与过期响应守卫 | P001 慢→P002 快最终只显示 P002；卸载不回写；404/取消/失败/loading 状态准确 |
+| 16 | C31 自定义 Hooks 与路由 | 提取 `useProductRequest.js`、本地快照 Hook，App 增加列表/详情 hash 路由与 URL 筛选 | Java 复用函数/实例 / Hook 复用逻辑；路径参数 / 浏览器 URL | 分享并刷新 P004 详情可用；不存在 ID 显示不存在；两个 Hook 实例状态独立；本地改动可恢复 |
+| 16 | C32 认识 TanStack Query 与服务端状态 | 增加 query-options 与浏览器 mock repository，替换详情手工请求；一次明确数据归属迁移 | Java Map 缓存经验 / queryKey、失效与生命周期；不等同 HashMap | P001/P002 缓存隔离；修改后对应查询更新；默认重试策略可解释；持久化只由 repository 写 |
+| 17 | C33 现代 React 19 与更新速查 | 在编辑/补货流程加入异步 Action、提交中与乐观反馈，保留失败回滚 | Java try/finally 的提交流程 / Action 状态；无一一对应 API | 防重复提交；成功更新、失败回滚且保留草稿；useActionState 参数正确；新 API 分级而非全量强制 |
+| 17 | C34 性能、加载与错误诊断 | 用 Profiler 测库存筛选；按需加载 ReportPanel，增加局部错误边界 | Java 缓存经验 / useMemo 依赖；任务优先级 / transition 的边界 | 测量后再选优化；补货后统计不旧；区分 lazy fallback、请求状态与渲染错误，不能用 memo 掩盖逻辑 bug |
+| 18 | C35 React UT、集成测试与 E2E 地图 | 在 `tests/react/` 补表单校验、创建、失败重试；在 tests/e2e 保留一条跨页冒烟 | JUnit / Vitest；UI 用户行为 / RTL；浏览器流程 / Playwright | 用角色/label 断言；await 用户操作和异步 UI；空库存 bug 真能被抓住；解释 Jest 定位，不再写第二套测试 |
+| 18 | C36 React 项目复盘与故障排查 | 在当前应用定位派生统计、请求身份、存储边界三个故障，记录 notes/react-review.md | Java 分层排错经验 / Console→Components→Network→Profiler | 每个故障有证据/修复/复现结果；本地库存快照恢复、详情与统计一致；L3 和第三周验收 |
 
-## 第 3 周：详细 React
+写作边界：C23、C29、C30 保留难点深度，以同一用户操作展示错误/正确及时间顺序。C24–C27 明确 state 放哪里、什么不用存。C31 先手写再抽 Hook，C32 再引缓存；不要一次引三种抽象。C33 的 RSC/Server Functions、use 的缓存前提放边界说明或选修，Pages 不运行服务端代码。C34 的 Compiler 与新版本索引仅作入口，版本/API 状态重新核查。
 
-| 日 | 课号与标题 | 必须讲清的内容 | 自己尝试与验收 |
-| --- | --- | --- | --- |
-| 13 | C25 表单、校验与可访问性 | 受控/非受控、input/select/checkbox；label、错误信息、提交、焦点；表单值字符串与业务数字；原生校验 | 建立商品编辑表单；空名称、负库存、非法价格不能提交；纯键盘可操作 |
-| 13 | C26 状态提升、保留与重置 | 找到共同父节点、事件回调向上；受控设计、最小 state；位置/类型/key 与状态保留；props/state 边界 | 列表和统计同步；切换商品时编辑表单按预期重置；解释何时不需要 Context |
-| 14 | C27 useReducer 与 Context | reducer 纯函数、action、复杂更新；Context 消费/Provider；业务状态、UI 状态与服务端状态；避免 Context 泛滥 | 给库存操作写 reducer，并测更新与非法 action；只共享确实跨层的数据 |
-| 14 | C28 useRef 与外部系统 | ref 与 state 的区别；DOM 焦点、可变句柄；不在 render 中产生副作用；Effect 作为外部同步的起点 | 提交后聚焦输入；用 ref 保存取消句柄；解释 ref 改变为何不触发 render |
-| 15 | C29 useEffect 深入与清理 | 依赖、闭包、setup/cleanup、订阅与监听；StrictMode 开发验证；不需要 Effect 的派生值与事件处理；lint 规则 | 修复重复监听、缺清理和循环更新；用日志解释开发环境的验证过程；不靠关闭 StrictMode 解决 |
-| 15 | C30 请求状态与竞态调试 | fetch 手工请求状态机；HTTP/网络错误；AbortController、过期响应、取消与资源清理；Network 对照 | 快速切换商品详情，模拟失败和慢网；保证旧请求不覆盖新内容；正确恢复加载状态 |
-| 16 | C31 自定义 Hooks 与路由 | 复用逻辑、不共享独立实例状态；useLocalStorage 等；Hook API/依赖设计；React Router 参数/嵌套/404/URL 状态；Pages 演示用 hash 路由 | 提取一个 Hook；实现列表/详情路由；刷新/分享演示 URL 可用；正文仍是普通静态路径 |
-| 16 | C32 认识 TanStack Query 与服务端状态 | 手工请求和缓存库职责；query key、缓存、重试、失效、mutation；本地 UI 状态仍留在 React；模拟服务不等于真实后端 | 对已有详情请求加缓存；改变商品后使相应查询失效；比较快网/慢网与重复访问 |
-| 17 | C33 现代 React 19 与更新速查 | Actions、useActionState/useFormStatus/useOptimistic、ref prop、Custom Elements；use 的缓存要求；19.2/19.3 更新索引；Server Functions/RSC 边界 | 浏览器异步 mock 演示提交中/成功/失败；辨认哪些代码需要服务器；新特性进阶实验可跳过 |
-| 17 | C34 性能、加载与错误诊断 | React DevTools Profiler；纯渲染与避免无意义更新；memo/useMemo/useCallback、transition；lazy/Suspense 的实际边界、错误边界；Compiler 简介 | 测量筛选列表再优化；按需加载一个区域；区分加载 fallback、请求状态和渲染错误 |
-| 18 | C35 React UT、集成测试与 E2E 地图 | Vitest、Testing Library、user-event、角色查询；render/screen、用户行为断言；异步/mock/cleanup；Jest 与 Playwright 职责；快照测试边界 | 测表单校验、创建商品、失败重试；不用只断言内部 state；认识一条跨页 E2E，不要求重复测试所有分支 |
-| 18 | C36 React 项目复盘与故障排查 | 组件/状态/请求架构复盘；Console→Components→Network→Profiler 的排查顺序；source maps；测试失败的定位 | 完成 React 库存 v2 核心练习；修复三个预置 bug，并为适合的 bug 加回归测试 |
+## Lab 4 组件库与 UI5 适配
 
-React 16 课的写作深度要求：
+| 日 | 课号与标题 | 本课主任务与文件 | Java / JS 并排主题 | 完成标准 |
+| --- | --- | --- | --- | --- |
+| 19 | C37 组件生态与选择标准 | 以当前表格/编辑需求写 notes/components.md，确定 adapter 输入输出与验收 | Java 接口/适配经验 / UI 组件契约；库与业务数据分离 | 按可访问性、主题、维护、许可选型；比较整库/primitives/代码分发；同一个商品 id 贯穿排序与编辑 |
+| 19 | C38 一个普通组件库的完整案例 | 在 `adapters/antd/` 替换列表与弹窗，调用同一 core/repository | Java Bean 初值经验 / Form initialValues 与受控更新边界 | 按库存排序后编辑 P002 仍是它；取消 P001 草稿不残留；校验、空/错态、主题与焦点可用 |
+| 20 | C39 SAP Fiori 与 UI5 家族 | 写 notes/ui5-choice.md，对同一库存需求选择经典 UI5 或 Web Components；阅读现有 D2 | Java MVC 经验 / UI5 View/Controller/Model；Fiori 不等于框架 | 分清 SAPUI5、OpenUI5、原生 UI5 Web Components 和 React 包装库；说明静态 mock 的边界 |
+| 20 | C40 OpenUI5 入门：MVC 与工程 | 在 `adapters/openui5/webapp/` 配 Component、manifest、XML View、Controller，接共享规则桥接 | Java 包/类路径 / UI5 namespace、模块与资源路径 | 列表加载 6 件；Console/Network 定位模块名错误；UI5 CLI 构建能生成静态产物；不手抄第二份业务规则 |
+| 21 | C41 UI5 Model、绑定与业务控件 | 在 Inventory.view/controller、编辑 Fragment 和 i18n 中完成筛选、草稿、保存 | Java Bean/监听经验 / JSONModel.setProperty 与绑定通知 | 筛选 P004 后只改它；取消不污染源数据；汇总与语言切换正确；理解 model 名称、路径与 binding context |
+| 21 | C42 UI5 路由与 OData 起点 | 增加 Detail View/Controller、manifest 路由、静态 metadata 和有限 V2 mock | Java DTO/Repository 经验 / OData 实体集、元数据、模型请求；不是接口等价 | P004 详情刷新/回退正常；有限过滤/排序/分页可观察；JSONModel/ODataModel、V2/V4 区分清楚 |
+| 22 | C43 UI5 Web Components 原生使用 | 在 `adapters/web-components/` 替换原生库存表单输入/按钮，监听真实事件 | Java listener 经验 / CustomEvent；字段值 / attribute 与 property | 两个组件可补货；布尔属性正确；slots、主题/i18n 资源可用；知道 Shadow DOM 边界与 React 原生支持 |
+| 22 | C44 UI5 Web Components for React | 在 `adapters/ui5-react/` 改列表和编辑表单，接共享规则/repository | Java adapter 经验 / React 包装 API；继续对照原生组件与经典 UI5 | 原生 form 提交链正确；事件取值/数字转换正确；P004 编辑场景通过；L4 验收，不再重写所有 CRUD |
 
-- C23 必须用多段预测输出代码讲透状态快照、函数式更新和闭包，不只列 API。
-- C24–C27 用同一数据变化对比错误/正确设计，说明状态放哪里、哪些数据不该存储。
-- C29–C30 给完整错误例子、触发步骤、清理时序和修复依据。
-- C31–C32 先有手工实现，再引出抽象与工具，避免同时学习过多库。
-- C33 拆为核心现代用法与更新附录；不强迫初学者掌握所有新 API。
-- C34 先测量，再优化；不能讲成每个函数都需要 useCallback。
-- C35 至少包括一个真实业务回归和一个异步失败用例，解释为什么要选这个测试层级。
-- React 各课的代码都在项目阶段 `04-react/` 上推进；正文只展示改动的组件，完整文件放在阶段目录中。
+写作边界：C37 不做市场排名，不安装全部候选库；C38 只完整用 Ant Design，其余短对照。C39 不为概览单开一个必须运行的 UI5 demo，实际运行接到 C40 的 adapter。C40 的模块桥接先由 R4 原型证明。C42 仅有限 V2 浏览器 mock，不做真实 SAP 鉴权、完整 OData CRUD 或 V4 服务。C43/C44 分别按所选版本核对事件、属性、主题和资源文档，不沿用旧 React 限制或已废弃 charts 包。
 
-## 第 4 周：开源组件、SAP UI5 与交付
+## Lab 5 调试与静态交付
 
-| 日 | 课号与标题 | 必须讲清的内容 | 自己尝试与验收 |
-| --- | --- | --- | --- |
-| 19 | C37 组件生态与选择标准 | 完整组件库、无样式 primitives、组件代码分发；Ant Design/MUI/Mantine/shadcn/ui/Radix/UI5 React；主题、可访问性、维护、许可；UI 库与 Query/Table/Form/状态工具的区别 | 对“商品表格+编辑弹窗”写选择理由；比较三类方案；不背市场排名 |
-| 19 | C38 一个普通组件库的完整案例 | 主练习选 Ant Design：Table/Form/Modal、数据与回调、校验、主题；MUI 等短对照；区分社区功能与收费扩展 | 将库存页改成组件库版；处理空/错态、验证与焦点；不要求把所有候选库都装进工程 |
-| 20 | C39 SAP Fiori 与 UI5 家族 | Fiori 设计系统；SAPUI5/OpenUI5 交付与库范围；经典 MVC；Web Components 与 React 包装关系；Tooling/CLI；为何企业应用需要绑定/元数据 | 用一张 D2 图解释家族；根据需求选择经典 UI5 或 React + UI5 路线 |
-| 20 | C40 OpenUI5 入门：MVC 与工程 | bootstrap、模块、XML View、Controller、Component、manifest、UI5 CLI 与静态构建；常见 Layout/List/Button/Input 控件 | 本地建立商品列表最小应用；在 Sources/Console 定位模块或绑定错误 |
-| 21 | C41 UI5 Model、绑定与业务控件 | JSONModel、属性/列表/表达式绑定、格式化；事件、表单校验；i18n；Table/List、Dialog/Fragment 与模型作用域 | 完成筛选、编辑 Dialog、汇总、语言切换；检查绑定路径错误；理解 Controller 与 Model 的职责 |
-| 21 | C42 UI5 路由与 OData 起点 | manifest 路由、列表/详情；OData 实体/元数据/查询、V2/V4；ODataModel vs JSONModel；V2 浏览器 MockServer；真实 SAP 鉴权与服务边界 | 做详情导航；阅读 metadata；自己尝试一个有限 V2 mock 请求；完整 OData CRUD/V4/CAP 深入选修 |
-| 22 | C43 UI5 Web Components 原生使用 | Custom Elements、Shadow DOM、slots、属性/事件、主题与 i18n 资源；npm 导入/打包；与经典 UI5 不同；React 19 原生支持 | 原生页面使用两个组件，监听事件；检查资源请求、主题和 slots；不套用旧 React 自定义事件限制 |
-| 22 | C44 UI5 Web Components for React | 包装库的 React API、事件、表单/列表/布局与高层组件；资源与主题；不采用已废弃的 charts 包 | 用 UI5 React 改写同一编辑表单与列表；比较普通组件库版、经典 UI5 版的数据流 |
-| 23 | C45 全链路 Debug 与交付前检查 | 真实故障排查：资源 404、请求失败、布局异常、状态不更新、存储损坏、生产 source maps；Performance/Memory 入门、无障碍/移动检查 | 用 Debug 清单排查综合项目；保存一份包含复现步骤、根因、修复与验证的记录 |
-| 23 | C46 静态构建与 GitHub Pages | 构建环境与浏览器运行区别；base /js_web/、真实静态页面、资源路径；Actions、产物、Pages；React 演示路由边界 | 构建并预览；自己尝试部署个人练习；验证首页、深层刷新、资源与 hash 路由 |
-| 24 | C47 综合项目与测试选择 | 补齐库存应用；以风险选择 UT/集成/E2E；Vitest 核心函数与 reducer、RTL 表单/请求、Playwright 冒烟 | 写测试计划并补 3–5 个有价值的回归用例；完成键盘/手机/数据恢复手工检查 |
-| 24 | C48 总复盘与后续路线 | 从历史到生态回顾；Java↔JS 常见差异；语言→数据→UI→工具→静态交付；阅读新版本的方法；个人补缺表 | 不看答案讲清 10 个核心机制；展示项目与排错/测试记录；选择下一阶段学习方向 |
+| 日 | 课号与标题 | 本课主任务与文件 | Java / JS 并排主题 | 完成标准 |
+| --- | --- | --- | --- | --- |
+| 23 | C45 全链路 Debug 与交付前检查 | 在当前 src/react 应用依次复现状态/资源/存储/布局问题，写 notes/debug.md | Java 堆栈/调试经验 / 浏览器跨层证据与 source maps | 每个修复可复现并回归；做键盘/手机检查；Performance/Memory 有前后证据，不凭一张快照断言泄漏 |
+| 23 | C46 静态构建与 GitHub Pages | 修改构建 base、严格静态预览和交付说明；学习个人 Pages 流程 | Java 打包部署经验 / Node 构建与浏览器运行的边界 | `/js_web/` 及演示嵌套路径资源无 404；深层/hash 刷新可用；无开发服务器 fallback 掩盖错误，无服务端 API 假设 |
+| 24 | C47 综合项目与测试选择 | 写 notes/test-plan.md，给目前项目补 3–5 条风险驱动回归 | JUnit 分层经验 / Vitest、RTL、Playwright 各自边界 | 至少覆盖非法快照保护、连续交互、请求失败恢复；不用快照数量充当覆盖；完成恢复与键盘验收 |
+| 24 | C48 总复盘与后续路线 | 在 notes/final-review.md 记录十题自测、现场增量、排错记录和下一阶段 | Java/JS 本次最易错的对照回看；不新增业务框架 | 不看答案给当前应用加一条筛选并解释测试；现场定位一个已学故障；能说清语言→UI→工具→交付；L5/最终验收 |
 
-第 4 周写作范围：
+## 不压缩掉的机制与参考页
 
-- C37：只比较定位、可访问性、主题、维护状况和许可，不写市场排名。
-- C38：只用 Ant Design 完整实现一次，MUI 等只放一张对照表。
-- C39–C42：OpenUI5 的引导方式（CDN bootstrap 或 UI5 CLI）、V2 MockServer 的当前状态，写之前核对官方文档。
-- C43、C44：React 19 原生支持 Custom Elements，不沿用旧版 React 的自定义事件写法。
-- C45–C47：在阶段 `04-react/` 上做排错、部署和测试，不新开项目。
+每章保持主张→代码→输出→原因→一句 Java 对照。短机制代码留在页内；可选深入实验有明确入口，默认必做任务不离开工作区。原有四张速查页随迁移更新：ES 版本、Java ↔ JS、React Hooks、UI5 家族。
 
-## 数据结构覆盖边界
-
-| 层次 | 内容 | 学习深度 |
+| 领域 | 必修机制 | 深入边界 |
 | --- | --- | --- |
-| 语言内建 | Array/Object/Map/Set、WeakMap/WeakSet、迭代器 | 必修：选择、常用操作、引用身份、业务数据变换 |
-| 常见抽象结构 | 栈、队列、树、图、链表 | 栈/队列/树遍历必做；图/链表理解模型与简短代码 |
-| 二进制数据 | Buffer、ArrayBuffer/TypedArray/DataView | Node Buffer 基础必修，完整二进制处理选修 |
-| 算法深化 | 双向链表、堆、图搜索、LRU、复杂分析 | 选修；不能挤掉语言、异步和 React 核心 |
+| 语言 | 原始值/对象、动态类型、null/undefined、truthy、比较、Number/BigInt、闭包、this/原型、异常、ESM/CommonJS | 新特性逐项分标准/提案/支持；规范仅延伸阅读 |
+| 数据 | Array/Object/Map/Set、WeakMap/WeakSet、迭代、栈/队列/树、复杂度与 JSON | 图/链表模型短讲；完整图算法、二进制结构选修 |
+| 浏览器 | HTML 语义、DOM/事件、XSS 的 textContent/innerHTML 差异、CSS/响应式、HTTP、请求、存储 | CORS 讲现象/原因；不通过关闭安全策略解决；不写完整后端 |
+| 工具 | Node 的 fs/path/process/inspect、Buffer/stream 概览；npm/锁；Yarn/pnpm/Bun；Vite/UT | 运行时/包管理分开；网站 npm 锁不混用 |
+| React | 16 课原有核心深度，含状态快照、身份、Effect、竞态、路由、缓存与测试 | Compiler/RSC/新 API 有入口但不挤占核心任务 |
+| UI5 | 四个名称、经典 MVC/绑定/路由、有限 OData mock、原生组件、React 包装 | 共享业务规则，分别学习运行机制；真实 SAP 后端选修 |
 
-复杂度讲抽象操作和示例算法；例如标准并不承诺 Map 总是某一种具体哈希表实现。
+## 选修与慢速版
 
-## 现代标准附录：参考页「ES 版本速查」
+8 周路线按课号一天一课；不是增加必做课。X01 CSS/可访问性深化，X02 TypeScript，X03 Generator/Proxy/TypedArray/GC，X04 高级数据结构，X05 Node HTTP/流/worker，X06 包发布/workspaces，X07 React 复杂表单与状态库，X08 Compiler/新 API/RSC，X09 OData CRUD/V4/CAP/BTP，X10 Jest 迁移/MSW/Playwright 进阶。用户指定后另开任务，不在本次改版顺手扩写。
 
-原 C15 的内容已改为参考页 `reference/es-versions.md`，随 C16 提供。按 ES2015→ES2026 列出代表特性「解决了什么问题」、目标环境支持和首次讲解入口。ES2026 新增组包括 Map/WeakMap Upsert、JSON 源文本访问、Iterator Sequencing、Uint8Array Base64/Hex、Math.sumPrecise、Error.isError、Array.fromAsync；更新时逐项核对规范、API 名称和目标环境。
+## 周验收衔接
 
-TC39 完成提案表查询所见将 Temporal、Explicit Resource Management 列为预计进入 2027，不能标成 ES2026。规范年份、提案阶段与环境支持是三件事；以 [来源文件](SOURCES.md) 指向的官方资料为准。
-
-## 8 周或提前完成时的选修
-
-选修不计入 48 课必修进度，优先补自己容易出错的内容：
-
-- X01：CSS 布局深化、响应式、可访问性与浏览器兼容。
-- X02：TypeScript：对象/联合类型、泛型、组件 props、类型检查与运行时校验。
-- X03：Generator、Proxy、TypedArray、GC/WeakRef；支持情况与实际用途。
-- X04：链表、堆、图与 LRU；用 Java 已知结构迁移思路。
-- X05：Node HTTP API、流、worker_threads；本地服务与静态站的边界。
-- X06：包发布、workspaces/monorepo、依赖治理与不同管理器实验。
-- X07：React 复杂表单、React Hook Form、Zustand 的适用场景；不要为使用库而使用库。
-- X08：React Compiler、Activity/useEffectEvent/ViewTransition/Fragment refs 的经验证实验；RSC/SSR 架构。
-- X09：OData 完整 CRUD、V4 本地 CAP mock、Fiori Elements、SAP BTP/ABAP 接入概览。
-- X10：Jest 现有工程迁移、MSW 请求 mock、测试覆盖率解读、Playwright 多浏览器和故障追踪。
-
-## 每周自检题
-
-1. 第一周：为什么空数组是真值？为什么 const 对象能变？Map 键为何不用 Java equals？闭包保留了什么？
-2. 第二周：await 暂停谁？fetch 遇到 404 是否自动抛异常？锁文件固定什么？Node/npm/Bun 为什么不属于同一层？
-3. 第三周：state 为什么是快照？key 改变了什么？何时不需要 Effect？怎样防请求竞态？这个测试在验证用户能做什么？
-4. 第四周：UI5 的四个名称有何关系？JSONModel/ODataModel 区别是什么？Pages 能执行服务器代码吗？如何定位资源 404 并防回归？
+C12：L1 完整＋L2 事件/异步已接上，固定统计仍可复现。C24：L2 完整＋React 列表状态。C36：L3 完整。C48：L4/L5 完整与最终交付。Lab 收尾点 C10/C20/C36/C44/C48 与周检查点不是同一概念，不要额外增加一套重复作业。

@@ -1,0 +1,20 @@
+{
+  "previous": "C03",
+  "files": [
+    "adapters/openui5/ui5.yaml",
+    "adapters/openui5/webapp/index.html",
+    "adapters/openui5/webapp/Component.js",
+    "adapters/openui5/webapp/manifest.json",
+    "adapters/openui5/webapp/view/Inventory.view.xml",
+    "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "adapters/openui5/webapp/i18n/i18n.properties",
+    "adapters/openui5/webapp/i18n/i18n_en.properties",
+    "adapters/openui5/package.json",
+    "adapters/openui5/webapp/model/formatter.js"
+  ],
+  "sharedFiles": {
+    "src/core/validation.js": "labs/reference/core/validation.js",
+    "src/core/inventory.js": "labs/reference/core/inventory.js",
+    "src/core/summary.js": "labs/reference/core/summary.js"
+  }
+}

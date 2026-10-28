@@ -14,13 +14,15 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 先读示例、亲手运行，再做预测与排错练习。每课包含 Java 对照和操作说明，库存管理项目贯穿全程。
 
+V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 3 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。
+
 ## 第 1 周：历史、语言、结构与浏览器
 
 | 主线学习日 | 课程 | 状态 |
 | --- | --- | --- |
 | 第 1 天 | [C01 JavaScript 的故事与生态地图](../01-history-web/c01-story-ecosystem/) | 已发布<span data-lesson-status="C01" hidden></span> |
 | 第 1 天 | [C02 Web 基础与第一个调试现场](../01-history-web/c02-web-debugging/) | 已发布<span data-lesson-status="C02" hidden></span> |
-| 第 2 天 | [C03 值、类型、转换与比较](../02-language-data/c03-values-types/) | 已发布<span data-lesson-status="C03" hidden></span> |
+| 第 2 天 | [C03 值、类型、转换与比较](../02-language-data/c03-values-types/) | 已接工作区<span data-lesson-status="C03" hidden></span> |
 | 第 2 天 | [C04 变量、作用域与控制流](../02-language-data/c04-scope-control/) | 已发布<span data-lesson-status="C04" hidden></span> |
 | 第 3 天 | [C05 对象、引用与数据交换](../02-language-data/c05-objects-json/) | 已发布<span data-lesson-status="C05" hidden></span> |
 | 第 3 天 | [C06 函数、闭包与高阶操作](../02-language-data/c06-functions-closures/) | 已发布<span data-lesson-status="C06" hidden></span> |
@@ -45,7 +47,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 10 天 | [C20 构建工具与第一次 UT](../04-runtime-tooling/c20-vite-vitest/) | 已发布<span data-lesson-status="C20" hidden></span> |
 | 第 11 天 | [C21 React 来由、JSX 与第一个组件](../05-react/c21-react-jsx-components/) | 已发布<span data-lesson-status="C21" hidden></span> |
 | 第 11 天 | [C22 Props、组合与渲染模型](../05-react/c22-props-composition-render/) | 已发布<span data-lesson-status="C22" hidden></span> |
-| 第 12 天 | [C23 useState：状态快照与更新队列](../05-react/c23-state-snapshot-queue/) | 已发布<span data-lesson-status="C23" hidden></span> |
+| 第 12 天 | [C23 useState：状态快照与更新队列](../05-react/c23-state-snapshot-queue/) | 已接工作区（前置试做）<span data-lesson-status="C23" hidden></span> |
 | 第 12 天 | [C24 数组更新、key 与派生数据](../05-react/c24-arrays-keys-derived/) | 已发布<span data-lesson-status="C24" hidden></span> |
 
 ## 第 3 周：详细 React 与组件工程
@@ -73,7 +75,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 | 第 19 天 | [C38 一个普通组件库的完整案例](../06-components-ui5/c38-antd-inventory/) | 已发布<span data-lesson-status="C38" hidden></span> |
 | 第 20 天 | [C39 SAP Fiori 与 UI5 家族](../06-components-ui5/c39-fiori-ui5-family/) | 已发布<span data-lesson-status="C39" hidden></span> |
 | 第 20 天 | [C40 OpenUI5 入门：MVC 与工程](../06-components-ui5/c40-openui5-mvc-project/) | 已发布<span data-lesson-status="C40" hidden></span> |
-| 第 21 天 | [C41 UI5 Model、绑定与业务控件](../06-components-ui5/c41-model-binding-controls/) | 已发布<span data-lesson-status="C41" hidden></span> |
+| 第 21 天 | [C41 UI5 Model、绑定与业务控件](../06-components-ui5/c41-model-binding-controls/) | 已接工作区（前置试做）<span data-lesson-status="C41" hidden></span> |
 | 第 21 天 | [C42 UI5 路由与 OData 起点](../06-components-ui5/c42-routing-odata/) | 已发布<span data-lesson-status="C42" hidden></span> |
 | 第 22 天 | [C43 UI5 Web Components 原生使用](../06-components-ui5/c43-native-web-components/) | 已发布<span data-lesson-status="C43" hidden></span> |
 | 第 22 天 | [C44 UI5 Web Components for React](../06-components-ui5/c44-ui5-react/) | 已发布<span data-lesson-status="C44" hidden></span> |

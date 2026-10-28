@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Java / JS 并排课程 · 改版审阅稿</title>
+  <style>
+    :root { color-scheme:light; --bg:#f7f8fa; --paper:#fff; --ink:#182b38; --muted:#526573; --line:#dce3e8; --accent:#08685d; --tint:#eaf5f0; --code:#f5f7fa; --purple:#6941a0; --blue:#215a9c; --orange:#8a4c1a; --shadow:0 12px 32px #23384706; }
+    :root[data-theme="dark"] { color-scheme:dark; --bg:#111a21; --paper:#17232d; --ink:#e1ecf3; --muted:#a5b7c4; --line:#344653; --accent:#83d9c5; --tint:#183830; --code:#101a24; --purple:#c9adf5; --blue:#9bc6ff; --orange:#f3ba88; --shadow:none; }
+    * { box-sizing:border-box; }
+    html { scroll-padding-top:28px; }
+    body { margin:0; color:var(--ink); background:var(--bg); font:16px/1.8 system-ui,-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
+    a { color:var(--accent); text-underline-offset:4px; }
+    button { font:inherit; cursor:pointer; color:inherit; }
+    button:focus-visible,a:focus-visible,summary:focus-visible,pre:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+    .review-note { margin:0; padding:8px 20px; background:var(--tint); color:var(--accent); text-align:center; font-size:13px; }
+    header { background:var(--paper); border-bottom:1px solid var(--line); }
+    .bar { max-width:1320px; margin:auto; display:flex; align-items:center; gap:30px; padding:18px 32px; }
+    .brand { display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-weight:750; letter-spacing:-.4px; white-space:nowrap; }
+    .mark { background:var(--accent); color:var(--paper); border-radius:9px; padding:0 9px; font:700 18px/34px ui-monospace,monospace; }
+    .topnav { display:flex; gap:22px; flex:1; font-size:14px; }
+    .topnav a { text-decoration:none; color:var(--muted); }
+    .theme { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:5px 12px; font-size:13px; white-space:nowrap; }
+    .shell { display:grid; grid-template-columns:188px minmax(0,1fr); max-width:1320px; margin:auto; gap:40px; padding:36px 32px 70px; }
+    aside { font-size:14px; }
+    .side-inner { position:sticky; top:24px; }
+    .side-label { color:var(--muted); font-size:11px; letter-spacing:1.4px; text-transform:uppercase; margin:0 0 9px; }
+    .side-title { margin:0 0 24px; font-size:18px; font-weight:700; }
+    aside nav { display:grid; gap:5px; }
+    aside a { text-decoration:none; color:var(--muted); padding:8px 10px; border-radius:7px; }
+    aside a.active { color:var(--accent); background:var(--tint); font-weight:650; }
+    aside small { display:block; margin-top:26px; padding-top:18px; border-top:1px solid var(--line); line-height:1.8; color:var(--muted); }
+    main { min-width:0; max-width:1000px; }
+    .eyebrow { margin:0 0 10px; color:var(--accent); font-size:12px; font-weight:750; letter-spacing:1.3px; }
+    h1 { font-size:34px; line-height:1.4; letter-spacing:-.7px; margin:0 0 13px; text-wrap:balance; }
+    .lead { color:var(--muted); max-width:750px; margin:0 0 18px; }
+    .meta { display:flex; gap:18px; flex-wrap:wrap; margin:0 0 28px; color:var(--muted); font-size:13px; }
+    .task { background:var(--paper); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:10px; padding:20px 24px; box-shadow:var(--shadow); margin-bottom:30px; }
+    .task-head { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:9px; }
+    .task h2 { font-size:18px; margin:0; }
+    .badge { background:var(--tint); color:var(--accent); padding:2px 8px; font-size:12px; border-radius:5px; white-space:nowrap; }
+    .task p { margin:5px 0; font-size:14px; }
+    .task-footer { margin-top:14px; padding-top:13px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:13px; color:var(--muted); }
+    code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.88em; }
+    p code,.task-footer code,li code { background:var(--code); padding:2px 5px; border-radius:4px; overflow-wrap:anywhere; }
+    .section-head { display:flex; align-items:baseline; gap:12px; margin:24px 0 12px; }
+    .section-head h2 { font-size:22px; margin:0; }
+    .section-head span { color:var(--muted); font-size:13px; }
+    .claim { margin:0 0 16px; }
+    .compare { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--paper); box-shadow:var(--shadow); container-type:inline-size; }
+    .compare-title { margin:0; padding:13px 19px; font-size:14px; border-bottom:1px solid var(--line); color:var(--muted); }
+    .pair { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+    .language { min-width:0; padding:16px 18px 0; }
+    .language + .language { border-left:1px solid var(--line); }
+    .code-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px; }
+    .code-top strong { font-size:15px; }
+    .code-top small { color:var(--muted); display:block; font:12px/1.7 ui-monospace,monospace; }
+    .copy { border:1px solid var(--line); background:var(--paper); border-radius:6px; padding:2px 9px; font-size:12px; }
+    pre { margin:0; padding:17px 14px; background:var(--code); border-radius:7px; overflow:auto; font:13px/1.9 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; tab-size:2; }
+    pre code { font:inherit; }
+    .kw { color:var(--purple); }
+    .fn { color:var(--blue); }
+    .str,.num { color:var(--orange); }
+    .comment { color:var(--muted); }
+    .result { padding:13px 0; font-size:13px; display:flex; justify-content:space-between; gap:12px; color:var(--muted); }
+    .result b { font-family:ui-monospace,monospace; font-size:16px; color:var(--ink); }
+    .difference { margin:0; padding:13px 19px; border-top:1px solid var(--line); background:var(--tint); font-size:14px; }
+    .difference strong { color:var(--accent); }
+    .after { color:var(--muted); font-size:15px; margin:16px 0 24px; }
+    details { border:1px solid var(--line); border-radius:8px; background:var(--paper); margin:10px 0; padding:12px 17px; }
+    summary { cursor:pointer; font-weight:650; font-size:14px; }
+    details p { margin:10px 0 3px; font-size:14px; }
+    details pre { margin-top:12px; }
+    .practice { margin-top:26px; }
+    .practice h2 { font-size:21px; margin:0 0 8px; }
+    .practice ol { padding-left:23px; font-size:15px; }
+    .command { display:flex; align-items:center; gap:18px; padding:13px 17px; background:var(--code); border-radius:8px; font-size:13px; flex-wrap:wrap; }
+    .command span { color:var(--muted); font-size:12px; }
+    .pause { color:var(--muted); font-size:13px; margin-top:20px; }
+    .sample-divider { border:0; border-top:1px solid var(--line); margin:50px 0 40px; }
+    .lab-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .lab-card { padding:17px; border:1px solid var(--line); background:var(--paper); border-radius:9px; }
+    .lab-card .number { color:var(--accent); font:700 12px/1.6 ui-monospace,monospace; }
+    .lab-card h3 { font-size:16px; margin:5px 0; }
+    .lab-card p { font-size:13px; color:var(--muted); margin:0; }
+    .lab-card:last-child { grid-column:1 / -1; }
+    .foot { margin-top:25px; color:var(--muted); font-size:13px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .enhancement { display:none; }
+    .js .enhancement { display:inline-block; }
+    @container (max-width:759px) {
+      .pair { grid-template-columns:minmax(0,1fr); }
+      .language + .language { border-left:0; border-top:1px solid var(--line); }
+    }
+    @media (max-width:1100px) {
+      .shell { grid-template-columns:minmax(0,1fr); max-width:1000px; }
+      aside { display:none; }
+      .bar { max-width:1000px; }
+    }
+    @media (max-width:600px) {
+      body { font-size:15px; }
+      .review-note { text-align:left; padding:8px 17px; font-size:11px; }
+      .bar { padding:13px 17px; gap:10px; flex-wrap:wrap; }
+      .brand { flex:1; font-size:16px; }
+      .topnav { order:3; flex-basis:100%; gap:22px; font-size:13px; }
+      .theme { font-size:12px; }
+      .shell { padding:25px 17px 45px; }
+      h1 { font-size:27px; }
+      .meta { gap:7px 14px; margin-bottom:20px; }
+      .task { padding:16px; margin-bottom:23px; }
+      .task-head { flex-wrap:wrap; gap:5px; }
+      .section-head { display:block; }
+      .section-head h2 { font-size:21px; }
+      .language { padding:14px 13px 0; }
+      pre { padding:12px 10px; font-size:12px; }
+      .compare-title,.difference { padding:12px 14px; }
+      .lab-grid { grid-template-columns:minmax(0,1fr); }
+      .sample-divider { margin:35px 0; }
+    }
+  </style>
+</head>
+<body>
+  <p class="review-note">改版审阅稿 · 展示章节片段与布局，Lab 命令尚未实现；完整方案见 docs/PLAN.md</p>
+  <header>
+    <div class="bar">
+      <a href="#c03" class="brand"><span class="mark">{ }</span> Java → JavaScript</a>
+      <nav class="topnav" aria-label="样稿导航"><a href="#c03">普通课 C03</a><a href="#c23">难点课 C23</a><a href="#labs">5 个 Lab</a></nav>
+      <button class="theme enhancement" type="button" aria-pressed="false">切换深色</button>
+    </div>
+  </header>
+  <div class="shell">
+    <aside>
+      <div class="side-inner">
+        <p class="side-label">ONE PROJECT · 48 LESSONS</p>
+        <p class="side-title">库存工作台</p>
+        <nav aria-label="Lab 导航">
+          <a href="#lab1" class="active">01　库存规则与数据</a>
+          <a href="#lab2">02　原生库存页</a>
+          <a href="#lab3">03　React 库存应用</a>
+          <a href="#lab4">04　组件库与 UI5</a>
+          <a href="#lab5">05　调试与交付</a>
+        </nav>
+        <small>每章改一部分，始终在自己的项目里继续。<br><br>恢复用起点，卡住看提示，完成后再对照参考解。</small>
+      </div>
+    </aside>
+    <main>
+      <section id="c03" aria-labelledby="c03-title">
+        <p class="eyebrow">LAB 01　/　库存规则与数据</p>
+        <h1 id="c03-title">C03 让补货数量真正变成数字</h1>
+        <p class="lead">你的商品卡片已经能显示库存。现在给机械键盘补 3 件：从输入框读到的“3”，为什么会让 12 变成 123？</p>
+        <p class="meta"><span>前置：商品卡片已能打开</span><span>本页为章节片段</span><span>完整课仍保留类型与比较机制</span></p>
+        <div class="task">
+          <div class="task-head"><h2>这次只做一件事：修好补货输入</h2><span class="badge">继续当前项目</span></div>
+          <p>工作目录 <code>labs/inventory/</code></p>
+          <p>修改文件 <code>src/core/inventory.js</code>，沿用已有卡片调用。</p>
+          <div class="task-footer"><span>开始：P001 库存 12</span><span>完成：输入 3 → 库存 15；空白被拒绝</span></div>
+        </div>
+        <div class="section-head"><h2>Java 程序员先看这里</h2><span>同一份输入，左右看写法</span></div>
+        <p class="claim">输入框给你的是文本。先转换，再校验，最后参与库存计算。</p>
+        <div class="compare">
+          <p class="compare-title">共同输入：库存 <code>12</code>，补货文本 <code>"3"</code></p>
+          <div class="pair">
+            <div class="language">
+              <div class="code-top"><div><strong>Java</strong><small>Restock.java · main 方法片段</small></div><button type="button" class="copy enhancement" data-copy="java03" aria-label="复制 C03 Java 代码">复制</button></div>
+              <pre tabindex="0" aria-label="C03 Java 代码"><code id="java03"><span class="kw">String</span> input = <span class="str">"3"</span>;
+<span class="kw">int</span> stock = <span class="num">12</span>;
+<span class="kw">int</span> amount = Integer.<span class="fn">parseInt</span>(input);
+
+System.out.<span class="fn">println</span>(stock + amount);</code></pre>
+              <div class="result"><span>输出</span><b>15</b></div>
+            </div>
+            <div class="language">
+              <div class="code-top"><div><strong>JavaScript</strong><small>inventory.js · 转换片段</small></div><button type="button" class="copy enhancement" data-copy="js03" aria-label="复制 C03 JavaScript 代码">复制</button></div>
+              <pre tabindex="0" aria-label="C03 JavaScript 代码"><code id="js03"><span class="kw">const</span> input = <span class="str">"3"</span>;
+<span class="kw">const</span> stock = <span class="num">12</span>;
+<span class="kw">const</span> amount = <span class="fn">Number</span>(input);
+
+console.<span class="fn">log</span>(stock + amount);</code></pre>
+              <div class="result"><span>输出</span><b>15</b></div>
+            </div>
+          </div>
+          <p class="difference"><strong>记住这一点：</strong>合法整数文本都能转换，但边界不同：Java 解析空字符串会抛异常，JS 的 <code>Number("")</code> 得到 0。</p>
+        </div>
+        <p class="after">先猜一猜：如果跳过 Number，直接执行 <code>12 + "3"</code> 呢？JS 会拼接文本，得到 <code>"123"</code>。下面的任务还要检查空输入，避免把“没填”当成合法的 0。</p>
+        <details><summary>常见错误：没有报错，库存却变成了 123</summary><p>在 Sources 给补货计算行设断点，点击补货。在 Scope 查看 amount，再求值 typeof amount：它是 string。修复转换后重复点击，库存应从 12 变成 15；继续检查空白和小数输入。</p></details>
+        <div class="practice">
+          <h2>自己尝试 · 在当前文件里完成</h2>
+          <ol><li>找到库存输入转换的位置，先对文本执行 <code>trim()</code> 并拒绝空白。</li><li>转换后检查整数与范围，再把有效数量交给已有补货逻辑。</li><li>用 <code>3</code>、空白、<code>3件</code>、<code>-1</code>、<code>1.5</code> 重复操作，确认无效输入不改变库存。</li></ol>
+          <details><summary>提示：转换成功不等于输入合法</summary><p>先保留原始文本用于空白检查，再看 Number.isInteger 与范围。库存为 0 本身是有效业务值；初始输入校验与补货后的总库存范围都要满足要求。</p></details>
+          <details><summary>参考答案：输入边界的关键改动</summary><pre tabindex="0" aria-label="输入校验参考代码"><code>const raw = input.trim();
+const amount = Number(raw);
+if (raw === "" || !Number.isInteger(amount)
+    || amount &lt; 0 || amount &gt; 99999) {
+  throw new Error("请输入有效数量");
+}</code></pre><p>这里只展示输入校验。实际保存还应校验补货后的总库存不超过 99,999；完整参考解应使用本课固定快照。</p></details>
+          <div class="command"><code>npm run lab -- check C03</code><span>拟定的检查入口 · 尚未实现</span></div>
+          <p class="pause">暂停点：记下你已处理的输入与下一步。下次仍打开这份 inventory.js，继续完成总库存统计。</p>
+        </div>
+      </section>
+      <hr class="sample-divider">
+      <section id="c23" aria-labelledby="c23-title">
+        <p class="eyebrow">LAB 03　/　React 库存应用</p>
+        <h1 id="c23-title">C23 连续更新，为什么只加了一次？</h1>
+        <p class="lead">现在仍然给同一件机械键盘补货。Java 中连续三次加一会得到 15；React 中的三次 setter，需要先看它们读取的是哪一份状态。</p>
+        <div class="task">
+          <div class="task-head"><h2>把“补三件”接到现有商品卡片</h2><span class="badge">同一个库存项目</span></div>
+          <p>修改 <code>src/react/StockActions.jsx</code> 与 App 的事件回调。</p>
+          <div class="task-footer"><span>开始：P001 库存 12</span><span>完成：一次补三件 → 15；延迟操作也不丢更新</span></div>
+        </div>
+        <div class="section-head"><h2>相同目标，不同更新机制</h2></div>
+        <div class="compare">
+          <p class="compare-title">共同目标：从 <code>12</code> 连续加三次 <code>1</code></p>
+          <div class="pair">
+            <div class="language">
+              <div class="code-top"><div><strong>Java</strong><small>Update.java · main 方法片段</small></div><button type="button" class="copy enhancement" data-copy="java23" aria-label="复制 C23 Java 代码">复制</button></div>
+              <pre tabindex="0" aria-label="C23 Java 代码"><code id="java23"><span class="kw">int</span> stock = <span class="num">12</span>;
+stock += <span class="num">1</span>;
+stock += <span class="num">1</span>;
+stock += <span class="num">1</span>;
+
+System.out.<span class="fn">println</span>(stock);</code></pre>
+              <div class="result"><span>当前变量的输出</span><b>15</b></div>
+            </div>
+            <div class="language">
+              <div class="code-top"><div><strong>React / JavaScript</strong><small>StockActions.jsx · 错误事件片段</small></div><button type="button" class="copy enhancement" data-copy="js23" aria-label="复制 C23 React 错误代码">复制</button></div>
+              <pre tabindex="0" aria-label="C23 React 错误代码"><code id="js23"><span class="comment">// 有问题的写法：三次都读取 12</span>
+<span class="comment">// 当前渲染的 stock === 12</span>
+<span class="fn">setStock</span>(stock + <span class="num">1</span>);
+<span class="fn">setStock</span>(stock + <span class="num">1</span>);
+<span class="fn">setStock</span>(stock + <span class="num">1</span>);</code></pre>
+              <div class="result"><span>下一次渲染显示</span><b>13</b></div>
+            </div>
+          </div>
+          <p class="difference"><strong>差异在这里：</strong>Java 片段立即修改局部变量；React 事件读到当前渲染的快照，三次都提交 13。setter 会请求更新。</p>
+        </div>
+        <p class="after">先猜一猜：第一次调用 setStock 之后，在同一个事件函数里读 stock，会得到 12 还是 13？它仍是 12。下一次渲染得到的新 state，不会改写这次回调中的局部值。</p>
+        <details><summary>提示：下一步的更新要基于队列里的待处理状态</summary><p>函数式更新会接收前一步的结果。把“设为当前快照加一”改成“在待处理值上加一”，再连续提交三次。</p></details>
+        <details><summary>参考答案：三次函数式更新</summary><pre tabindex="0" aria-label="React 函数式更新参考代码"><code>setStock(current =&gt; current + 1);
+setStock(current =&gt; current + 1);
+setStock(current =&gt; current + 1);</code></pre><p>从 12 开始，队列依次得到 13、14、15，下一次界面显示 15。当前事件回调中的 stock 仍然是 12。再验证延迟补三件期间立即补一件，最终应为 16。</p></details>
+        <p class="pause">这个片段展示 state 更新机制。完整课将把它接回商品集合，并提供断点观察、Hooks 规则和当前工作区的行为检查。</p>
+      </section>
+      <hr class="sample-divider">
+      <section id="labs" aria-labelledby="labs-title">
+        <p class="eyebrow">学习主线</p>
+        <h1 id="labs-title">5 个 Lab，一份持续演进的作品</h1>
+        <p class="lead">每一阶段复用前面的数据与规则。换到 React 或 UI5 时学习新的界面机制，仍然处理你已经熟悉的库存业务。</p>
+        <div class="lab-grid">
+          <article id="lab1" class="lab-card"><span class="number">LAB 01 · C01—C10</span><h3>库存规则与数据</h3><p>从卡片开始，写校验、筛选、统计、索引和撤销。交付一套能解释、能验证的库存规则。</p></article>
+          <article id="lab2" class="lab-card"><span class="number">LAB 02 · C11—C20</span><h3>可用的原生库存页</h3><p>事件、请求、存储、CSS、模块、Node 和 UT。列表能编辑，刷新可恢复，报告和页面一致。</p></article>
+          <article id="lab3" class="lab-card"><span class="number">LAB 03 · C21—C36</span><h3>React 库存应用</h3><p>在相同业务上学习组件、状态、表单、请求和测试。完成真正连贯的一组交互。</p></article>
+          <article id="lab4" class="lab-card"><span class="number">LAB 04 · C37—C44</span><h3>组件库与 UI5 适配</h3><p>替换表格和编辑界面，共用业务规则。分别理解 Ant Design、OpenUI5、原生组件与 React 包装。</p></article>
+          <article id="lab5" class="lab-card"><span class="number">LAB 05 · C45—C48</span><h3>调试、测试与静态交付</h3><p>回到主应用排查真实故障，补有价值的回归，检查 Pages 子路径和刷新，让作品可以交付。</p></article>
+        </div>
+        <p class="foot">审阅范围：页面信息顺序、代码对照、任务入口、Lab 划分。完整的 48 章任务和错误矩阵位于 docs。此样稿没有替换线上站点。</p>
+      </section>
+    </main>
+  </div>
+  <div class="sr-only" role="status" aria-live="polite" id="copy-status"></div>
+  <script>
+    document.documentElement.classList.add('js');
+    const themeButton = document.querySelector('.theme');
+    themeButton.addEventListener('click', () => {
+      const dark = document.documentElement.dataset.theme !== 'dark';
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      themeButton.setAttribute('aria-pressed', String(dark));
+      themeButton.textContent = dark ? '切换浅色' : '切换深色';
+    });
+    for (const button of document.querySelectorAll('[data-copy]')) {
+      button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(document.getElementById(button.dataset.copy).textContent);
+          button.textContent = '已复制';
+          document.getElementById('copy-status').textContent = button.getAttribute('aria-label') + '：已复制';
+          setTimeout(() => { button.textContent = '复制'; }, 1600);
+        } catch {
+          document.getElementById('copy-status').textContent = '复制不可用，请选中本侧代码复制。';
+          button.textContent = '请手动复制';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

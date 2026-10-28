@@ -1,0 +1,100 @@
+{
+  "c03-parser": {
+    "lang": "js",
+    "checkpoint": "C03",
+    "file": "src/core/inventory.js",
+    "region": "stock-input",
+    "verified": true
+  },
+  "c03-restock": {
+    "lang": "js",
+    "checkpoint": "C03",
+    "file": "src/core/inventory.js",
+    "region": "restock",
+    "verified": true
+  },
+  "c23-setup": {
+    "lang": "jsx",
+    "checkpoint": "P23",
+    "file": "src/react/StockActions.jsx",
+    "region": "setup",
+    "verified": true
+  },
+  "c23-delay": {
+    "lang": "jsx",
+    "checkpoint": "P23",
+    "file": "src/react/StockActions.jsx",
+    "region": "delay",
+    "verified": true
+  },
+  "c23-controls": {
+    "lang": "jsx",
+    "checkpoint": "P23",
+    "file": "src/react/StockActions.jsx",
+    "region": "controls",
+    "verified": true
+  },
+  "c23-app": {
+    "lang": "jsx",
+    "checkpoint": "P23",
+    "file": "src/react/App.jsx",
+    "region": "app",
+    "verified": true
+  },
+  "c41-edit": {
+    "lang": "js",
+    "checkpoint": "P41",
+    "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "region": "edit",
+    "verified": true
+  },
+  "c41-filter": {
+    "lang": "js",
+    "checkpoint": "P41",
+    "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "region": "filter",
+    "verified": true
+  },
+  "c41-summary": {
+    "lang": "js",
+    "checkpoint": "P41",
+    "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "region": "summary",
+    "verified": true
+  },
+  "c41-toolbar": {
+    "lang": "xml",
+    "checkpoint": "P41",
+    "file": "adapters/openui5/webapp/view/Inventory.view.xml",
+    "region": "toolbar",
+    "verified": true
+  },
+  "c41-table": {
+    "lang": "xml",
+    "checkpoint": "P41",
+    "file": "adapters/openui5/webapp/view/Inventory.view.xml",
+    "region": "table",
+    "verified": true
+  },
+  "c41-header": {
+    "lang": "js",
+    "checkpoint": "P41",
+    "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "region": "header",
+    "verified": true
+  },
+  "c41-tail": {
+    "lang": "js",
+    "checkpoint": "P41",
+    "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "region": "tail",
+    "verified": true
+  },
+  "c41-dialog": {
+    "lang": "xml",
+    "checkpoint": "P41",
+    "file": "adapters/openui5/webapp/view/EditDialog.fragment.xml",
+    "region": null,
+    "verified": true
+  }
+}
