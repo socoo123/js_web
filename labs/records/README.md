@@ -31,4 +31,6 @@ C23/P22→P23 与 C41/P40→P41 是 R4 的前置试做，不代表 C04–C22/C40
 
 ## 发布
 
-本批本地验收完成，提交推送及对应 Pages 结果将在核验后记录。后续任务为 R5：C01–C20 的正式连续工作区迁移。
+提交 `11259e9`；[Pages run 40684581291](https://github.com/socoo123/js_web/actions/runs/40684581291) build/deploy 成功。线上 C03/C23/C41 与 Lab 入口 HTTP 200，8 个快照双格式下载及 SHA-256 全部通过。实际发布字节冻结于 labs/releases/2026.10-v2.1；后续 R5 使用新发行版，不覆盖旧包。
+
+本机线上核验使用 npm 已配置的可信 CA 文件（NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem），保持 TLS 验证。后续任务为 R5：C01–C20 的正式连续工作区迁移。
