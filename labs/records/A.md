@@ -1,6 +1,6 @@
-# A · React 连续主线（执行中，未发布）
+# A · React 连续主线（已发布）
 
-2026-10-29。范围 C21–C36 / L3；发行候选 `2026.10-v2.3`。独立教学验收已通过，最终发行门禁与发布记录见下文。
+2026-10-29。**阶段 A 成功**：C21–C36 / L3，发行版 `2026.10-v2.3`。四路及全部返修结束，主独立教学验收、最终门禁、Pages和线上下载核验通过。
 
 ## 基线与四路
 
@@ -35,7 +35,7 @@ C24 约定集合 state 与 id 更新；C28 交接 reducer/Provider、局部草�
 - 中间 `npm run build` 通过：9 项 Lab/内容契约、22 个 Java 对照、303 个固定输出、15 项进度数据测试、14 张 D2、61 页产物；记录在隔离根 `intermediate-build.log`。
 - `LAB_NATIVE_CHECK_PORT=18062 npm run test:lab-walkthrough` 通过：C00→C20 自动组装/错误红绿，以及 C03、正式 C22→C23、C41 试做的实际工作文件回归。C23 错误版分别得到 13、15，修复后为 15、16；`pre-final-walkthrough.log` 保存证据。这是前置自动回归，独立读者验收另记。
 - A4 真实 C32 的66个文件哈希一致；C25–C36的12快照完整检查、9项必要故障及真实重试按钮故障红→绿、C33–36公开围栏作者组装通过。按33文件manifest集成，69份上游镜像未复制；其中A2旧计数不替代最新溢出修复结果。证据在 `agent-4/delivery/evidence/final-*`。
-- 主审 C33–36 的公开改动位置、Action错误传播、Profiler/lazy/边界、RTL与严格静态步骤、真实存储故障插入行；catalog实现与任务文件表已对齐，迁移标记待主验收。L3补充旧发行版升级入口。
+- 主审 C33–36 的公开改动位置、Action错误传播、Profiler/lazy/边界、RTL与严格静态步骤、真实存储故障插入行；catalog实现与任务文件表已对齐，迁移标记在独立验收通过后置真。L3补充旧发行版升级入口。
 - 四路集成构建通过（`integrated-build.log`），Astro check 32文件零诊断。随后最新预检增量与锚点已重建公开候选包/页面；主审实际HTML中的C21–C36全部322个旧H2/H3目标均存在（`legacy-anchors-36.json`）。
 - 主流程 `npm run check` 32文件零诊断、`npm run lint:lessons` 48课零error/warning（`final-astro-check.log`、`final-lesson-lint.log`）。原发行69文件保留，Git远端检查与main无分叉；冻结/发布前仍复核最终差异。
 
@@ -68,4 +68,12 @@ C24 约定集合 state 与 id 更新；C28 交接 reducer/Provider、局部草�
 
 ## 发布
 
-未提交、未部署。下一阶段仍须在本阶段验收与 Pages 核验后决定。
+- 内容与发行提交：`89795e489d1bd1a8de97c4ccdfa6f4477920254b`（`docs: publish React C21-C36 continuous lessons and L3 lab`）。正常推送main，无强推；提交前远端无分叉。
+- 对应 [Pages run 40814920092](https://github.com/socoo123/js_web/actions/runs/40814920092) 的build/deploy均成功。Linux中实际完成锁定安装、前置跟做、16个React快照、旧React工程、D2、Astro和全站构建。
+- 线上核验：C21–C36的16页任务卡/正式起点、Lab总览与L1–L5共6入口HTTP 200；3份冻结manifest逐字节一致，144个新旧双格式下载包SHA全部一致；C23 D2和Pagefind资源200。结果在 `release-online-check.log` / `online-result.json`，使用可信CA并保持TLS验证。
+- 入口：[L3 React](https://socoo123.github.io/js_web/labs/l3/)、[C21开始](https://socoo123.github.io/js_web/05-react/c21-react-jsx-components/)、[本版manifest](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.3/manifest.json)。库存应用仍按课内步骤在本地运行/构建，未作为在线演示另行部署。
+- 本记录和STATUS随后以记录提交同步；该提交如触发Pages，主agent等待成功后在最终回复给出结果，不为记录自身SHA/run循环提交。
+
+## 下一窗口
+
+下一阶段为 **B：C37–C44 / L4 组件库与UI5**。从已冻结C36继续，按PLAN §7同时启动四路：C37–C38、C39–C42、C43、C44/L4；仍用指定Sol max模型与隔离副本。本窗口止于A，不启动B；B的独立抽验链为C40→C41–C42并抽验C43/C44表单。阶段证据写 `labs/records/B.md`。

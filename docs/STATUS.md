@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-10-29（阶段 A 执行中，尚未发布；既有发布范围未变）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-10-29（阶段 A 已发布并核验；下一阶段 B）。
 
 ## 续做时按这个顺序读
 
@@ -33,11 +33,11 @@
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
 | 工程 | Node 24.22.0、npm 11.19.1（本机默认已对齐）、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
 | 已发布 | 48 / 48（C01–C48）；C48 每课门禁与线上核验通过 |
-| 贯穿项目 | 阶段 1–7、Q3 完成；C48 七阶段复检通过；阶段 4 的 199 条核心/组件与 2 条静态浏览器回归通过 |
+| 贯穿项目 | 第一版阶段1–7/Q3保留；V2 L1–L3已接通，React 16快照、四课独立抽验与严格静态E2E通过，见[A](../labs/records/A.md) |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；14 张图；C16/C18 合并共用，新增 C46 静态交付图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | F1 已上线：标记/撤销、路线状态、导入导出、备份/损坏恢复、跨标签；[Pages run](https://github.com/socoo123/js_web/actions/runs/39263906094) 与线上交互通过 |
-| V2 改版 | R1–R5 已发布：C01–C20 连续工作区、双栏与门禁、实际起点跟做/逐章错误；C23/C41 仍为前置试做；[Pages 40713752220](https://github.com/socoo123/js_web/actions/runs/40713752220) 成功，48课/Lab/33个双格式快照线上核验通过 |
+| V2 改版 | A已发布：C01–C36连续工作区/L1–L3，C23正式接C22，C41仍试做；v2.3/[Pages 40814920092](https://github.com/socoo123/js_web/actions/runs/40814920092)成功，16课/6个Lab入口/全部144新旧包SHA线上通过，见[A](../labs/records/A.md) |
 
 ## 已发布课程
 
@@ -63,22 +63,22 @@
 | C18 npm：项目、版本与可复现安装 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c18-npm-reproducible-installs/) | [examples/c18](../examples/c18/README.md) | [run 38994824234](https://github.com/socoo123/js_web/actions/runs/38994824234) |
 | C19 Yarn、pnpm、Bun 的职责与选择 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c19-yarn-pnpm-bun/) | [examples/c19](../examples/c19/README.md) | [run 38996724990](https://github.com/socoo123/js_web/actions/runs/38996724990) |
 | C20 构建工具与第一次 UT | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c20-vite-vitest/) | [examples/c20](../examples/c20/README.md) | [run 38997587821](https://github.com/socoo123/js_web/actions/runs/38997587821) |
-| C21 React 来由、JSX 与第一个组件 | [打开](https://socoo123.github.io/js_web/05-react/c21-react-jsx-components/) | [examples/c21](../examples/c21/README.md) | [run 39009250317](https://github.com/socoo123/js_web/actions/runs/39009250317) |
-| C22 Props、组合与渲染模型 | [打开](https://socoo123.github.io/js_web/05-react/c22-props-composition-render/) | [examples/c22](../examples/c22/README.md) | [run 39018608877](https://github.com/socoo123/js_web/actions/runs/39018608877) |
-| C23 useState：状态快照与更新队列 | [打开](https://socoo123.github.io/js_web/05-react/c23-state-snapshot-queue/) | [examples/c23](../examples/c23/README.md) | [run 39020278502](https://github.com/socoo123/js_web/actions/runs/39020278502) |
-| C24 数组更新、key 与派生数据 | [打开](https://socoo123.github.io/js_web/05-react/c24-arrays-keys-derived/) | [examples/c24](../examples/c24/README.md) | [run 39021433607](https://github.com/socoo123/js_web/actions/runs/39021433607) |
-| C25 表单、校验与可访问性 | [打开](https://socoo123.github.io/js_web/05-react/c25-forms-validation-accessibility/) | [examples/c25](../examples/c25/README.md) | [run 39030596833](https://github.com/socoo123/js_web/actions/runs/39030596833) |
-| C26 状态提升、保留与重置 | [打开](https://socoo123.github.io/js_web/05-react/c26-state-ownership-reset/) | [examples/c26](../examples/c26/README.md) | [run 39037201320](https://github.com/socoo123/js_web/actions/runs/39037201320) |
-| C27 useReducer 与 Context | [打开](https://socoo123.github.io/js_web/05-react/c27-reducer-context/) | [examples/c27](../examples/c27/README.md) | [run 39038415280](https://github.com/socoo123/js_web/actions/runs/39038415280) |
-| C28 useRef 与外部系统 | [打开](https://socoo123.github.io/js_web/05-react/c28-refs-external-systems/) | [examples/c28](../examples/c28/README.md) | [run 39040017175](https://github.com/socoo123/js_web/actions/runs/39040017175) |
-| C29 useEffect 深入与清理 | [打开](https://socoo123.github.io/js_web/05-react/c29-effects-cleanup/) | [examples/c29](../examples/c29/README.md) | [run 39042403933](https://github.com/socoo123/js_web/actions/runs/39042403933) |
-| C30 请求状态与竞态调试 | [打开](https://socoo123.github.io/js_web/05-react/c30-requests-races/) | [examples/c30](../examples/c30/README.md) | [run 39081623244](https://github.com/socoo123/js_web/actions/runs/39081623244) |
-| C31 自定义 Hooks 与路由 | [打开](https://socoo123.github.io/js_web/05-react/c31-custom-hooks-routing/) | [examples/c31](../examples/c31/README.md) | [run 39082631885](https://github.com/socoo123/js_web/actions/runs/39082631885) |
-| C32 认识 TanStack Query 与服务端状态 | [打开](https://socoo123.github.io/js_web/05-react/c32-tanstack-query-server-state/) | [examples/c32](../examples/c32/README.md) | [run 39087677999](https://github.com/socoo123/js_web/actions/runs/39087677999) |
-| C33 现代 React 19 与更新速查 | [打开](https://socoo123.github.io/js_web/05-react/c33-modern-react-actions/) | [examples/c33](../examples/c33/README.md) | [run 39088993996](https://github.com/socoo123/js_web/actions/runs/39088993996) |
-| C34 性能、加载与错误诊断 | [打开](https://socoo123.github.io/js_web/05-react/c34-performance-loading-errors/) | [examples/c34](../examples/c34/README.md) | [run 39101734918](https://github.com/socoo123/js_web/actions/runs/39101734918) |
-| C35 React UT、集成测试与 E2E 地图 | [打开](https://socoo123.github.io/js_web/05-react/c35-react-testing/) | [examples/c35](../examples/c35/README.md) | [run 39108651570](https://github.com/socoo123/js_web/actions/runs/39108651570) |
-| C36 React 项目复盘与故障排查 | [打开](https://socoo123.github.io/js_web/05-react/c36-react-project-debugging/) | [examples/c36](../examples/c36/README.md) | [run 39110881230](https://github.com/socoo123/js_web/actions/runs/39110881230) |
+| C21 React 来由、JSX 与第一个组件 | [打开](https://socoo123.github.io/js_web/05-react/c21-react-jsx-components/) | [examples/c21](../examples/c21/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39009250317)；[A改版](../labs/records/A.md#发布) |
+| C22 Props、组合与渲染模型 | [打开](https://socoo123.github.io/js_web/05-react/c22-props-composition-render/) | [examples/c22](../examples/c22/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39018608877)；[A改版](../labs/records/A.md#发布) |
+| C23 useState：状态快照与更新队列 | [打开](https://socoo123.github.io/js_web/05-react/c23-state-snapshot-queue/) | [examples/c23](../examples/c23/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39020278502)；[A改版](../labs/records/A.md#发布) |
+| C24 数组更新、key 与派生数据 | [打开](https://socoo123.github.io/js_web/05-react/c24-arrays-keys-derived/) | [examples/c24](../examples/c24/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39021433607)；[A改版](../labs/records/A.md#发布) |
+| C25 表单、校验与可访问性 | [打开](https://socoo123.github.io/js_web/05-react/c25-forms-validation-accessibility/) | [examples/c25](../examples/c25/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39030596833)；[A改版](../labs/records/A.md#发布) |
+| C26 状态提升、保留与重置 | [打开](https://socoo123.github.io/js_web/05-react/c26-state-ownership-reset/) | [examples/c26](../examples/c26/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39037201320)；[A改版](../labs/records/A.md#发布) |
+| C27 useReducer 与 Context | [打开](https://socoo123.github.io/js_web/05-react/c27-reducer-context/) | [examples/c27](../examples/c27/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39038415280)；[A改版](../labs/records/A.md#发布) |
+| C28 useRef 与外部系统 | [打开](https://socoo123.github.io/js_web/05-react/c28-refs-external-systems/) | [examples/c28](../examples/c28/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39040017175)；[A改版](../labs/records/A.md#发布) |
+| C29 useEffect 深入与清理 | [打开](https://socoo123.github.io/js_web/05-react/c29-effects-cleanup/) | [examples/c29](../examples/c29/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39042403933)；[A改版](../labs/records/A.md#发布) |
+| C30 请求状态与竞态调试 | [打开](https://socoo123.github.io/js_web/05-react/c30-requests-races/) | [examples/c30](../examples/c30/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39081623244)；[A改版](../labs/records/A.md#发布) |
+| C31 自定义 Hooks 与路由 | [打开](https://socoo123.github.io/js_web/05-react/c31-custom-hooks-routing/) | [examples/c31](../examples/c31/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39082631885)；[A改版](../labs/records/A.md#发布) |
+| C32 认识 TanStack Query 与服务端状态 | [打开](https://socoo123.github.io/js_web/05-react/c32-tanstack-query-server-state/) | [examples/c32](../examples/c32/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39087677999)；[A改版](../labs/records/A.md#发布) |
+| C33 现代 React 19 与更新速查 | [打开](https://socoo123.github.io/js_web/05-react/c33-modern-react-actions/) | [examples/c33](../examples/c33/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39088993996)；[A改版](../labs/records/A.md#发布) |
+| C34 性能、加载与错误诊断 | [打开](https://socoo123.github.io/js_web/05-react/c34-performance-loading-errors/) | [examples/c34](../examples/c34/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39101734918)；[A改版](../labs/records/A.md#发布) |
+| C35 React UT、集成测试与 E2E 地图 | [打开](https://socoo123.github.io/js_web/05-react/c35-react-testing/) | [examples/c35](../examples/c35/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39108651570)；[A改版](../labs/records/A.md#发布) |
+| C36 React 项目复盘与故障排查 | [打开](https://socoo123.github.io/js_web/05-react/c36-react-project-debugging/) | [examples/c36](../examples/c36/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39110881230)；[A改版](../labs/records/A.md#发布) |
 | C37 组件生态与选择标准 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c37-component-ecosystem-selection/) | [examples/c37](../examples/c37/README.md) | [run 39111938025](https://github.com/socoo123/js_web/actions/runs/39111938025) |
 | C38 一个普通组件库的完整案例 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c38-antd-inventory/) | [examples/c38](../examples/c38/README.md) | [run 39121201638](https://github.com/socoo123/js_web/actions/runs/39121201638) |
 | C39 SAP Fiori 与 UI5 家族 | [打开](https://socoo123.github.io/js_web/06-components-ui5/c39-fiori-ui5-family/) | [examples/c39](../examples/c39/README.md) | [run 39122376307](https://github.com/socoo123/js_web/actions/runs/39122376307) |
@@ -93,7 +93,6 @@
 | C48 总复盘与后续路线 | [打开](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/) | [examples/c48](../examples/c48/README.md) | [run 39257555264](https://github.com/socoo123/js_web/actions/runs/39257555264) |
 
 ## 周验收记录
-
 - 建站与 C01–C05（2026-10-15，旧流程）：本地和线上 Pages 都检查过 1280px/360px、亮暗模式、D2 中文、折叠答案、禁用 JS 后阅读、搜索、代码复制，全部通过。
 - T0 配置调整与 C06（2026-10-16）：本地 1280px/360px、亮暗模式、D2、折叠答案、代码复制、三个关键词搜索及禁用 JS 阅读通过。
 - C12 / 第一周验收（2026-10-16）：C01–C12 及首页/路线页的 1280px/360px、亮暗模式、9 张 D2 中文、折叠答案、代码复制、三关键词搜索与禁用 JS 阅读通过；阶段 1 业务参考值一致。
@@ -102,6 +101,7 @@
 - C48 / 第四周验收（2026-10-19）：54 页、216 组 1280/360px × 亮暗、14 张 D2、折叠答案/复制、三关键词搜索与禁用 JS 阅读通过；七阶段安装/构建/业务复检通过，§10 仅余 F1 学习进度。
 - F1 / 站点交互变更复检（2026-10-19）：15 条数据测试、浏览器主流程/故障回归、54 页/216 组宽度主题、14 张 D2、搜索/复制/答案和禁用 JS 阅读通过；Pages 与线上交互通过，明细见 SOURCES。
 - V2 R1–R4 / 首批（2026-10-28）：61 页/366 组、双栏复制与无 JS、D2/搜索、旧 F1、三课起点跟做/错误先红后绿、UI5 严格静态子路径通过；[记录](../labs/records/README.md)。[Pages run](https://github.com/socoo123/js_web/actions/runs/40684581291) 成功，线上课程和下载核验通过。
+- V2 A / C24–C36合并验收（2026-10-29）：61页/366组、14张D2、键盘/复制/答案/搜索/无JS及F1通过；四课独立跟做、16个React快照、144包线上SHA与Pages通过，见[A记录](../labs/records/A.md)。
 
 ## 已知问题（不阻塞）
 
@@ -110,9 +110,9 @@
 
 ## 下一步
 
-1. **继续 A 的发布核验**。四路及全部返修已结束；四课独立跟做、16快照、根门禁、366组视觉/F1通过，v2.3已冻结并核对历史69文件/全部144包SHA。证据见 `labs/records/A.md`。提交推送、对应Pages及线上核验尚待，勿重开四路或提前进入B。
-2. **保留已接管工作**：规划、catalog、练习/C00 package/lock、CLI/check 与 React steps 已审阅复用。C21–C36本地已迁移不代表已上线；已发布基线仍为 [R5 v2.2](../labs/records/R5.md)，实际发布核验后再更新。
-3. A 成功后 B：C37–C44/L4；B 成功后 C：C45–C48/L5、导航下载与最终验收。C 成功则下一阶段为“无”；旧 R6–R9 不再作为并列队列。
+1. **新窗口执行 B：C37–C44 / L4 组件库与UI5**。按PLAN §7同时启动4个指定模型子agent，隔离分工C37–C38、C39–C42、C43、C44/L4；从A的C36继续。全部交稿/返修后由主agent独立验收发布，记录 `labs/records/B.md`。
+2. **A已完成**：四路及返修结束；四课独立跟做、16快照、根门禁、366组视觉/F1通过；v2.3已冻结发布，历史69文件不变。内容提交 `89795e4` 与Pages/线上证据见 [A](../labs/records/A.md)。保留已发布源码、工具、锁及历史包，不重做React。
+3. B成功后C：C45–C48/L5、导航下载与最终验收。C成功则下一阶段为“无”；旧R6–R9不再作为并列队列。本窗口止于A，用户清理上下文后再开B。
 
 ## 本文件的更新规则
 
