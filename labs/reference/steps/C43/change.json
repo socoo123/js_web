@@ -1,0 +1,8 @@
+{
+  "previous": "C42",
+  "files": [
+    "adapters/web-components/index.html",
+    "adapters/web-components/components.js",
+    "adapters/web-components/editor.js"
+  ]
+}

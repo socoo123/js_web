@@ -1,0 +1,13 @@
+:root { font-family: system-ui, sans-serif; color: var(--sapTextColor, #17212b); background: var(--sapBackgroundColor, #f5f6f7); }
+body { margin: 0; }
+main { max-width: 54rem; margin: auto; padding: 1rem; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.1rem; }
+.toolbar, .actions { display: flex; flex-wrap: wrap; gap: 1rem; }
+label { display: grid; gap: .4rem; }
+input, select, button { font: inherit; max-width: 100%; padding: .5rem; box-sizing: border-box; }
+article, #editor { border: 1px solid var(--sapGroup_ContentBorderColor, #8496a6); border-radius: .5rem; padding: 1rem; margin-block: .8rem; }
+article p, #feedback { overflow-wrap: anywhere; }
+ui5-input { display: block; width: 100%; max-width: 24rem; margin-block: .5rem; }
+:focus-visible { outline: 3px solid #0070f2; outline-offset: 3px; }
+[hidden] { display: none !important; }

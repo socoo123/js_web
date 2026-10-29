@@ -1,0 +1,8 @@
+{
+  "previous": "C39",
+  "files": [
+    "adapters/openui5/webapp/manifest.json",
+    "adapters/openui5/webapp/view/Inventory.view.xml",
+    "adapters/openui5/webapp/controller/Inventory.controller.js"
+  ]
+}

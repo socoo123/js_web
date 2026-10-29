@@ -1,0 +1,19 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m">
+  <Dialog id="editDialog" title="{i18n>editTitle}" contentWidth="28rem" initialFocus="editName">
+    <content><VBox class="sapUiSmallMargin">
+      <Text text="{draft>/id}" />
+      <Label text="{i18n>name}" labelFor="editName" required="true" />
+      <Input id="editName" value="{draft>/name}" valueLiveUpdate="true"
+        valueState="{= %{draft>/errors/name} ? 'Error' : 'None' }" valueStateText="{i18n>invalidName}" />
+      <Label text="{i18n>stock}" labelFor="editStock" required="true" />
+      <Input id="editStock" value="{draft>/stock}" valueLiveUpdate="true" submit=".onSave"
+        valueState="{= %{draft>/errors/stock} ? 'Error' : 'None' }" valueStateText="{i18n>invalidStock}" />
+      <Label text="{i18n>price}" labelFor="editPrice" required="true" />
+      <Input id="editPrice" value="{draft>/price}" valueLiveUpdate="true"
+        valueState="{= %{draft>/errors/price} ? 'Error' : 'None' }" valueStateText="{i18n>invalidPrice}" />
+      <MessageStrip text="{i18n>formInvalid}" visible="{draft>/hasErrors}" type="Error" />
+    </VBox></content>
+    <beginButton><Button text="{i18n>save}" press=".onSave" type="Emphasized" /></beginButton>
+    <endButton><Button text="{i18n>cancel}" press=".onCancel" /></endButton>
+  </Dialog>
+</core:FragmentDefinition>

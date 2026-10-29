@@ -1,0 +1,14 @@
+:root { font-family: var(--sapFontFamily), system-ui, sans-serif; color: var(--sapTextColor); background: var(--sapBackgroundColor); }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 76rem; margin: auto; padding: 1rem; }
+h1 { font-size: 1.7rem; }
+h2 { font-size: 1.2rem; }
+ui5-input { width: 100%; min-width: 0; }
+.inventory-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; }
+.inventory-grid > section { min-width: 0; padding: .8rem; border: 1px solid var(--sapGroup_ContentBorderColor); border-radius: .5rem; }
+.settings, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin-block: 1rem; }
+.settings select { max-width: 100%; color: inherit; background: var(--sapField_Background); padding: .4rem; }
+[role="alert"] { color: var(--sapNegativeTextColor); }
+:focus-visible { outline: 2px solid var(--sapContent_FocusColor); outline-offset: 3px; }
+@media (max-width: 48rem) { .inventory-grid { grid-template-columns: minmax(0, 1fr); } }

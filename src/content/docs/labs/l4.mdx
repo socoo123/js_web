@@ -1,12 +1,58 @@
 ---
 title: L4 组件库与 UI5 适配
-description: 在持续修改的库存工作区完成这一阶段的业务交付。
+description: 从 C36 继续，用四种组件界面完成同一组库存筛选、草稿取消和保存验收。
 sidebar:
   order: 4
 ---
 
 import LabOverview from '../../../components/LabOverview.astro';
 
-从[工作区入口](/js_web/labs/)安装一次，按课程顺序修改自己的代码。阶段收尾使用同一工程验收；不需要再安装一个 Lab。
+在本发行版的工作区，从 C36 的自己的代码继续，依次完成 C37–C44。React 主应用保留；新增四个并列的小范围界面，不把库一层层套起来，也不各写一遍完整 CRUD。正常学习持续改同一个目录，不每天换快照。
+
+## 从阶段 A 的旧发行版继续
+
+旧目录完整保留。工具与锁不会随课程网页更新，阶段 A 的工程需要做一次升级：
+
+1. 下载 [2026.10-v2.4 的 C00 骨架](/js_web/downloads/inventory/2026.10-v2.4/C00.tar.gz)，解压到新的空目录，例如 `inventory-components/`。
+2. 保留新版的 `tools/`、依赖清单与锁、固定 `data/` 和 `adapters/` 机械外壳。迁入自己完成的 `src/`、`notes/`、`tests/` 与 `vite.config.js`；把自己新增的 package.json scripts（如 report/test）逐项合并进新清单，已有 adapter 改动也先比较再合并。不要用旧依赖清单覆盖新版，node_modules 与 .lab 留在旧目录。
+3. 在新目录执行一次 `npm ci`，接着 `npm run lab -- start C37`。以后沿用这个工作区，四个适配器外壳不会靠后续 step 自动补进自己的工程。
+
+新版 C00 的 adapter 外壳只提供入口、资源、布局与占位页面。列表、草稿、事件取值和保存仍由对应课程完成，**不包含 C44 表单答案**。
+
+如果 React 前置尚未完成，需要补课或对照，再下载 [2026.10-v2.4 的 C36 起点包](/js_web/downloads/inventory/2026.10-v2.4/C36.tar.gz)到另一新目录，执行 `npm ci` 后从 C37 开始。也可在本版工作区运行 `npm run lab -- restore C36 ../inventory-components`；非空目录会被拒绝。安装与下载校验见[工作区入口](/js_web/labs/)。
 
 <LabOverview labId="L4" />
+
+## 这一阶段交什么
+
+| 学习段 | 在当前工作区做什么 | 看什么证据 |
+| --- | --- | --- |
+| C37–C38 | `notes/components.md` 写选择依据；`adapters/antd/` 接表格与编辑 | 稳定 id、表单会话、取消后再打开不串草稿 |
+| C39–C42 | 选择 UI5 路线；`adapters/openui5/` 完成 MVC、绑定、详情与有限 V2 mock | JSONModel 通知、P004 路由刷新、metadata 与查询请求 |
+| C43 | `adapters/web-components/` 的小表单换原生组件 | property / attribute、真实事件、主题与翻译资源 |
+| C44 | `adapters/ui5-react/` 接列表与库存编辑 | 包装事件、HTML form 祖先、按钮和 Enter 各保存一次 |
+
+共享规则始终来自 `src/core/`；React 适配器复用 `src/services/inventory-repository.js`。不复制四份业务校验器。OpenUI5 的构建桥负责模块边界，不负责发明另一套字段规则。
+
+## 四种界面用同一组数据验收
+
+每个独立场景先使用六件固定商品：总库存 52、总价值 2634800 分。适配器间不共享练习中的已保存结果；按本课说明刷新或重开独立练习，不删除主应用的个人快照。
+
+1. 筛选 P004，库存草稿填 8，再取消：正式库存仍为 3，全部总库存仍为 52。
+2. 重新打开保存 8：P004=8、P001=12、全部总库存 57；商品名、分类、价格和“热销、新品”保留。
+3. 空白和负数拒绝，0 合法；只用键盘能打开、输入、取消和保存，错误位置清楚。
+4. 清空筛选显示全部六项。筛选后的单行和有限 OData 分页子集，都不能被当成全量库存。
+
+OpenUI5 另外检查 P004 详情刷新/返回、未知 id、有限 V2 过滤/排序/分页。C44 另外分别测试库存框 Enter、保存按钮 Enter 和鼠标保存，每次确认一次；主题、中文翻译、英文内置文案与本地字体随产物可用，不依赖运行时字体 CDN。
+
+## 切换、检查与暂停
+
+始终在 `inventory/` 执行 `npm run lab -- start Cnn`、`npm run lab -- dev` 和 `npm run lab -- check Cnn`。只有切换界面时才 Ctrl+C 停止旧服务并重启，不需要同时开四个端口。
+
+- C44 收尾运行 `npm run lab -- check C44`。严格静态补验可执行 `node tools/ui5-react-check.mjs --production`，它在独立子路径构建并检查资源，缺失资源必须返回 404。
+- 在 `notes/next.md` 留当前课、改动文件、观察结果、故障证据和下一件事；网站阅读标记与本地检查结果分开记录。
+- `npm run lab -- compare C44` 只读比较；恢复 C44 时只向新目录写入。保留自己的未保存草稿与个人快照。
+
+## 完成后去哪里
+
+下一阶段使用这里保留的 `src/react/` 主应用与适配成果，做全链路排错和静态交付。UI5 React 不是后续所有课程的强制入口。当前 Lab 的应用在本地构建和预览；课程网站与学习包由各自入口访问。

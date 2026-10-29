@@ -25,7 +25,8 @@
     "build:labs": "node scripts/build-labs.mjs",
     "test:comparisons": "node scripts/verify-comparisons.mjs",
     "test:lab-walkthrough": "npm run build:labs && node scripts/verify-l1-walkthrough.mjs && node scripts/verify-lab-walkthrough.mjs",
-    "test:lab-react": "node scripts/verify-react-lab.mjs"
+    "test:lab-react": "node scripts/verify-react-lab.mjs",
+    "test:lab-ui5": "node scripts/verify-ui5-lab.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.6",

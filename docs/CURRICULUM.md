@@ -73,7 +73,7 @@ C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。�
 
 | 日 | 课号与标题 | 本课主任务与文件 | Java / JS 并排主题 | 完成标准 |
 | --- | --- | --- | --- | --- |
-| 19 | C37 组件生态与选择标准 | 以当前表格/编辑需求写 notes/components.md，确定 adapter 输入输出与验收 | Java 接口/适配经验 / UI 组件契约；库与业务数据分离 | 按可访问性、主题、维护、许可选型；比较整库/primitives/代码分发；同一个商品 id 贯穿排序与编辑 |
+| 19 | C37 组件生态与选择标准 | 写 notes/components.md 的界面契约，并在 adapters/antd/select-product.js 按 id 连接排序后的商品 | Java 接口/适配经验 / UI 组件契约；库与业务数据分离 | 按可访问性、主题、维护、许可选型；比较整库/primitives/代码分发；同一个商品 id 贯穿排序与编辑 |
 | 19 | C38 一个普通组件库的完整案例 | 在 `adapters/antd/` 替换列表与弹窗，调用同一 core/repository | Java Bean 初值经验 / Form initialValues 与受控更新边界 | 按库存排序后编辑 P002 仍是它；取消 P001 草稿不残留；校验、空/错态、主题与焦点可用 |
 | 20 | C39 SAP Fiori 与 UI5 家族 | 写 notes/ui5-choice.md，对同一库存需求选择经典 UI5 或 Web Components；阅读现有 D2 | Java MVC 经验 / UI5 View/Controller/Model；Fiori 不等于框架 | 分清 SAPUI5、OpenUI5、原生 UI5 Web Components 和 React 包装库；说明静态 mock 的边界 |
 | 20 | C40 OpenUI5 入门：MVC 与工程 | 在 `adapters/openui5/webapp/` 配 Component、manifest、XML View、Controller，接共享规则桥接 | Java 包/类路径 / UI5 namespace、模块与资源路径 | 列表加载 6 件；Console/Network 定位模块名错误；UI5 CLI 构建能生成静态产物；不手抄第二份业务规则 |

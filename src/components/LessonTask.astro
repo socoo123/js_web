@@ -6,12 +6,12 @@ const lesson = catalog.lessons.find((row) => row.lessonId === Astro.props.lesson
 if (!lesson?.implemented) throw new Error(`工作区任务未发行：${Astro.props.lessonId}`);
 const base = import.meta.env.BASE_URL;
 const download = `${base}downloads/inventory/${catalog.release}/`;
-const start = lesson.trial?.start ?? lesson.startCheckpoint;
-const end = lesson.trial?.end ?? lesson.endCheckpoint;
+const start = lesson.startCheckpoint;
+const end = lesson.endCheckpoint;
 ---
 <aside class="lesson-task" aria-label="本课工作区任务" data-lesson-task={lesson.lessonId}>
   <p><strong>{lesson.labId} · 本课只完成这一项</strong></p>
-  {lesson.trial ? <p>试做前置：{lesson.trial.description}。本课提供单独标明的参考起点；连续课程迁移完成前，用新目录跟做。</p> : <p>接续 {lesson.previousLesson === 'C00' ? '初始骨架' : lesson.previousLesson + ' 的自己的代码'}，工作目录：<code>labs/inventory/</code>。</p>}
+  <p>接续 {lesson.previousLesson === 'C00' ? '初始骨架' : lesson.previousLesson + ' 的自己的代码'}，工作目录：<code>labs/inventory/</code>。</p>
   <p>改动文件：{lesson.files.map((file, i) => <>{i > 0 && '、'}<code>{file}</code></>)}</p>
   <p>跨课沿用正在运行的服务。首次运行或切换界面时启动 dev；切换前用 Ctrl+C 停止旧服务，改完源码再运行 check。</p>
   <Code code={`${lesson.commands.start}\n${lesson.commands.dev}\n${lesson.commands.check}`} lang="sh" title="在库存工作区执行" />

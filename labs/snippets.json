@@ -1,4 +1,212 @@
 {
+  "c40-view": {
+    "lang": "xml",
+    "checkpoint": "C40",
+    "file": "adapters/openui5/webapp/view/Inventory.view.xml",
+    "region": "view",
+    "verified": true
+  },
+  "c40-controller": {
+    "lang": "js",
+    "checkpoint": "C40",
+    "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "region": "controller",
+    "verified": true
+  },
+  "c42-app": {
+    "lang": "xml",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/view/App.view.xml",
+    "region": null,
+    "verified": true
+  },
+  "c42-ready": {
+    "lang": "js",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/Component.js",
+    "region": "ready",
+    "verified": true
+  },
+  "c42-detail-link": {
+    "lang": "js",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "region": "detail-link",
+    "verified": true
+  },
+  "c42-detail-header": {
+    "lang": "js",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/controller/Detail.controller.js",
+    "region": "header",
+    "verified": true
+  },
+  "c42-detail-matched": {
+    "lang": "js",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/controller/Detail.controller.js",
+    "region": "matched",
+    "verified": true
+  },
+  "c42-detail-tail": {
+    "lang": "js",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/controller/Detail.controller.js",
+    "region": "tail",
+    "verified": true
+  },
+  "c42-detail-view": {
+    "lang": "xml",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/view/Detail.view.xml",
+    "region": null,
+    "verified": true
+  },
+  "c42-metadata": {
+    "lang": "xml",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/localService/metadata.xml",
+    "region": null,
+    "verified": true
+  },
+  "c42-probe-html": {
+    "lang": "html",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/probe/odata.html",
+    "region": null,
+    "verified": true
+  },
+  "c42-probe-setup": {
+    "lang": "js",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/probe/odata.js",
+    "region": "setup",
+    "verified": true
+  },
+  "c42-probe-query": {
+    "lang": "js",
+    "checkpoint": "C42",
+    "file": "adapters/openui5/webapp/probe/odata.js",
+    "region": "query",
+    "verified": true
+  },
+  "c43-language-config": {
+    "lang": "html",
+    "checkpoint": "C43",
+    "file": "adapters/web-components/index.html",
+    "region": "language-config",
+    "verified": true
+  },
+  "c43-components-imports": {
+    "lang": "js",
+    "checkpoint": "C43",
+    "file": "adapters/web-components/components.js",
+    "region": "components-imports",
+    "verified": true
+  },
+  "c43-editor-markup": {
+    "lang": "html",
+    "checkpoint": "C43",
+    "file": "adapters/web-components/index.html",
+    "region": "editor-markup",
+    "verified": true
+  },
+  "c43-editor-setup": {
+    "lang": "js",
+    "checkpoint": "C43",
+    "file": "adapters/web-components/editor.js",
+    "region": "editor-setup",
+    "verified": true
+  },
+  "c43-editor-validate": {
+    "lang": "js",
+    "checkpoint": "C43",
+    "file": "adapters/web-components/editor.js",
+    "region": "editor-validate",
+    "verified": true
+  },
+  "c43-editor-open": {
+    "lang": "js",
+    "checkpoint": "C43",
+    "file": "adapters/web-components/editor.js",
+    "region": "editor-open",
+    "verified": true
+  },
+  "c43-editor-save": {
+    "lang": "js",
+    "checkpoint": "C43",
+    "file": "adapters/web-components/editor.js",
+    "region": "editor-save",
+    "verified": true
+  },
+  "c43-components-settings": {
+    "lang": "js",
+    "checkpoint": "C43",
+    "file": "adapters/web-components/components.js",
+    "region": "components-settings",
+    "verified": true
+  },
+  "c44-bootstrap-config": {
+    "lang": "html",
+    "source": "labs/reference/c00/adapters/ui5-react/index.html",
+    "region": "react-adapter-config",
+    "verified": true
+  },
+  "c44-bootstrap": {
+    "lang": "jsx",
+    "source": "labs/reference/c00/adapters/ui5-react/main.jsx",
+    "region": "react-adapter-bootstrap",
+    "verified": true
+  },
+  "c44-app-state": {
+    "lang": "jsx",
+    "checkpoint": "C44",
+    "file": "adapters/ui5-react/App.jsx",
+    "region": "react-adapter-state",
+    "verified": true
+  },
+  "c44-app-save": {
+    "lang": "jsx",
+    "checkpoint": "C44",
+    "file": "adapters/ui5-react/App.jsx",
+    "region": "react-adapter-save",
+    "verified": true
+  },
+  "c44-app-list": {
+    "lang": "jsx",
+    "checkpoint": "C44",
+    "file": "adapters/ui5-react/App.jsx",
+    "region": "react-adapter-list",
+    "verified": true
+  },
+  "c44-app-view": {
+    "lang": "jsx",
+    "checkpoint": "C44",
+    "file": "adapters/ui5-react/App.jsx",
+    "region": "react-adapter-editor",
+    "verified": true
+  },
+  "c44-editor-state": {
+    "lang": "jsx",
+    "checkpoint": "C44",
+    "file": "adapters/ui5-react/ProductEditor.jsx",
+    "region": "react-editor-state",
+    "verified": true
+  },
+  "c44-editor-submit": {
+    "lang": "jsx",
+    "checkpoint": "C44",
+    "file": "adapters/ui5-react/ProductEditor.jsx",
+    "region": "react-editor-submit",
+    "verified": true
+  },
+  "c44-editor-fields": {
+    "lang": "jsx",
+    "checkpoint": "C44",
+    "file": "adapters/ui5-react/ProductEditor.jsx",
+    "region": "react-editor-fields",
+    "verified": true
+  },
   "c03-parser": {
     "lang": "js",
     "checkpoint": "C03",
@@ -43,56 +251,56 @@
   },
   "c41-edit": {
     "lang": "js",
-    "checkpoint": "P41",
+    "checkpoint": "C41",
     "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
     "region": "edit",
     "verified": true
   },
   "c41-filter": {
     "lang": "js",
-    "checkpoint": "P41",
+    "checkpoint": "C41",
     "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
     "region": "filter",
     "verified": true
   },
   "c41-summary": {
     "lang": "js",
-    "checkpoint": "P41",
+    "checkpoint": "C41",
     "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
     "region": "summary",
     "verified": true
   },
   "c41-toolbar": {
     "lang": "xml",
-    "checkpoint": "P41",
+    "checkpoint": "C41",
     "file": "adapters/openui5/webapp/view/Inventory.view.xml",
     "region": "toolbar",
     "verified": true
   },
   "c41-table": {
     "lang": "xml",
-    "checkpoint": "P41",
+    "checkpoint": "C41",
     "file": "adapters/openui5/webapp/view/Inventory.view.xml",
     "region": "table",
     "verified": true
   },
   "c41-header": {
     "lang": "js",
-    "checkpoint": "P41",
+    "checkpoint": "C41",
     "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
     "region": "header",
     "verified": true
   },
   "c41-tail": {
     "lang": "js",
-    "checkpoint": "P41",
+    "checkpoint": "C41",
     "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
     "region": "tail",
     "verified": true
   },
   "c41-dialog": {
     "lang": "xml",
-    "checkpoint": "P41",
+    "checkpoint": "C41",
     "file": "adapters/openui5/webapp/view/EditDialog.fragment.xml",
     "region": null,
     "verified": true

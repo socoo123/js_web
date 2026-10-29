@@ -1,0 +1,38 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "course.inventory", "type": "application", "title": "OpenUI5 库存入门",
+    "applicationVersion": { "version": "0.1.0" }
+  },
+  "sap.ui": { "technology": "UI5" },
+  "sap.ui5": {
+    "dependencies": { "minUI5Version": "1.153.0", "libs": { "sap.ui.core": {}, "sap.m": {} } },
+    "rootView": { "viewName": "course.inventory.view.App", "type": "XML", "id": "appView" },
+    "models": {
+      "inventory": { "type": "sap.ui.model.json.JSONModel", "uri": "model/products.json" },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "course.inventory.i18n.i18n", "supportedLocales": ["", "en"],
+          "fallbackLocale": "", "async": true
+        }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router", "type": "View", "viewType": "XML",
+        "path": "course.inventory.view", "controlId": "app", "controlAggregation": "pages",
+        "async": true
+      },
+      "routes": [
+        { "pattern": "", "name": "list", "target": "list" },
+        { "pattern": "products/{id}", "name": "detail", "target": "detail" },
+        { "pattern": ":all*:", "name": "missing", "target": "detail" }
+      ],
+      "targets": {
+        "list": { "id": "inventoryView", "name": "Inventory" },
+        "detail": { "id": "detailView", "name": "Detail" }
+      }
+    }
+  }
+}

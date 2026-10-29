@@ -1,5 +1,19 @@
 # C41 UI5 Model、绑定与业务控件 · 示例
 
+## 连续 Lab · 阶段 B（2026.10-v2.4）
+
+- 新主线正式定义为 C40 → C41，不再以 P40/P41 为正常学习起点；旧原型与冻结包保留。目标发行版 `2026.10-v2.4`，最终发行/主验由阶段 B 汇总。
+- 当前工作区 `adapters/openui5/webapp/` 修改三个文件；正文明确删除 C40 按钮/旧Controller外壳、按顺序接全部方法/导入、Fragment、i18n与取消。
+- 机械壳从新版C00一路保留，不是到C36才安装。旧A目录不覆盖，以新版C00工具/锁/adapters接自己的src/notes及已写文件后继续C40；补课才用新版C36。
+- 2026-10-29 · Node 24.22.0/npm 11.19.1 · OpenUI5 1.153.0 / UI5 CLI 4.0.71 / Playwright 1.64.1 Chromium：`node tools/ui5-check.mjs C41` 在单独 C41 局部夹具通过全部共同向量；根固定输出3/3。
+- 实测 context=/products/3、id=P004；取消8仍3/52；保存8只改P004且全量57/P00112/其他字段不变；空白/负数拒绝、0合法；清空筛选六件、空结果0、键盘与English重载通过。
+- `openui5-fault-check.mjs` 错写 /products/0 后原P001位置被P004草稿覆盖，stock8/原P0043，重复id被共享汇总拒绝；恢复context并刷新后绿。
+- 严格构建发现首次Table更新可能早于JSON到达；summary增加加载就绪检查后，C42严格静态全套无页面错误。Java `javac` + `java C41Notification` 实际输出 P004:3->8。
+- 新检查器对真实P41历史原型通过，原型源码未改；最终真实C40→C41和C44副本均通过86条及共同向量。完整C03/C23/C41 walkthrough实际通过，C41正式从C40组装，缺Fragment/错路径先红后绿。
+- 主agent仅按公开C40包与正文手写三文件：86条通过；CDP断点观察/products/3与P004，写死路径故障再修复后P00112/P0048/全量57。独立跟做、门禁与发布见 [B记录](../../labs/records/B.md)。未运行跨浏览器/Windows/屏幕阅读器/真实SAP。
+
+## 第一版参考（保留）
+
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
 | draft-summary.js | `node draft-summary.js` | 独立草稿、P002 补货与汇总 |
@@ -34,8 +48,8 @@
 - Pages：[run 39134470004](https://github.com/socoo123/js_web/actions/runs/39134470004) 成功；线上课程与路线均 HTTP 200，标题、6 个答案、路线 41/48 与 C41 链接正确。
 - 未运行：DevTools 界面上手动点选面板、屏幕阅读器、Firefox、Safari、Windows；真实 SAP 服务。
 
-## V2 工作区试做
+## 历史：V2 工作区试做
 
 - 2026-10-28 · 发行版 `2026.10-v2.1` · 起点 `P40` → 终点 `P41`；共享规则向量、binding context、取消/空白拒绝/保存/中英切换通过。原例子保留为可选参考，不是当前主线工作目录。
 - 在练习工作区执行 `npm run lab -- check C41`。教师从起点按正文片段跟做并修改实际文件验证先红后绿：`npm run test:lab-walkthrough`。
-- 详细环境、错误证据、范围与限制见 [V2 验证](../../labs/records/README.md)。C23/C41 的试做前置单独提供，连续路线仍需 R6/R7 验收。
+- 当时的环境、错误证据与试做限制见 [V2 验证](../../labs/records/README.md)。本轮连续路线接续见本页首节，不再使用旧 R6/R7 队列。

@@ -1,0 +1,230 @@
+---
+title: C43 UI5 Web Components 原生使用
+description: 保留原生库存列表，用两个自定义元素连接编辑草稿、真实事件、主题与语言资源。
+sidebar:
+  order: 43
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+
+> **第 4 周 · 第 22 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C11、C16、C36、C39–C42 · 运行：Node 24、本地网页 · 部分示例未运行，已在对应位置标注
+
+## 这一课解决什么问题
+
+你已经能用原生 DOM、React 和 OpenUI5 编辑库存。这次保留原生列表与筛选，只把库存输入和保存/取消按钮换成 UI5 Web Components。筛选 P004 后，草稿改成 8 可以取消，也可以保存；商品规则仍是同一个 core，写入仍走 C32 的 repository。
+
+<LessonTask lessonId="C43" />
+
+继续自己的 `inventory/`，先用 Ctrl+C 停止 OpenUI5 服务，再选择本课并启动。依赖沿用本发行版的锁文件，无须再安装一套 UI5 工程。
+
+新版 C00 已提供 `adapters/web-components/main.js`、`shell.js` 和 `style.css`，从第一课持续修改也会保留这些外壳，到本课才启动。main 先加载 components，再创建原生列表外壳，最后调用 `connectEditor(shell)`。shell 提供 `onEdit`、`repository`、`refresh`、`close`，不替你完成表单。初次打开应有六件商品、总库存 52，点击编辑会提示“请按本课正文连接编辑表单”。
+
+本课只改该目录的 `index.html`、`components.js`、`editor.js`。如果你沿用阶段 A 的旧发行版，先保留旧目录，按 [Lab 4](/js_web/labs/l4/) 的升级说明把新版 C00 解压到新目录，取得本版工具与 adapters 外壳；再将自己的 `src/`、`notes/` 复制到新目录。保留新版的依赖声明、锁、tools 和 adapters，不用 C00 的 src 覆盖已经完成的 React 主应用；在新目录安装依赖后继续。
+
+## Java 程序员先看这里
+
+Java 的 listener 经验可以沿用：控件发事件，监听器调用业务。但这里的控件是浏览器 DOM 元素，需要先注册标签。HTML attribute 是文本标记，JS property 才是对象上的值；布尔 setter 对应 `save.disabled = false`，不是字符串 `"false"`。
+
+经典 UI5 的 Component、XML View、JSONModel 不参与这个 adapter。自定义元素提供输入和外观，应用负责草稿、校验与保存。
+
+## 1. 导入模块，浏览器才认识标签
+
+在 `index.html` 的 head 内、title 后加入初始配置。语言在控件启动前确定，默认远程字体关闭，后面改用打包的本地字体。
+
+<CodeExcerpt snippetId="c43-language-config" />
+
+用下面内容替换 `components.js` 的占位注释，暂不加业务逻辑：
+
+<CodeExcerpt snippetId="c43-components-imports" />
+
+导入 Input/Button 执行[自定义元素注册](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_components/Using_custom_elements)，`whenDefined` 等待标签可用。Assets 注册主题/翻译的加载器，FontFace.css 让 Vite 把包里的字体写进产物。浏览器本身不识别 npm 包路径，仍由工作区的 Vite 处理模块。
+
+接着找到 `index.html` 的 `section id="editor"`，只用下面片段替换里面的占位注释；外面的 section 和原生列表不动：
+
+<CodeExcerpt snippetId="c43-editor-markup" />
+
+预期出现的编辑区包含库存输入和两个按钮。`accessible-name-ref` 用标签文本命名输入，description 指向反馈；按钮内的“保存”进入默认 slot。两个按钮明确是 `Button`，本课用按钮激活保存；键盘路径是 Tab 到按钮再按 Enter。
+
+这一步只提供外观，还要接下面的监听器，点击编辑才会展开。对照 Java，加载类库还不等于已经把监听器连接到实例。
+
+## 2. 属性传值，事件通知：业务计算仍在外面
+
+### attribute 是标记文本，property 是 JS 值
+
+**先猜一猜：** 输入文本 `"0"` 应该变成什么？`disabled="false"` 又会启用按钮吗？前者交给 `parseStock` 得到数字 0；后者仍禁用，因为这个布尔 attribute 存在就是真。
+
+完成编辑器后，在页面 Console 可以观察并恢复按钮：
+
+```js
+const saveButton = document.querySelector("#save");
+saveButton.setAttribute("disabled", "false");
+console.log(saveButton.hasAttribute("disabled"), saveButton.disabled); // → true true
+saveButton.removeAttribute("disabled");
+saveButton.disabled = false;
+console.log(saveButton.disabled, typeof saveButton.disabled); // → false boolean
+```
+
+动态开关直接给 property 赋布尔值。输入的 `value` 则一直是字符串；即使看起来像数字，也要在业务入口转换。这里编辑的是库存总数，合法 0 与“补货数量必须大于 0”是不同规则。
+
+### 监听事件时读什么
+
+现在用以下四段**按顺序**替换整个 `editor.js`。第一段打开 `connectEditor`，最后一段负责关闭它，先写齐再预览，不要把每段另包一层函数。
+
+<CodeExcerpt snippetId="c43-editor-setup" />
+
+`product` 是 shell 传来的独立副本，`stock.value` 是当前输入草稿，busy 只代表提交中。继续在函数内加入校验：
+
+<CodeExcerpt snippetId="c43-editor-validate" />
+
+输出：输入 8，反馈为“草稿库存 8 件；保存前原值仍为 3”；空白或负数时显示 core 的错误，valueState 为 Negative，保存禁用。`parseStock` 失败会抛错，null 只是这个 UI 函数的“校验失败”结果，不能写成 `if (!value)`，否则会错拒绝 0。
+
+接着加入打开、输入与取消的连接：
+
+<CodeExcerpt snippetId="c43-editor-open" />
+
+输入订阅真实的 `ui5-input`；按钮订阅 `ui5-click`。UI5 2 的事件还可使用不带前缀的名称，本课只订阅带前缀的一种，避免重复处理。[Input API](https://ui5.github.io/webcomponents/components/Input/) 中 input 表示每次输入，change 表示 Enter 或失焦完成输入。
+
+打开时把商品库存转成字符串赋给 value，之后每次输入重新读取它。取消只关闭编辑区，不调用 repository；再打开 P002，应显示它自己的 0。close 会把焦点交回对应商品的编辑按钮。
+
+<a id="detail-只装事件契约规定的数据"></a>
+
+事件的 detail 只承载具体契约规定的附加数据，Input 不用 `event.detail.value` 取当前值。这里直接闭包引用已知的 stock 元素；若用事件参数，当前监听元素是 `event.currentTarget`，组件公开值是它的 value。DOM 的事件名大小写与连字符都要精确匹配。
+
+最后加入保存监听器及函数的右花括号：
+
+<CodeExcerpt snippetId="c43-editor-save" />
+
+保存前再次校验，阻止程序赋值绕过输入监听。展开 `product` 再替换 stock，名称、分类、价格与 tags 都保留；repository 继续在写入前校验整个商品。保存成功后重新读取列表，再关闭编辑区。提交中锁住按钮与输入，失败则保留草稿并显示原因，允许重试。
+
+**先猜一猜：** P004 改成 8 时，如果屏幕只显示这一行，汇总应是 8 还是 57？本页明确显示“全部”的统计，答案是 57。列表外壳只对显示结果做筛选，统计使用 repository 返回的六件商品；它不是当前子集的小计。
+
+## 3. Shadow DOM 管内部实现，slot 接收页面内容
+
+Input 宿主是 `ui5-input`，内部原生 input 在 shadow tree；你写的 span 则属于页面的 light DOM。打开编辑后在 Console 运行：
+
+```js
+const stockElement = document.querySelector("#edit-stock");
+console.log(stockElement.querySelector("input")); // → null
+console.log(Boolean(stockElement.shadowRoot.querySelector("input"))); // → true
+console.log(stockElement.querySelector("#value-message").parentElement === stockElement); // → true
+```
+
+slot 是插入页面内容的位置，不是把节点的所有权交给组件。`slot="valueStateMessage"` 精确对应 Input 的命名槽，Negative 状态时可显示你提供的错误文案；保存按钮文字使用默认槽。打开 Elements → ui5-input → `#shadow-root (open)`，可以看到内部树与分配到槽的内容。
+
+样式也有树边界：
+
+```css
+ui5-input { width: 100%; }
+ui5-input input { color: red; }
+ui5-input::part(input) { letter-spacing: 2px; }
+```
+
+第一行改变宿主；第二行进不了 shadow tree；第三行通过公开 part 改内部字间距。配色用主题接口，局部定制先查 CSS Parts。像 Java 类的公开接口一样，业务代码不依赖控件内部实现；open shadow root 便于检查，不是安全隔离。
+
+## 4. 主题与语言也是需要交付的资源
+
+在 `components.js` 已有代码后，追加选择框连接：
+
+<CodeExcerpt snippetId="c43-components-settings" />
+
+预期：切 Horizon 深色后，输入与按钮变暗；切 English 后，输入清除图标的可访问名称从“清除”变成 Clear。“保存”仍是中文，因为它是应用传入的文本，`setLanguage` 只翻译组件内置文案。
+
+Assets.js 先注册加载器，首次切主题或语言时才通过动态 import 加载相应资源。Vite 会把主题/翻译 JSON 转成带 hash 的 JS chunk，Network 中不一定看到 JSON 后缀。FontFace.css 提供本地字体；初始配置关闭默认 CDN 字体，构建目录才可以完整搬到静态子路径。
+
+:::tip[自己尝试 · 本地网页]
+1. 保持当前服务，打开 Network，勾选 Disable cache，刷新后筛选 P004 并打开编辑。
+2. 过滤 zh_CN，检查翻译请求；切 Horizon 深色，过滤 parameters-bundle；再过滤 woff2 查看字体。
+3. 切 English，在 Elements 展开 Input 的 shadow root，查看清除图标的 accessible-name。
+
+预期：资源成功返回，图标名称为 Clear，保存按钮仍是中文；全部请求来自当前服务，不依赖外部 CDN。
+:::
+
+发布时带上整个产物目录，包含动态 chunks 和字体。只复制首页与首屏 JS，会留下“第一页正常，切主题才失败”的问题。这与 Java 发布时一并携带资源包是同一类交付责任。
+
+## 5. React 19 可以直接使用这些元素
+
+React 19 支持自定义元素的 property 和自定义事件。直接使用 `ui5-input` 时，事件 prop 是 `on` 加事件原名，即 `onui5-input`；布尔 disabled 传布尔值。元素应先注册，React 才能识别它暴露的 property。
+
+React 包装库提供另一套适合 React 的组件名与事件接口，而不是给经典 OpenUI5 套一层 JSX。下一课比较包装 API，并建立原生 form 的提交链；本课的小编辑区保留为独立对照。
+
+## 常见错误与调试
+
+### 按钮始终灰着，明明写了 false
+
+> 未运行验证：下文 DevTools 面板的手动点选与断点尚未逐项运行。请按步骤自己尝试。
+
+在 `editor.js` 的 validate 成功分支，故意把 `save.disabled = busy` 改成：
+
+```js
+// 有问题的写法：把布尔开关写成字符串 attribute
+save.setAttribute("disabled", String(busy));
+```
+
+1. **现象**：打开 P004，输入合法的 8，保存却一直灰着。
+2. **工具**：Elements 选中 `#save`；Console 读取 `$0.getAttribute("disabled")`、`$0.disabled`。Sources 在这行设断点。
+3. **证据**：busy 为 false，但 attribute 值是字符串 false，property 为 true。
+4. **原因**：attribute 存在即禁用，字符串内容没有改变布尔规则。
+5. **修复**：恢复 `save.disabled = busy`；不需要删除合法的输入校验。
+6. **确认**：重复输入，保存恢复可用，P004 保存成 8，总库存 57。运行 `npm run lab -- check C43`；浏览器回归会检查实际按钮可用性与保存结果，错误写法应先失败，修复后通过。
+
+<a id="输入框变了预览一直停在-15"></a>
+
+若输入已是 8，反馈仍显示草稿 3，先在 `ui5-input` 回调设断点。回调不命中时对照事件名，不能把它拼成 `ui5Input`；命中后才继续检查值。这是接线错误，不是缓存或样式问题。
+
+## 练习
+
+<a id="练习-1预测类型数据与布尔值"></a>
+<a id="练习-2修复事件与-slot"></a>
+<a id="练习-3解释语言切换与发布目录"></a>
+
+完成同一个小表单，并留下上面的主错误修复；不另写补货函数、列表组件或完整 CRUD。
+
+:::tip[自己尝试 · 本地网页]
+1. 从刷新后的固定数据开始，筛选 P004，Tab 到编辑按钮并按 Enter；草稿改 8 后 Tab 到取消并按 Enter：仍为 3 / 52。
+2. 再次编辑，保存 8：P004 为 8、P001 为 12、全部总库存 57，其他字段不变。清空筛选恢复六件。
+3. 刷新，再试空白、负数：显示原因且不能保存；输入 0 则可保存，全部总库存为 49。修好布尔 attribute 故障后运行检查。
+
+预期：鼠标和键盘都能完成编辑；输入变化立即更新草稿反馈，取消不写入，保存只修改指定 id。
+:::
+
+<details>
+<summary>提示</summary>
+
+按钮被禁用时从 property/attribute 查起，反馈没更新时从事件回调查起。保留 stock 的字符串到 parseStock，不在监听器里再写一份正则校验。slot 名要与 Input API 完全一致。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+取消没有调用 save，因此源数据仍为 3 / 52；保存 8 增加五件，为 57；保存 0 减少三件，为 49。业务字段通过展开原商品保留。布尔状态直接赋 property，事件只监听一种名称，错误文案由 valueStateMessage 槽和页面反馈共同呈现。完整参考解在任务卡中，先比较三个目标文件，不替换整个工作区。
+
+</details>
+
+## 项目进度
+
+- 原生列表与筛选外壳保留，Input/Button 只承担库存小表单；React 与 OpenUI5 成果仍在。
+- P004 的取消/保存、空白与负数拒绝、合法 0、键盘焦点和清空筛选可复现。
+- 在工作区执行 `npm run lab -- build`，产物为 `dist/adapters-web-components/`；执行 `node tools/web-components-check.mjs --static` 可构建并检查严格静态子路径及主题/翻译/字体。检查运行在隔离浏览器，不清理你的存储。
+- 在 `notes/next.md` 留当前课、三个改动文件与观察结果；暂停后继续同一目录。
+
+## 小结
+
+- 自定义标签先注册，界面仍由 DOM 事件和应用 JS 连接。
+- attribute 是文本配置，property 是 JS 值；布尔 attribute 存在即真。
+- Input.value 是字符串，真实事件触发共享校验，保存才调用 repository。
+- Shadow DOM 封装内部树，slot 接收页面内容，公开 parts 提供局部样式入口。
+- 主题、翻译与本地字体都属于静态产物，React 19 也可以直接使用这些元素。
+
+自测：字符串 false 为什么仍会禁用？为什么 0 不能用 falsy 判断拒绝？取消为何不影响商品？组件语言为何不翻译保存文字？
+
+## 延伸阅读
+
+- [UI5 Web Components：Input 的属性、事件、slots 与 parts](https://ui5.github.io/webcomponents/components/Input/)
+- [UI5 Web Components：Button 与按钮激活事件](https://ui5.github.io/webcomponents/components/Button/)
+- [UI5 Web Components：额外资源与动态加载](https://ui5.github.io/webcomponents/docs/advanced/using-assets/)
+- [UI5 Web Components：主题、语言与初始配置](https://ui5.github.io/webcomponents/docs/advanced/configuration/)
+- [UI5 Web Components：本地字体](https://ui5.github.io/webcomponents/docs/advanced/fonts/)
+- [React：自定义 HTML 元素](https://react.dev/reference/react-dom/components#custom-html-elements)

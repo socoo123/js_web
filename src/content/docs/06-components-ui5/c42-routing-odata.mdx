@@ -1,0 +1,238 @@
+---
+title: C42 UI5 路由与 OData 起点
+description: 在现有 OpenUI5 adapter 接详情 hash 与刷新，再用独立固定数据观察有限 OData V2 查询。
+sidebar:
+  order: 42
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+
+> **第 4 周 · 第 21 天** · 阅读跟做约 45 分钟 · 实作约 50 分钟<br />
+> 前置：C41 完成态的筛选、草稿与绑定 · 运行：Node 24、本地 UI5 · 示例已运行验证
+
+## 这一课解决什么问题
+
+筛选 P004 后，你要分享它的详情，而不是分享“表格第一行”。本课把编号写入 hash，刷新后仍能找到商品；随后打开同一 adapter 的独立读取页，观察 OData V2 的元数据、过滤、排序与分页。
+
+继续自己的 `inventory/`。经典 MVC 的路由需要多个小文件，本课完整列出搬接清单；所有路径都相对于 `adapters/openui5/webapp/`。C41 的编辑 Fragment、中英文资源和共享桥保留，React 与其他 adapter 不动。
+
+| 操作 | 文件与位置 |
+| --- | --- |
+| 修改 | manifest.json 的 rootView 与 sap.ui5.routing；Component.js 的 init 末尾 |
+| 修改 | Inventory.view.xml 的 ColumnListItem；Inventory.controller.js 新增 onDetail |
+| 新建 | view/App.view.xml、view/Detail.view.xml、controller/Detail.controller.js |
+| 新建 | localService/metadata.xml、probe/odata.html、probe/odata.js |
+
+<LessonTask lessonId="C42" />
+
+## Java 程序员先看这里
+
+路由参数类似按主键查询 DTO，但本课 Router 只匹配浏览器 hash。ODataModel 类似带缓存的数据访问适配器，还连接 UI5 的控件绑定；它不是数据库连接，也不是 Java Repository 的逐个方法翻译。V2、V4 的模型接口分别学习。
+
+## 1. manifest 路由：从地址找到该显示的 View
+
+route 匹配地址，target 把 View 放进容器。C41 的 Inventory 根已经是 Page，无需再删一层 App。新建 `view/App.view.xml`，它仅承载路由页面：
+
+<CodeExcerpt snippetId="c42-app" />
+
+在 manifest 的 `sap.ui5.rootView`，把 viewName 改成 `course.inventory.view.App`、id 改成 `appView`，保留 type 为 XML。在 `sap.ui5` 内、models 后面增加 routing 成员；给 models 的结束括号补逗号，**保留两个模型**：
+
+```json
+"routing": {
+  "config": {
+    "routerClass": "sap.m.routing.Router", "type": "View", "viewType": "XML",
+    "path": "course.inventory.view", "controlId": "app", "controlAggregation": "pages",
+    "async": true
+  },
+  "routes": [
+    { "pattern": "", "name": "list", "target": "list" },
+    { "pattern": "products/{id}", "name": "detail", "target": "detail" },
+    { "pattern": ":all*:", "name": "missing", "target": "detail" }
+  ],
+  "targets": {
+    "list": { "id": "inventoryView", "name": "Inventory" },
+    "detail": { "id": "detailView", "name": "Detail" }
+  }
+}
+```
+
+空 hash 显示列表；`#/products/P004` 匹配 detail，参数是 P004。兜底放最后，使用同一 Detail View 显示“页面地址不存在”。未知 P999 则已经匹配商品详情，是“未找到商品”。
+
+在 Component.js 的 init 中，**紧接 `this.setModel(..., "ui");` 后面**，加入以下代码；保留原依赖、父类 init 和模块外壳：
+
+<CodeExcerpt snippetId="c42-ready" />
+
+inventoryReady 等 JSON 数据加载；检查数组能捕获 HTTP 失败后没有可用商品的情况。catch 让停留列表时没有未处理拒绝，详情仍等待原 Promise 并显示错误。最后 initialize 才开始处理首次已有 hash。
+
+### 点击表格行时传 id
+
+在 Inventory.view.xml 把 `<ColumnListItem>` 开始标签替换为 `<ColumnListItem type="Navigation" press=".onDetail">`，保留内部 cells 和编辑按钮。在同一 Inventory Controller 的方法对象中，onInit 后、onFilter 前插入：
+
+<CodeExcerpt snippetId="c42-detail-link" />
+
+**先猜一猜：** 筛选 P004 后点击唯一一行，地址应含 0、3，还是 P004？应是 P004。可见索引是 0，本地数据路径为 `/products/3`，业务 id 才能跨重排与刷新保持身份。
+
+Java 按主键查对象的经验适用于 id；这里 hash 不发给静态服务器，刷新仍请求真实存在的 index.html。
+
+## 2. 详情绑定：编号稳定，数据位置现场查
+
+### 直接打开详情时，JSON 可能还没回来
+
+新建 `controller/Detail.controller.js`，按下面三个片段的顺序组成**一个完整模块**：开头 → onMatched → 末尾。第一段打开 Controller 方法对象并监听 detail、missing 两条路由：
+
+<CodeExcerpt snippetId="c42-detail-header" />
+
+接上处理函数：
+
+<CodeExcerpt snippetId="c42-detail-matched" />
+
+它先清除旧上下文，再等当前数据，按 id 找数组位置。sequence 防止等待旧编号的结果覆盖新编号；found、missing、error、loading 是不同状态。兜底路由没有 id，直接显示 routeMissing。
+
+### 返回列表
+
+最后接上返回与清理，并关闭方法对象和 define：
+
+<CodeExcerpt snippetId="c42-detail-tail" />
+
+navTo 第三个参数 true 表示替换当前历史项。按钮固定“返回列表”，外部直接打开详情也能使用；浏览器自己的后退与前进仍走已有历史。onExit 对称解除监听，沿用前面学过的资源清理。
+
+新建 `view/Detail.view.xml`，完整内容如下：
+
+<CodeExcerpt snippetId="c42-detail-view" />
+
+View 共享 Component 的 inventory；bindElement 为它提供当前商品上下文，里面的 `inventory>stock` 才知道读哪件。P002 显示合法 0，P999 显示未找到。Java DTO 的主键查找不会自动替你建立前端绑定，这一步由 UI5 Model 完成。
+
+## 3. OData：实体、元数据与查询有共同契约
+
+路由仍用 JSONModel 的完整数组。读取实验另用固定数据，互不写入；它不是把库存编辑改成远程保存。
+
+新建 `localService/metadata.xml`，完整内容如下：
+
+<CodeExcerpt snippetId="c42-metadata" />
+
+Product 是类型，Products 是实体集，id 是键，P002 才是一条实体。Edm.String、Edm.Int32 描述标量类型。实验把六商品投影为这五个标量字段；tags 仍留在主应用，没有被编辑丢弃。固定样例的整数分在 Int32 内，真实金额类型按服务契约选择。
+
+桥接命令已从 `data/products.json` 生成 `localService/mockdata/Products.json`，不手抄第二份数据。重新启动 dev 会更新生成物。V2 请求的 `$metadata` 由浏览器 mock 响应，metadata.xml 则是实际要部署的静态资源。
+
+| 请求相对服务根 | 含义 |
+| --- | --- |
+| `$metadata` | 服务结构、实体集与键 |
+| `Products` | 实体集，大小写来自 metadata |
+| `Products('P002')` | 字符串键为 P002 的实体 |
+| `Products?$filter=stock ge 1 and stock le 5` | 库存 1–5，排除售罄 |
+
+`$orderby=stock desc,id asc` 排序，`$top=2` 限数量，`$skip=1` 跳过一件，`$select` 只取指定字段。范围内顺序为 P006:5、P004:3；跳过第一件再取一件只得到 P004:3。Java Stream 的筛选/排序/limit 是相近的计算，但真实 OData 查询交给服务执行。
+
+<a id="查询选项控制返回什么"></a>
+
+## 4. JSONModel 与 ODataModel：相似的绑定，不同的取数方式
+
+JSONModel 的 `/products/3` 指向已在本地的对象。V2 ODataModel 的 `/Products('P004')` 描述服务资源，数据经读取进入缓存；V4 使用另一套 binding/Promise API，不能把 V2 的 read 原样搬去。
+
+**先猜一猜：** getProperty 返回 undefined，就能证明服务没有 P999 吗？不能。它只读已加载缓存，不主动请求。完成下一节后，在读取页 Console 执行：
+
+```js
+const model = window.odataProbe.model;
+console.log(model.getProperty("/Products('P999')/stock")); // → undefined
+model.read("/Products('P002')", {
+  success: (product) => console.log(product.id, product.stock), // → P002 0
+  error: (error) => console.log("读取失败", error.statusCode),
+});
+```
+
+read 返回请求句柄，不是数据 Promise；结果在 success/error 中。实体集返回 `data.results`。分页缓存或本页合计不能当成全量统计；本实验的小计 8、3，都不是库存主应用的 52。
+
+## 5. 用 V2 MockServer 跑一次有限读取
+
+新建 `probe/odata.html`。相对路径比主入口多一层 `../`，仍从同一静态应用加载资源：
+
+<CodeExcerpt snippetId="c42-probe-html" />
+
+新建 `probe/odata.js`，先放以下开头。它导入官方 MockServer 与 **V2** ODataModel，先启动 mock，再创建模型；rootUri 与 serviceUrl 使用同一带结尾斜杠的站内路径：
+
+<CodeExcerpt snippetId="c42-probe-setup" />
+
+继续同一文件，接上下面片段并关闭 define。有限查询使用固定的系统查询参数，页面提供重查与跳过第一件两个按钮：
+
+<CodeExcerpt snippetId="c42-probe-query" />
+
+默认显示“P006 降噪耳机 5；P004 USB-C 扩展坞 3；本页库存 8”；跳过后显示 P004 与本页库存 3。useBatch=false 便于观察单请求；tokenHandling=false 仅用于这个无鉴权读取实验。没有与库存页的保存连通。
+
+MockServer 拦截 XMLHttpRequest，不接管原生 fetch。模拟请求由页面下方记录和 Sources 中的 model.read 参数观察；Network 中实际加载的 metadata.xml、Products.json、模块与主题必须成功。[官方支持清单](https://ui5.github.io/docs/04_Essentials/odata-features-supported-by-the-odata-v2-mock-server-3459c37.html)比本课范围更广，但仍有限。
+
+### 从 mock 到真实 SAP 服务
+
+真实接入先确认协议、服务根、metadata、认证与权限。401 查会话，403 查权限/请求保护；写入还可能需要 CSRF token、ETag 和后端业务校验。Pages 只提供静态文件，密码和 client secret 不进入前端。UI5 Router 切页面，服务端 Application Router/Destination 连接后端，是不同职责。
+
+## 常见错误与调试
+
+<a id="有限查询失败元数据里明明有商品"></a>
+
+### 搜索后点第一行，详情指向错误商品
+
+**现象**：在 onDetail 中故意把 id 来源改成 `this.byId("products").indexOfItem(event.getSource())`。筛选 P004 后点击，地址出现 0，详情未找到商品。
+
+**工具**：Sources → Inventory.controller.js，在 navTo 行设断点，再筛选并点击。
+
+**证据**：可见索引是 0，而事件源 context 的路径是 `/products/3`，id 为 P004。
+
+**原因**：把界面投影位置当成商品身份。
+
+**修复**：恢复 `getBindingContext("inventory").getProperty("id")`，详情继续按 id 查当前数组。
+
+**确认**：同样操作得到 P004 hash，复制并刷新仍显示库存 3；未知 P999 有明确反馈。`npm run lab -- check C42` 同时检查详情与有限查询。若读取页报 404，先比对 Products 大小写、rootUri 与 serviceUrl，不把 JSON 数组名 products 当实体集名。
+
+## 练习
+
+<a id="练习-1预测本地数据与查询结果"></a>
+<a id="练习-2修复路由参数"></a>
+<a id="练习-3修改有限查询解释模型边界"></a>
+
+:::tip[自己尝试 · 本地 UI5]
+1. 在当前工作区按清单完成文件，运行 `npm run lab -- start C42`，重启 `npm run lab -- dev`。
+2. 打开 `/index.html`，筛选 P004 后进详情；复制地址、刷新、返回，再试 P002、P999、wrong/path。
+3. 同一端口打开 `/probe/odata.html`，观察查询记录，按“跳过第一件”，执行 Console 单件读取。
+4. 复现并修复路由索引错误；运行 `npm run lab -- check C42`。再运行 `node tools/openui5-static-check.mjs`，它构建后在严格静态子路径检查同样场景。
+
+预期：P004 刷新仍为 3，P002 为 0，未知 id/地址有不同提示；有限查询的小计不冒充全量库存；主题、语言、metadata 和数据资源没有真实 HTTP 404。
+:::
+
+<details>
+<summary>提示</summary>
+
+按启动链查：manifest 根 View → App.pages → 路由 target → Detail 的监听 → inventoryReady → bindElement。读取实验另查模型创建前 mock 是否已经启动。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+路由传稳定 id，详情等待数据再找当前路径；用同一 inventory 模型保持列表与详情一致。OData 读取页从静态 metadata 和桥生成的数据建立独立 mock，read 的查询结果只计算本页小计。不要把它写回主库存或为它再写一套业务校验。
+
+</details>
+
+## 项目进度
+
+- C41 编辑保留；主应用增加可分享、可刷新的详情和未知状态。
+- V2 读取页能观察过滤、排序、字段选择和分页，静态数据与元数据随应用构建。
+- `adapters/openui5/dist/` 是本地构建产物；本课没有把该应用部署成线上 SAP 服务。
+- 暂停记录已改文件和子路径检查结果；下一课保留这里的成果，转到并列的原生 Web Components 小表单。
+
+## 小结
+
+- route 匹配 hash，target 放置 View，initialize 开始处理地址。
+- id 是身份，context 是当前模型位置；刷新时先等数据。
+- OData metadata 描述实体、集合、键；查询返回的子集有自己的统计口径。
+- JSONModel、V2 与 V4 ODataModel 的数据入口与 API 不同。
+
+自测：为何不能路由传行号？为什么直接刷新要等数据？getProperty 与 read 有何差别？本页库存 8 为什么不是全量？静态 mock 与真实 SAP 的边界是什么？
+
+## 延伸阅读
+
+- [UI5 路由配置](https://ui5.github.io/docs/04_Essentials/routing-configuration-9023130.html)
+- [带参数的路由](https://ui5.github.io/tutorials/walkthrough/steps/31/index.html)
+- [OData V2 URI 与查询约定](https://www.odata.org/documentation/odata-version-2-0/uri-conventions/)
+- [OData V2 Model](https://ui5.github.io/docs/04_Essentials/odata-v2-model-6c47b2b.html)
+- [V2 MockServer](https://ui5.github.io/tutorials/walkthrough/steps/26/index.html)
+- [V4 相比 V2 的模型接口](https://ui5.github.io/docs/04_Essentials/upgrading-your-odata-model-cda632b.html)

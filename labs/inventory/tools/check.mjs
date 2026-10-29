@@ -198,9 +198,18 @@ try {
     await run(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', '--config', 'tools/playwright.config.mjs']);
   }
   if (n >= 29 && n <= 36) await run(process.execPath, ["node_modules/eslint/bin/eslint.js", "--config", "tools/eslint.config.mjs", "src/react"]);
-  if (n >= 41 && n <= 42) {
-    equal('view/EditDialog.fragment.xml 已创建', existsSync(path.join(workspace, 'adapters/openui5/webapp/view/EditDialog.fragment.xml')), true);
-    await run(process.execPath, ['tools/ui5-check.mjs']);
+  if (n === 37) await run(process.execPath, ['tools/component-choice-check.mjs']);
+  if (n === 38) await run(process.execPath, ['tools/antd-check.mjs']);
+  if (n === 39) await run(process.execPath, ['tools/openui5-choice-check.mjs']);
+  if (n >= 40 && n <= 42) {
+    if (n >= 41) equal('view/EditDialog.fragment.xml 已创建', existsSync(path.join(workspace, 'adapters/openui5/webapp/view/EditDialog.fragment.xml')), true);
+    await run(process.execPath, ['tools/ui5-check.mjs', id]);
+    if (n === 42) await run(process.execPath, ['tools/openui5-routing-check.mjs']);
+  }
+  if (n === 43) await run(process.execPath, ['tools/web-components-check.mjs']);
+  if (n === 44) {
+    await run(process.execPath, ['tools/ui5-react-repository.mjs']);
+    await run(process.execPath, ['tools/ui5-react-check.mjs']);
   }
   console.log(`${id}：${count} 条当前工作文件检查通过；没有修改商品数据或源码。`);
 } catch (error) { console.error(error.stack); process.exitCode = 1; }

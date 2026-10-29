@@ -1,0 +1,209 @@
+---
+title: C37 组件生态与选择标准
+description: 为同一库存页写组件选型契约，用排序身份、键盘、主题、维护和许可解释选择。
+sidebar:
+  order: 37
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 4 周 · 第 19 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C25、C26、C35、C36 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+你的 React 库存页已经能编辑、筛选和保存。现在要评估表格和编辑弹窗：直接选排名最高的库，还是先写清界面必须守住什么？本课先写一份选择记录，再把最容易漏掉的“排序以后仍编辑同一商品”落实成一个小接口。组件的外观可以更换，库存规则和商品身份继续复用。
+
+<LessonTask lessonId="C37" />
+
+接 C36 的完成态，始终在自己的 `inventory/` 目录工作。没完成前一阶段时，从 [L4 起点说明](../../labs/l4/) 把 C36 恢复到**新目录**，再执行一次 `npm ci`；已有工作区继续用自己的代码。新版 C00 已在 `adapters/antd/` 提供入口、布局和读取/缓存外壳；从它连续学到这里，文件一直都在。到本课才完成选择器，表格、编辑器和核心连接点继续留空；进入对应课程才启动该 adapter，不替换 `src/react/`。
+
+如果你还使用上一发行版的 React 工作区，先保留旧目录。到 [Lab 入口](../../labs/) 下载新版 C00 到新目录，沿用新版的清单、锁、`tools/` 和 `adapters/`，再迁入自己写的 `src/`、`notes/`、`tests/` 和 `vite.config.js`；将已有 report/test 脚本合并到新版 package.json 的 scripts。不要带入旧 node_modules 或用参考解覆盖自己的源码。在新目录执行 `npm ci` 后继续下面的任务。
+
+本课只改 `notes/components.md` 和 `adapters/antd/select-product.js`。在工作区执行 `npm run lab -- start C37`；需要看当前页面时执行 `npm run lab -- dev`，这里仍打开 React 主应用。本课结束运行 `npm run lab -- check C37`。
+
+## Java 程序员先看这里
+
+你熟悉“接口保持不变、换一种适配实现”的思路。本课沿用这个边界：输入是商品记录，编辑事件带 `id`，保存走 repository。不同组件库的 props、事件、焦点和样式 API 是新知识，不存在一个 Java 控件类能与它们逐一对应。不要把选择 UI 库等同于替换业务服务。
+
+## 1. 三类方案：交付给你的东西不同
+
+先问三个问题：外观谁决定，交互谁提供，修复落在哪个文件？
+
+```text
+完整库：业务组件 → npm 包中的实现与默认样式
+primitives：业务组件 → 自己的外观与组合 → npm 包中的交互基础
+代码分发：业务组件 → 仓库里的组件源码 → 它依赖的底层包
+```
+
+结果是三种维护入口：配置与公开 API、自己的外观层、本地组件源码。它们可以组合，并不是三个互不相容的阵营。
+
+<a id="完整组件库先得到一致的界面"></a>
+
+| 方案 | 主要交付 | 对本库存页的意义 |
+| --- | --- | --- |
+| Ant Design | 带样式的 Table、Form、Modal 与主题 | 允许采用现成管理界面时，主要工作是业务接线 |
+| MUI 的 Material UI | Material Design 的 React 组件 | 团队已有 Material 约定时优先评估，复杂网格另看 MUI X |
+| Mantine | 带样式组件、Hooks 与配套包 | 检查目标控件和表单能力位于哪个包 |
+| UI5 Web Components for React | 原生 UI5 组件的 React 接口及高层组件 | 要求 Fiori 体验时评估对应主题、资源与事件 |
+
+UI5 React 在这里指 UI5 Web Components for React，**不是 OpenUI5 的 React 皮肤**。后端来自 SAP 与前端必须选哪一个库，是两项不同的决定。
+
+<a id="无样式-primitives拿行为自己完成外观"></a>
+
+[Radix Primitives](https://www.radix-ui.com/primitives/docs/overview/introduction) 提供 Dialog 等低层交互组件，包括许多角色、焦点和键盘机制；布局、颜色、错误态与深浅主题由你完成。它适合能维护设计系统的团队。Radix Themes 是带样式的另一套产品，名称要看完整。
+
+<a id="组件代码分发把组件放进自己的仓库"></a>
+
+[shadcn/ui](https://ui.shadcn.com/docs) 分发可修改的组件代码。组件进入仓库后，本地改动与上游修复需要你比较、合入；更新底层 npm 包不会自动更新本地组件源码。具体条目依赖哪种基础实现，查看实际生成的依赖，而不是假定所有条目都一样。
+
+这类似 Java 中“引用 jar”和“接管生成的源码”的差别；接管源码依然可能保留其他依赖。
+
+## 2. UI 库负责呈现，数据规则留在业务层
+
+本工作区的数据流不变：repository 读写正式商品，Query 管异步缓存，组件库呈现表格和草稿，core 管解析、校验、筛选和统计。TanStack Table 这种行模型工具不提供完整皮肤；React Hook Form 这种表单工具也不负责画商品表格。已有 Form 能满足任务时，无需再叠一套表单状态。
+
+<a id="记录身份贯穿整个编辑过程"></a>
+
+**先猜一猜：** 库存升序后首行是 P002，显示索引为 0。原数组第 0 项还是谁？在 `adapters/antd/select-product.js` **替换占位函数**，保持下面的导出名：
+
+```js
+export function selectProduct(products, row) {
+  return products.find((product) => product.id === row.id) ?? null;
+}
+```
+
+结果：`row={ id: "P002", index: 0 }` 时选择 P002，库存为 0；原数组首项仍是 P001。`index` 属于当前显示顺序，`id` 才属于商品；未知 id 返回 null，让调用方明确处理。这和对 Java 排序视图使用原列表下标一样，位置已经不是同一个含义。
+
+<a id="显示格式和排序依据分开"></a>
+
+**先猜一猜：** 价格显示文本 `"1599.00"` 和 `"199.00"`，按文本排序谁在前？应该更便宜的是谁？
+
+```js
+console.log(["1599.00", "199.00"].toSorted()); // → ["1599.00", "199.00"]
+console.log([159900, 19900].toSorted((a, b) => a - b)); // → [19900, 159900]
+```
+
+显示器的文本会排到支架前面，数字金额则相反。保存和排序保留 `priceCents` 整数分，显示时才格式化。Java 的展示 DTO 也不会把带货币格式的字符串当计算金额。
+
+## 3. 用可操作的基线检查可访问性与主题
+
+不要给“支持无障碍”打一个勾就结束。把结果写成别人能重复的操作：
+
+<a id="打开弹窗要改变交互范围"></a>
+
+1. Tab 到目标商品编辑按钮，Enter 打开；标题应包含该商品的 id 与名称。
+2. 焦点进入有 label 的字段；Tab/Shift+Tab 留在弹窗，Esc 取消。
+3. 空库存保存显示可定位错误，焦点回到字段；0 允许保存。
+4. 取消/保存后回到同一个编辑按钮，读数与总库存一起核对。
+
+例如 C36 的 React 表单已具备标签、错误和返焦点行为；新弹窗要在此基础上增加模态交互范围。组件库提供基础机制，你仍需给出标题、字段含义和业务上的取消规则。
+
+<a id="主题用配置贯穿页面与浮层"></a>
+
+主题同时检查**页面和实际打开的弹窗**。React Context 可以传给 Portal 中的 Modal，但局部 CSS 选择器依赖 DOM 父子关系，两者不同。使用库的公开主题入口，如 [Ant Design ConfigProvider](https://ant.design/docs/react/customize-theme/)，再检查亮/暗的文字、错误和焦点。360px 下让宽表格在自己的容器内滚动，页面按钮仍可到达。
+
+这些检查不是 Java Bean 字段测试：焦点、Portal、视口与浏览器布局必须在真实页面观察。
+
+## 4. 查维护与许可，把结论写成选择理由
+
+选择的依据是“本项目需要什么、团队愿意维护什么”，不是排名。先查目标包的兼容声明和许可，再查 [Changelog](https://ant.design/changelog/) 中与你的 Table/Form/Modal 有关的修复。维护记录解释风险，锁文件固定实际采用的组合。
+
+<a id="许可看具体包和功能"></a>
+
+Ant Design 的 `antd` 包是 MIT；Material UI 与 MUI X 不能混写成同一档功能。[MUI X 许可页](https://mui.com/x/introduction/licensing/)区分 MIT 的 Community 和商业许可的 Pro/Premium，后者还按具体功能区分。字体、图标、额外 registry 条目分别查来源，不能把整个生态都归到主库的许可下。
+
+<a id="本项目为什么先选-ant-design"></a>
+
+本项目允许现成管理界面，目标只是六商品表格与库存弹窗，因此首选 Ant Design；团队承担数据适配和行为回归。把这个决定写进 `notes/components.md`，至少包含下列结构，**每行用自己的话补全依据**：
+
+```md
+# 库存界面选型
+核对日期：填写你查官方资料的日期
+## 契约
+- 正式商品、显示行、草稿分别由谁持有？id 怎样贯穿排序与保存？
+- P004：取消 8 保持 3/52；保存 8 后 P004=8、P001=12、总量 57。
+- 空白/负数拒绝，0 合法；保留名称、分类、priceCents、tags；清筛选恢复六行。
+## 候选与责任
+- 比较 Ant Design、Radix Primitives、shadcn/ui；说明谁维护样式与源码。
+## 验收与维护
+- 可访问性：写一条键盘操作路径。
+- 主题：写出页面与浮层的检查方法。
+- 维护：写明要跟踪的官方发布/迁移入口。
+- 许可：写具体包、目标功能范围和官方来源 URL。
+```
+
+结果是一份能指导接线和验收的选择记录。未来换成 Material 风格、品牌设计系统或 Fiori 体验时，你知道要重新评估哪一项。像 Java 适配接口一样，业务合同不因换实现就改变。
+
+## 常见错误与调试
+
+### 排序后编辑错商品
+
+**现象**：把当前 `adapters/antd/select-product.js` 改成下面错误版本，运行 `node tools/component-choice-check.mjs`，应报告期望 P002、实际 P001。
+
+```js
+// 有问题的写法：把显示位置当成原数组位置
+export function selectProduct(products, row) {
+  return products[row.index] ?? null;
+}
+```
+
+**工具**：在工作区运行 `node --inspect-brk tools/component-choice-check.mjs`；Chrome 打开 `chrome://inspect` → Open dedicated DevTools for Node → Sources，打开选择器，在 return 行设置断点后继续执行。
+
+**证据**：Scope 中 `row.id` 为 P002、`row.index` 为 0，而 `products[0].id` 为 P001。**原因**：显示顺序与正式数组顺序不同。**修复**：恢复第 2 节的按 id 查找。**确认**：退出调试进程，再运行 `npm run lab -- check C37`，商品身份断言变绿，未知 id 仍返回 null；选择理由还要由你解释，检查不会替你评价选型。
+
+## 练习
+
+<a id="练习-1预测换皮肤以后还要守住的结果"></a>
+<a id="练习-2修好位置错误再验证取消"></a>
+<a id="练习-3为表格和弹窗写一份选型理由"></a>
+
+完成这同一份选择记录，并修复一次排序身份错误。验收：三类方案和维护责任写清楚；P004 场景同时有取消、保存、非法输入与清筛选；有键盘、浮层主题及许可的具体检查入口。
+
+:::tip[自己尝试 · Node]
+1. 保持当前工作区，按上节把选择器改错，运行检查，读到 P002/P001 的差异。
+2. 按 id 修复再检查；把观察补进 `notes/components.md`，不用运行脚本替你生成理由。
+3. 在 `notes/next.md` 记录“组件选择合同完成；下一步连接 AntD 的 Table/Form/Modal”。
+
+预期：检查由红变绿，初始固定数据仍为六种、52 件；没有更改 React 主应用或安装其他候选库。
+:::
+
+<details>
+<summary>提示</summary>
+
+排名不能说明你的弹窗是否能用 Esc 取消。先写可观察行为，再把每个候选的额外责任填进表里。`rowKey` 只管渲染身份，事件和保存也要传相同的 id。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+可以选择 Ant Design：它的 Table/Form/Modal 满足这次管理界面目标，业务继续调用同一 core/repository；Radix 要补样式，shadcn/ui 要维护本地源码。合同中保留 P004 取消 3/52、保存 8/57、P001 仍 12 以及其他字段不丢失。选择器恢复按 id 的 find；键盘与主题由组合后的页面验收，MIT 只写对应的 antd 包。
+
+</details>
+
+## 项目进度
+
+- `notes/components.md` 现在定义四种适配都要守住的业务合同。
+- 选择器通过排序/筛选/未知 id 检查，React 主应用仍然可启动。
+- 暂停只保存自己的文件与 `notes/next.md`；继续时不覆盖工作区。
+
+## 小结
+
+- 完整库、primitives、代码分发，决定你维护配置、外观还是本地源码。
+- UI 不接管业务规则；正式商品、Query 缓存与表单草稿各有归属。
+- id 是身份，index 是位置；显示文本与数字排序分开。
+- 键盘、主题、维护和许可都要落实到具体行为与来源。
+
+自测：为什么配了 rowKey 仍可能编辑错商品？谁合入本地 shadcn/ui 组件的修复？为什么检查主题要打开弹窗？你的选型理由中哪条需求变化会改变结论？
+
+下一课按这份合同完成 Ant Design adapter。
+
+## 延伸阅读
+
+- [Ant Design：Table 身份与排序](https://ant.design/components/table/)
+- [Radix Primitives：行为基础与无样式设计](https://www.radix-ui.com/primitives/docs/overview/introduction)
+- [shadcn/ui：代码分发与维护](https://ui.shadcn.com/docs)
+- [MUI X：Community 与商业许可](https://mui.com/x/introduction/licensing/)
+- [Ant Design：主题配置](https://ant.design/docs/react/customize-theme/)
+- [Ant Design：发布与修复记录](https://ant.design/changelog/)

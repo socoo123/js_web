@@ -1,5 +1,5 @@
 {
-  "release": "2026.10-v2.3",
+  "release": "2026.10-v2.4",
   "labs": [
     {
       "labId": "L1",
@@ -1448,30 +1448,33 @@
       "startCheckpoint": "C36",
       "endCheckpoint": "C37",
       "files": [
-        "notes/components.md"
+        "notes/components.md",
+        "adapters/antd/select-product.js"
       ],
-      "task": "以当前表格/编辑需求写 notes/components.md，确定 adapter 输入输出与验收",
+      "task": "为四种界面写同一库存合同、组件选择和维护理由；按 id 连接排序后的商品身份",
       "comparisonTheme": "Java 接口/适配经验 / UI 组件契约；库与业务数据分离",
       "acceptance": [
-        "按可访问性、主题、维护、许可选型；比较整库/primitives/代码分发；同一个商品 id 贯穿排序与编辑"
+        "记录完整库/primitives/代码分发的责任；可访问性、主题、维护与许可有官方依据",
+        "库存排序后选中 P002/0；筛选 P004 和未知 id 不按原数组位置回退",
+        "写清 P004 取消3/52、保存8/57且P001=12、其他字段保留的共同合同"
       ],
       "comparisonIds": [],
       "errorIds": [
         "C37-main"
       ],
       "error": {
-        "trigger": "根据排名选库，忽略表格/弹窗契约；排序后用row.index回查原数组",
-        "evidence": "对照需求矩阵；断点显示row.id=P002但取到P001",
-        "repair": "写明输入/输出/维护/许可依据；以id作身份；排序后选中与编辑同一商品",
-        "risk": "将“选型”变成安装六个库；比较缺日期或把付费扩展写成基础功能"
+        "trigger": "把显示 row.index 用于正式 products，排序首行 P002 却选择 P001",
+        "evidence": "Node inspector 的 row.id=P002、index=0、products[0].id=P001；当前文件检查期望P002实际P001",
+        "repair": "selectProduct 按 row.id 查找；未知 id 返回 null；重跑同一检查转绿",
+        "risk": "只配 rowKey 却仍按位置提交；根据排名选择而不写业务、主题、许可合同"
       },
       "commands": {
         "start": "npm run lab -- start C37",
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C37"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1484,30 +1487,35 @@
       "startCheckpoint": "C37",
       "endCheckpoint": "C38",
       "files": [
-        "adapters/antd/"
+        "adapters/antd/ProductTable.jsx",
+        "adapters/antd/ProductEditor.jsx",
+        "adapters/antd/App.jsx"
       ],
-      "task": "在 `adapters/antd/` 替换列表与弹窗，调用同一 core/repository",
+      "task": "在独立 Ant Design adapter 连接 Table/Form/Modal，复用同一 core/repository 并保留 React 主应用",
       "comparisonTheme": "Java Bean 初值经验 / Form initialValues 与受控更新边界",
       "acceptance": [
-        "按库存排序后编辑 P002 仍是它；取消 P001 草稿不残留；校验、空/错态、主题与焦点可用"
+        "排序后P002读0；P001改8取消再开P002仍0，再开P001仍12",
+        "P004草稿8取消保持3/52；保存8后仅它变化，P001=12、总量57，完整字段保留",
+        "空白/负数拒绝且错误关联字段、0合法；键盘开关保存和返焦点，清筛选恢复六行",
+        "页面/浮层主题、读取和保存失败重试、严格静态子路径可用；React持久化不被adapter覆盖"
       ],
       "comparisonIds": [],
       "errorIds": [
         "C38-main"
       ],
       "error": {
-        "trigger": "Form initialValues被当成实时值，P001改8取消后P002仍8",
-        "evidence": "Components中product=P002/0，输入DOM值仍8；检查表单挂载生命周期",
-        "repair": "按编辑会话设置/重置草稿；取消→换商品→保存行为回归；表格rowKey为id",
-        "risk": "新增AntD专属规则覆盖共享校验；只测首次打开，不测连续开关"
+        "trigger": "保留 ProductEditor/Form 实例、移除destroyOnHidden并保留字段，误把 initialValues 当实时值",
+        "evidence": "product=P002/0、initialValues.stock=0而DOM仍8；连续会话浏览器回归转红",
+        "repair": "关闭后afterClose清editor、卸载Form实例，destroyOnHidden配preserve=false；同一回归转绿",
+        "risk": "仅隐藏弹窗、只测首次打开；另写AntD业务校验；把筛选子集作全量统计"
       },
       "commands": {
         "start": "npm run lab -- start C38",
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C38"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1525,7 +1533,7 @@
       "task": "写 notes/ui5-choice.md，对同一库存需求选择经典 UI5 或 Web Components；阅读现有 D2",
       "comparisonTheme": "Java MVC 经验 / UI5 View/Controller/Model；Fiori 不等于框架",
       "acceptance": [
-        "分清 SAPUI5、OpenUI5、原生 UI5 Web Components 和 React 包装库；说明静态 mock 的边界"
+        "四种 UI5 名称与 Fiori 设计系统区分清楚；记录当前 P004 任务、保留项与静态 mock 边界"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1542,8 +1550,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C39"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1556,12 +1564,14 @@
       "startCheckpoint": "C39",
       "endCheckpoint": "C40",
       "files": [
-        "adapters/openui5/webapp/"
+        "adapters/openui5/webapp/manifest.json",
+        "adapters/openui5/webapp/view/Inventory.view.xml",
+        "adapters/openui5/webapp/controller/Inventory.controller.js"
       ],
       "task": "在 `adapters/openui5/webapp/` 配 Component、manifest、XML View、Controller，接共享规则桥接",
       "comparisonTheme": "Java 包/类路径 / UI5 namespace、模块与资源路径",
       "acceptance": [
-        "列表加载 6 件；Console/Network 定位模块名错误；UI5 CLI 构建能生成静态产物；不手抄第二份业务规则"
+        "六商品与 P002=0 正常；统计按钮复用 core 得 52；模块 404 可定位，UI5 CLI 可静态构建"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1578,8 +1588,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C40"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1599,7 +1609,7 @@
       "task": "在 Inventory.view/controller、编辑 Fragment 和 i18n 中完成筛选、草稿、保存",
       "comparisonTheme": "Java Bean/监听经验 / JSONModel.setProperty 与绑定通知",
       "acceptance": [
-        "筛选 P004 后只改它；取消不污染源数据；汇总与语言切换正确；理解 model 名称、路径与 binding context"
+        "筛选 P004，取消为 3/52，保存8后 P004=8/P001=12/全量57；非法拒绝/0合法；键盘、清空筛选、i18n正常"
       ],
       "comparisonIds": [
         "c41-model-notification"
@@ -1620,11 +1630,7 @@
       },
       "implemented": true,
       "migrated": true,
-      "trial": {
-        "start": "P40",
-        "end": "P41",
-        "description": "已提供 OpenUI5 Component、JSONModel 六商品表格、i18n 与共享纯函数构建桥。只在 View/Controller 中接通筛选和草稿保存。"
-      }
+      "trial": null
     },
     {
       "lessonId": "C42",
@@ -1636,15 +1642,21 @@
       "startCheckpoint": "C41",
       "endCheckpoint": "C42",
       "files": [
+        "adapters/openui5/webapp/Component.js",
+        "adapters/openui5/webapp/manifest.json",
+        "adapters/openui5/webapp/view/App.view.xml",
+        "adapters/openui5/webapp/view/Inventory.view.xml",
+        "adapters/openui5/webapp/controller/Inventory.controller.js",
         "adapters/openui5/webapp/view/Detail.view.xml",
         "adapters/openui5/webapp/controller/Detail.controller.js",
-        "adapters/openui5/webapp/manifest.json",
-        "adapters/openui5/webapp/localService/metadata.xml"
+        "adapters/openui5/webapp/localService/metadata.xml",
+        "adapters/openui5/webapp/probe/odata.html",
+        "adapters/openui5/webapp/probe/odata.js"
       ],
       "task": "增加 Detail View/Controller、manifest 路由、静态 metadata 和有限 V2 mock",
       "comparisonTheme": "Java DTO/Repository 经验 / OData 实体集、元数据、模型请求；不是接口等价",
       "acceptance": [
-        "P004 详情刷新/回退正常；有限过滤/排序/分页可观察；JSONModel/ODataModel、V2/V4 区分清楚"
+        "P004 hash 刷新/返回/未知id；V2 metadata与有限过滤/排序/分页可观察；严格静态子路径资源齐全，子集不当全量"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1661,8 +1673,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C42"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1675,30 +1687,34 @@
       "startCheckpoint": "C42",
       "endCheckpoint": "C43",
       "files": [
-        "adapters/web-components/"
+        "adapters/web-components/index.html",
+        "adapters/web-components/components.js",
+        "adapters/web-components/editor.js"
       ],
-      "task": "在 `adapters/web-components/` 替换原生库存表单输入/按钮，监听真实事件",
+      "task": "保留原生列表/筛选，连接库存 Input/Button 小表单、共享校验和 repository",
       "comparisonTheme": "Java listener 经验 / CustomEvent；字段值 / attribute 与 property",
       "acceptance": [
-        "两个组件可补货；布尔属性正确；slots、主题/i18n 资源可用；知道 Shadow DOM 边界与 React 原生支持"
+        "P004 草稿改 8 后取消仍为 3 / 52；保存后为 8 / 57，P001 为 12，其他字段保留",
+        "空白和负数拒绝，0 合法；键盘可打开、取消、保存，清空筛选恢复六件",
+        "真实事件、布尔 property、命名 slot 与主题/翻译/本地字体在静态子路径正常"
       ],
       "comparisonIds": [],
       "errorIds": [
         "C43-main"
       ],
       "error": {
-        "trigger": "`disabled=\"false\"`仍禁用；拿错事件字段；全局CSS无法穿透Shadow DOM",
-        "evidence": "Elements看属性存在；Console看disabled/property与event.detail；检查shadow树/slots",
-        "repair": "布尔属性按存在/移除或property；按当前事件契约取值；用支持的主题接口；补货有效",
-        "risk": "漏打包主题/i18n资源；把attribute字符串与property类型混为一谈"
+        "trigger": "disabled 字符串 false 仍禁用；ui5-input 接线错误",
+        "evidence": "Elements 属性存在、disabled 为 true；Sources 回调与 stock.value 对照",
+        "repair": "动态布尔开关赋 property，监听真实事件；P004 取消仍 3/52，保存 8 后 8/57",
+        "risk": "空白误转 0、丢失商品其他字段、主题/翻译/字体未静态交付"
       },
       "commands": {
         "start": "npm run lab -- start C43",
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C43"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1711,30 +1727,33 @@
       "startCheckpoint": "C43",
       "endCheckpoint": "C44",
       "files": [
-        "adapters/ui5-react/"
+        "adapters/ui5-react/App.jsx",
+        "adapters/ui5-react/ProductEditor.jsx"
       ],
-      "task": "在 `adapters/ui5-react/` 改列表和编辑表单，接共享规则/repository",
+      "task": "接共享 core/repository，用 UI5 React 完成筛选列表与库存编辑；按钮和两种 Enter 各保存一次",
       "comparisonTheme": "Java adapter 经验 / React 包装 API；继续对照原生组件与经典 UI5",
       "acceptance": [
-        "原生 form 提交链正确；事件取值/数字转换正确；P004 编辑场景通过；L4 验收，不再重写所有 CRUD"
+        "P004 草稿8取消仍3/52；保存8得到P0048/P00112/总57，其他字段保留",
+        "空白、负数拒绝，0合法；清空筛选恢复六项，汇总使用全量数据",
+        "HTML form 承接提交，鼠标、库存框Enter、按钮Enter各确认保存一次；主题、语言与本地字体资源可用"
       ],
       "comparisonIds": [],
       "errorIds": [
         "C44-main"
       ],
       "error": {
-        "trigger": "UI5布局Form被当原生form，保存未触发；包装事件沿用AntD签名",
-        "evidence": "Sources提交断点不命中；Elements没有HTML form祖先；查看实际事件对象",
-        "repair": "建正确原生表单链，按包装API取值/转换；键盘Enter与按钮均保存一次，错误阻止提交",
-        "risk": "把经典UI5绑定语法混入React props；使用废弃组件包；只通过鼠标点击验收"
+        "trigger": "把 UI5 Form 当原生 form，保存断点未命中；把包装事件当直接数字",
+        "evidence": "Sources submit 断点与 event.target.value；Elements HTML form 祖先；确认次数与全量库存",
+        "repair": "恢复外层 HTML form，单一 onSubmit 接 core/repository，ref 在 await 前上锁",
+        "risk": "按钮 onClick 或 Input onKeyDown 再次保存；沿用经典 UI5 绑定字符串；只测鼠标"
       },
       "commands": {
         "start": "npm run lab -- start C44",
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C44"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {

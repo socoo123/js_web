@@ -1,0 +1,270 @@
+---
+title: C38 一个普通组件库的完整案例
+description: 在连续工作区连接 Ant Design 表格与库存弹窗，复用规则和仓库，守住商品身份与草稿生命周期。
+sidebar:
+  order: 38
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 4 周 · 第 19 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C25、C26、C32、C35、C37 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+选择合同已经写好，现在把六商品列表接成表格，把库存草稿放进弹窗。你只替换界面连接处：正式数据继续由公共 repository 管理，校验调用 core，不复制一套 AntD 库存规则。完成后，P004 取消仍是 3/52，保存 8 则变成 8/57；React 主应用继续保留。
+
+<LessonTask lessonId="C38" />
+
+接自己的 C37 完成态，工作目录仍为 `inventory/`。本课改 `adapters/antd/ProductTable.jsx`、`ProductEditor.jsx`、`App.jsx` 三个文件。新版 C00 已提供入口、布局和 App 的查询/主题外壳，连续工作区无需再取一次脚手架；下面的 Table、表单、会话与提交由你接上，而不是运行完整答案再猜连接关系。沿用上一发行版的学员先按上一课迁入新版 C00 的工具外壳，保留自己写的源码。
+
+在工作区执行：
+
+```sh
+npm run lab -- start C38
+npm run lab -- dev
+```
+
+停掉上一课服务再启动，打开终端地址。本发行版已经在工作区锁定 Ant Design 6，不需要重新安装。初次是表格占位文字；完成后应看到六行与总库存 52。这里使用 `storage:null` 的独立仓库，刷新重置固定数据，不读取或覆盖 React 主应用的持久化。
+
+## Java 程序员先看这里
+
+Java 的编辑 DTO 与实体分离经验仍然适用：Form 字符串草稿不是正式商品。但 `initialValues` 是表单实例的初始值，**不是每次 props 变化都会执行的 Bean 赋值**。本课用“关闭后卸载整次编辑会话”得到新实例；只隐藏弹窗则不会自动丢弃旧草稿。
+
+## 1. 接入组件库，先保留业务模块
+
+先读 App 已有的三段接线，不修改它们：
+
+```jsx
+const repository = createInventoryRepository({ storage: null, seed });
+// App 内，inventoryRepository 默认使用上面的独立实例
+const list = useQuery({ queryKey: ["antd", "products"], queryFn: () => inventoryRepository.list() });
+const saveMutation = useMutation({
+  mutationFn: (product) => inventoryRepository.save(product),
+  onSuccess: () => cache.invalidateQueries({ queryKey: ["antd", "products"] }),
+});
+```
+
+结果：list 读六商品，mutation 保存后刷新列表缓存。没有第二份可写 `products` state；`list.data` 是缓存结果，`selectProducts` 派生显示行，`summarize(products)` 始终统计全部商品。App 还提供读取中、失败重试和搜索空态的容器。
+
+`main.jsx` 已从 `react-dom/client` 创建入口，并用 QueryClientProvider 包住 App。App 从 `../../src/services/inventory-repository.js` 导入工厂，从 `../../src/core/inventory.js` 导入筛选和汇总；相对路径从 adapter 回到同一个公共模块。Java 里换一个界面适配器，也不应顺手复制服务和校验类。
+
+## 2. Table：字段用于显示，记录用于操作
+
+**先猜一猜：** 库存升序后首行 P002 的 `index` 是 0，编辑应传 P002 还是原数组第 0 项？把 `ProductTable.jsx` **整文件替换**为：
+
+```jsx
+import React from "react";
+import { Button, Table } from "antd";
+import { formatPriceCents } from "../../src/core/inventory.js";
+
+export default function ProductTable({ products, onEdit }) {
+  const columns = [
+    { title: "编号", dataIndex: "id", width: 90 },
+    { title: "商品", dataIndex: "name", width: 190 },
+    { title: "分类", dataIndex: "category", width: 90 },
+    { title: "库存", dataIndex: "stock", width: 90, sorter: (a, b) => a.stock - b.stock },
+    { title: "价格（元）", dataIndex: "priceCents", width: 120,
+      sorter: (a, b) => a.priceCents - b.priceCents, render: formatPriceCents },
+    { title: "标签", dataIndex: "tags", width: 130, render: (tags) => tags.join("、") || "—" },
+    { title: "操作", key: "edit", width: 100, render: (_value, record, index) =>
+      <Button aria-label={`编辑 ${record.id}`} onClick={(event) => onEdit({ id: record.id, index }, event.currentTarget)}>编辑</Button> },
+  ];
+  return <div className="antd-table"><Table rowKey="id" dataSource={products} columns={columns}
+    pagination={false} scroll={{ x: 810 }} locale={{ emptyText: "没有符合条件的商品" }} /></div>;
+}
+```
+
+结果：六行使用 id 作 key，库存和价格按数字排序，价格才在显示时转成元。`render` 的第二个参数 record 是当前商品，第三个是显示位置。事件同时携带位置便于观察，选择器只使用 id；配置 rowKey 和正确传事件是两件都要做的事。
+
+在 App 中**只替换占位的 openEditor 函数**：
+
+```jsx
+function openEditor(row, button) {
+  const product = selectProduct(products, row);
+  if (!product) return;
+  trigger.current = button;
+  setEditor({ product: structuredClone(product), open: true });
+}
+```
+
+`selectProduct` 已从 `./select-product.js` 导入，正是上一课按 id 的函数。App 已把 `openEditor` 作为 ProductTable 的 onEdit 传入。复制商品得到隔离编辑会话，trigger 只记焦点目标；排序后打开鼠标仍读到 0。Java 排序视图同样需要稳定主键，而不是把两个数组的下标混用。
+
+## 3. Form：只存草稿，提交时跨过输入边界
+
+Form 管草稿与字段错误，公共 `parseStock` 管业务规则。**先猜一猜：** P004 输入文本 `"8"`，尚未保存时正式库存与总库存是多少？仍是 3 和 52；输入 `""` 不能通过规则，`"0"` 可以。
+
+<a id="规则复用已有函数"></a>
+
+把 `ProductEditor.jsx` 整文件替换：先放下面的导入和函数前半段，**函数暂不闭合**，随后接第 4 节的 return 与结尾：
+
+```jsx
+import React, { useRef, useState } from "react";
+import { Alert, Form, Input, Modal } from "antd";
+import { parseStock } from "../../src/core/inventory.js";
+import { cycleDialogFocus } from "./cycle-dialog-focus.js";
+
+export default function ProductEditor({ product, open, onSave, onCancel, afterClose }) {
+  const [form] = Form.useForm();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const input = useRef(null);
+  const saving = useRef(false);
+  const stockRule = { async validator(_rule, value) { parseStock(value); } };
+
+  async function finish({ stock }) {
+    if (saving.current) return;
+    saving.current = true;
+    setPending(true); setError("");
+    try { await onSave({ ...product, stock: parseStock(stock) }); }
+    catch (caught) { setError(caught.message); }
+    finally { saving.current = false; setPending(false); }
+  }
+```
+
+结果：输入空白/负数时共享解析函数抛错，async validator 返回拒绝的 Promise，Form 显示该错误；通过后 `finish` 得到字符串，再转换为数字。`{ ...product, stock }` 只替换库存，名称、分类、整数分价格、tags 不丢失。repository 仍会在保存前校验整件商品。
+
+pending 驱动界面，saving ref 立即挡住连续提交；失败显示错误并保留草稿。这里没有把商品修改塞进 Effect，也没有复制校验范围。像 Java DTO 转成业务值一样，转换发生在正式提交边界。
+
+<a id="字段用-name-进入-form"></a>
+
+下一段的 `Form.Item name="stock"` 会给 Input 注入 value/onChange；无需再写一份库存 useState。Input 保留字符串，`inputMode="numeric"` 只提示键盘类型。错误通过 Form 关联到字段，`scrollToFirstError` 负责把焦点送到第一个失败字段。
+
+## 4. Modal：把关闭、销毁和提交分开
+
+在刚才的 `finish` 后**继续追加以下代码**，最后一行闭合组件函数：
+
+```jsx
+  return <Modal title={`编辑 ${product.id} ${product.name}`} open={open}
+    onCancel={() => { if (!saving.current) onCancel(); }} onOk={() => form.submit()}
+    okText="保存" cancelText="取消" confirmLoading={pending}
+    okButtonProps={{ "aria-label": "保存" }} cancelButtonProps={{ "aria-label": "取消", disabled: pending }}
+    mask={{ closable: false }} closable={!pending} keyboard={!pending} destroyOnHidden
+    focusable={{ trap: true, focusTriggerAfterClose: true }} afterClose={afterClose}
+    modalRender={(node) => <div onKeyDown={cycleDialogFocus}>{node}</div>}
+    afterOpenChange={(visible) => { if (visible) input.current?.focus(); }}>
+    <p>取消或按 Esc 丢弃草稿。只编辑库存，其他字段保持原值。</p>
+    {error && <Alert type="error" title={error} />}
+    <Form form={form} name="antd-stock" layout="vertical" preserve={false}
+      initialValues={{ stock: String(product.stock) }} onFinish={finish}
+      disabled={pending} scrollToFirstError={{ focus: true }}>
+      <Form.Item name="stock" label="库存数量" rules={[stockRule]}>
+        <Input ref={input} inputMode="numeric" />
+      </Form.Item>
+      <button type="submit" hidden>保存库存</button>
+    </Form>
+  </Modal>;
+}
+```
+
+结果：Enter 在原生 form 中提交，Modal 确认按钮经 `form.submit()` 走同一条校验；隐藏 submit 只为原生表单提供默认提交入口，不额外监听 Enter。校验失败不关闭，失败重试仍用原草稿。
+
+最后在 App 中**替换占位的 save 函数**：
+
+```jsx
+async function save(product) {
+  await saveMutation.mutateAsync(product);
+  closeEditor();
+}
+```
+
+App 已有条件渲染和关闭回调，保留它们：
+
+```jsx
+function closeEditor() { setEditor((current) => current && { ...current, open: false }); }
+function afterClose() { setEditor(null); trigger.current?.focus(); }
+// App 返回的 main 内已经连接，不要再插入第二份：
+{editor && <ProductEditor product={editor.product} open={editor.open}
+  onSave={save} onCancel={closeEditor} afterClose={afterClose} />}
+```
+
+这形成完整生命周期：open=false 先做关闭动画；`destroyOnHidden` 卸载 Modal 内容；`preserve={false}` 不留字段值；afterClose 把 editor 置空，**创建 Form 实例的 ProductEditor 也卸载**。下次从商品新建会话，所以取消 P001 的 8 后打开 P002 得到 0。若选择让同一实例一直存在，需主动 `setFieldsValue` 并处理重置；本课不用那条设计。
+
+<a id="焦点要和数据一起验收"></a>
+
+`afterOpenChange` 在打开动画后聚焦字段，`focusable.trap` 管模态焦点，afterClose 回到实际按钮。入口已提供 `cycle-dialog-focus.js`：它从 modalRender 的包装层找可见可用控件，在首尾拦截 Tab/Shift+Tab 并转向另一端，避免焦点去往地址栏。上面的导入和 modalRender 把这个辅助机制连上。确认/取消按钮显式提供 aria-label，避免中文双字排版改变可访问名称。
+
+关闭、卸载、保存不是同一事件；类比 Java 编辑缓冲区可以帮助理解草稿，但浏览器动画和焦点需要实际操作。
+
+## 5. 主题贯穿弹窗，功能范围按具体包判断
+
+App 已用 ConfigProvider 包住表格和编辑器，`dark` 切换 `theme.darkAlgorithm` 与 `defaultAlgorithm`。声明式 Modal 虽挂在 body，仍能接收 React Context；只写局部 DOM 选择器则未必能选中它。点击“切换深色”后**重新打开弹窗**，确认文字、输入、错误和背景都变化。
+
+<a id="换库时比较对应能力"></a>
+
+本例的 Table/Form/Modal 在 antd 的 MIT 包内。换成 MUI 时，要分别找 Table、Dialog、表单组织和主题路径；MUI X 的高级功能按 Community/Pro/Premium 单独确认。界面能画出来只是一半，另一半是下面同一组业务和键盘合同。
+
+## 常见错误与调试
+
+### 打开鼠标，库存却是刚才键盘的草稿
+
+**现象**：在当前 App 把 `afterClose` 改成只返焦点、不调用 `setEditor(null)`；在当前 ProductEditor 移除 `destroyOnHidden`，并将 `preserve={false}` 改成 `preserve={true}`。编辑 P001，输入 8 后 Esc，再打开 P002：标题是鼠标，库存却仍为 8。
+
+**工具**：React DevTools → Components → ProductEditor 查看 product；Elements 选中库存 input，Console 读取 `$0.value`；Sources 在 `finish` 内设断点。
+
+**证据**：`product.id=P002`、`product.stock=0`，Form 的 initialValues.stock 是 `"0"`，DOM value 却为 `"8"`。**原因**：表单实例存活，initialValues 不会覆盖已修改的草稿。**修复**：恢复第 4 节的销毁、preserve 和 afterClose 三处接线。**确认**：P001 改 8 取消→P002 得 0；取消→再开 P001 得 12；按下列命令运行当前源码的回归：
+
+```sh
+node tools/antd-browser.mjs --case=lifecycle
+npm run lab -- check C38
+```
+
+第一条只检查连续开关，错误版本应红，修复后绿；完整检查还覆盖 P004、非法输入、排序与静态子路径。它不会注入故障或替你修改源码。
+
+## 练习
+
+<a id="练习-1草稿提交后哪些值发生变化"></a>
+<a id="练习-2修复重开时的旧草稿"></a>
+<a id="练习-3验收扩展坞的完整字段与失败恢复"></a>
+
+完成这同一个 adapter，并修好上面的生命周期错误。不增加另一套 CRUD。
+
+:::tip[自己尝试 · 本地 React]
+1. 按库存升序，用键盘打开 P002，应读到 0；Esc 取消后焦点回同一按钮。
+2. 筛选 P004，输入 8 后取消：该行仍为 3，总量仍 52。重开输入 8，用 Enter 保存。
+3. 清空筛选：六行恢复，P004=8、P001=12、总量 57；P004 的名称/分类/价格/tags 保留。
+4. 刷新回固定数据；再编辑 P004，分别试空白、负数和 0。检查错误关联、字段焦点、空态和深色弹窗。
+
+预期：非法输入不保存，0 可保存为总量 49；取消不改正式数据；原有 React 主应用仍在 `src/react/`。
+:::
+
+<details>
+<summary>提示</summary>
+
+先分清 Table 的 record 与 index，再追踪 Form 实例由谁创建。取消只关闭会话，mutation 完成后才会改变正式数据；统计基于完整 list.data，不是筛选后的行。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+Table 配 rowKey=id，事件把 id 交给 C37 选择器；库存 validator 与提交都调用公共 parseStock，完整商品经 repository.save 写回。App 等待 mutation 和缓存刷新，再关闭。afterClose 清 editor，让下一次 Form 重新初始化；P004 保存 8 只比原来的 3 多 5，因此总库存 57，其他字段由对象展开保留。
+
+</details>
+
+## 项目进度
+
+- 三个目标文件连接完成，初始六行/52、P004 取消/保存与连续开关检查通过。
+- 清筛选、0/非法输入、主题与键盘可观察；React 主应用与同一 core/repository 保留。
+- 工作区运行 `npm run lab -- build` 生成当前 adapter；切回 React 时选 `start C36` 并重启 dev，不移动源码。
+- 暂停写入 `notes/next.md`；继续自己的工作区，不重新下载答案覆盖它。
+
+## 小结
+
+- Table 用数字字段排序，用 id 连接渲染与业务事件。
+- Form 存草稿，core 校验，repository 管正式商品。
+- initialValues 是初值；关闭后卸载编辑会话才能重新初始化。
+- 保存成功才关闭；错误、焦点和主题与数据一起验收。
+
+自测：rowKey 能替事件选对商品吗？谁拥有 Form 实例？为什么只隐藏弹窗会残留草稿？P004 保存时为什么要保留整个 product？筛选一行时总库存为何仍是 52？
+
+下一课进入 Fiori 与 UI5 家族，继续比较同一份库存合同。
+
+## 延伸阅读
+
+- [Ant Design：Table](https://ant.design/components/table/)
+- [Ant Design：Form 初始化与字段管理](https://ant.design/components/form/)
+- [Ant Design：Modal 生命周期与焦点](https://ant.design/components/modal/)
+- [Ant Design：主题配置](https://ant.design/docs/react/customize-theme/)
+- [React：保留与重置状态](https://react.dev/learn/preserving-and-resetting-state)
+- [MUI X：许可与功能档位](https://mui.com/x/introduction/licensing/)

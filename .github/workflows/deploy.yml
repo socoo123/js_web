@@ -42,6 +42,8 @@ jobs:
         run: npm run test:lab-walkthrough
       - name: Check the continuous React lesson snapshots
         run: npm run test:lab-react
+      - name: Check the continuous component and UI5 lesson snapshots
+        run: npm run test:lab-ui5
       - name: Install locked React example dependencies
         run: npm ci --prefix examples/inventory/04-react
       - name: Check React reference project

@@ -1,0 +1,19 @@
+<!-- region view -->
+<mvc:View controllerName="course.inventory.controller.Inventory"
+  xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">
+  <Page title="{i18n>appTitle}"><content><VBox class="sapUiSmallMargin">
+    <Button text="计算全量库存" press=".onSummarize" />
+    <Text id="message" text="{ui>/message}" />
+    <Table id="products" items="{inventory>/products}">
+      <columns>
+        <Column><Text text="{i18n>product}" /></Column>
+        <Column><Text text="{i18n>stock}" /></Column>
+      </columns>
+      <items><ColumnListItem><cells>
+        <ObjectIdentifier title="{inventory>name}" text="{inventory>id}" />
+        <ObjectNumber number="{inventory>stock}" />
+      </cells></ColumnListItem></items>
+    </Table>
+  </VBox></content></Page>
+</mvc:View>
+<!-- endregion view -->

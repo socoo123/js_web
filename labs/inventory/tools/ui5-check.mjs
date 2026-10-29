@@ -1,74 +1,87 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import path from 'node:path';
-import vm from 'node:vm';
-import { spawn } from 'node:child_process';
-import { chromium, expect } from '@playwright/test';
-import { workspace, run } from './lab.mjs';
-import * as core from '../src/core/inventory.js';
+import { expect } from '@playwright/test';
+import { withUI5, inventoryData, products } from './openui5-support.mjs';
 
-await run(process.execPath, ['tools/bridge.mjs']);
-let bridge;
-vm.runInNewContext(await readFile(path.join(workspace, 'adapters/openui5/webapp/model/rules.js'), 'utf8'), { sap: { ui: { define: (_, factory) => { bridge = factory(); } } } });
-const data = JSON.parse(await readFile(path.join(workspace, 'data/products.json')));
-for (const text of ['', '0', '3', '3.5', '3件', '-1', '99999', '100000']) {
-  const outcome = (rules) => { try { return { value: rules.parseStock(text) }; } catch (error) { return { error: error.message }; } };
-  assert.deepEqual(outcome(bridge), outcome(core), `共享规则两端：${JSON.stringify(text)}`);
-}
-assert.equal(JSON.stringify(bridge.summarize(data)), JSON.stringify(core.summarize(data)));
-for (const text of ['0', '0.29', '399.00', '', '3元', '-1', '1.001', '90071992547409.91', '90071992547409.92']) {
-  const outcome = (rules) => { try { return { value: rules.parsePriceCents(text) }; } catch (error) { return { error: error.message }; } };
-  assert.deepEqual(outcome(bridge), outcome(core), `金额桥接：${JSON.stringify(text)}`);
-}
-for (const changes of [{}, { stock: '' }, { stock: '0' }, { name: ' ' }, { price: '0.29' }]) {
-  const draft = { ...core.toDraft(data[3]), ...changes };
-  assert.equal(JSON.stringify(bridge.parseDraft(draft)), JSON.stringify(core.parseDraft(draft)), `草稿桥接 ${JSON.stringify(changes)}`);
-}
-const server = process.env.LAB_UI5_BASE_URL ? null : spawn(process.execPath, [path.join(workspace, 'node_modules/@ui5/cli/bin/ui5.cjs'), 'serve', '--port', '8061'], { cwd: path.join(workspace, 'adapters/openui5'), stdio: ['ignore', 'pipe', 'pipe'] });
-const ready = server ? new Promise((resolve, reject) => {
-  let output = '';
-  const timer = setTimeout(() => reject(new Error('UI5 8061 启动超时：' + output)), 180000);
-  const collect = (chunk) => { output += chunk; if (output.includes('Server started')) { clearTimeout(timer); resolve(); } };
-  server.stdout.on('data', collect); server.stderr.on('data', collect);
-  server.once('exit', (code) => { clearTimeout(timer); reject(new Error(`UI5 退出 ${code}：${output}`)); });
-}) : Promise.resolve();
-let browser;
-try {
-  await ready; browser = await chromium.launch();
-  const page = await browser.newPage(); const errors = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  page.on('response', (response) => { if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`); });
-  await page.goto(process.env.LAB_UI5_BASE_URL ?? 'http://127.0.0.1:8061/index.html');
-  await expect(page.getByRole('button', { name: /编辑$/ })).toHaveCount(6, { timeout: 30000 });
-  const field = page.getByRole('searchbox');
-  await field.fill('P004'); await field.press('Enter');
-  await expect(page.getByRole('button', { name: /编辑$/ })).toHaveCount(1);
-  const id = await page.evaluate(() => {
-    const view = sap.ui.require('sap/ui/core/Component').getComponentById('container-inventory').getRootControl();
-    const context = view.byId('products').getItems()[0].getBindingContext('inventory');
+export async function checkInventory(page, url, { prototype = false, lesson = 'C41', language = true } = {}) {
+  await page.goto(url);
+  await expect(page.getByRole('row').filter({ hasText: 'P002' })).toContainText('0', { timeout: 45000 });
+  assert.deepEqual(await inventoryData(page), products);
+  if (lesson === 'C40') {
+    await expect(page.getByRole('row').filter({ hasText: /P00\d/ })).toHaveCount(6);
+    await page.getByRole('button', { name: '计算全量库存', exact: true }).press('Enter');
+    await expect(page.locator('[id$="--message"]')).toHaveText('6 种商品，总库存 52 件');
+    console.log('C40：六商品逐字段等于固定数据；P002=0；共享统计按钮输出6/52。');
+    return;
+  }
+  const edits = page.getByRole('button', { name: /编辑$/ });
+  const stock = page.getByRole('textbox', { name: '库存', exact: true });
+  const search = page.getByRole('searchbox');
+  await expect(edits).toHaveCount(6);
+  if (!prototype) await expect(page.locator('[id$="--allStock"]')).toHaveText('52');
+  await search.fill('P004'); await search.press('Enter');
+  await expect(edits).toHaveCount(1);
+  const identity = await page.evaluate(() => {
+    const item = sap.ui.require('sap/ui/core/Element').getElementById(
+      [...document.querySelectorAll('[id$="--products"]')][0].id).getItems()[0];
+    const context = item.getBindingContext('inventory');
     return { path: context.getPath(), id: context.getProperty('id') };
   });
-  assert.deepEqual(id, { path: '/products/3', id: 'P004' });
-  await page.getByRole('button', { name: /编辑$/ }).click();
-  await page.getByRole('textbox', { name: '库存', exact: true }).fill('8');
-  await page.getByRole('button', { name: '取消', exact: true }).click();
-  await page.getByRole('button', { name: /编辑$/ }).click();
-  await expect(page.getByRole('textbox', { name: '库存', exact: true })).toHaveValue('3');
-  await page.getByRole('textbox', { name: '库存', exact: true }).fill('');
-  await page.getByRole('button', { name: '保存', exact: true }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await page.getByRole('textbox', { name: '库存', exact: true }).fill('8');
-  await page.getByRole('button', { name: '保存', exact: true }).click();
+  assert.deepEqual(identity, { path: '/products/3', id: 'P004' });
+  await edits.focus(); await edits.press('Enter');
+  await stock.focus(); await stock.press('ControlOrMeta+A'); await stock.press('8');
+  const cancel = page.getByRole('button', { name: '取消', exact: true });
+  await cancel.focus(); await cancel.press('Enter');
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  const products = await page.evaluate(() => sap.ui.require('sap/ui/core/Component').getComponentById('container-inventory').getModel('inventory').getProperty('/products'));
-  assert.equal(products[0].stock, 12, 'P001 不变'); assert.equal(products[3].stock, 8, 'P004 保存 8');
+  assert.deepEqual(await inventoryData(page), products, '取消不改变任何正式字段');
+  if (!prototype) await expect(page.locator('[id$="--allStock"]')).toHaveText('52');
+  await edits.press('Enter');
+  await expect(stock).toHaveValue('3');
+  for (const invalid of ['', '-1']) {
+    await stock.fill(invalid);
+    const save = page.getByRole('button', { name: '保存', exact: true });
+    await save.focus(); await save.press('Enter');
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(stock).toBeFocused();
+    assert.deepEqual(await inventoryData(page), products, `拒绝 ${JSON.stringify(invalid)}`);
+  }
+  await stock.fill('8');
+  await page.getByRole('button', { name: '保存', exact: true }).press('Enter');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const saved = await inventoryData(page);
+  assert.deepEqual(saved, products.map((product) => product.id === 'P004' ? { ...product, stock: 8 } : product),
+    'P004 保存8/P001 不变，所有其他字段保留');
   await expect(page.locator('[id$="--totalStock"]')).toHaveText('8');
-  await expect(page.getByRole('row').filter({ hasText: 'P004' }).getByRole('gridcell').nth(1)).toContainText('8');
   await expect(page.locator('[id$="--totalValue"]')).toHaveText('2392.00');
-  await page.getByRole('combobox', { name: '界面语言', exact: true }).press('Space');
-  await page.getByRole('option', { name: 'English', exact: true }).click();
-  await page.waitForURL(/sap-ui-language=en/);
-  await expect(page.getByRole('button', { name: /Edit$/ })).toHaveCount(6, { timeout: 30000 });
-  assert.equal(products[3].tags.join(','), '热销,新品'); assert.deepEqual(errors, []);
-  console.log(`C41 浏览器：${JSON.stringify(id)}；取消保留 3，空白拒绝，保存后 P004=8/P001=12；共享规则向量一致。`);
-} finally { if (browser) await browser.close(); server?.kill('SIGTERM'); }
+  if (!prototype) await expect(page.locator('[id$="--allStock"]')).toHaveText('57');
+  await search.fill(''); await search.press('Enter');
+  await expect(edits).toHaveCount(6);
+  await expect(page.locator('[id$="--totalStock"]')).toHaveText('57');
+  await search.fill('不存在'); await search.press('Enter');
+  await expect(edits).toHaveCount(0);
+  await expect(page.locator('[id$="--totalStock"]')).toHaveText('0');
+  await page.reload();
+  await expect(edits).toHaveCount(6);
+  await search.fill('P004'); await search.press('Enter');
+  await expect(edits).toHaveCount(1);
+  await edits.press('Enter'); await stock.fill('0');
+  await page.getByRole('button', { name: '保存', exact: true }).press('Enter');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  assert.equal((await inventoryData(page))[3].stock, 0);
+  if (!prototype) await expect(page.locator('[id$="--allStock"]')).toHaveText('49');
+  if (language) {
+    await page.getByRole('combobox', { name: '界面语言', exact: true }).press('Space');
+    await page.getByRole('option', { name: 'English', exact: true }).click();
+    await page.waitForURL(/sap-ui-language=en/);
+    await expect(page.getByRole('button', { name: /Edit$/ })).toHaveCount(6, { timeout: 45000 });
+    assert.deepEqual(await inventoryData(page), products, '语言重载恢复固定数据');
+  }
+  console.log(`${lesson}：context ${JSON.stringify(identity)}；键盘取消 3/52、保存 8/57；空白/负数拒绝、0 合法；清空筛选六件；i18n。`);
+}
+
+if (process.argv[1]?.endsWith('/ui5-check.mjs')) {
+  const checkpoint = JSON.parse(await readFile(new URL('../checkpoint.json', import.meta.url))).checkpoint;
+  await withUI5(({ page, url }) => checkInventory(page, url, {
+    prototype: /^P4/.test(checkpoint), lesson: process.argv[2] ?? 'C41',
+  }));
+}

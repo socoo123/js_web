@@ -1,0 +1,15 @@
+{
+  "previous": "C41",
+  "files": [
+    "adapters/openui5/webapp/Component.js",
+    "adapters/openui5/webapp/manifest.json",
+    "adapters/openui5/webapp/view/App.view.xml",
+    "adapters/openui5/webapp/view/Inventory.view.xml",
+    "adapters/openui5/webapp/controller/Inventory.controller.js",
+    "adapters/openui5/webapp/view/Detail.view.xml",
+    "adapters/openui5/webapp/controller/Detail.controller.js",
+    "adapters/openui5/webapp/localService/metadata.xml",
+    "adapters/openui5/webapp/probe/odata.html",
+    "adapters/openui5/webapp/probe/odata.js"
+  ]
+}

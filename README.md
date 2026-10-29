@@ -2,7 +2,7 @@
 
 面向**会 Java、初学前端**的开发者，用中文从 HTML/CSS 和浏览器讲起，逐步掌握 JavaScript、工程工具、React、开源组件与 SAP UI5。以同一个库存管理应用贯穿课程，每课包含可运行示例、预期输出、Java 对照、调试任务和练习答案。
 
-**第一版 48 课必修主线已完结**，配套七阶段库存项目、四张速查页、14 张 D2 机制图与本地学习进度。工作区改版按 [三阶段收尾计划](docs/PLAN.md) 推进；[五个 Lab 的设计](labs/README.md) 已明确。本版 C01–C36 接入连续路线，C23 使用正式 C22 起点；C41 仍为试做。React 批次证据见 [阶段 A](labs/records/A.md)，实际发布与下一步以 [STATUS](docs/STATUS.md) 为准。
+**第一版 48 课必修主线已完结**，配套七阶段库存项目、四张速查页、14 张 D2 机制图与本地学习进度。工作区改版按 [三阶段收尾计划](docs/PLAN.md) 推进；[五个 Lab 的设计](labs/README.md) 已明确。本版 C01–C44 接入连续路线，C23/C41 分别使用正式 C22/C40 起点；L4 提供四种并列界面适配。React 与组件库批次证据见 [阶段 A](labs/records/A.md)、[阶段 B](labs/records/B.md)，实际发布与下一步以 [STATUS](docs/STATUS.md) 为准。
 
 [V2 库存工作区](https://socoo123.github.io/js_web/labs/)提供初始工程、固定命令、版本化快照与恢复说明。旧 examples 链接与学习进度保留，未迁移的课程继续使用原入口。
 
@@ -54,7 +54,7 @@ npm run dev -- --host 127.0.0.1
 
 D2 准备脚本需要 Bash、curl、tar、Python 3，以及 `shasum` 或 `sha256sum`；首次下载工具与中文字体需要联网。自动准备支持 macOS/Linux 的 arm64、x64，已实测 macOS arm64 与 Linux x64；其他环境与手动准备方式见 [D2 说明](diagrams/README.md)。
 
-构建会实际运行 Java 对照，需要 JDK 21（`java --version`）。工作区检查还需要在 `labs/inventory` 安装一次锁定依赖，并准备 Playwright Chromium：`npm ci --prefix labs/inventory`、`npm exec --prefix labs/inventory -- playwright install chromium`。然后在根目录运行 `npm run test:lab-walkthrough` 和 `npm run test:lab-react`，分别检查前置自动组装与 C21–C36 实际快照；独立读者抽验另记在阶段记录中。
+构建会实际运行 Java 对照，需要 JDK 21（`java --version`）。工作区检查还需要在 `labs/inventory` 安装一次锁定依赖，并准备 Playwright Chromium：`npm ci --prefix labs/inventory`、`npm exec --prefix labs/inventory -- playwright install chromium`。根目录的 `npm run test:lab-walkthrough` 检查前置自动组装，`npm run test:lab-react` 检查 C21–C36 实际快照，`npm run test:lab-ui5` 检查 C37–C44 实际快照；独立读者抽验另记在阶段记录中。
 
 构建并检查生产预览，在仓库根目录执行：
 
@@ -115,6 +115,7 @@ Pages 发布课程网站；七阶段库存应用供本地练习，未作为在�
 | `npm run check` | Astro 内容与类型 |
 | `npm run test:lab-walkthrough` | 前置连续源码及 C03/C23/C41 片段自动组装、错误红绿；不等同独立读者验收 |
 | `npm run test:lab-react` | C21–C36 各自真实快照的必要前置、组件、请求、浏览器与测试检查 |
+| `npm run test:lab-ui5` | C37–C44 连续快照、四个 adapter 共同场景及 UI5 专项检查 |
 | `npm run test:progress` | 进度格式、合并、备份与故障恢复 |
 | `npm run build` | Lab 包与契约 → Java 对照 → 课程 lint → 固定输出 → 进度数据 → 路线/D2 → Astro/Pagefind → 页面、包与子路径资源检查 |
 | `npm run check:build` | 检查已有 `dist/` 的页面、链接、资源、练习折叠区、进度与速查导航 |

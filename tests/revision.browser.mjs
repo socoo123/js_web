@@ -9,7 +9,9 @@ import { importedContent } from '../scripts/lesson-sources.mjs';
 
 const base = process.env.REVISION_BASE_URL ?? 'http://127.0.0.1:8874/js_web/';
 const qa = path.resolve('.cache/qa/v2/site-review'); await mkdir(qa, { recursive: true });
-const routes = globSync('**/*.html', { cwd: 'dist' }).filter((route) => !route.startsWith('demos/')).map((route) => route.replace(/index\.html$/, ''));
+const requestedRoutes = process.env.REVISION_ROUTES?.split(',').filter(Boolean);
+const routes = globSync('**/*.html', { cwd: 'dist' }).filter((route) => !route.startsWith('demos/')).map((route) => route.replace(/index\.html$/, '')).filter((route) => !requestedRoutes || requestedRoutes.includes(route));
+if (requestedRoutes) assert.deepEqual([...routes].sort(), [...requestedRoutes].sort(), '请求验收的页面必须全部存在');
 const trials = catalog.lessons.filter((row) => row.migrated).map((row) => row.slug + '/');
 const cardCounts = new Map(catalog.lessons.filter((row) => row.migrated).map((row) => {
   const [file] = globSync(`src/content/docs/${row.slug}.{md,mdx}`);
@@ -18,6 +20,7 @@ const cardCounts = new Map(catalog.lessons.filter((row) => row.migrated).map((ro
 }));
 const copyRoute = '02-language-data/c03-values-types/';
 const sampleRoutes = new Set([
+  ...(requestedRoutes ?? []),
   '05-react/c21-react-jsx-components/',
   '05-react/c26-state-ownership-reset/',
   '05-react/c30-requests-races/',

@@ -57,6 +57,19 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 
 ## SAP、UI5 与静态边界
 
+### 2026-10-29 · 阶段 B 重新核对
+
+- C37：核对 [Radix Primitives](https://www.radix-ui.com/primitives/docs/overview/introduction)、[shadcn/ui](https://ui.shadcn.com/docs) 与 [MUI X 许可](https://mui.com/x/introduction/licensing/)；区分无样式交互基础、代码分发、MIT Community 与商业 Pro/Premium，按具体包和功能判断。
+- C38：官方 [Changelog](https://ant.design/changelog/) 当前为 6.6.8，练习保留锁定 antd 6.6.6；[该版本 Form](https://raw.githubusercontent.com/ant-design/ant-design/6.6.6/components/form/index.en-US.md) / [Modal](https://raw.githubusercontent.com/ant-design/ant-design/6.6.6/components/modal/index.en-US.md) 核对 initialValues、Promise validator、preserve、destroyOnHidden、afterClose、focusable 与 mask.closable。
+- C39：采用当前 [Fiori for Web](https://www.sap.com/design-system/fiori-design-web/) 入口；[SAPUI5/OpenUI5](https://ui5.github.io/docs/02_Read-Me-First/sapui5-vs-openui5-5982a97.html) 的库与使用条件分别核对。[React 19 官方说明](https://react.dev/blog/2024/12/05/react-19#support-for-custom-elements) 已支持自定义元素，未沿用部分 UI5 React 指南中的旧限制。
+- C40：沿用 OpenUI5 1.153.0 / UI5 CLI 4.0.71；[CLI 4 框架配置](https://ui5.github.io/cli/v4/pages/OpenUI5/) 区分 specVersion、framework.version 与工具版本，npm 元数据的 Node ^20.11.0 或 >=22 范围包含本项目 Node 24。
+- C41：[JSONModel](https://ui5.github.io/docs/04_Essentials/json-model-96804e3.html) 为客户端完整小数据集，默认 TwoWay，setProperty 通知绑定；模型名、绝对/相对路径、独立草稿与全量/可见统计分别处理。
+- C42：核对 [路由配置](https://ui5.github.io/docs/04_Essentials/routing-configuration-9023130.html)、[V2 Model](https://ui5.github.io/docs/04_Essentials/odata-v2-model-6c47b2b.html)、[有限 MockServer 能力](https://ui5.github.io/docs/04_Essentials/odata-features-supported-by-the-odata-v2-mock-server-3459c37.html) 和 [1.153.0 MockServer 源码](https://raw.githubusercontent.com/SAP/openui5/1.153.0/src/sap.ui.core/src/sap/ui/core/util/MockServer.js)；V2 read/缓存与 V4 binding/context API 不混用，静态 mock 不提供真实 SAP 写服务。
+- C43：官方当前原生组件 2.28.1，沿用锁定 2.27.2，核对该 tag 的 [Input](https://github.com/UI5/webcomponents/blob/v2.27.2/packages/main/src/Input.ts) / [Button](https://github.com/UI5/webcomponents/blob/v2.27.2/packages/main/src/Button.ts)；宿主 value、布尔 property、ui5-input/ui5-click、slots 与 Shadow DOM 按真实 API 使用。[字体文档](https://ui5.github.io/webcomponents/docs/advanced/fonts/) 明确默认 CDN、关闭 defaultFontLoading 与本地 FontFace.css；该 CSS 路径为实验接口，升级需复核。
+- C44：官方包装库当前 2.28.2，沿用锁定 2.27.3 / 原生 2.27.2；[包装 Form](https://raw.githubusercontent.com/UI5/webcomponents-react/v2.27.3/packages/main/src/webComponents/Form/index.tsx) 只是布局，[Input](https://raw.githubusercontent.com/UI5/webcomponents-react/v2.27.3/packages/main/src/webComponents/Input/index.tsx) 回调取 event.target.value，[原生表单支持](https://raw.githubusercontent.com/UI5/webcomponents/v2.27.2/packages/base/src/features/InputElementsFormSupport.ts) 通过 HTML form/requestSubmit；不叠加按键与点击保存入口。主题/翻译注册与本地字体按 [Assets](https://ui5.github.io/webcomponents/docs/advanced/using-assets/) / [Fonts](https://ui5.github.io/webcomponents/docs/advanced/fonts/) 配置。
+
+以上为资料核对；运行与发布结果分别见各课 examples README 和 [阶段 B](../labs/records/B.md)。
+
 - [SAP Fiori](https://experience.sap.com/fiori-design-web/sap-fiori/)：设计系统背景。
 - [SAPUI5 vs OpenUI5](https://ui5.github.io/docs/02_Read-Me-First/sapui5-vs-openui5-5982a97.html)、[UI5 ecosystem](https://ui5.github.io/docs/02_Read-Me-First/the-ui5-ecosystem-b72ccb5.html)：体系与交付区别。
 - [UI5 Web Components](https://ui5.github.io/webcomponents/docs/)、[First Steps](https://ui5.github.io/webcomponents/docs/getting-started/first-steps/)：Custom Elements、npm 导入与资源打包。

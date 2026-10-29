@@ -1,0 +1,195 @@
+---
+title: C40 OpenUI5 入门：MVC 与工程
+description: 在当前工作区连接 OpenUI5 工程、商品模型、XML View、Controller 和共享规则桥。
+sidebar:
+  order: 40
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+
+> **第 4 周 · 第 20 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C39 的路线选择 · 运行：Node 24、本地 UI5 · 示例已运行验证
+
+## 这一课解决什么问题
+
+把同一份六商品显示到经典 UI5 页面，并让一个按钮调用共享统计规则。你不再进入旧 demo，也不新建一套业务层。
+
+继续当前 `inventory/`；新版 C00 起点已提供 `adapters/openui5/` 的机械 MVC 壳，之前一直未接业务。本课只改其 `webapp/manifest.json`、`view/Inventory.view.xml`、`controller/Inventory.controller.js`。先停掉 C38 开发服务，再切任务并启动。
+
+<LessonTask lessonId="C40" />
+
+## Java 程序员先看这里
+
+命名空间类似包名，模块资源路径类似类路径；但加载、XML 解析、控件事件都发生在浏览器。npm 安装 Node 工具，UI5 CLI 提供框架资源，Component 负责应用初始化。不要把这三个职责当成一个运行时。
+
+## 1. 先把开发工具与浏览器资源分开
+
+工作区使用同一份 npm 锁。已经安装过就不必重装；跨发行版恢复到新目录时，在那个工作区执行一次 `npm ci`。`adapters/openui5/package.json` 只是项目标识，不在子目录另装依赖。
+
+从阶段 A 旧版继续时，按上一课的迁移步骤保留旧目录，以新版 C00 的工具、清单、锁和 adapters 为壳，迁入自己的 src、notes 及其他已写文件。不要为了得到机械壳就用新版 C36 完成态替换作业；C36 只供补课恢复。
+
+```sh
+# 当前目录：自己的 inventory/
+npm run lab -- start C40
+npm run lab -- dev
+```
+
+打开终端给出的 `http://127.0.0.1:8060/index.html`。首次启动 UI5 CLI 要下载框架与主题，等终端报告服务启动后再访问；端口根地址是资源目录。默认端口被占用时先停止自己的上一课服务。
+
+本课文件的位置是：
+
+```text
+adapters/openui5/
+  ui5.yaml                         Node 工具的框架/库配置
+  webapp/index.html                浏览器入口
+  webapp/Component.js              初始化应用与 ui 模型
+  webapp/manifest.json             根 View、模型与运行库
+  webapp/view/Inventory.view.xml   你改：列表和按钮
+  webapp/controller/Inventory.controller.js  你改：事件
+  webapp/model/rules.js            core 构建产物，不手改
+  webapp/model/products.json       data/products.json 的投影
+  webapp/i18n/                     已提供的中英文资源
+```
+
+`ui5.yaml` 使用 OpenUI5 1 系列、`sap.ui.core`、`sap.m` 与 Horizon 主题。`specVersion` 描述 YAML 格式；`framework.version` 固定框架，和 CLI 4 的工具版本分开。Java 构建工具和运行库也各有版本。
+
+## 2. bootstrap：从 HTML 进入应用组件
+
+先读已提供的 `index.html`，无需替换。关键连接是：
+
+```html
+<script id="sap-ui-bootstrap" src="resources/sap-ui-core.js"
+  data-sap-ui-async="true" data-sap-ui-theme="sap_horizon"
+  data-sap-ui-resource-roots='{"course.inventory":"./"}'
+  data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"></script>
+<main data-sap-ui-component data-name="course.inventory"
+  data-id="container" data-settings='{"id":"inventory"}'></main>
+```
+
+核心启动后，ComponentSupport 创建 `course.inventory.Component`。资源映射把 `course/inventory/Component.js` 解析到当前目录的 `Component.js`。点号类名、斜杠模块 ID、实际文件名要互相对应。
+
+**先猜一猜：** 把静态产物放在 `/js_web/demos/inventory-openui5/`，相对的核心路径会请求哪里？
+
+```js
+const entry = "https://example.com/js_web/demos/inventory-openui5/index.html";
+console.log(new URL("resources/sap-ui-core.js", entry).pathname);
+// → /js_web/demos/inventory-openui5/resources/sap-ui-core.js
+```
+
+开头没有 `/` 的相对路径保留应用子目录；`/resources/` 会跳到域名根。浏览器依 URL 找模块，不能依 Java 的磁盘 classpath 猜路径。
+
+## 3. Component 与 manifest：应用初始化和声明配置
+
+### manifest 写“需要什么”，Component 写“初始化时做什么”
+
+已有 Component 先调用父类 init，然后创建名为 `ui` 的 JSONModel，放提示与语言。它声明 `manifest: "json"`，因此 UI5 读取同目录 manifest；异步内容接口让根 View 异步创建。
+
+在 `manifest.json` 的 `sap.ui5.models` 对象内，**保留 i18n 项**，在它前面新增 inventory 项，注意逗号：
+
+```json
+"inventory": {
+  "type": "sap.ui.model.json.JSONModel",
+  "uri": "model/products.json"
+},
+```
+
+这是插入对象成员，不是整份 JSON。已有 `rootView.viewName` 为 `course.inventory.view.Inventory`，对应 `view/Inventory.view.xml`。启动桥生成的数据外层是 `{"products":[...]}`，所以数组路径是 `/products`。
+
+manifest 由浏览器 UI5 消费；YAML 由 Node CLI 消费。manifest 的 `dependencies.libs` 声明运行库，YAML 让开发服务与构建实际提供库资源。`minUI5Version` 是最低要求，不负责下载版本。
+
+## 4. XML View：布局、控件与绑定上下文
+
+用以下完整内容替换 `webapp/view/Inventory.view.xml`：
+
+<CodeExcerpt snippetId="c40-view" />
+
+Page 的 content 聚合接纳 VBox；Table 的 items 绑定创建行。`xmlns="sap.m"` 选择经典控件库，XML 标签不是原生 DOM。Label/按钮/表格最终由控件渲染为 HTML。
+
+### 为什么行里没有 `/products/1/name`
+
+<a id="列表有六行库存却全部为空"></a>
+
+Table 从根读 `/products`，每行获得当前商品的 context。行内相对绑定 `inventory>stock` 因此依次读到 12、0、7、3、25、5。
+
+**先猜一猜：** 把名称改成 `{inventory>/name}`，会显示六件商品名吗？不会。根只有 products，没有 name，所以名称为空；编号与库存仍可正常显示。Java 循环中的 product 随当前元素变化，这里由绑定上下文提供当前元素。
+
+## 5. Controller 与模块：把一次点击接到业务函数
+
+用以下完整内容替换 `webapp/controller/Inventory.controller.js`：
+
+<CodeExcerpt snippetId="c40-controller" />
+
+六行加载后点“计算全量库存”，提示是“6 种商品，总库存 52 件”。连接链是 XML 的 press → 同一 Controller 方法 → inventory 模型 → rules.summarize → ui.setProperty → Text 绑定。`this.byId` 只查本 View 的局部 ID，控件实际 ID 还带框架前缀。
+
+`sap.ui.define` 的依赖数组写模块 ID，回调参数按顺序接收导出值。当前 core 是 ESM；已提供的 bridge 用构建工具打包为 `sap.ui.define` 的 rules 模块。dev/build 每次从当前 `src/core` 重新生成它，不在 Controller 手抄统计或校验。
+
+Java 的接口复用经验适用于共享纯函数；UI5 loader 与 ESM 则是不同的模块加载机制，不能在 define 回调里粘顶层 import。
+
+## 常见错误与调试
+
+### 模块名拼错，页面无法启动
+
+**现象**：故意把 Controller 依赖中的 `course/inventory/model/rules` 改为末尾多一个 s 的 `ruless`，开发服务刷新后页面不再正常创建。
+
+**工具**：DevTools → Network 勾选 Disable cache，过滤 ruless 并刷新；Console 展开首个模块加载错误。
+
+**证据**：请求实际应用子路径下的 `model/ruless.js`，响应 404；真实文件是 rules.js，Controller 工厂还没成功运行。
+
+**原因**：资源映射只替换命名空间前缀，不能修正模块名拼写。
+
+**修复**：恢复 `course/inventory/model/rules`，模块 ID 不加 `.js`，文件保留该扩展名。
+
+**确认**：刷新后六件商品出现，P002 显示 0，统计按钮得到 52。再运行 `npm run lab -- check C40`。若只有字段为空，比较 `stock` 和 `Stock`，而不是继续改模块地址。
+
+## 练习
+
+<a id="练习-1预测模型根与当前商品"></a>
+<a id="练习-2修复两个页面空了"></a>
+<a id="练习-3用静态产物重复一次查询"></a>
+
+:::tip[自己尝试 · 本地 UI5]
+1. 按正文完成三个文件；初始只有列表与统计按钮，没有筛选、编辑和路由。
+2. 复现一次 rules 模块 404，保存失败 URL，修复后核对六件和 52。
+3. 在工作区运行 `npm run lab -- check C40`，再运行 `npm run lab -- build`。
+
+预期：框架、主题和应用进入 `adapters/openui5/dist/`；统计仍调用同一个 core。
+:::
+
+<details>
+<summary>提示</summary>
+
+先看请求，再看模型名，最后看路径大小写。JSONModel 的根对象不是商品数组本身。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+models 增加 inventory，View 的 items 读取 inventory>/products，行内使用相对路径。Controller 按 define 的参数顺序接 rules，事件中统计并 setProperty。无需另建 findProduct 或业务校验文件。
+
+</details>
+
+## 项目进度
+
+- 六商品与全量统计按钮连通；P002 的合法 0 未丢失。
+- 本课 `build` 调用 `ui5 build --all` 并补框架版本信息，产物包含本地 resources，不依赖 CDN。
+- 可在 `adapters/openui5/dist/` 启动 `python3 -m http.server 8140 --bind 127.0.0.1`，打开该端口的 index.html；这是本地静态预览。
+- 暂停记录当前三个文件；下一课在这份真实完成态上加筛选、独立草稿和多语言界面。
+
+## 小结
+
+- bootstrap、Component、manifest、View、Controller 连成一条启动链。
+- 模型名选数据来源，绝对路径选根数组，相对路径读当前行。
+- 共享 core 通过构建桥适配模块格式，不重写业务层。
+- 静态应用资源保持相对路径，开发服务成功不能代替子路径构建检查。
+
+自测：namespace 对应哪个目录？YAML 与 manifest 谁读取？为什么 /name 是空？按钮怎样到达 rules？停止开发服务后，静态目录为什么仍能执行统计？
+
+## 延伸阅读
+
+- [UI5 CLI：框架配置](https://ui5.github.io/cli/v4/pages/OpenUI5/)
+- [Component 配置](https://ui5.github.io/docs/03_Get-Started/step-9-component-configuration-4cfa608.html)
+- [应用描述与 ComponentSupport](https://ui5.github.io/docs/03_Get-Started/step-10-descriptor-for-applications-8f93bf2.html)
+- [UI5 模块定义](https://ui5.github.io/docs/03_Get-Started/step-6-modules-f665d0d.html)
+- [JSONModel 与路径](https://ui5.github.io/docs/04_Essentials/json-model-96804e3.html)

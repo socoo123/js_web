@@ -1,0 +1,4 @@
+<mvc:View controllerName="course.inventory.controller.Inventory"
+  xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">
+  <Page title="{i18n>appTitle}"><Text text="待连接商品模型" /></Page>
+</mvc:View>

@@ -62,12 +62,12 @@
     "right": {
       "label": "OpenUI5",
       "lang": "js",
-      "checkpoint": "P41",
+      "checkpoint": "C41",
       "file": "adapters/openui5/webapp/controller/Inventory.controller.js",
       "region": "save",
       "caption": "JSONModel 的保存处理函数",
       "resultLabel": "页面结果",
-      "output": "P004 的行与可见汇总更新为 8，P001 仍为 12",
+      "output": "P004 行与可见库存变为 8，全量 57，P001 仍为 12",
       "verified": true
     },
     "difference": "两侧都通过约定的更新入口通知观察者。JSONModel.setProperty 会检查相关绑定；Java Bean 本身没有 UI5 的模型名、绑定路径或 XML View。"

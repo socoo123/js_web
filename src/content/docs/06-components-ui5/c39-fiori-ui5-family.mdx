@@ -1,0 +1,200 @@
+---
+title: C39 SAP Fiori 与 UI5 家族
+description: 为同一个库存任务选择 UI5 路线，分清设计系统、经典框架、自定义元素和 React 包装库。
+sidebar:
+  order: 39
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 4 周 · 第 20 天** · 阅读约 35 分钟 · 实作约 25 分钟<br />
+> 前置：C38 的组件适配契约 · 运行：Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+Ant Design 版已经能编辑商品。现在要求“与 SAP 的 Fiori 体验一致”，你却找到四种名字和三种按钮语法。本课只做一个决定：为当前库存任务写一份技术选择，不另开应用。
+
+继续自己的 `inventory/`，新建 `notes/ui5-choice.md`。保留 C36 React 主应用、C38 adapter 和 `src/core`；换界面不等于重写库存规则。下面的比较始终围绕筛选 P004、取消不写入、保存只改它这个任务。
+
+<LessonTask lessonId="C39" />
+
+## Java 程序员先看这里
+
+你可以用 MVC、监听器、适配器的经验理解分工，但这里的 Controller 在浏览器中响应控件事件，不是 Spring HTTP Controller。Fiori 是设计系统，不是类似 Spring 的依赖包。先分交付物，再比较 API。
+
+## 1. Fiori 先决定用户要完成什么
+
+[SAP Fiori](https://www.sap.com/design-system/fiori-design-web/)约定任务、导航、布局与反馈的一致性。“让管理员找到低库存商品并可靠保存”是交互要求；按钮的颜色只是其中一部分。
+
+**先猜一猜：** P002 的库存是 0，把字段的显示标签改为“可用库存”，商品库存会变吗？
+
+```js
+const product = { id: "P002", stock: 0 };
+const field = { path: "stock", label: "库存数量" };
+field.label = "可用库存";
+console.log(`${field.label}：${product[field.path]}`); // → 可用库存：0
+```
+
+描述字段的配置和业务记录是两个对象。设计可以改变标签与页面组织，库存仍由业务规则决定。Java 的注解或字段描述也不等于字段的值。
+
+本 Lab 的四个界面都要保留：稳定 id、独立草稿、错误反馈、键盘操作。不能用“看起来像 Fiori”替代这些验收。
+
+## 2. 先分清交付物，再看长得像不像
+
+本课程说的“经典 UI5”，指 SAPUI5/OpenUI5 的模块、控件、Model、绑定与 MVC 体系。
+
+| 名称 | 实际交付 | 在当前项目中的路线 |
+| --- | --- | --- |
+| SAPUI5 | SAP 交付的 UI5 框架，含额外业务库；核对使用条件 | 维护已有 SAPUI5 工程，按具体库选版本 |
+| OpenUI5 | Apache-2.0 开源交付，共享核心与常用控件库 | 经典适配器用 `sap.m`、XML View 与 Model 实作 |
+| UI5 Web Components | 注册自定义元素的 npm 模块 | 原生适配器在网页接输入与按钮 |
+| UI5 Web Components for React | 基于上述元素的 React 接口与组合组件 | React 适配器继续用 JSX、React 状态与事件 |
+
+[官方交付比较](https://ui5.github.io/docs/02_Read-Me-First/sapui5-vs-openui5-5982a97.html)说明核心及 `sap.m` 等常用库共享；SAPUI5 另有额外库。已有工程用到 `sap.ui.comp` 时，不能仅把资源地址换成 OpenUI5。库范围与许可要按项目实际依赖核对。
+
+### 看加载入口，比看截图可靠
+
+下面是三条不同路线的入口标记，阅读即可：
+
+```text
+经典 UI5：resources/sap-ui-core.js → Component → XML View
+原生元素：import "@ui5/webcomponents/dist/Button.js" → <ui5-button>
+React 包装：import { Button } from "@ui5/webcomponents-react" → <Button />
+```
+
+**先猜一猜：** JSX 中出现 `Button`，就说明底层是经典 `sap.m.Button` 吗？不是。要看 import 来源；React 包装连接的是 Web Components，不是 OpenUI5 的 React 皮肤。
+
+![UI5 家族与经典 MVC 绑定图：Fiori 指导经典 UI5 和 Web Components；React 包装 Web Components；经典 UI5 由 View 事件经 Controller 更新 Model，再由绑定通知控件。](../../../assets/diagrams/c39-ui5-family-binding.svg)
+
+先读上面的设计与包装关系，再读下面的 MVC 通知链。视觉相近不表示运行机制相同。
+
+## 3. MVC：把“显示什么”与“怎样修改”接起来
+
+经典 UI5 在浏览器中连接三部分：View 声明控件与绑定，Controller 响应事件，Model 承载数据与更新通知。本课先识别职责，下一课把它们接到当前工作区。
+
+### View：声明路径与事件
+
+```xml
+<Text text="{inventory>/product/stock}" />
+<Button text="补货" press=".onRestock" />
+```
+
+这不是浏览器原生 HTML。XMLView 创建经典控件；`inventory` 是模型名，`/product/stock` 是数据路径，`onRestock` 是 Controller 方法。
+
+### Model：包装数据并提供更新接口
+
+<a id="model-已经变成-3页面为什么还是-0"></a>
+
+JSONModel 包装普通对象，还把它接入控件绑定。它是客户端模型，没有内建的服务器持久化能力。商品仍来自六件固定数据。
+
+### Controller：响应事件，修改模型
+
+```js
+model.setProperty("/product/stock", 3);
+```
+
+当模型已有上述绑定时，控件显示 3。`setProperty` 写入数据并检查相关绑定；直接给普通对象字段赋值没有这一步通知。Java Bean 可以在 setter 中发 PropertyChangeEvent，但 UI5 额外管理模型名、路径和控件绑定。
+
+## 4. Web Components 与 React 包装库连接另一条路线
+
+Web Components 模块向浏览器注册自定义元素；应用决定数据、路由与请求方案。[React 19 原生支持自定义元素的属性与事件](https://react.dev/reference/react-dom/components#custom-html-elements)，包装库的价值是 React 接口与组合能力，不是让经典 MVC 在 React 中运行。
+
+### 给库存项目选择路线
+
+在 `notes/ui5-choice.md` 用以下结构写自己的决定：
+
+```md
+# 库存界面的 UI5 路线
+- 家族：Fiori 是设计系统；SAPUI5/OpenUI5 是经典框架；Web Components 是自定义元素，React 包装连接它们。
+- 当前任务：筛选 P004，草稿取消不写入，保存后总库存 57。
+- 接手 XML View/manifest/UI5 Model：沿用经典 UI5；核对所需库。
+- 保留 React 应用：选择 Web Components，按需使用 React 包装。
+- 只换原生小表单：注册 Web Components，使用 DOM 属性与事件。
+- 本 Lab 经典路线：OpenUI5 + sap.m，规则仍来自 src/core。
+- 静态边界：页面内存与浏览器 mock；真实鉴权、持久化在服务端。
+```
+
+Java 的 adapter 思路在这里很有用：保留业务契约，替换界面连接方式。四个 adapter 是并列练习，不互相嵌套。
+
+## 5. Tooling 管工程，绑定与元数据管重复劳动
+
+### UI5 CLI 在浏览器之外工作
+
+UI5 CLI 4 用 Node 提供开发服务和静态构建；UI5 框架在浏览器运行。npm 管依赖，`ui5.yaml` 固定框架及库，manifest 描述浏览器应用。工具版本和框架版本不是同一件事。
+
+新版 C00 起点已提供 `adapters/openui5/` 的机械 MVC 壳：HTML bootstrap、Component、manifest、中英文文案与显示 formatter。Controller 还是空的，模型未接商品，只显示占位提示。C00 默认仍开原生卡片，到经典 UI5 课程才切换这个入口。下一课由你连接商品模型、View、Controller；共享桥把当前 `src/core` 构建成 UI5 模块，不复制第二份规则。
+
+### 从旧版工作区继续
+
+如果你已经从新版 C00 一路做到这里，继续当前目录即可。若你完成的是阶段 A 旧版，先保留整个旧目录，再把本发行版 C00 解压到一个**新的空目录**，不要用参考答案覆盖自己的源码。
+
+在新目录保留新版的 `tools/`、`package.json`、`package-lock.json` 和 `adapters/` 机械壳；把旧目录自己写的 `src/`、`notes/` 迁入相同位置。自己写过的测试、项目配置与 adapter 实现也逐项合并，未改过的机械壳保留新版；不要复制旧 node_modules。然后在新目录执行一次 `npm ci`，从这里继续学习。
+
+只有需要补前置课程时才恢复同发行版 C36 完成态；正常续做保留自己的代码，不下载完成态替代作业。
+
+## 常见错误与调试
+
+### 把 React 包装当成经典 UI5 的皮肤
+
+**现象**：决定保留 React，却计划把 JSX 的 props 改成 `{inventory>stock}`，并额外加 JSONModel。
+
+**工具**：打开编辑器里的组件 import，与第 2 节的三条入口对照；再沿 D2 图查看包装关系。
+
+**证据**：`@ui5/webcomponents-react` 指向 Web Components，图上的包装线也没有连接经典 MVC。
+
+**原因**：以相似外观推断相同的数据连接机制。
+
+**修复**：notes 中改成“React 保留原状态与事件；经典 UI5 使用 Model 与 XML 绑定”，并明确本次是学习哪一条路线。
+
+**确认**：能把 SAPUI5、OpenUI5、原生组件、React 包装四个名字分别归类；说明更换库不会替你完成业务校验。
+
+## 练习
+
+<a id="练习-1描述字段还是修改数据"></a>
+<a id="练习-2修复绑定更新"></a>
+<a id="练习-3为两个需求选技术路线"></a>
+
+:::tip[自己尝试 · Node]
+1. 继续当前 `inventory/`，按第 4 节新建 `notes/ui5-choice.md`。
+2. 给“已有 SAPUI5 且依赖额外库”和“保留 React 状态”两种需求各写一条保留项、一条要核对的条件。
+3. 在工作区运行 `npm run lab -- check C39`，检查笔记契约。
+
+预期：四种名称没有混淆；没有为了概览再安装四个工程。运行练习接着 C40 做。
+:::
+
+<details>
+<summary>提示</summary>
+
+先看现有工程和目标库，再决定运行机制；Fiori 的任务与交互要求可以跨路线保留。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+已有经典工程保留 View、Controller、模型，核对目标版本是否交付所需库及许可。React 工程保留状态、路由与 core，通过 Web Components 或其 React 包装替换界面；无需引入 JSONModel。
+
+</details>
+
+## 项目进度
+
+- 选择记录保存在 `notes/ui5-choice.md`，与 C37 的组件契约一起保留。
+- React 主应用、Ant Design adapter 和共享规则均未替换。
+- 暂停时记录“路线已定；下一步连接 OpenUI5 MVC 壳”。
+
+## 小结
+
+- Fiori 描述设计；四种 UI5 名称描述不同交付与接口。
+- 经典 UI5 由 Model API 通知绑定；Web Components 走元素属性与事件。
+- UI5 CLI 是 Node 工具，浏览器框架与业务后端各有职责。
+
+自测：React 包装底层是谁？为什么不能只换 SAPUI5 的加载地址？JSONModel 与普通对象相比多了什么？页面刷新与服务器持久化为什么不是同一个能力？
+
+## 延伸阅读
+
+- [SAP Fiori 设计系统](https://www.sap.com/design-system/fiori-design-web/)
+- [SAPUI5 与 OpenUI5](https://ui5.github.io/docs/02_Read-Me-First/sapui5-vs-openui5-5982a97.html)
+- [UI5 MVC](https://ui5.github.io/docs/04_Essentials/model-view-controller-mvc-91f2334.html)
+- [UI5 Web Components](https://ui5.github.io/webcomponents/docs/)
+- [UI5 Web Components for React](https://ui5.github.io/webcomponents-react/)
+- [UI5 CLI](https://ui5.github.io/cli/v4/pages/GettingStarted/)

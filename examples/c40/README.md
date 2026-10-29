@@ -1,9 +1,23 @@
 # C40 OpenUI5 入门：MVC 与工程 · 示例
 
+## 连续 Lab · 阶段 B（2026.10-v2.4）
+
+- 主线为 `inventory/adapters/openui5/`，只改manifest、Inventory View/Controller；机械壳权威源在新版C00并同步inventory镜像，不再注入C36 step。目标 `2026.10-v2.4`，C39 → C40。
+- 旧A目录完整保留；以新版C00的tools/清单/锁/adapters为壳，迁入自己的src/notes/测试与配置后npm ci；补课才恢复新版C36。空Controller和未接商品的壳到C40才启动。
+- 工作区执行 `npm run lab -- check C40`：85条、六件完整固定数据、P002=0、共享规则按钮6/52通过，已接入实际UI5检查。
+- 2026-10-29 · Node 24.22.0/npm 11.19.1 · UI5 CLI 4.0.71/OpenUI5 1.153.0 · macOS arm64：新增 workspace-paths.js；根目录固定输出 `npm run examples -- c40` 3/3。
+- `node tools/openui5-fault-check.mjs`：实际 Controller 依赖改为 ruless 后404、列表创建失败；独立干净页面恢复 rules 后共同向量通过。只拦截测试响应，不改学员源码。
+- 本课单独完成态的 `node tools/openui5-static-check.mjs C40` 已实测构建、主题/字体/语言资源和严格子路径；只有六件与统计6/52，没有筛选、编辑或路由答案。
+- 最终真实C38→C39→C40逐课补验通过；从C40组装C41的完整C03/C23/C41 walkthrough也通过。主agent以公开C40下载包为起点，独立完成后续四课；见 [B记录](../../labs/records/B.md)。
+- 未运行：跨浏览器、Windows、真实SAP、手动点选DevTools。阶段门禁与发布见B记录。
+
+## 第一版参考（保留）
+
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
 | module-paths.js | `node module-paths.js` | 资源映射与子路径 URL |
 | prediction.js | `node prediction.js` | 行对象、模型根与大小写 |
+| workspace-paths.js | `node workspace-paths.js` | 新工作区严格子路径预测 |
 | engineering.test.js、vitest.config.js | 见下 | 真实 UI5 工程与绑定的浏览器回归 |
 | ../inventory/06-openui5 | 本地 UI5 | 本课完整工程、独立 package.json/lock 与 ui5.yaml |
 

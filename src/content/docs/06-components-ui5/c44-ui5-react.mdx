@@ -1,0 +1,203 @@
+---
+title: C44 UI5 Web Components for React
+description: 在同一库存工作区连接 UI5 React 列表与小表单，让按钮和回车都沿原生提交链只保存一次。
+sidebar:
+  order: 44
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+
+> **第 4 周 · 第 22 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C25、C26、C32、C36、C38、C43 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+同样编辑 P004，原生组件、Ant Design 和 OpenUI5 都遵守一条业务规则：草稿可以取消，保存才改正式库存。本课把这条规则接到 UI5 React，只做筛选列表与库存编辑，不重写完整 CRUD。
+
+最重要的连接是：输入框读出文本，公共 core 校验，原生 form 产生 submit，repository 保存。点击保存、在库存框按 Enter、聚焦保存按钮后按 Enter，都必须只确认一次。
+
+<LessonTask lessonId="C44" />
+
+接 C43 自己的完成态，仍在 `inventory/`。C36 的 `src/react/` 主应用和 `src/core/`、`src/services/` 全部保留；本课新增的适配器与另外三种界面并列。下面先完成两个文件再启动服务，避免编辑到一半时导入尚不存在的文件。
+
+## Java 程序员先看这里
+
+包装库像 adapter：把调用入口换成 React 组件与回调，底层仍是真正的自定义元素。它不把 UI5 事件变成 Ant Design 的参数，也不会接管业务校验。Java 布局容器和提交动作各有职责；这里大写 `Form` 排版，小写 `form` 提交，名称相似但不是同一组件。
+
+<a id="1-包装库提供-react-接口业务仍由你管理"></a>
+
+## 1. 先看已有入口，不另开工程
+
+本发行版从 C00 就带有 `adapters/ui5-react/index.html`、`main.jsx`、`styles.css`、`Settings.jsx`，以及只显示标题的 `App.jsx`。它们负责 HTML 入口、资源、双列布局和主题设置；**没有列表映射、编辑草稿或保存逻辑**，也不会在切到 C44 时自动复制答案。本课替换 App，并新建同目录的 `ProductEditor.jsx`。旧版工程先按 [L4 的升级说明](/js_web/labs/l4/)迁入自己的代码，再继续本课。
+
+`index.html` 在加载组件前就配置初始语言，并关闭默认字体 CDN：
+
+<CodeExcerpt snippetId="c44-bootstrap-config" />
+
+结果：组件第一次初始化就读取中文配置，不必在组件导入后再异步切语言。HTML 随后加载 `main.jsx`，它导入 App 并挂到 root。阅读已有的入口，不必重写：
+
+<CodeExcerpt snippetId="c44-bootstrap" />
+
+结果：内置组件文案先按中文准备，保存图标已注册。`ThemeProvider` 为包装层提供基础设施，`Assets.js` 注册主题和翻译的动态加载入口，单个图标仍需显式导入。`FontFace.css` 让 Vite 把本地 npm 包中的字体一起打包；这是实验性样式入口，升级依赖时要重新核对路径，不能只关 CDN 却不提供字体。
+
+工作区锁已包含 React 19 与 UI5 React 2，继续使用既有安装。React 19 本身也支持自定义元素；包装库的增量是 React 风格 props、命名 slot 的 JSX 入口、类型提示和组合组件，并不是运行 OpenUI5 MVC 的另一种皮肤。
+
+<a id="4-列表编辑区与汇总共用一份业务-state"></a>
+
+## 2. repository 管正式数据，组件只保留读取结果
+
+清空 `adapters/ui5-react/App.jsx`，先写下面的导入、组件声明和初始化。**本段暂不闭合函数，下一段紧接在 Effect 后面**。App 创建独立的内存 repository，刷新恢复六件固定商品，不读取 C36 主应用的个人快照。
+
+<CodeExcerpt snippetId="c44-app-state" />
+
+结果：`repository.list()` 返回六件商品供显示。`products` 是读取后的界面投影；写入只走 repository，不另写 `setProducts` 直接改库存的旁路。Effect 的清理标记避免卸载后还接收异步读取结果。
+
+接在上段后面，加入筛选、汇总、关闭和保存函数，仍保持 App 函数打开：
+
+<CodeExcerpt snippetId="c44-app-save" />
+
+结果：保存成功后重新读取正式数据，确认次数增加，再关闭编辑器并归还焦点。repository 的 `save` 会继续校验；拒绝时不会改列表。`finally` 恢复列表和筛选的可交互状态，具体错误由编辑器显示。
+
+**先猜一猜：** 筛选框只留下 P004 时，summary.stock 是 3 还是 52？是 **52**。列表从 visible 读取，汇总从全部 products 读取；把有限列表当全部库存，才会得到错误的 3。这和 Java 对一个分页 List 做求和不能代表数据库总库存一样。
+
+<a id="2-事件名变顺手了取值仍按控件契约"></a>
+<a id="list-的-target-是谁"></a>
+
+## 3. 列表传业务 id，事件按当前控件取值
+
+继续在 App 的 save 函数后加入列表变量，再加入下一段 return。List 的 `onItemClick` 收到事件对象，被激活的行在 `event.detail.item`，不是回调的第一个参数直接就是商品。
+
+<CodeExcerpt snippetId="c44-app-list" />
+
+结果：输入 P004 后只显示扩展坞；激活这一行，selectedId 得到 P004。`key` 给 React 识别行，`data-product-id` 给 DOM 事件查业务 id；筛选后的第一项不是原数组第零项。
+
+接上 return，最后一个大括号闭合 App：
+
+<CodeExcerpt snippetId="c44-app-view" />
+
+结果：宽屏左右排列，窄屏上下排列；编辑器用选中 id 找商品，并用 key 划分编辑会话。取消后再次打开会从正式商品重新生成草稿。保存期间列表 inert、筛选禁用，避免切走正在提交的商品。
+
+<a id="输入选择和勾选分别读取"></a>
+
+这里的筛选 Input 用 `event.target.value`，值仍是字符串。List 用 `detail.item`；如果扩展为 Select，则按它自己的 `detail.selectedOption` 契约读取，不能套用另一个库的 `(value) => ...` 签名。Java 监听器也要先读事件类型与载荷，而不是只看方法名相同。
+
+<a id="3-form-排版草稿和校验决定能否保存"></a>
+<a id="文本入口继续复用-c03-的规则"></a>
+
+## 4. 一个原生提交入口，文本校验后才保存
+
+新建 `adapters/ui5-react/ProductEditor.jsx`。下面三段**按顺序拼成完整文件**：导入和草稿状态 → submit → return；不用再补任何 import 或调用。库存之外的名称、分类、价格与 tags 都从 toDraft 保留。
+
+<CodeExcerpt snippetId="c44-editor-state" />
+
+结果：打开 P004 时 draft.stock 是字符串 `"3"`，焦点进入库存。改成 `"8"` 只更新草稿；取消就是丢弃这个编辑会话，repository 中仍为 3。
+
+**先猜一猜：** 把草稿库存改为 `""`、`"0"`，再交给 parseDraft，会分别怎样？空白返回错误，0 返回合法数字。直接 `Number("")` 会得到 0，因此要保留文本边界，不能先转换再校验。
+
+紧接状态后加入 submit。这里直接复用公共 `parseDraft`，不再实现 UI5 专用校验器：
+
+<CodeExcerpt snippetId="c44-editor-submit" />
+
+结果：非法输入显示原因并把焦点留在库存；合法输入调用父组件的 save。同步 ref 在第一次异步等待前上锁，pending 则负责显示和禁用；两次 submit 即使落在相邻时刻，也只有一次进入 onSave。失败时保留草稿、显示错误并解锁，随后可以重试。
+
+<a id="保留原生提交边界"></a>
+
+最后加入 return 并闭合组件：
+
+<CodeExcerpt snippetId="c44-editor-fields" />
+
+结果：Elements 中的祖先是 **HTML form → ui5-form → ui5-form-item → ui5-input**。外层接 `onSubmit`，内层 Form 只排版。`Label for` 与 Input id 连接，错误同时用文字、valueState 和描述关联呈现。
+
+Input 的 `onInput` 每次输入都读取当前元素的 value，再用函数式更新保留其他草稿字段。UI5 Input 的 `onChange` 是完成输入时的事件，不是 Ant Design InputNumber 直接给数字的回调。
+
+当前锁定的组件支持原生表单：库存 Input 按 Enter 会请求关联 HTML form 提交，`Button type="Submit"` 激活时也走同一条链。**保存按钮不再绑定 onClick 保存，Input 也不加 onKeyDown 保存**。取消按钮显式用 `type="Button"`，不会误提交；`noValidate` 让本课统一展示 core 的业务错误，`preventDefault` 阻止页面导航。
+
+现在按任务卡启动：停止之前的 adapter 服务，执行 start C44 和 dev，打开终端地址。初始应显示六种商品、总库存 52、总价值 2634800 分。
+
+<a id="5-组合布局与资源仍要一起交付"></a>
+<a id="从基础控件走到页面结构"></a>
+<a id="themeprovider配置与-assets-各有职责"></a>
+
+## 5. L4 换的是界面，交付边界保持不变
+
+四种适配器共用 core，React 适配器共用 C32 的 repository。经典 UI5 用 JSONModel.setProperty 通知绑定，React 包装层用 props 与 state 重新渲染；把 `inventory>/draft/stock` 塞进 Input.value，只会显示那串文本，不会建立 XML 绑定。
+
+已有 `Settings.jsx` 的两个下拉框分别调用 `await setTheme("sap_horizon_dark")` 与 `await setLanguage("en")`。它等待资源配置完成后再启用控件；页面 CSS 使用 SAP 主题变量，所以外部页面与 Shadow DOM 控件能一起变深。组件语言改变内置文案，业务标题仍由应用提供。
+
+:::tip[自己尝试 · 本地 React]
+1. 筛选 P004，用 Tab 进入列表项、按 Enter 打开；输入 8，用 Tab 到取消、按 Enter。预期仍为 3 / 52，确认次数为 0。
+2. 再次打开，输入 8，先点击保存；刷新恢复固定数据，再分别用库存框 Enter、保存按钮 Enter 保存。每次独立操作都是 P004=8、P001=12、总库存 57、确认次数 1；价格与标签不丢。
+3. 从新页面尝试空白和 -1：报错、正式值不变；改为 0 可保存，总库存为 49。清空筛选恢复六项。
+4. Network 勾选 Disable cache 后刷新，再切深色与 English。主题、中文翻译、动态 JS 和 woff2 应成功加载，全部请求都在当前应用子路径，没有字体 CDN；展开筛选 Input 的 Shadow DOM，清除图标的 accessible-name 变为 Clear，业务标题仍是中文。
+:::
+
+## 常见错误与调试
+
+<a id="保存按钮可以按却没有进入提交函数"></a>
+
+**现象**：按钮能按，但扩展坞一直是 3，总库存一直是 52。故意把 ProductEditor 的外层原生 form 换成布局 Form，会得到这个错误结构：
+
+```jsx
+// 有问题的写法：布局容器不能替代原生提交容器
+<Form onSubmit={submit}>
+  <FormItem labelContent={<Label>库存</Label>}>
+    <Input value={draft.stock} />
+  </FormItem>
+  <Button type="Submit">保存库存</Button>
+</Form>
+```
+
+**工具**：Sources 打开 `adapters/ui5-react/ProductEditor.jsx`，在 submit 第一行行号上单击设断点；点击保存，再到 Elements 查看 ui5-input 祖先。
+
+**证据**：断点未命中，HTML form 不存在；type 为 Submit 的 UI5 按钮没有原生表单可提交。**原因**：大写 Form 不提供原生提交 API，写一个 onSubmit prop 不会凭空产生事件。
+
+**修复**：恢复外层 `<form ... onSubmit={submit}>` 和对应结束标签，内部 Form 仍然排版。**确认**：用同样的 8，点击和两种 Enter 路径各从固定数据重放，断点命中一次、确认次数为 1、总库存为 57；空白仍不能保存。
+
+工作区 `npm run lab -- check C44` 检查当前实际源码，浏览器回归覆盖提交连接。只有 parseDraft 的纯函数测试通过，还不能证明真实按钮、Shadow DOM 和表单接好了。
+
+## 练习
+
+<a id="练习-1解释四行输出"></a>
+<a id="练习-2修好提交容器"></a>
+<a id="练习-3追踪草稿和标签"></a>
+
+完成本课两个文件，修复上面的提交容器错误，然后用相同 P004 场景收尾 [L4](/js_web/labs/l4/)。记录取消、鼠标保存、两种 Enter、非法输入与 0 的实际结果；确认列表始终按 id 更新，而不是按可见索引更新。
+
+<details>
+<summary>提示</summary>
+
+先证明 submit 有没有执行，再看 parseDraft 的输入。提交未发生时不要先改校验器。确认次数只在 repository.save 和重新读取成功后增加；保存按钮不该再有第二个写入口。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+取消只销毁文本草稿，所以仍为 3 / 52。保存把库存文本 8 解析为数字，repository 只替换 P004，全量库存增加 5，得到 57。名称、分类、priceCents 与 tags 由完整草稿保留；空白和负数在 parseDraft 停止，0 合法。外层 HTML form 承接所有提交，ref 锁保护异步期间的重复事件，pending 负责界面反馈。
+
+</details>
+
+## 项目进度
+
+- 四个 adapter 完成同一个小范围 P004 场景，C36 React 主应用与公共规则保留，后续交付回到主应用。
+- 本界面以固定数据独立运行：取消仍 3 / 52，保存 8 得 57，0 得 49；主题和组件语言资源随静态产物交付。
+- 在 `notes/next.md` 写下当前课、两个改动文件、失败/修复证据与下一步。暂停后继续自己的工程；恢复仅向新目录写入。
+
+## 小结
+
+- 包装组件改变 React 调用入口，不改变底层元素的事件与资源契约。
+- 草稿保留文本，core 校验转换，repository 是唯一正式写入口。
+- Form 排版，form 提交；按钮与 Enter 只汇合到一个 submit。
+- 全量汇总和筛选列表的输入范围要分清，更新始终按 id。
+
+自测：Input 与 List 分别从哪里取值？为什么不能先 Number 再校验空白？哪个元素产生 submit？为什么需要同步 ref 锁？组件改为英文后业务标题为何不变？下一课把资源、状态与存储串成一次交付排错。
+
+## 延伸阅读
+
+- [UI5 React：组件与事件文档](https://ui5.github.io/webcomponents-react/v2/)
+- [UI5 Web Components：Form 的布局职责](https://ui5.github.io/webcomponents/components/Form/)
+- [UI5 Web Components：Button 的提交类型](https://ui5.github.io/webcomponents/components/Button/)
+- [UI5 Web Components：主题和翻译资源](https://ui5.github.io/webcomponents/docs/advanced/using-assets/)
+- [MDN：form.requestSubmit](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/requestSubmit)
+- [UI5 Web Components：关闭默认字体并本地打包](https://ui5.github.io/webcomponents/docs/advanced/fonts/)

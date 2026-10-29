@@ -14,7 +14,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 先读示例、亲手运行，再做预测与排错练习。每课包含 Java 对照和操作说明，库存管理项目贯穿全程。
 
-V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 37 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。
+V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 44 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。
 
 ## 第 1 周：历史、语言、结构与浏览器
 
@@ -71,14 +71,14 @@ V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 37 课接
 
 | 主线学习日 | 课程 | 状态 |
 | --- | --- | --- |
-| 第 19 天 | [C37 组件生态与选择标准](../06-components-ui5/c37-component-ecosystem-selection/) | 已发布<span data-lesson-status="C37" hidden></span> |
-| 第 19 天 | [C38 一个普通组件库的完整案例](../06-components-ui5/c38-antd-inventory/) | 已发布<span data-lesson-status="C38" hidden></span> |
-| 第 20 天 | [C39 SAP Fiori 与 UI5 家族](../06-components-ui5/c39-fiori-ui5-family/) | 已发布<span data-lesson-status="C39" hidden></span> |
-| 第 20 天 | [C40 OpenUI5 入门：MVC 与工程](../06-components-ui5/c40-openui5-mvc-project/) | 已发布<span data-lesson-status="C40" hidden></span> |
-| 第 21 天 | [C41 UI5 Model、绑定与业务控件](../06-components-ui5/c41-model-binding-controls/) | 已接工作区（前置试做）<span data-lesson-status="C41" hidden></span> |
-| 第 21 天 | [C42 UI5 路由与 OData 起点](../06-components-ui5/c42-routing-odata/) | 已发布<span data-lesson-status="C42" hidden></span> |
-| 第 22 天 | [C43 UI5 Web Components 原生使用](../06-components-ui5/c43-native-web-components/) | 已发布<span data-lesson-status="C43" hidden></span> |
-| 第 22 天 | [C44 UI5 Web Components for React](../06-components-ui5/c44-ui5-react/) | 已发布<span data-lesson-status="C44" hidden></span> |
+| 第 19 天 | [C37 组件生态与选择标准](../06-components-ui5/c37-component-ecosystem-selection/) | 已接工作区<span data-lesson-status="C37" hidden></span> |
+| 第 19 天 | [C38 一个普通组件库的完整案例](../06-components-ui5/c38-antd-inventory/) | 已接工作区<span data-lesson-status="C38" hidden></span> |
+| 第 20 天 | [C39 SAP Fiori 与 UI5 家族](../06-components-ui5/c39-fiori-ui5-family/) | 已接工作区<span data-lesson-status="C39" hidden></span> |
+| 第 20 天 | [C40 OpenUI5 入门：MVC 与工程](../06-components-ui5/c40-openui5-mvc-project/) | 已接工作区<span data-lesson-status="C40" hidden></span> |
+| 第 21 天 | [C41 UI5 Model、绑定与业务控件](../06-components-ui5/c41-model-binding-controls/) | 已接工作区<span data-lesson-status="C41" hidden></span> |
+| 第 21 天 | [C42 UI5 路由与 OData 起点](../06-components-ui5/c42-routing-odata/) | 已接工作区<span data-lesson-status="C42" hidden></span> |
+| 第 22 天 | [C43 UI5 Web Components 原生使用](../06-components-ui5/c43-native-web-components/) | 已接工作区<span data-lesson-status="C43" hidden></span> |
+| 第 22 天 | [C44 UI5 Web Components for React](../06-components-ui5/c44-ui5-react/) | 已接工作区<span data-lesson-status="C44" hidden></span> |
 | 第 23 天 | [C45 全链路 Debug 与交付前检查](../07-project/c45-debug-delivery-checks/) | 已发布<span data-lesson-status="C45" hidden></span> |
 | 第 23 天 | [C46 静态构建与 GitHub Pages](../07-project/c46-static-build-pages/) | 已发布<span data-lesson-status="C46" hidden></span> |
 | 第 24 天 | [C47 综合项目与测试选择](../07-project/c47-project-testing-strategy/) | 已发布<span data-lesson-status="C47" hidden></span> |

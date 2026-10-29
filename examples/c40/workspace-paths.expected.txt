@@ -1,0 +1,1 @@
+/js_web/demos/inventory-openui5/resources/sap-ui-core.js

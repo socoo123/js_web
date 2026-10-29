@@ -1,10 +1,24 @@
 # C37 组件生态与选择标准 · 示例
 
-配套正文：[C37](../../src/content/docs/06-components-ui5/c37-component-ecosystem-selection.md)。复用固定商品数据；不安装候选组件库、不增加依赖或 D2，不改阶段 4。
+配套正文：[C37](../../src/content/docs/06-components-ui5/c37-component-ecosystem-selection.mdx)。当前主线接真实 C36，在同一个库存工作区写 `notes/components.md` 和 `adapters/antd/select-product.js`；不安装候选库，不改 React 主应用。
+
+## 当前 L4 主线（2026.10-v2.4）
+
+- 起点/参考：本发行版 C36 → C37；正式下载状态以 [L4](../../src/content/docs/labs/l4.mdx) 和阶段 B 记录为准。新版 C00 已提供闲置 AntD 机械外壳，权威源 labs/reference/c00/adapters/antd，与 labs/inventory/adapters/antd 逐字相同；不修改 C36 step。
+- 旧 A 学员保留旧目录，在新版 C00 新目录保留新工具/adapters/清单和锁，迁入自己的 src/notes/tests/vite.config.js 并合并 report/test scripts，再 npm ci；不迁 node_modules，也不换教师完成态。
+- 在库存工作区运行 `npm run lab -- start C37`、`npm run lab -- check C37`；检查读取实际选择器和 notes，不注入故障、不改数据。
+- `contract-predictions.js` 复用 C37 选择器与固定数据；仓库根 `npm run examples -- c37` 自动核对它和保留的三份历史输出。
+- 2026-10-29 · macOS arm64 · Node 24.22.0/npm 11.19.1：固定输出4/4；真实C36→C37接续检查85条及身份/notes要点通过。新版C00自然继承机械外壳，catalog/check已集成。
+- 本次主错误：实际选择器按 index 时 Node 检查与真实浏览器均红（P002 误选 P001）；Node inspector 在 return 行采样 rowId=P002/index=0/firstId=P001/pickedId=P001；改回 id 后同命令绿。
+- Chromium156.0.8078.4：真实C38与最终C44验证排序/筛选身份，C44保留的React原入口10组浏览器通过；正文片段组装与选择器逐字一致。阶段门禁与发布见 [B记录](../../labs/records/B.md)。
+- 未运行：手动点击Node DevTools UI、屏幕阅读器、Firefox/Safari、Windows、其他候选组件库。
+
+## 第一版参考（保留旧实验与发布事实，不是当前连续主线）
 
 | 文件 | 运行 | 结果 |
 | --- | --- | --- |
 | row-identity.js | `node row-identity.js` | 排序首行 P002，错误按位置选 P001，正确按 id 选 P002 |
+| contract-predictions.js | `node contract-predictions.js` | 当前 C37 选择器、文本价格与数字金额顺序 |
 | price-sort.js | `node price-sort.js` | 文本顺序与金额顺序不同；整数分保留 number |
 | acceptance.js | `node acceptance.js` | 鼠标库存改 3 后总库存 55、总价值 2673500 分；原数据 0 |
 | select-product.js / select-product-broken.js | 被实验引入 | 正确选择器与故意保留的位置错误 |

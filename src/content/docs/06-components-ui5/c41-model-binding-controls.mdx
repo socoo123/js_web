@@ -10,13 +10,13 @@ import CodeExcerpt from '../../../components/CodeExcerpt.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 4 周 · 第 21 天** · 阅读跟做约 45 分钟 · 实作约 45 分钟<br />
-> 前置：OpenUI5 Component、XML View、JSONModel 与共享库存规则 · 运行：本地 UI5 · 示例已运行验证
+> 前置：C40 完成态的六商品列表与共享规则桥 · 运行：本地 UI5 · 示例已运行验证
 
 ## 这一课解决什么问题
 
 六商品表格已经能加载。现在完成同一个编辑场景：筛选 P004，打开草稿，把库存 3 改成 8；取消时仍是 3，保存时只修改 P004。筛选后它位于可见第一行，却仍对应数据中的第四件商品，不能用行号猜身份。
 
-本课起点已提供共享纯函数构建桥与中英文资源。你只修改当前工作区里的 View、Controller 和编辑 Fragment，库存规则继续来自 `src/core/`。
+继续当前 `inventory/` 的 C40 完成态，不更换工程。共享纯函数构建桥、中英文资源和 formatter 继续使用已提供的版本。你只改 `adapters/openui5/webapp/` 内的 View、Controller，新增编辑 Fragment；`manifest.json` 与 Component 保持 C40 的配置，库存规则继续来自 `src/core/`。
 
 <LessonTask lessonId="C41" />
 
@@ -36,7 +36,7 @@ import LessonTask from '../../../components/LessonTask.astro';
 
 答案是 `/products/3`。筛选改变绑定的可见结果，没有重排原始数组。这个路径属于模型内的数据位置，商品 id P004 才是跨界面与路由的业务身份。
 
-用下面内容替换 View 中的 Table，保留外层 mvc:View、Page/content。下一节会在同一个 content 里加 VBox，包住工具栏和 Table。
+在 `view/Inventory.view.xml` 中，保留外层 mvc:View、Page/content/VBox，删除 C40 的“计算全量库存”Button 和 message Text，用下面内容替换原 Table。下一节的工具栏放在同一个 VBox 内、Table 前面。
 
 <CodeExcerpt snippetId="c41-table" />
 
@@ -48,7 +48,7 @@ Java 集合中的索引也会因筛选投影而失去原有含义；UI5 额外�
 
 ## 2. 筛选和可见汇总共用绑定结果
 
-在 Page 的 content 内用 `<VBox class="sapUiSmallMargin">` 包住下面的工具栏与 Table，并在 Table 后关闭 `</VBox>`。mvc:View 还要声明 `xmlns:core="sap.ui.core"`，供语言选项使用。
+在已有 VBox 内、Table 前插入下面的工具栏。mvc:View 的开始标签还要增加 `xmlns:core="sap.ui.core"`，供语言选项使用；保留已有 `xmlns:mvc` 和默认 `xmlns="sap.m"`。
 
 <CodeExcerpt snippetId="c41-toolbar" />
 
@@ -62,7 +62,9 @@ Table 更新后，从可见行拿实际商品并复用汇总规则：
 
 <CodeExcerpt snippetId="c41-summary" />
 
-初始显示 6 件商品、总库存 52、价值 26348.00 元；筛选 P004 显示 1 件商品、库存 3、价值 897.00 元；空结果各项为 0。这里统计口径是“当前可见结果”，不是远程服务全量。Java 的 Stream filter 后求和也是同一口径。
+JSON 是异步加载的，Table 可能先产生一次空更新。开头先判断完整数组是否已就绪；真正的空结果则在数据就绪后继续按空数组统计为 0。这里是加载时序检查，不是另写一套商品校验。
+
+初始显示 6 件商品、可见库存 52、价值 26348.00 元；筛选 P004 显示 1 件、可见库存 3、价值 897.00 元。空结果的可见统计是 0。单独一行的“全量总库存”始终从 inventory 的完整数组计算，筛选后仍是 52，保存 P004=8 后是 57。Java Stream 的 filter 后求和与原集合求和也有两个口径。
 
 <a id="3-筛选绑定汇总当前可见结果"></a>
 
@@ -80,11 +82,11 @@ Table 更新后，从可见行拿实际商品并复用汇总规则：
 
 `rules.toDraft` 创建独立的 tags 数组，并把库存与元价格转成表单文本。正式 Model 不参与草稿绑定，取消时只关闭 Dialog。Java 的编辑 DTO 也需要独立生命周期；持有同一个可变对象就不能获得取消隔离。
 
-新建 `view/EditDialog.fragment.xml`：
+新建 `view/EditDialog.fragment.xml`，完整内容如下；`loadFragment` 会将它加入当前 View 的依赖，并按本 View 的 ID 前缀查找里面的控件：
 
 <CodeExcerpt snippetId="c41-dialog" />
 
-Label 与控件关联，错误时显示 Error 状态。`valueLiveUpdate` 让输入文本进入草稿；库存 0 的文本是 `"0"`，空字符串继续保留为空，留给共享校验判断。
+Label 与控件关联，错误时显示 Error 状态与对应说明。`valueLiveUpdate` 让输入文本进入草稿；库存 0 的文本是 `"0"`，空字符串继续保留为空，留给共享校验判断。库存 Input 的 submit 也接 onSave，可按 Enter 保存；Cancel 按钮或 Escape 只关闭弹窗。
 
 <a id="5-i18n界面文案也来自模型"></a>
 
@@ -96,7 +98,7 @@ Java/UI5 对照卡右侧的 `onSave` 先执行 `rules.parseDraft`。名称、库
 
 ### 把处理函数接到同一个 Controller
 
-在 `controller/Inventory.controller.js` 中，用下面开头引入所需模块，并打开 Controller 的方法对象。之后按顺序放入 onFilter、onUpdateFinished、onEdit、对照卡中的 onSave。
+把 `controller/Inventory.controller.js` 原内容全部替换：先放下面的开头，它引入 JSONModel、筛选模块、共享 rules、formatter 并打开方法对象；接着按顺序放入前面的 onFilter、onUpdateFinished、onEdit，以及 Java/UI5 对照卡右侧完整的 onSave。删除 C40 的 onSummarize，不保留旧 define 外壳。
 
 <CodeExcerpt snippetId="c41-header" />
 
@@ -106,13 +108,19 @@ Java/UI5 对照卡右侧的 `onSave` 先执行 `rules.parseDraft`。名称、库
 
 `rules.js` 由启动命令从当前 core 构建为 `sap.ui.define` 模块，生成文件无需手改。XML/Controller 使用经典 UI5 加载器，不能直接粘入 ESM import。更改 core 后重新启动 dev/build，桥接会重新生成；相同向量同时检查两端行为。
 
+### i18n 的键也是模型路径
+
+manifest 已用 ResourceModel 注册命名模型 i18n，并声明默认资源 `i18n/i18n.properties` 和英文资源 `i18n/i18n_en.properties`。工具栏、表格与 Fragment 通过 `{i18n>save}` 等键读取文案；Controller 异步取 ResourceBundle，保存成功后用 `getText("saved")` 提示。
+
+例如把两份资源的 `save` 分别改成“确认保存”与“Confirm save”，重启后两种语言的按钮会相应变化；做完恢复原文，以便继续练习。中文使用默认资源，supportedLocales 只列默认与 en，避免浏览器额外请求不存在的区域文件。
+
 切换语言会重新加载并恢复固定初始商品。这个阶段没有服务器保存。Java 的模型通知经验能帮助理解更新入口，模块加载和 XML 绑定则是这里的新机制。
 
 ## 常见错误与调试
 
 ### 筛选后保存错了商品
 
-**现象**：筛选 P004 后编辑可见第一行，保存 8，P004 仍是 3，P001 却变了。
+**现象**：筛选 P004 后编辑可见第一行，保存 8，原 P004 仍是 3，原来 P001 的位置却被 P004 草稿覆盖。汇总还可能报告重复 id。
 
 **工具**：Sources 找到当前 Controller，在 onEdit 的 `this._editPath = context.getPath()` 设断点。输入 P004 并搜索，点编辑；在暂停的 Console 分别读取 `context.getPath()`、`context.getProperty("id")`。
 
@@ -131,10 +139,10 @@ Java/UI5 对照卡右侧的 `onSave` 先执行 `rules.parseDraft`。名称、库
 :::tip[自己尝试 · 本地 UI5]
 1. 在当前工作区按正文修改 View、Controller，新增 Fragment；中英文资源和共享桥使用起点提供的版本。
 2. 从同一工作区运行任务卡的 start/dev，打开终端明确打印的 `http://127.0.0.1:8060/index.html`。
-3. 筛选 P004。先故意把 `_editPath` 设成 `/products/0`，用 Sources 记录真实 context；随后恢复 `context.getPath()`。
+3. 筛选 P004。先故意把 `_editPath` 设成 `/products/0`，用 Sources 记录真实 context；随后恢复 `context.getPath()`，刷新回固定数据。
 4. 完成取消、空白拒绝、保存 8、清空筛选四步，再运行 `npm run lab -- check C41`。
 
-预期：P004 的修改不影响 P001，取消不污染正式数据；切换 English 后商品、按钮与汇总标签有对应文字。
+预期：取消后 P004=3/全量52；保存后 P004=8、P001=12/全量57；清空筛选恢复六件。空白和负数拒绝，0 可保存。用键盘打开、输入、取消、保存；切换 English 后按钮与标签变为英文，商品名称仍来自固定数据。
 :::
 
 <details>

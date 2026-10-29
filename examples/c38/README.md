@@ -1,5 +1,21 @@
 # C38 一个普通组件库的完整案例 · 示例
 
+正文：[C38](../../src/content/docs/06-components-ui5/c38-antd-inventory.mdx)。本次主线是同一工作区 `adapters/antd/`，下表旧文件/05-antd 工程仅保留作参考，不要求学员切换工程。
+
+## 当前 L4 主线（2026.10-v2.4）
+
+- C37 → C38；目标文件 App.jsx、ProductTable.jsx、ProductEditor.jsx。从真实 C36 的 core/repository 接续，storage:null 独立固定数据，React 主应用不改。
+- 库存工作区命令：`npm run lab -- start C38`、`npm run lab -- dev`、`npm run lab -- check C38`、`npm run lab -- build`。新版C00已提供机械外壳，C37/C38核心答案只在steps；catalog/check已集成，下载以阶段发行记录为准。
+- 旧 A 目录保留，从新版 C00 新目录迁入自己的 src/notes/tests/vite.config.js，沿用新版工具/adapters/清单/锁并合并已学脚本，再 npm ci；不把教师参考解覆盖到自己源码上。
+- 2026-10-29 · macOS arm64 · Node 24.22.0/npm 11.19.1，独立 npm ci：沿用 antd 6.6.6/React 19.3.1、Vitest 5.0.5、Playwright 1.64.1。固定输出 3/3；当前仓库/core 4 条 Vitest 通过。
+- Chromium 156.0.8078.4：8 场景通过：排序身份、连续会话、P004取消3/52/保存8/57/字段不丢失、空白/负数/0、空态与主题/焦点、保存失败重试/重复Enter保护、读取失败重试、严格静态子路径。
+- 静态：`/js_web/demos/inventory-antd/` 无 SPA fallback，刷新、模块/CSS、P004保存通过；未知页和根级 assets 确认404。CLI正式构建单入口约948kB，有体积提示，未改阈值。
+- 红绿：真实 App 保留 editor、Modal不销毁/Form preserve=true 时，P001改8取消→P002的DOM为8；组件props=P002/0、initialValues=0已采样；恢复会话销毁后同一生命周期检查通过。
+- 真实C36→C37→C38与最终C44补验：85通用断言、4条Vitest、8组浏览器/静态通过；29个src文件保持C36原字节。前期公开片段组装单独记录，不算主agent独立读者验收；见 [B记录](../../labs/records/B.md)。
+- 未运行：手动React DevTools扩展UI、屏幕阅读器、Firefox/Safari、Windows。阶段门禁与发布见B记录。
+
+## 第一版参考（以下验证为历史，不移作本次证据）
+
 | 文件/目录 | 运行 | 说明 |
 | --- | --- | --- |
 | table-contract.js | `node table-contract.js` | 排序后记录身份、数字排序与显示文本 |

@@ -1,5 +1,19 @@
 # C42 UI5 路由与 OData 起点 · 示例
 
+## 连续 Lab · 阶段 B（2026.10-v2.4）
+
+- 主线在同一 `inventory/adapters/openui5/` 接 C41，目标 `2026.10-v2.4`。全部文件与导入/替换/调用顺序在正文；V2入口改为本adapter的 `probe/odata.html`，不跳旧demo。
+- 新版C00已有机械壳、默认原生入口不变；旧A保留目录，从新版C00取工具/清单/锁/adapters并迁入自己的src/notes及已写文件，补课才用新版C36；本课继续已完成的C41代码。
+- 2026-10-29 · Node 24.22.0/npm 11.19.1 · UI5 CLI 4.0.71/OpenUI5 1.153.0/Playwright 1.64.1 Chromium：根固定输出3/3。
+- `node tools/openui5-routing-check.mjs`：筛选P004后hash/详情、复制刷新、返回、浏览器后退前进、P002=0、P999与未知地址通过。
+- `node tools/openui5-static-check.mjs` 实际 ui5 build --all 后在 `/js_web/demos/inventory-openui5/` 严格同源服务器通过：无SPA fallback；域名根resources与伪history路径404；主题/字体/i18n、metadata.xml、生成Products.json均可用。
+- V2真实模型：$metadata、Products('P002')=0、未知键404；范围过滤/排序得到P0065/P0043，skip1/top1得到P0043；页面记录模拟请求URL，8/3明确为本页小计。英文资源被Component-preload打包，界面英文切换与独立资源HTTP200均验证。
+- `openui5-fault-check.mjs` 两组红绿：可见索引变成products/0导致详情未找到；Products错成products导致读取404。恢复id/实体集大小写后全套通过。只拦截浏览器响应，不改学员文件。
+- 首轮局部夹具结果后，已补真实C38→C42逐课链与最终C44：86条、详情/有限V2通过；37个运行输入与最终C44一致，真实C42严格静态通过。
+- 主agent从公开C40起点独立完成C41后，仅按C42正文修改10文件；86条/静态通过，路由索引故障CDP取证后修复。详见 [B记录](../../labs/records/B.md)。未运行：真实SAP鉴权/写入、V4/CAP、跨浏览器/Windows/屏幕阅读器。
+
+## 第一版参考（保留）
+
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
 | route-identity.js | `node route-identity.js` | 可见索引、数组位置与业务编号 |

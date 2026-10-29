@@ -1,33 +1,41 @@
-# C43 UI5 Web Components 原生使用 · 示例
+# C43 UI5 Web Components 原生使用 · 验证入口
 
-| 文件 | 运行 | 说明 |
-| --- | --- | --- |
-| restock-cases.js | `node restock-cases.js` | 售罄、非法文本、原对象与库存上限 |
-| event-contract.js | `node event-contract.js` | EventTarget、事件原名和 detail |
-| prediction.js | `node prediction.js` | 练习 1 |
-| registered-console.js | 原生实验页 Console | 自定义元素注册 |
-| attributes-console.js | 同上 | 布尔 attribute 与 property |
-| shadow-console.js | 同上 | light DOM 与 shadow tree 查询边界 |
-| parts.css | Elements → Styles | 宿主、普通后代选择器与公开 part |
-| lab/ | 本地网页 | 原生补货页、主题/语言与 React 19 对照 |
-| restock.test.js / webcomponents.test.js | 见下 | 2 条业务回归、5 条浏览器回归 |
+主线在同一 `inventory/adapters/web-components/`，从C42接续，参考解为C43。发行版 `2026.10-v2.4` 的主验收与实际发布状态见 [阶段B](../../labs/records/B.md)。
+
+| 文件/目录 | 用途 |
+| --- | --- |
+| `labs/reference/steps/C43/files/` | 三个目标文件；正文受控片段同源，不另复制业务实现 |
+| `labs/reference/c00/adapters/web-components/` | 新版 C00 已含的休眠机械外壳权威源；不含本课表单答案 |
+| `labs/inventory/adapters/web-components/` | 仓库 C00 工作区镜像，与权威源逐字一致 |
+| `labs/reference/steps/C43/prelude/manifest.json` | 外壳清单，指向 C00；不再向 C36 注入文件 |
+| `labs/inventory/tools/web-components-check.mjs` | 实际工作区浏览器检查；开发/严格静态两种模式 |
+| `verify-lab.mjs` | 本地隔离验证；默认显式 C36+本课夹具，非完整课程链 |
+| `lab/`、其他原有 JS/CSS/测试 | 历史独立补货案例，保留链接；见 [旧验证记录](legacy-validation.md) |
 
 ## 运行
 
-- 本目录执行 Node 命令；仓库根执行 `npm run examples -- c43`，核对三个 `.expected.txt`。
-- lab 目录执行 `npm ci`、`npm run dev`，打开 `http://127.0.0.1:8043/`；react.html 仅对照原生属性与事件，没有 React 包装库。
-- lab 执行 `npm run build`、`npm run preview`，打开 `http://127.0.0.1:8143/`；交付整个 dist。base 为 ./，可以把完整产物挂到 /js_web/native/ 静态目录。
-- 仓库根执行 `node examples/inventory/04-react/node_modules/vitest/vitest.mjs run --config examples/c43/vitest.config.js`；复用阶段 4 已锁工具，缺失时在阶段 4 npm ci。
-- 使用独立 headless Chrome，不操作现有窗口。设置 C43_BASE_URL 可改入口；例如 `C43_BASE_URL=http://127.0.0.1:8343/js_web/native/` 后执行同一测试命令。
-- 反例：回归命令前加 `C43_BROKEN_EVENT=1`，末尾加 `-t '注册、固定数据'`，预期预览更新失败。只拦截开发源码，把监听名改成 ui5Input，不修改文件。
+- 学员在工作区按正文执行 `npm run lab -- start C43`、`npm run lab -- dev`、`npm run lab -- check C43`。工具接线与新起点已集成。
+- 新版 C00 从第一课就带着按课启用的 adapters。阶段 A 旧版用户保留旧目录，按 L4 升级说明把新版 C00 解压到新目录，取得新版工具/adapters，再将自己的 src/notes 复制过去；保留新版 package/lock/tools/adapters，不用 C00 的 src 覆盖 React 成果。
+- 作者在仓库根执行 `node examples/c43/verify-lab.mjs --c00`：验证 C00 默认原生页未加载未来组件；同时核对六个外壳文件及镜像。
+- `node examples/c43/verify-lab.mjs --starter`：真实 C36 已自然继承新版 C00 的机械外壳，确认没有预装 UI5 表单；脚本不额外注入外壳。
+- `node examples/c43/verify-lab.mjs`：C36+C43 答案的局部夹具，明确缺少 C37–C42，不记作连续跟做完成。
+- `LAB_BASE=/js_web/demos/web-components/ node examples/c43/verify-lab.mjs --static`：生产构建、无 fallback 服务器、子路径浏览器检查。
+- 最终接续补验用 `LAB_C43_WORKSPACE=/绝对/真实C43目录 node examples/c43/verify-lab.mjs [--static]`；不组装、不覆盖指定目录源码。
+- 实际工作区也能直接运行 `node tools/web-components-check.mjs [--static]`；`--only=cancel/save/boundaries/properties-slots/resources` 只跑对应场景。默认随机空闲端口，`LAB_C43_PORT` 可指定。
+- 根目录 `npm run examples -- c43` 继续核对原有三个固定输出例子；不能代替本课表单检查。
 
-## 验证记录
+## 2026-10-29 本路实际验证
 
-- 2026-10-19 · macOS arm64 · Node 24.22.0/npm 11.7.0：固定输出 3/3；lab 精确锁 UI5 Web Components/base/icons 2.27.2、Vite 8.3.4、React/ReactDOM 19.3.1，npm ci 与静态构建通过。根依赖、锁、站点配置、D2 和阶段 6 未改。
-- Chrome 155.0.8059.82 headless · Vitest 5.0.5/Playwright 1.64.1：开发 7/7、静态 /js_web/native/ 7/7。页面异常、Console error、HTTP 错误和失败资源均纳入正常回归。
-- 原生页初始 6 件/库存 52/26348.00 元；P002 输入 3 后库存 3、汇总 55/26735.00 元；刷新恢复。空白、3.8、3件、负数、0 与超上限禁止提交，恢复合法输入后键盘 Tab/Enter 补货成功。
-- 三个 Console 文件实际执行：注册 true/true；布尔 true true→false→boolean；Shadow 查询 heading/null/true。slot 节点仍归页面，错误 slot 不分配；改回后按正文刷新，标题恢复。运行中改成无效 slot 后，UI5 会忽略该 slot，故恢复步骤明确要求刷新。
-- 公开 input part 字间距 2px 生效，普通后代选择器未使内部输入变红；深色变量由 #f5f6f7 变为 #12171c，中文翻译及 parameters-bundle 资源请求成功；语言切 en 后图标可访问名称清除→Clear，业务标题仍为中文。
-- React 19 对照页：真实 ui5-input 事件更新 state/文字，value property 与 disabled 布尔传递正确。事件错误名反例先失败，正常命令恢复通过。
-- 网站 lint 43 课零 error；check 零诊断；全量固定输出 283/283；build 49 页与 /js_web/ 产物检查通过。课程生产页 HTTP 200、6 个折叠区展开、资源/异常、禁用 JS 阅读与实验页 360px 无溢出通过；[Pages run 39180665049](https://github.com/socoo123/js_web/actions/runs/39180665049) 成功；线上课程和路线均 HTTP 200，标题、6 个折叠区、43/48 与 C43 链接正确。
-- 未运行：DevTools 界面手动点选、屏幕阅读器、Firefox、Safari、Windows；真实 SAP 服务与后端持久化。
+- macOS arm64，Node 24.22.0，Chromium 156.0.8078.4 headless，Playwright 1.64.1，Vite 8.3.4；UI5 Web Components/base 2.27.2，theming-base-content 11.36.4。未重新 npm ci，未改依赖源码；浏览器工具的 Vite 缓存在夹具 .lab 内。站点 check 的共享缓存例外见下。
+- 主审修订后 `--c00` 1/1：默认卡片 P001/12、补货待接通、6/52；没有 parseStock、UI5 注册或 adapter 请求，360px 无溢出。六文件权威源/镜像逐字一致。
+- 修订后 `--starter` 1/1：六件、52；点击编辑只有待接线提示，无 ui5-input 与库存表单答案，外壳从 C00 自然继承。
+- 开发 5/5、严格静态 `/js_web/demos/web-components/` 5/5：P004 改 8 取消仍3/52，保存8后8/57，P001仍12，名称/分类/价格/tags 全保留；清空筛选恢复六件。
+- 空白/空格/负数/小数/单位文本/超上限均禁用保存且显示错误；0 可保存，汇总49；刷新重置固定数据。键盘打开→输入→取消/保存、焦点返回、360px 无整页溢出通过。
+- 真实 UI5 事件、disabled 布尔属性、valueStateMessage 命名槽、Shadow DOM 查询与 CSS part 边界通过。深色参数、中文翻译与本地 woff2 成功；切 English 后清除图标为 Clear，保存仍中文。
+- 静态检查实际根/缺文件返回404；所有请求在部署子路径内、无外部 CDN、无资源/Console/pageerror。FontFace.css 打包本地字体，默认 CDN 字体关闭。
+- 首轮局部夹具接入共享 check 建议行后为85条core + 5组浏览器通过。修订后新夹具 `node tools/check.mjs C43` 85条通过，浏览器另由上述命令5/5；未当成真实C42接续。29个src文件及3个C43答案文件与首轮逐字节一致。
+- 主错误先红后绿：将实际 editor.js 的 property 赋值改成 `setAttribute("disabled", String(busy))`，`--only=save` 报 expected enabled / received disabled；恢复后1/1。将实际监听名改成 ui5Input，`--only=cancel` 报草稿预期8实为3；恢复后全部5/5。
+- `npm run examples -- c43` 首轮3/3；修订后 `npm run lint:lessons` 48课、0 error/0 warning，C43为6196字/13块（含任务卡与8个受控片段；本地共享元数据夹具）。
+- 首轮 `npm run check` 33文件、0诊断；本轮未再次运行。修订后 `node delivery/verify-anchors.mjs` 20个旧节锚点静态匹配。首轮Astro check 默认向依赖软链目标的 `.vite/.astro` 写了生成缓存；未编辑依赖源码，未删除/回滚共享缓存。最终站点门禁由主 agent 重建缓存后执行。
+- 真实v2.4接续补验：从主agent提供的C42副本只应用本课三文件，共享check85条+开发5/5、严格静态5/5；最终C44副本也实际85条+开发5/5、严格静态5/5。29个src文件未改，26个C43运行输入在两者哈希一致。无必要实现修复，见 [B记录](../../labs/records/B.md)（作者接续回归，非独立正文验收）。
+- 主agent公开C40→C41→C42后仅按本课正文完成三文件：85条、开发5/5、布尔attribute故障先红、修复后静态5/5通过；最终门禁/发行见B记录。未运行：DevTools手动点选与断点、屏幕阅读器、Firefox/Safari/Windows、真实SAP服务。

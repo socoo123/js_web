@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>有限 OData V2 读取</title><link rel="icon" href="data:,">
+  <script id="sap-ui-bootstrap" src="../resources/sap-ui-core.js"
+    data-sap-ui-async="true" data-sap-ui-language="zh-CN"
+    data-sap-ui-resource-roots='{"course.inventory":"../"}'
+    data-sap-ui-on-init="module:course/inventory/probe/odata"></script>
+</head><body>
+  <h1>有限 OData V2 读取</h1><p>独立固定数据；本页小计不是全量库存。</p>
+  <button id="query" disabled>有限查询</button><button id="next" disabled>跳过第一件</button>
+  <pre id="result" role="status">加载元数据……</pre><pre id="requests" aria-label="模拟请求"></pre>
+</body></html>

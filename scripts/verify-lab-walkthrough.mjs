@@ -65,7 +65,7 @@ try {
   await write(react, 'src/react/StockActions.jsx', stock.replace('setStock((previous) => add(previous, 3));', 'setStock(stock + 3);')); check(react, 'C23', false, /16 件/); await browserScene(react, 'C23', 'delay-broken');
   await write(react, 'src/react/StockActions.jsx', stock); check(react, 'C23'); await browserScene(react, 'C23');
 
-  const ui5 = path.join(parent, 'C41'); await materialize('P40', ui5);
+  const ui5 = path.join(parent, 'C41'); await materialize('C40', ui5);
   await symlink(path.join(repo, 'labs/inventory/node_modules'), path.join(ui5, 'node_modules'));
   check(ui5, 'C41', false, /EditDialog.fragment.xml 已创建/);
   const prefix = 'adapters/openui5/webapp/';
@@ -75,5 +75,5 @@ try {
   await write(ui5, prefix + 'view/EditDialog.fragment.xml', snippet('c41-dialog').code); check(ui5, 'C41');
   await write(ui5, prefix + 'controller/Inventory.controller.js', controller.replace('this._editPath = context.getPath()', 'this._editPath = "/products/0"')); check(ui5, 'C41', false, /P001 不变/);
   await write(ui5, prefix + 'controller/Inventory.controller.js', controller); check(ui5, 'C41');
-  console.log('C03/C23/C41：起点→公开片段自动组装→实际错误失败→修复后通过。C23 已接正式 C22；C41 仍为试做。此检查不替代主 agent 的独立读者验收。');
+  console.log('C03/C23/C41：起点→公开片段自动组装→实际错误失败→修复后通过。C23 已接正式 C22；C41 已接正式 C40。此检查不替代主 agent 的独立读者验收。');
 } finally { await rm(parent, { recursive: true, force: true }); }

@@ -1,0 +1,11 @@
+{
+  "description": "新版 C00 已含的休眠机械外壳清单：仅原生列表/筛选、空资源入口、空编辑连接；到 C43 才启动，不含 C43 表单答案。不需要改写 C36 step，旧冻结发行版不变。",
+  "sharedFiles": {
+    "adapters/web-components/index.html": "labs/reference/c00/adapters/web-components/index.html",
+    "adapters/web-components/main.js": "labs/reference/c00/adapters/web-components/main.js",
+    "adapters/web-components/shell.js": "labs/reference/c00/adapters/web-components/shell.js",
+    "adapters/web-components/style.css": "labs/reference/c00/adapters/web-components/style.css",
+    "adapters/web-components/components.js": "labs/reference/c00/adapters/web-components/components.js",
+    "adapters/web-components/editor.js": "labs/reference/c00/adapters/web-components/editor.js"
+  }
+}
