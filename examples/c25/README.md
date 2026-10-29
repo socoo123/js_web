@@ -1,45 +1,30 @@
 # C25 表单、校验与可访问性 · 示例
 
-配套正文：[C25](../../src/content/docs/05-react/c25-forms-validation-accessibility.md)。数据来自 shared/products.js，真实 React 表单在[阶段 4](../inventory/04-react/)。
-
-| 文件 | 运行 | 说明 |
-| --- | --- | --- |
-| value-boundary.js | node value-boundary.js | 空库存与明确输入 0 的区别 |
-| price-cents.js | node price-cents.js | 十进制价格转整数分，拒绝三位小数与单位 |
-| validate-draft.js | node validate-draft.js | 草稿转业务记录，旧商品保持原值 |
-| prediction.js | node prediction.js | FormData 字符串、字段存在与 null |
-| invalid-draft.js | node invalid-draft.js | 三项错误全部收集，禁止产出业务值 |
-| 阶段 4 src/product-form.js | 由组件/Node 导入 | 解析、精确单价格式化、草稿和字段校验 |
-| 阶段 4 src/ProductForm.jsx | dev / 生产首页 | 名称、分类、库存、单价与热销；错误说明和焦点 |
-| 阶段 4 tests/forms.test.jsx | npm test | 22 条正常回归：业务边界、输入、提交、取消、错误关联与焦点 |
-| 阶段 4 labs/forms-bugs.test.jsx | npm run test:bug -- labs/forms-bugs.test.jsx | 两项故意失败，修改各 Broken 文件后通过 |
+主线是自己的 `inventory/`，不是本目录或旧阶段演示。正文：[C25](../../src/content/docs/05-react/c25-forms-validation-accessibility.mdx)。本轮目标发行版 **2026.10-v2.3**：前置 C24、完成 C25；参考增量在 [steps/C25](../../labs/reference/steps/C25/)，发行入口见 [Lab](https://socoo123.github.io/js_web/labs/)。本轮冻结、主验收与发布证据统一写入 `labs/records/A.md`，局部通过不代表已发布。
 
 ## 运行
 
-- 仓库根目录：`npm run examples -- c25`，自动核对 5 个固定输出；在本目录也可执行各 node 命令。
-- 阶段 4：`npm ci`、`npm run dev -- --host 127.0.0.1`，打开终端的 /js_web/ 地址。
-- 在该地址后加 labs/forms.html?case=下表值。实验页只由 dev 服务提供，不进入生产构建。
-- 阶段 4 正常检查：`npm test`、`npm run build`、`npm run preview -- --host 127.0.0.1`。
+| 入口 | 工作目录与命令 | 用途 |
+| --- | --- | --- |
+| 当前工程 | `inventory/`：`npm run lab -- start C25`、`npm run lab -- dev` | 接 C24 加表单 |
+| 本课检查 | `inventory/`：`npm run lab -- check C25` | 检查真实工作文件 |
+| 专项组件检查 | `inventory/`：`node tools/forms-state-check.mjs C25` | 18 条本课/必要前置用例；后课用例跳过 |
+| 专项浏览器 | `inventory/`：`node tools/forms-state.browser.mjs C25` | 真实键盘、错误焦点、0 与取消 |
+| 旧固定输出 | 仓库根：`npm run examples -- c25` | 本目录五个 JS 参考例子，不是 Lab 实现 |
 
-| case | 操作与预期 |
-| --- | --- |
-| controlled | 名称改为键盘待盘点，再清空，输入值均保留 |
-| locked | 错误起点：输入新名称仍恢复机械键盘；setName 改存 event.target.value 后正常 |
-| uncontrolled | 修改名称后提交，结果含 string / true；取消热销再提交为 false |
-| native | 空、-1、1.5 阻止提交；0 用 Enter 提交成功 |
-| blank / blank-answer | 空库存错误保存为 0 / 正确提示库存无效，明确输入 0 可以保存 |
+旧固定输出文件为 value-boundary.js、price-cents.js、validate-draft.js、prediction.js、invalid-draft.js，继续使用原阶段纯函数。本轮没有再维护第二份业务源码；Lab 调用自己的 core.toDraft/parseDraft，返回值接口与旧 validateDraft 不同。
 
-## 验证记录
+## 本轮验证记录
 
-- 2026-10-17 · macOS arm64 · Node 24.22.0、npm 11.19.1；沿用 React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.3，没有修改任何依赖清单或锁文件。
-- 固定输出 5/5；阶段 4 正常回归 42/42。两项 bug 测试先分别报机械键盘未改变、空库存已保存为 0；按正文修改 LockedNameBroken 与 BlankStockBroken 后原测试 2/2 通过，最终恢复教学错误起点。
-- 独立后台 Chrome 155.0.8059.82：六个实验、原生缺失/范围/步长校验、真实文本输入、复选框空格切换与 Enter 提交均通过；未操作已有 Chrome 窗口。
-- 断点停在 LockedNameBroken 的 setter 前，name=机械键盘、event.target.value=键盘待盘点；记录由调试接口取得，另一个断点记录 stock=空字符串、Number(stock)=0；没有在 DevTools 界面手动逐项点击。
-- 首页按正文操作：P002 的纯空格名称/-1/129.999 显示三项错误、聚焦名称、总库存仍 52；改为无线鼠标/3/129.90/热销并 Enter 保存后为 55 件、26737.70 元，焦点在标题。
-- 取消不保存草稿，焦点回编辑按钮，再开读取已保存值；鼠标搜索中改名为办公指针，保存后空列表仍提示成功，标题保留焦点，清空搜索可见新名。P004 改分类为音频并取消热销后仍保留新品。
-- 刷新后全程用 Tab/Enter 打开 P001，焦点顺序为名称→分类→库存→单价→热销→保存→取消，Enter 保存后到标题。360/1280px 无横向溢出，所有文本与选择控件均有关联 label。
-- 边界回归包含 0/99999、空白/负数/小数/指数/越界库存，非法分类、超长名称、三位小数与超安全整数价格；接近安全上限的价格打开草稿再解析仍保持原整数分。
-- 阶段 4 npm ci、42 条正常回归、生产构建通过；网站 lint 25 课零 error/warning、check 零诊断、build 固定输出 222/222、30 个 HTML 与 25 课产物检查通过。正文 7704 字符、16 个代码块，全部来自示例源码，5 个具名片段逐字一致。
-- 生产预览编辑 P002 库存为 3 得到 55 件、26735.00 元；课程在禁用 JS 的 360/1280px 下可读、六个答案区可展开、16 段代码齐全；路线页为 25/48。
-- Pages：[run 39030596833](https://github.com/socoo123/js_web/actions/runs/39030596833) build/deploy 成功；C25 与路线页均 HTTP 200，课程标题、示例和项目结果已上线，路线为 25/48。
-- 未运行：屏幕阅读器朗读、Firefox、Safari、Windows。
+- 2026-10-29 · macOS arm64 · Node 24.22.0、npm 11.19.1；React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.4、RTL 16.3.3、Playwright 1.64.1、Chromium 156.0.8078.4。依赖软链接只读，未 install/ci；Vite 缓存落到隔离副本。
+- `npm run examples -- c25`：5/5 固定输出通过。它们只是旧示例兼容证据，不替代新表单检查。
+- 已从第1路最终 `handoff-C24`（2026.10-v2.3/C24，49文件只读复制）按正文连续组装 C25，两个文件与参考增量一致；正文 Console 数字/字符串、空白、0、0.29 与非法价格输出实际执行。是作者回归，不是独立读者抽验。
+- 实际上游最新组件检查18 passed/11后课skipped；原输入/焦点/取消/统计及3000ms前置队列通过，新增编辑与新建的全量汇总溢出行为回归也通过。C25原有同步预检作为不崩溃基准，源码未改。共享Lab仍由主agent集成后终验。
+- 独立后台 Chromium：Tab/Enter 打开 P002，空名称与空库存 Enter 拒绝并聚焦，键盘输入 0/0.29 后 Enter 保存，Tab 到取消后 Enter 不保存；360px 无横向溢出、无 pageerror。
+- 主错误：仅在临时 C25 工作区把原始库存先 Number 再转字符串；“拒绝空库存”回归失败（onSave 被调用），恢复原解析行后同命令通过。正式 steps 保留正确版本。
+- 最终真实衔接日志：第2路 `delivery/.validation/real-c24-20261029/`，包含输入hash、组件/浏览器/主错误红绿和各课组装源码；完整命令见 `delivery/agent-2.md` §7，入口 `walkthrough-agent-2.mjs`。上游49文件前后hash不变。
+- 必要返修：MDX静态LessonTask、含组件lint、80锚点及四页静态夹具输出已通过；真实C24连续作者回归和主错误红绿已补验。主集成16快照、全站门禁与发行见 [阶段 A](../../labs/records/A.md)。
+- 跨课溢出定点记录见 `delivery/agent-2-overflow.md`：C25基准2/2，C27/C28修复前2失败、修后2通过；只重跑新溢出浏览器路径。最新正文组装/组件日志 `delivery/.validation/overflow-walkthrough-20261029/`；此前整段浏览器仍为上轮记录。
+- 未运行：DevTools 界面手动点击、屏幕阅读器、Firefox、Safari、Windows；独立读者抽验范围及全站视觉/Pages由阶段 A 统一记录。
+
+旧版运行/发布记录保留在 [基线 README](https://github.com/socoo123/js_web/blob/93f81d29fef57e4bd86da38cc8f740e12b14775e/examples/c25/README.md)，不作为本轮新源码的验证记录。

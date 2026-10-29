@@ -1,6 +1,6 @@
 {
   "name": "inventory-learning-workspace",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -20,7 +20,8 @@
     "@ui5/webcomponents-react": "2.27.3",
     "antd": "6.6.6",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "react-router": "8.4.0"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
@@ -30,6 +31,8 @@
     "@testing-library/user-event": "14.6.8",
     "@ui5/cli": "4.0.71",
     "@vitejs/plugin-react": "6.1.2",
+    "eslint": "10.13.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "happy-dom": "21.0.4",
     "semver": "7.8.5",
     "typescript": "7.0.2",

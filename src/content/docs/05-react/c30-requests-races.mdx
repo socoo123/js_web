@@ -1,0 +1,230 @@
+---
+title: C30 请求状态与竞态调试
+description: 为同一库存页增加只读详情，取消旧请求并隔离晚成功、晚失败和旧 finally。
+sidebar:
+  order: 30
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 15 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟\
+> 前置：C29 的工作区 · 运行：本地 React、Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+先点机械键盘，再点无线鼠标。键盘的处理更慢，晚到的结果却可能盖掉鼠标。你还需要展示加载、失败、重试，并在关闭详情时结束这次请求。本课先手写一套清楚的生命周期，再考虑封装。
+
+<LessonTask lessonId="C30" />
+
+详情暂时读的是**固定静态数据**，列表仍读 reducer 中的本地修改。给列表 P001 补货后，详情仍可能显示起始的 12：两种来源在本课刻意分开。它们将在统一数据归属时接到同一仓库。
+
+## Java 程序员先看这里
+
+Java Future 的“请求取消”经验有用，但取消并不意味着所有已经开始的后续处理都会停止。浏览器用 AbortSignal 传递取消；组件还需要一个过期标记，决定这次完成是否仍有权更新界面。`await` 只暂停当前异步函数，不会创建线程。
+
+## 1. 先画清请求状态，再写 fetch
+
+用一个对象描述一次请求，不要分别维护可以互相矛盾的 loading、error、data。本课状态转换是 loading→success 或 loading→error；关闭详情后整个实例卸载，没有详情即不请求。
+
+在 `src/react/ProductDetail.jsx` 先写下列开头，后面还要接 Effect 和视图：
+
+```jsx
+import React, { useEffect, useState } from "react";
+import { getProduct } from "../services/product-api.js";
+export default function ProductDetail({ productId, fail = false, loadProduct = getProduct }) {
+  const [request, setRequest] = useState({ id: null, status: "loading" });
+  const [attempt, setAttempt] = useState(0);
+```
+
+`id` 标明结果归属，`attempt` 让同一商品也能重试。先完成后面的请求代码，组件才能运行。加载、成功、失败互斥，Java 的状态枚举配记录对象也可表达同样约束；React 需要每次写入一个新对象触发渲染。
+
+## 2. HTTP 返回了，不等于商品加载成功
+
+新建 `src/services/product-api.js`。先放一个可取消的处理延时，用来稳定观察顺序：
+
+```js
+function wait(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) { reject(new DOMException("已取消", "AbortError")); return; }
+    const abort = () => { clearTimeout(timer); reject(new DOMException("已取消", "AbortError")); };
+    const timer = setTimeout(() => { signal?.removeEventListener("abort", abort); resolve(); }, ms);
+    signal?.addEventListener("abort", abort, { once: true });
+  });
+}
+```
+
+接在同一文件后面：
+
+```js
+import { importProducts } from "../core/inventory.js";
+export async function getProduct(id, { signal, fail = false, delay = id === "P001" ? 300 : 30 } = {}) {
+  const response = await fetch(`${import.meta.env.BASE_URL}products.json?product=${encodeURIComponent(id)}`, { signal });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const products = importProducts(await response.text());
+  await wait(delay, signal);
+  if (fail) throw new Error("模拟读取失败");
+  const product = products.find((item) => item.id === id);
+  if (!product) throw new Error(`HTTP 404：商品 ${id} 不存在`);
+  return product;
+}
+```
+
+结果：P001 的处理至少等待 300 毫秒，P002 等待 30 毫秒；P002 库存仍为合法的 0。文件由已有 Lab 启动器复制到公共资源目录，`BASE_URL` 保留构建子路径。不要写死 `/products.json`。
+
+fetch 收到 404 仍会兑现 Response，所以先检查 `ok`；JSON 解析与字段校验也可能抛错。此处所有商品共享一个静态文件，未知 ID 的“HTTP 404”是读取后抛出的应用错误，不是 Network 中该文件的状态码。人工延时在 JSON 读取后，Network 的 Timing 不包含这段 JS 处理；用 Sources 断点观察后续阶段。
+
+## 3. 后发先到：旧结果为什么覆盖新选择
+
+**先猜一猜：** P001 已开始，随后 P002 开始；如果两者都直接 setRequest，谁最后显示？
+
+不是“最后点击的”决定，而是“最后完成的”决定。P001 晚到会盖掉 P002。只在渲染时比较 ID 还不够：旧状态虽被挡住，却可能让正确结果消失、重新显示 loading。
+
+把下面代码接在 `ProductDetail` 的两个 state 后：
+
+```jsx
+  useEffect(() => {
+    const controller = new AbortController();
+    let ignore = false;
+    setRequest({ id: productId, status: "loading" });
+    async function load() {
+      try {
+        const product = await loadProduct(productId, { signal: controller.signal, fail });
+        if (!ignore) setRequest({ id: productId, status: "success", product });
+      } catch (error) {
+        if (!ignore && error.name !== "AbortError")
+          setRequest({ id: productId, status: "error", error: error.message });
+      }
+    }
+    load();
+    return () => { ignore = true; controller.abort(); };
+  }, [productId, fail, attempt, loadProduct]);
+```
+
+每次 setup 都有自己的 controller 和 ignore。切到 P002，P001 cleanup 把自己的 ignore 改为 true；无论旧请求成功还是失败，都没有更新资格。返回 P001 又是新的一次请求，不能拿“ID 恰好相同”替代这层实例隔离。
+
+## 4. abort 释放资源，旧结果还要单独拦住
+
+AbortController 通知 fetch 和 wait 尽量停止；ignore 决定 UI 写入权限。两者职责不同。测试可以故意让加载器**忽略 signal**，晚到结果仍必须被拦截。真实系统中的 JSON 转换、第三方 Promise 也未必支持取消。
+
+接上视图并关闭组件函数：
+
+```jsx
+  const visible = request.id === productId ? request : { status: "loading" };
+  return <section aria-label="商品详情">
+    {visible.status === "loading" && <p role="status">正在加载 {productId}</p>}
+    {visible.status === "error" && <p role="alert">{visible.error}</p>}
+    {visible.status === "success" && <p>{visible.product.id} {visible.product.name}：库存 {visible.product.stock}</p>}
+    <button onClick={() => setAttempt((previous) => previous + 1)}>重试详情</button>
+  </section>;
+}
+```
+
+结果：切换那一轮渲染先显示新 ID 的 loading，不短暂展示旧商品；Effect 的 success/error 也只由当前请求提交。AbortError 不作为业务失败展示。关闭详情使 ignore 失效，并取消当前 signal。Java 中的取消标记也需要在提交结果前检查；不是只在开始时检查一次。
+
+## 5. 每次 Effect 独立拥有一次请求
+
+在 `App.jsx` 导入 `ProductDetail`；在 `InventoryView` 的其他 state 旁增加：
+
+```jsx
+import ProductDetail from "./ProductDetail.jsx";
+// 以下两行在 InventoryView 内：
+const [detailId, setDetailId] = useState(null);
+const [failRead, setFailRead] = useState(false);
+```
+
+App 的编辑和补货部分不动：保留 heading/trigger ref、带 tabIndex 的标题、保存前可见性判断、取消的箭头回调以及已有两秒计时器。也保留 core 的 validateProducts 导入与 saveProduct 中构造 next、validateProducts(next)、summarize(next) 的同步预检，不用详情示例覆盖整个保存函数。详情请求的 300/30 毫秒只是本课服务里的处理延时，和补货计时器无关。
+
+在 `ProductList` 的 `renderActions` 片段里，紧接 `StockActions` 增加详情按钮；其余三行放在 `ProductList` 后、编辑表单前：
+
+```jsx
+<button onClick={() => setDetailId(product.id)}>详情 {product.id}</button>
+
+<label><input type="checkbox" checked={failRead} onChange={(event) => setFailRead(event.target.checked)} />模拟读取失败</label>
+<button onClick={() => setDetailId(null)}>关闭详情</button>
+{detailId && <ProductDetail productId={detailId} fail={failRead} />}
+```
+
+首次不显示详情。点 P001 再点 P002，组件在同一位置保留，productId 变化使旧 Effect 交接；点关闭则卸载。重试让 attempt 加一，用新 controller，不复用已经 abort 的 signal。
+
+<a id="练习-1两份-ignore-会不会相互影响" />
+
+**先猜一猜：** P001→P002→P001 三轮，第一轮 P001 最后才回来，能覆盖第三轮吗？
+
+不能。第一轮的 ignore 已是 true，第三轮有自己的 false。只用一个模块级变量会让组件实例或前后轮次互相干扰；把 controller 或 ignore 放进 Effect 的词法作用域，就有明确的所有权。
+
+## 6. finally 也属于旧请求
+
+<a id="请求还没回来加载提示已经消失" />
+
+下面是需要避免的额外 loading 写入：
+
+```js
+// 有问题的写法：旧请求无条件结束当前loading
+finally {
+  setLoading(false);
+}
+```
+
+P001 结束并不代表 P002 也结束了。成功、失败有守卫，finally 却没有，旧请求仍能破坏新界面。本课直接用 success/error 终结 loading，**没有另一个 setLoading，也不需要 finally**。若另一种实现必须在 finally 写请求状态，同样先检查这轮是否过期。
+
+finally 适合释放当前函数自己拥有的资源，例如文件输入清空；它不是绕过请求归属的特权位置。Java 的 try/finally 保证运行，不保证被写入的对象仍属于这次工作。
+
+## 常见错误与调试
+
+<a id="下拉框选了-p002详情却变回-p001" />
+
+1. **现象**：模拟不支持取消的后续处理：在 product-api.js 把 `await wait(delay, signal)` 改为 `await wait(delay)`，再在 ProductDetail 删除成功分支的 `if (!ignore)`。点 P001，等 Network 中它的文件读取完成、尚在处理延时，再点 P002，鼠标结果会被晚到的旧写入清空。
+2. **工具**：Chrome → Network 保留记录，看 `products.json?product=...`；Sources 在 await 后的 setRequest 行设断点。人工处理延迟看 Sources，不拿 GET 完成时间代替它。
+3. **证据**：晚执行的闭包里 productId=P001、ignore=true，而页面当前选择已是 P002。可在 React DevTools → Components 查看 ProductDetail 的 productId。
+4. **原因**：已经结束的同步仍在写共享的请求 state。abort 只是取消协作，无法替代结果守卫。
+5. **修复**：先恢复成功和失败分支的守卫，确认即使处理不支持取消也安全；再把 wait 的 signal 参数接回以释放资源。保留 cleanup 和完整依赖，不增加无守卫的 finally。
+6. **确认**：重复切换始终显示 P002；勾选失败出现错误，保持勾选时重试仍会失败；取消勾选会重新请求并恢复。运行 `npm run lab -- check C30`，受控 Promise 回归也应通过。
+
+`tools/request-check.test.jsx` 不是等待固定秒数碰运气：它先拿到两轮 Promise 的 resolve/reject，再指定完成顺序。还会在新请求仍 pending 时完成旧请求，确认 loading 不被旧成功或旧 finally 关掉；卸载后再成功/失败也不应改变 UI。
+
+## 练习
+
+<a id="练习-2让取消和重试都能恢复" />
+<a id="练习-3让失败重试真的成功" />
+
+:::tip[自己尝试 · 本地 React]
+完成三个文件，按 P001→P002 快速切换；勾选失败后重试，再取消勾选恢复。加载 P001 时关闭详情，随后重新打开 P002。演练缺成功守卫的故障并修复，最后运行本课检查和 lint。
+
+预期：当前结果的 ID 一致；失败可读，取消不报业务错误；关闭后的晚结果不影响重新打开的详情。
+:::
+
+<details>
+<summary>提示</summary>
+
+把每轮请求当作一个独立的小会话：开始时建立 controller，结束时先撤销 UI 写入资格，再通知取消。测试“旧结果最后回来”和“旧结果回来时新请求还没完成”是两种情况。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+state 对象同时保存 ID 和 status；每轮 Effect 内新建 ignore/controller；成功和失败都检查 ignore，取消不进入业务错误。视图用 ID 守卫切换帧，不另设需要 finally 同步的 loading。重试只增加 attempt。
+
+</details>
+
+## 项目进度
+
+- 同一页已有加载、成功、失败、重试与关闭详情。
+- P001 慢/P002 快、旧失败、同 ID 的前后两轮和卸载均隔离。
+- 列表仍由 reducer 管，详情读静态初始数据；在 `notes/next.md` 记录这个边界和 C30 完成状态。
+
+## 小结
+
+- Response 成功兑现不等于 HTTP、JSON 和业务数据都有效。
+- abort 尽量停止工作，过期守卫决定谁可以提交结果。
+- 请求的成功、失败和收尾写入都要有归属。
+- 受控 Promise 比固定等待更适合验证竞态。
+
+自测：已取消的 signal 为什么不能复用？只按 ID 检查为何挡不住第一轮 P001？为什么本实现没有 finally？
+
+## 延伸阅读
+
+- [React：在 Effect 中读取数据](https://react.dev/reference/react/useEffect#fetching-data-with-effects)
+- [React：同步与清理](https://react.dev/learn/synchronizing-with-effects)
+- [MDN：AbortController](https://developer.mozilla.org/zh-CN/docs/Web/API/AbortController)
+- [MDN：Fetch](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch)

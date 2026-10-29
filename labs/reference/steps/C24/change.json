@@ -1,0 +1,9 @@
+{
+  "previous": "C23",
+  "files": [
+    "src/core/collections.js",
+    "src/react/App.jsx",
+    "src/react/ProductList.jsx",
+    "src/react/StockActions.jsx"
+  ]
+}

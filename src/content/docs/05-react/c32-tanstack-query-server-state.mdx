@@ -1,0 +1,393 @@
+---
+title: C32 认识 TanStack Query 与服务端状态
+description: 把商品和持久化交给仓库，Query 管列表与详情缓存，移除重复 state 和手工请求。
+sidebar:
+  order: 32
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 16 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟\
+> 前置：C31 的工作区 · 运行：本地 React、Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+列表改了 P004，详情还显示起始库存；多个详情又各自请求同一数据。现在做一次明确的归属迁移：**repository 持有可写商品并负责持久化，Query 管读取缓存，组件只保留草稿和 UI state**。保存后列表、详情和统计一起更新，不再同步两份商品 state。
+
+<LessonTask lessonId="C32" />
+
+本课新建仓库和 query-options，替换 Provider 与详情视图，再修改 App 的异步事件。最后删除当前工程中的旧请求 Hook、reducer 和 product-api；前课快照仍保留它们。已有锁和依赖包含 TanStack Query，无需另装。完整导入、拼接与删除位置都在下面的步骤中。
+
+## Java 程序员先看这里
+
+queryKey 有点像 Map 的键，但 Query 还管理请求去重、新鲜度、订阅者、失效、重试和回收。它不是把一个 HashMap 换成 Hook。仓库像业务边界，缓存是它的读模型；修改必须走仓库，而不是让 UI 同时 setProducts 和写仓库。
+
+这里使用浏览器内的 mock repository，数据落在本地存储，没有真实后端或跨用户同步。学的是服务端状态的读取/写入边界，静态 Pages 也能运行这个模型。
+
+## 1. 手工 Hook 已经解决什么，还缺什么
+
+C30–C31 的 Hook 已处理过期、取消和错误。它没有共享缓存；两次调用各自拥有状态，也不会自动让列表跟着详情修改。现在用 Query 接管这些读取，把已学过的请求生命周期留在历史课中。
+
+新建 `src/services/inventory-repository.js`，接下来的五块按顺序拼成**一个文件**。先建立懒读取和查找边界：
+
+```js
+import initialProducts from "../../data/products.json" with { type: "json" };
+import { restockProduct } from "../core/inventory.js";
+import { readProducts, saveProducts, recoverProducts, encodeSnapshot, decodeSnapshot } from "./storage.js";
+export const reactStorageKey = "js_web:inventory:react:v2";
+export function createInventoryRepository({ storage, seed = initialProducts, delay = 80 } = {}) {
+  let products;
+  const failures = new Set();
+  const store = () => storage === undefined ? globalThis.localStorage : storage;
+  function current() {
+    if (products === undefined) products = (store() && readProducts(store(), reactStorageKey)) ?? decodeSnapshot(encodeSnapshot(seed));
+    return products;
+  }
+  function find(id) {
+    const product = current().find((item) => item.id === id);
+    if (!product) throw new Error(`HTTP 404：商品 ${id} 不存在`);
+    return product;
+  }
+```
+
+不在模块导入或 React render 时读写存储。第一次读取才初始化；坏快照抛错而不自动覆盖。测试可传入独立 storage；`storage: null` 只用内存。继续接上延时与提交函数：
+
+```js
+  async function before(operation, options = {}) {
+    const { signal } = options;
+    await new Promise((resolve, reject) => {
+      if (signal?.aborted) { reject(new DOMException("已取消", "AbortError")); return; }
+      const abort = () => { clearTimeout(timer); reject(new DOMException("已取消", "AbortError")); };
+      const timer = setTimeout(() => { signal?.removeEventListener("abort", abort); resolve(); }, options.delay ?? delay);
+      signal?.addEventListener("abort", abort, { once: true });
+    });
+    if (options.fail || failures.delete(operation)) throw new Error(`模拟 ${operation} 失败`);
+  }
+  function commit(next) {
+    const checked = decodeSnapshot(encodeSnapshot(next));
+    if (store()) saveProducts(store(), checked, reactStorageKey);
+    products = checked;
+  }
+```
+
+先校验并持久化成功，才替换仓库内存。容量不足或字段错误都不应让 UI 看见已提交的假结果。每轮等待结束后再读 current，连续补三次会在最新库存上累加。一次提交中没有 await 插在读改写中间；这是本地 mock 的串行边界，不是分布式事务。
+
+接上读取和保存方法：
+
+```js
+  return {
+    failNext(operation) { failures.add(operation); },
+    async list(options) { await before("list", options); return structuredClone(current()); },
+    async get(id, options) { await before("get", options); return structuredClone(find(id)); },
+    async save(product, options) {
+      const value = structuredClone(product);
+      await before("save", options); find(value.id);
+      commit(current().map((item) => item.id === value.id ? value : item));
+      return structuredClone(find(value.id));
+    },
+    async create(product, options) {
+      const value = structuredClone(product);
+      await before("create", options);
+      commit([...current(), value]);
+      return structuredClone(find(value.id));
+    },
+```
+
+接上删除与补货：
+
+```js
+    async remove(id, options) {
+      await before("remove", options); const removed = structuredClone(find(id));
+      commit(current().filter((item) => item.id !== id)); return removed;
+    },
+    async restock(id, amount, options) {
+      await before("restock", options);
+      const value = restockProduct(find(id), String(amount));
+      commit(current().map((item) => item.id === id ? value : item));
+      return structuredClone(find(id));
+    },
+```
+
+最后接快照方法、关闭工厂并导出默认单例：
+
+```js
+    async saveSnapshot() { commit(current()); return structuredClone(current()); },
+    async recover() {
+      if (!store()) throw new Error("没有本地存储");
+      products = recoverProducts(store(), reactStorageKey); return structuredClone(products);
+    },
+    async importText(text) { commit(decodeSnapshot(text)); return structuredClone(current()); },
+    async exportText() { return encodeSnapshot(current()); },
+  };
+}
+export const repository = createInventoryRepository();
+```
+
+所有业务方法都返回 Promise。list 是数组，get/save/create/restock 是商品，remove 返回被删商品；返回值都是独立副本。saveSnapshot/recover/importText 返回数组，exportText 返回 JSON 文本。与 C31 不同，现在每次业务写入都由仓库持久化，“保存本地快照”是额外的显式备份动作，组件不再直写存储。
+
+## 2. 用一个稳定的 QueryClient 连接组件
+
+先新建 `src/react/query-options.js`，把键和读取规则集中在一起：
+
+```js
+export const inventoryKeys = {
+  all: ["inventory"],
+  list: () => ["inventory", "list"],
+  detail: (id) => ["inventory", "detail", id],
+};
+export function listOptions(repository) {
+  return { queryKey: inventoryKeys.list(), queryFn: ({ signal }) => repository.list({ signal }), staleTime: 60000, retry: false };
+}
+export function detailOptions(repository, id, options = {}) {
+  return {
+    queryKey: inventoryKeys.detail(id),
+    queryFn: ({ signal }) => repository.get(id, { ...options, signal }),
+    staleTime: 60000, retry: false,
+  };
+}
+```
+
+替换 `InventoryProvider.jsx`。本文件由下面四块相接，旧 useReducer、useInventorySnapshot 和 reducer 导入全部删除：
+
+```jsx
+import React, { createContext, useContext, useState } from "react";
+import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { repository as defaultRepository } from "../services/inventory-repository.js";
+import { encodeSnapshot } from "../services/storage.js";
+import { inventoryKeys, listOptions } from "./query-options.js";
+const InventoryContext = createContext(null);
+export function InventoryProvider({ children, repository = defaultRepository, client }) {
+  const [queryClient] = useState(() => client ?? new QueryClient());
+  return <QueryClientProvider client={queryClient}>
+    <InventoryState repository={repository}>{children}</InventoryState>
+  </QueryClientProvider>;
+}
+```
+
+QueryClient 在一个挂载的 Provider 中保持稳定；不要每次渲染都 new。测试可以传独立 client/repository，避免用例串缓存和存储。Provider 在 Router 外的位置保持不变。
+
+## 3. query key 和缓存：先问“是不是同一份数据”
+
+**先猜一猜：** 刚读过 P001，再读取 P002，能复用 P001 的缓存结果吗？
+
+不能。两份数据的 key 分别是 `['inventory','detail','P001']` 与 `['inventory','detail','P002']`。Query 按可序列化内容确定身份，不要求数组是同一个 JS 对象；查询函数中影响数据的变量必须进入 key。Java 用业务 ID 当缓存键的经验在这里仍适用，React key 和 queryKey 却是两套不同的身份系统。
+
+替换 `ProductDetail.jsx`，不再导入或运行旧请求 Hook：
+
+```jsx
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useInventory } from "./InventoryProvider.jsx";
+import { detailOptions } from "./query-options.js";
+export default function ProductDetail({ productId }) {
+  const { repository } = useInventory();
+  const detail = useQuery(detailOptions(repository, productId));
+  return <section aria-label="商品详情">
+    {detail.isPending && <p role="status">正在加载 {productId}</p>}
+    {detail.isFetching && !detail.isPending && <p role="status">正在后台更新</p>}
+    {detail.isError && <p role="alert">{detail.error.message}</p>}
+    {detail.data && <p>{detail.data.id} {detail.data.name}：库存 {detail.data.stock}</p>}
+    <button onClick={() => detail.refetch()}>重试详情</button>
+    <button onClick={() => { repository.failNext("get"); detail.refetch(); }}>模拟详情失败</button>
+  </section>;
+}
+```
+
+<a id="复用请求与复用成功结果" />
+<a id="staletime-和-gctime-管两件事" />
+
+同键并发读取复用一轮请求；一分钟新鲜期内重新进入可读缓存，过期后保留旧数据并后台更新。Query 默认新鲜时间为 0，浏览器失败查询默认重试 3 次，未使用缓存默认 5 分钟回收；本课明确设 staleTime 为一分钟、retry 为 false，便于观察错误和写稳定测试。staleTime 管新鲜度，gcTime 管无人使用后的回收，不是一回事。
+
+## 4. 重试与界面状态：有旧结果时继续显示
+
+<a id="pendingfetching-与-error" />
+
+isPending 表示还没有成功数据，isFetching 表示当前有读取工作；后台重读失败时，error 和旧 data 可以同时存在。上面的视图既保留旧库存，也显示错误。点“模拟详情失败”只让下次 get 失败，随后“重试详情”可以成功。
+
+mock repository 不发 HTTP 请求，所以 C32 的 Network 不再出现 C30 的详情 GET。用 Sources 在 repository.get 设断点观察实际读取次数，用 QueryClient 的查询结果检查 key；不要把“没有 GET”直接当成缓存命中。
+
+继续把下面两块接在 Provider 的第一块后。第一块建立读取和 mutation，保留原 action 名，但 dispatch 现在返回 Promise：
+
+```jsx
+function InventoryState({ children, repository }) {
+  const queryClient = useQueryClient();
+  const list = useQuery(listOptions(repository));
+  const [message, report] = useState("");
+  const mutation = useMutation({
+    mutationFn: (action) => {
+      switch (action.type) {
+        case "saved": return repository.save(action.product, action.options);
+        case "created": return repository.create(action.product, action.options);
+        case "deleted": return repository.remove(action.id, action.options);
+        case "restocked": return repository.restock(action.id, action.amount, action.options);
+        case "replaced": return repository.importText(encodeSnapshot(action.products));
+        default: throw new Error(`未知 action：${action.type}`);
+      }
+    },
+```
+
+```js
+    onSuccess: async (_, action) => {
+      if (action.type === "replaced") await queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+      else await Promise.all([
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.list(), exact: true }),
+        queryClient.invalidateQueries({ queryKey: inventoryKeys.detail(action.product?.id ?? action.id), exact: true }),
+      ]);
+    },
+  });
+```
+
+<a id="失效保留旧值活跃查询会重新读取" />
+<a id="练习-3让两个详情一起更新" />
+
+结果：写成功后，列表和对应 ID 的详情失效；活跃查询重新读取，其他商品的详情不受影响。无观察者的缓存被标记过期，下次使用再读取。mutation 失败不进入 onSuccess，因此不能发布成功提示。返回失效 Promise，使 `await dispatch(...)` 等到相关刷新完成。
+
+## 5. mutation 与失效：先写成功，再更新读结果
+
+把最后一块接到 Provider 后面，完成快照适配与 Context：
+
+```jsx
+  async function snapshotAction(operation, success) {
+    try {
+      const result = await operation();
+      await queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+      report(success); return result;
+    } catch (error) { report(`快照操作失败：${error.message}`); return null; }
+  }
+  const snapshot = {
+    message, report,
+    save: () => snapshotAction(() => repository.saveSnapshot(), "本地快照已保存"),
+    recover: () => snapshotAction(() => repository.recover(), "备份已恢复"),
+    importText: (text) => snapshotAction(() => repository.importText(text), "导入完成"),
+    exportText: () => repository.exportText(),
+  };
+  return <InventoryContext value={{ products: list.data ?? [], dispatch: mutation.mutateAsync, snapshot, repository, queryClient }}>
+    {list.isPending && <p role="status">正在加载库存</p>}
+    {list.isError && <p role="alert">读取失败：{list.error.message}；可恢复备份或导入快照</p>}
+    {children}
+  </InventoryContext>;
+}
+export function useInventory() {
+  const value = useContext(InventoryContext);
+  if (value === null) throw new Error("需要 InventoryProvider");
+  return value;
+}
+```
+
+products **直接来自 list.data**，没有 setProducts 或 useReducer。坏主快照导致列表读取失败时，恢复/导入入口仍可用。恢复和导入可能改变任何商品，所以失效整个 inventory 前缀。
+
+<a id="保存成功了详情还是旧库存" />
+<a id="练习-1失效以后库存会消失吗" />
+
+**先猜一猜：** P004 写入 8 成功，缓存旧值是 3；只改仓库不失效，页面会立即自动变 8 吗？
+
+不会。仓库不知道 Query 的订阅者，缓存也不会猜到外部写入。失效才建立“写成功→重新读”的连接。Java 应用里的缓存同样需要更新/失效策略。
+
+最后连接 App，逐项完成这些替换：
+
+1. 在 `src/react/App.jsx` 删除 failRead state 和“模拟读取失败”复选框；路由表中的 `/products/:id` 保留原 path，把 element 改成 `<DetailRoute />`。把文件底部旧的 DetailRoute 整个函数替换成下面的版本；App 顶部保留 C31 的 `useParams`、`ProductDetail` 导入，其他既有组件导入不变。
+
+```jsx
+function DetailRoute() {
+  const { id } = useParams();
+  return <ProductDetail productId={id} />;
+}
+```
+
+2. 增加局部 `const [operationMessage, setOperationMessage] = useState("")`。在 summary 段落后加 `<p role="alert">{operationMessage}</p>`。保留 heading/trigger ref、原有 closeEditor、`<h1 ref={heading} tabIndex={-1}>` 与 `onCancel={() => closeEditor()}`，表单和两秒计时器不替换。
+3. 把原 restock、saveProduct 替换成下列三个函数，行内删除按钮改为 `onClick={() => removeProduct(product.id)}`。ProductEditor 的 onSave/onCancel 和 key 不变。
+
+```js
+async function restock(id, amount) {
+  try { await dispatch({ type: "restocked", id, amount }); setOperationMessage(""); }
+  catch (error) { setOperationMessage(error.message); }
+}
+async function saveProduct(value) {
+  const staysVisible = selectedId === "new"
+    || selectProducts([value], { query, category }).length > 0;
+  const target = staysVisible ? trigger.current : heading.current;
+  try {
+    await dispatch({ type: selectedId === "new" ? "created" : "saved", product: value });
+    setOperationMessage(""); closeEditor(target);
+  } catch (error) { setOperationMessage(error.message); }
+}
+async function removeProduct(id) {
+  try { await dispatch({ type: "deleted", id }); setOperationMessage(""); }
+  catch (error) { setOperationMessage(error.message); }
+}
+```
+
+保存前先按新值判断商品是否还匹配筛选，并记下返回目标；异步写入成功后再关闭。closeEditor 还会检查目标是否仍连接在页面中，已被筛掉的按钮回退到标题。不要直接把 closeEditor 作为 onCancel，否则事件对象会被误当成目标元素。
+
+这里整段替换了旧保存函数，同步 next 候选预检也随之移交给 repository.commit。删除 App 的 core 导入中不再使用的 validateProducts，保留 summarize 计算视图统计；仓库校验或汇总失败由这段异步 catch 显示，仍不关闭草稿。
+
+4. 快照的导出按钮改成下块；导入控件的 `snapshot.importText(await file.text())` 前加 await。保存、恢复按钮仍调用 snapshot.save/recover，Provider 已负责错误提示。
+
+```jsx
+<button onClick={async () => {
+  try { download(await snapshot.exportText()); }
+  catch (error) { snapshot.report(`导出失败：${error.message}`); }
+}}>导出快照</button>
+```
+
+5. 删除 `src/react/useProductRequest.js`、`src/react/inventory-reducer.js` 和 `src/services/product-api.js`。确认当前导入图里没有旧手工请求、reducer 或另一份可写 products。继续保留 storage.js、URL 筛选、表单草稿和 Effect 快捷键。
+
+这里先做到等待写入成功才关闭编辑器，失败保留草稿。提交中的禁用、重复提交和乐观反馈在下一课继续。
+
+## 常见错误与调试
+
+<a id="选了鼠标详情仍显示键盘" />
+
+1. **现象**：在 query-options 的 detail key 暂删末尾 id。先看 P001，再看 P002，地址是鼠标，详情却还是键盘。
+2. **工具**：Sources 在 repository.get 设断点；查看 detailOptions 的 queryKey。运行 `npm run lab -- check C32` 的“两ID缓存隔离”回归。
+3. **证据**：P001 与 P002 现在得到相同 key，新鲜缓存让 P002 不重新读取；测试期望 P002，实际收到 P001。
+4. **原因**：缓存身份少了决定数据的参数。
+5. **修复**：恢复 `['inventory','detail',id]`；重启页面建立新的缓存。再查看写成功后的精确失效，不靠清整个缓存补救漏 ID。
+6. **确认**：P002 库存为 0；保存 P004=8，详情、列表、统计和刷新结果一致，缓存隔离回归先红后绿。
+
+## 练习
+
+<a id="练习-2修复串用缓存" />
+
+:::tip[自己尝试 · 本地 React]
+按完整搬移清单完成迁移。打开 P001、P002，再回 P001；给 P004 保存 8，清筛选核对总库存 57，刷新后仍为 57。模拟详情失败，保留旧结果并重试；导入坏 JSON，确认好快照不被覆盖。最后演练漏 id 的 key 错误并运行检查。
+
+预期：所有业务写入只经过 repository；Query 是列表/详情唯一的读缓存，组件没有第二份 products state。
+:::
+
+<details>
+<summary>提示</summary>
+
+先按导入图找旧路径，再搜 useReducer、setProducts、useProductRequest 和 localStorage。前两者不应继续管理当前商品，手工请求 Hook 已移除；localStorage 的业务写入只出现在仓库调用的存储模块中。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+key 包含 ID；dispatch 用 mutateAsync 返回 Promise；onSuccess 等待列表和对应详情失效。恢复/导入失效 inventory 前缀。所有返回对象都由仓库克隆，组件只编辑草稿；失败不改仓库数据、不关闭编辑器，也不制造成功结果。
+
+</details>
+
+## 项目进度
+
+- repository owns 可写商品和持久化；Query owns 列表/详情缓存，UI owns 草稿与导航。
+- P001/P002 隔离；保存 P004 后详情与统计同步，刷新保留写入。
+- 旧请求 Effect/reducer 已从当前入口移除，快照损坏仍有恢复入口。在 `notes/next.md` 记录 C32 和下一步。
+
+## 小结
+
+- queryKey 是数据身份；缓存新鲜度和回收是两个时间概念。
+- Query 缓存读取结果，业务写入仍走仓库。
+- 写成功后精确失效，恢复/导入后按前缀刷新。
+- 异步 dispatch、快照和导出都要正确等待 Promise。
+
+自测：为什么新建 QueryClient 不能放普通 render 中？有旧数据为何还能显示 error？await dispatch 等了哪些操作？
+
+## 延伸阅读
+
+- [TanStack Query：Query Keys](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys)
+- [TanStack Query：Important Defaults](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults)
+- [TanStack Query：Invalidations from Mutations](https://tanstack.com/query/latest/docs/framework/react/guides/invalidations-from-mutations)
+- [TanStack Query：Query Cancellation](https://tanstack.com/query/latest/docs/framework/react/guides/query-cancellation)
+- [React：你可能不需要 Effect](https://react.dev/learn/you-might-not-need-an-effect)

@@ -1,0 +1,274 @@
+---
+title: C33 现代 React 19 与更新速查
+description: 把当前商品编辑接入异步 Action，提交中防重复，失败回滚预览并保留草稿。
+sidebar:
+  order: 33
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 17 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C25、C28、C32 · 运行：Node 24、本地 React · 部分示例未运行，已在对应位置标注
+
+## 这一课解决什么问题
+
+编辑扩展坞，把库存从 3 改为 8。保存还没完成，按钮应该告诉你正在等待；保存失败，商品仍是 3，但刚输入的 8 应该留下，方便重试。本课只改这条编辑流程，不另外开一个补货实验。
+
+<LessonTask lessonId="C33" />
+
+接 C32 自己的完成态，仍在 `inventory/`。改动下面的编辑器与 App，不另装一个项目。
+
+学习包与恢复说明见 [Lab 3](/js_web/labs/l3/)。`start` 只选择任务，不会把答案写进你的源码。
+
+## Java 程序员先看这里
+
+你熟悉“校验 → 调用异步服务 → 成功或失败 → finally 收尾”。React 的 Action 把这段过程与等待界面联系起来。它不是 Java 注解事务，也不会把函数搬到服务器。`useReducer` 的 reducer 必须纯；`useActionState` 的操作函数允许异步与副作用。
+
+<a id="1-actions让-react-跟踪异步提交"></a>
+
+## 1. 操作结果的第一个参数，不是表单
+
+<a id="useactionstate-多传一个上次结果"></a>
+
+**`useActionState` 调用的操作函数先收上次结果，再收本次数据。** 普通 `<form action={save}>` 则把 FormData 作为第一个参数。两种签名不要混用。[官方参数说明](https://react.dev/reference/react/useActionState)明确区分了它们。
+
+打开 `src/react/ProductEditor.jsx`，删除旧的 `submit(event)`、独立的 errors state 与旧 return。把整个文件依次替换为本节、下一节和第三节的代码。第一段打开组件函数，后两节继续写在这个函数里。
+
+```jsx
+import React, { useState, useRef, useEffect, useActionState, useOptimistic } from "react";
+import { categories, toDraft, parseDraft } from "../core/inventory.js";
+export default function ProductEditor({ product, onSave, onCancel }) {
+  const [draft, setDraft] = useState(() => toDraft(product));
+  const fields = useRef({});
+  const submitting = useRef(false);
+  const [previewStock, preview] = useOptimistic(product.stock);
+  const [result, submitAction, pending] = useActionState(saveAction, { errors: {}, message: "" });
+  const errors = result.errors;
+  function change(field, value) { setDraft((previous) => ({ ...previous, [field]: value })); }
+  useEffect(() => {
+    const firstError = ["name", "stock", "price", "category"].find((field) => errors[field]);
+    if (!pending) fields.current[firstError]?.focus();
+  }, [pending, errors]);
+```
+
+页面暂时还不能编译，补完后两节再保存。三个返回值分别是操作结果、交给 form 的入口和等待标记。`errors` 从本次结果读取，商品仍来自 prop，草稿仍属于编辑器。
+
+<a id="练习-1上次结果是谁"></a>
+
+**先猜一猜：** 初始结果是 `{ errors: {}, message: "" }`，第一次提交时 `saveAction` 的第一个参数是什么？答案是这份初始结果；第二个才是 FormData。下一次提交，第一个参数换成上一次的返回值。
+
+Java 方法的参数按位置传递也是如此；这里多出的“前一次结果”由 React 保存和传回。
+
+<a id="2-两种状态本次结果与所属表单的等待"></a>
+
+## 2. 草稿、等待和失败各有归属
+
+继续在组件函数里加入操作和提交守卫：
+
+```jsx
+  async function saveAction(previousState, formData) {
+    try {
+      if (formData.get("productId") !== product.id) throw new Error("商品编号不匹配，请重新打开编辑器");
+      const parsed = parseDraft(draft);
+      if (parsed.hasErrors) {
+        return { errors: parsed.errors, message: "" };
+      }
+      preview(parsed.value.stock);
+      await onSave(parsed.value);
+      return { errors: {}, message: "保存完成" };
+    } catch (error) {
+      return { errors: { form: `保存失败：${error.message}` }, message: "" };
+    } finally { submitting.current = false; }
+  }
+  function guardSubmit(event) {
+    if (submitting.current || pending) event.preventDefault();
+    else submitting.current = true;
+  }
+```
+
+结果：非法库存直接返回字段错误；合法输入先显示预计库存，再等待 `onSave`。失败被转换成可显示的结果，不会关闭编辑器。
+
+`draft` 是受控字段的唯一草稿，直接交给已有的 `parseDraft`，不再维护另一份业务校验。FormData 中的隐藏编号用于检查提交身份；原始输入的名称、库存、价格仍由受控 state 管理，标签保留在草稿里。
+
+<a id="请求还没结束按钮一直显示空闲"></a>
+
+pending 提供可见等待状态，ref 在同一次同步提交入口挡住重复事件。这里禁用整个编辑区，用户不能在保存过程中修改这一笔提交。服务器项目还需要服务端幂等与并发校验；浏览器禁用按钮只解决界面入口。
+
+**先猜一猜：** 保存失败后，草稿是 8，`product.stock` 仍为 3，预览最后显示哪个？答案是 3。`useOptimistic` 只在 Action 等待期间覆盖来源值；Action 结束后重新读取 `product.stock`，草稿则继续保留 8。
+
+Java 的 `finally` 能收尾任务，但不会替你安排界面重新渲染；这里的等待和结果由 Hook 联系到渲染。
+
+<a id="3-useoptimistic临时显示预计结果"></a>
+
+## 3. 连接表单与同一条 repository 写入路径
+
+最后接上 return。下面两段连续放在同一位置，第二段包含组件的结束花括号；中间不要插入自己的结束标签：
+
+```jsx
+  return <form aria-label="商品编辑" noValidate action={submitAction} onSubmit={guardSubmit} aria-busy={pending}
+    onReset={(event) => event.preventDefault()}>
+    <h2>编辑 {product.id}</h2>
+    <input type="hidden" name="productId" value={product.id} />
+    <fieldset disabled={pending}>
+      <legend>商品资料</legend>
+      {[["name", "名称"], ["stock", "库存"], ["price", "价格（元）"]].map(([field, label]) =>
+        <div key={field}><label htmlFor={`edit-${field}`}>{label}</label>
+          <input ref={(node) => { fields.current[field] = node; }} autoFocus={field === "name"}
+            inputMode={field === "stock" ? "numeric" : field === "price" ? "decimal" : "text"}
+            id={`edit-${field}`} name={field} value={draft[field]} onChange={(event) => change(field, event.target.value)}
+            aria-invalid={Boolean(errors[field])} aria-describedby={`error-${field}`} />
+          {errors[field] && <p id={`error-${field}`} role="alert">{errors[field]}</p>}
+        </div>)}
+```
+
+继续接上分类、按钮与提示：
+
+```jsx
+      <label>编辑分类 <select ref={(node) => { fields.current.category = node; }} aria-label="编辑分类" name="category" value={draft.category} onChange={(event) => change("category", event.target.value)}
+        aria-invalid={Boolean(errors.category)} aria-describedby="error-category">
+        {categories.map((name) => <option key={name}>{name}</option>)}
+      </select></label>
+      {errors.category && <p id="error-category" role="alert">{errors.category}</p>}
+      <button type="submit">{pending ? "正在保存…" : "保存"}</button>
+      <button type="button" onClick={() => onCancel()}>取消</button>
+    </fieldset>
+    <p role="status">预览库存 {previewStock} 件{pending ? "（等待确认）" : "（已保存）"}</p>
+    {errors.form && <p role="alert">{errors.form}</p>}
+    {!pending && result.message && <p role="status">{result.message}</p>}
+  </form>;
+}
+```
+
+结果：保存时按钮显示“正在保存…”，成功前不能再次点击。失败显示错误，输入值和分类留下。这里的字段全部受控，所以阻止原生 reset；需要真正重置时，按商品 key 重建编辑器或显式更新 draft。`noValidate` 保留既有的业务校验入口，错误按“名称→库存→价格→分类”聚焦；校验对象的插入顺序不是界面的字段顺序。聚焦放在 pending 结束后的 Effect，避免正在 disabled 的字段拿不到焦点。
+
+在 `App.jsx` 的 `InventoryView` 中，找到原来 trigger 声明、openEditor 与 closeEditor 这小段，保留下面的焦点边界。`useRef` 已在本文件导入：
+
+```jsx
+  const trigger = useRef(null);
+  const heading = useRef(null);
+  function openEditor(id, button) { trigger.current = button; setSelectedId(id); }
+  function closeEditor(target = trigger.current) {
+    setSelectedId(null);
+    (target?.isConnected ? target : heading.current)?.focus();
+  }
+```
+
+主 return 的标题保留为 `<h1 ref={heading} tabIndex={-1}>React 库存工作台</h1>`。打开按钮被筛选移除时，关闭回到标题；这个 fallback 不参与普通 Tab 顺序。
+
+在 `App.jsx` 的 `InventoryView` 中，加入 `failSave` state，用下面函数完整替换旧 `saveProduct`。删掉旧函数外层的 try/catch：保存失败要继续拒绝，让编辑器的 Action 接住；补货、删除的错误处理保持原样。
+
+```jsx
+  const [failSave, setFailSave] = useState(false);
+  async function saveProduct(value) {
+    const staysVisible = selectedId === "new"
+      || selectProducts([value], { query, category }).length > 0;
+    const target = staysVisible ? trigger.current : heading.current;
+    await dispatch({ type: selectedId === "new" ? "created" : "saved", product: value,
+      options: { fail: failSave, delay: 300 } });
+    setOperationMessage(""); closeEditor(target);
+  }
+```
+
+在原有条件渲染的 `<ProductEditor ... />` 前插入开关，并把该编辑器调用替换成第二行。取消用无参数回调，不把点击事件当作 DOM 焦点目标：
+
+```jsx
+    <label><input type="checkbox" checked={failSave} onChange={(event) => setFailSave(event.target.checked)} />模拟保存失败</label>
+    {selected && <ProductEditor key={selectedId} product={selected} onSave={saveProduct} onCancel={() => closeEditor()} />}
+```
+
+结果：失败由 C32 的 repository 在写入前拒绝，界面显示“模拟 save 失败”；成功分支等待 repository 写入和相关 Query 刷新后才关闭。保存改名即将使该行不再匹配筛选时，提前选择标题作为焦点目标，不等原按钮卸载才发现焦点丢失。`delay` 只让等待界面容易观察。它是浏览器内 mock，没有保存 POST，也没有服务器事务；Network 中没有写请求是本项目的正常现象。
+
+<a id="与-query-的分工"></a>
+
+Action 管提交过程，repository 管商品与持久化，Query 管缓存，`useOptimistic` 只管编辑器内的临时预览。列表和汇总在保存成功后一起读取 Query，不能顺手再 `setProducts` 一份。
+
+:::tip[自己尝试 · 本地 React]
+1. 在当前工作区运行开发服务，打开 P004 编辑，库存改成 8。
+2. 勾选“模拟保存失败”，点击保存，观察禁用按钮、预览和错误，再取消勾选重试。
+3. 成功后清空搜索：P004 为 8，总库存为 57；再编辑 P002，分别试空白与 0。
+
+预期：失败时 P004 仍 3、总库存仍 52、草稿仍 8；成功才更新。空白显示错误，0 可以保存。
+:::
+
+<a id="4-读懂现代组件接口ref-prop-与-custom-elements"></a>
+<a id="5-更新附录use服务器能力与版本索引"></a>
+
+## 4. 现代 API 按需要采用，不是整套替换
+
+本课必须会用 `useActionState` 与 `useOptimistic`；其他能力按场景查文档：
+
+<a id="useformstatus-给按钮读取最近的上层-form"></a>
+
+<a id="函数组件可以直接接收-ref"></a>
+
+<a id="custom-elements属性传对象事件读-detail"></a>
+
+<a id="use-读取-promisepromise-身份需要稳定"></a>
+
+<a id="浏览器-actionserver-functionrsc-各在哪里执行"></a>
+
+| 入口 | 适用场景 |
+| --- | --- |
+| [useFormStatus](https://react.dev/reference/react-dom/hooks/useFormStatus) | 通用提交按钮从**上层** form 读取 pending；不在返回该 form 的同一组件里读它 |
+| [ref prop](https://react.dev/blog/2024/12/05/react-19#ref-as-a-prop) | 函数组件接收 ref 并传给 DOM；本课沿用已有 DOM ref |
+| [use](https://react.dev/reference/react/use) | 读取缓存提供的稳定 Promise 或 Context；不在 render 中每次新建 fetch Promise |
+| [Server Functions](https://react.dev/reference/rsc/server-functions) / RSC | 需要相应框架与执行环境；Pages 的客户端编辑器没有这条服务端调用链 |
+
+<a id="react-19-更新索引"></a>
+
+把异步函数命名为 Action 不会自动进入 Transition。本课由 form 的 action prop 建立上下文；若以后用普通按钮手动调用生成的 submitAction，要用 `startTransition(() => submitAction(payload))`。React 版本与 API 状态以[官方版本入口](https://react.dev/versions)为准，不按更新列表给当前项目堆功能。
+
+## 常见错误与调试
+
+> 未运行验证：下文 Sources 面板的手动断点操作尚未逐项运行。请按步骤自己尝试。
+
+<a id="formdataget-is-not-a-function"></a>
+
+**现象**：保存后显示 `formData.get is not a function`。
+
+**工具**：DevTools → Sources 打开 `ProductEditor.jsx`，在 `formData.get` 那行设断点，提交一次。**证据**：故意把签名改为 `saveAction(formData)` 时，这个变量是 `{ errors, message }`，不是 FormData。
+
+**原因**：漏掉了 previousState 参数。**修复**：恢复 `saveAction(previousState, formData)`。**确认**：在当前工作区运行 `node node_modules/vitest/vitest.mjs run --config tools/action.config.mjs`，同一条签名/空白测试应从失败变为通过；随后重复失败→重试操作，预览回到来源值、草稿仍在。
+
+## 练习
+
+<a id="练习-2修好两个提交入口"></a>
+
+完成上述编辑流程，并在失败后检查分类仍是“配件”、价格仍是 299.00、标签仍是热销和新品。验收：不能只保住库存而丢失其他字段。
+
+<details>
+<summary>提示</summary>
+
+只替换提交方式，不重建商品 DTO。`toDraft`、`parseDraft` 保留 id/tags，成功后由同一 dispatch 更新。失败不要关闭编辑器，也不要把 draft 重设成 product。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+保留完整编辑器和 App 的 await。受控 draft 留在编辑器，乐观来源是已保存的 product.stock。失败时两者可以不同；这是保留重试输入的设计，不是缓存不一致。
+
+</details>
+
+## 项目进度
+
+- 当前编辑支持等待、防重复、失败提示与重试，成功后列表和汇总同源。
+- 保存失败不改业务商品；空库存拒绝、合法 0 保留。
+- 暂停前导出已保存的商品；未提交草稿另记在 `notes/next.md`，它不属于商品快照。
+
+## 小结
+
+- `useActionState` 的 FormData 是第二个参数。
+- 等待与结果属于 Action；草稿属于编辑器；正式商品属于 repository。
+- 乐观显示不是持久化，失败后回到来源值。
+- 成功后才关闭编辑器，保存与 Query 刷新需要真正 await。
+
+自测：失败后为什么草稿是 8、预览却是 3？pending 和同步 ref 各挡什么？Pages 在哪里执行这次保存？下一课测量当前应用，再增加报表的加载和错误边界。
+
+## 延伸阅读
+
+- [React：form action 与重置](https://react.dev/reference/react-dom/components/form)
+- [React：useActionState 参数和队列](https://react.dev/reference/react/useActionState)
+- [React：useOptimistic 的临时状态](https://react.dev/reference/react/useOptimistic)
+- [React DOM：useFormStatus](https://react.dev/reference/react-dom/hooks/useFormStatus)
+- [React：Server Functions](https://react.dev/reference/rsc/server-functions)

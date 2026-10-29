@@ -1,48 +1,28 @@
 # C30 请求状态与竞态调试 · 示例
 
-配套正文：[C30](../../src/content/docs/05-react/c30-requests-races.md)。普通 JS 在本目录，真实 React 在[阶段 4](../inventory/04-react/)，商品沿用固定数据。
+正文：[C30](../../src/content/docs/05-react/c30-requests-races.mdx)。同一 `inventory/`，发行版 `2026.10-v2.3`，C29→C30；主集成与发布见 [阶段 A](../../labs/records/A.md)。主 agent 从公开C29只按正文完成本课，完整check及竞态故障红→绿通过；旧阶段4保留为参考。
 
-| 文件 | 运行 | 说明 |
-| --- | --- | --- |
-| http-errors.js | node http-errors.js | Response 模拟 HTTP 已兑现，检查 ok 与 JSON 解析错误 |
-| race-order.js | node race-order.js | 手动控制 Promise 完成顺序；普通 JS，不运行 React |
-| abort-signal.js | node abort-signal.js | data URL 验证已取消 signal 无法复用 |
-| prediction.js | node prediction.js | 不同调用的 ignore 独立，闭包各自保留归属 |
-| 阶段 4 src/ProductDetails.jsx、RequestView.jsx | dev / 首页 | 五种请求状态、失效、取消与重试 |
-| 阶段 4 src/product-api.js、read-product.js | dev / 首页 | Pages 子路径、HTTP / JSON / 字段检查 |
-| 阶段 4 src/InventoryDetails.jsx、public/data/products | dev / 首页 | 六件商品只读初始快照，与本地编辑分开 |
-| 阶段 4 labs/requests-main.jsx | 下表实验页 | 八个请求与竞态实验，仅 dev 提供 |
-| 阶段 4 tests/requests.test.jsx | npm test | 十三项新增正常回归 |
-| 阶段 4 labs/requests-bugs.test.jsx | npm run test:bug -- labs/requests-bugs.test.jsx | 三项故意失败，改用完整修复实现后通过 |
-
-## 运行
-
-- 根目录执行 `npm run examples -- c30`；本目录也可逐个执行 node 命令。
-- 阶段 4 执行 `npm ci`、`npm run dev -- --host 127.0.0.1`，打开终端给出的 /js_web/ 地址。
-- 实验路径 labs/requests.html?case=下表值；每换实验重新打开对应地址。
-- 阶段 4 执行 `npm run lint`、`npm test`、`npm run build`；`npm run preview -- --host 127.0.0.1` 检查生产首页与静态 JSON。
-
-| case | 操作与预期 |
+| 入口 | 命令 / 说明 |
 | --- | --- |
-| race | 看到 P001 收到文件后选 P002，200ms 的 P002 先显示，1200ms 的 P001 随后错误覆盖 |
-| abort-only | 相同步骤，只取消 fetch 仍拦不住已开始的后续处理 |
-| answer | 相同步骤，旧结果不能覆盖 P002；取消立即结束 loading，晚返回不更新，重新加载成功 |
-| finally | 等初始完成，P002 开始处理后立刻切 P001；旧 finally 提前结束新 loading |
-| finally-answer | 相同步骤，保持 P001 加载中直到自己完成 |
-| http | 请求不存在的 P999.json，真实 HTTP 404，重试仍失败 |
-| invalid | HTTP 200 的 txt 含损坏 JSON，进入 error |
-| network | 无人工延时；Network 慢网取消 / Offline 失败 / 恢复后重试成功 |
+| http-errors.js、race-order.js、abort-signal.js、prediction.js | 根目录 `npm run examples -- c30`，4个机制参考 |
+| 当前工作区 | `npm run lab -- start C30`、`npm run lab -- dev`、`npm run lab -- check C30` |
+| 实际组件 | 工作区 `node node_modules/vitest/vitest.mjs run --configLoader runner --config tools/request.config.mjs` |
+| 实际浏览器 | 工作区 `node tools/browser-a3.mjs C30` |
 
-## 验证记录
+## 当前验证记录
 
-- 2026-10-18 · macOS arm64 · Node 24.22.0、npm 11.19.1；沿用 React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.3。无新增项目依赖或锁文件。
-- 固定输出 4/4；阶段 4 正常 lint、110/110 回归与生产构建通过，本课新增 13 条；覆盖晚成功/晚失败、同 id 的 A→B→A、取消/重试、新 signal、卸载/重挂载、StrictMode 首次失效、idle、HTTP/解析/字段错误及子路径。
-- 三项 bug 回归先分别报 P002 被 P001 覆盖、abort 后仍被 P001 覆盖、旧 finally 提前结束 loading；将三个 Broken 默认导出接到 ProductDetails 后，原命令 3/3 通过，之后恢复教学错误起点。
-- 独立后台 Chrome 155.0.8059.82：race、abort-only、answer、finally、finally-answer、http、invalid、network 按正文操作；未操作现有窗口。竞态延时位于读取文件后的 JS 处理，Network 传输与处理日志分别核对。
-- Chrome 调试接口的真实暂停帧：旧 finally 执行时 productId=P002、ignore=true，而页面已选 P001；页面随即错误结束 loading。未手动点击 DevTools 面板。
-- Network 调试接口禁用缓存，600ms 延时 / 有限带宽下取消 P002、最终加载 P001；Offline 使 P002 失败，恢复后重试成功。Vite 缺文件回退 HTML 的问题通过 Accept: application/json 修正，http 模式真实返回 404。
-- 首页与生产预览通过：详情请求为 /js_web/data/products/P002.json，HTTP 200、初始库存 0；列表补货后总库存 53 / 价值 26477.00 元，详情仍标初始库存；清空恢复 idle，刷新恢复 52 / 26348.00。
-- 网站 lint 30 课零 error/warning；check 零诊断；build 固定输出 239/239、35 页产物检查通过。正文 9861 字符、13 个代码块，全部与示例完整文件或连续片段一致。
-- 生产 C30 HTTP 200，禁用 JS 后 13 段代码、六个折叠区和 D2 可阅读；目录 30/48、C30 链接正确。共用 D2 已检查中文、箭头与两栏时序，全站仍为 13 张图。
-- Pages：[run 39081623244](https://github.com/socoo123/js_web/actions/runs/39081623244) build/deploy 成功；C30 与路线均 HTTP 200，标题、共用 D2、请求/竞态正文及 30/48 目录已上线。
-- 未运行：屏幕阅读器朗读、DevTools 界面手动点击、Firefox、Safari、Windows。
+- 最终checker验收：主仓库39 tools完整只读镜像，本路12专用工具无回退；最新C21–32重建后完整 `node tools/check.mjs C30` exit0：85条实际文件断言、Vitest 12/12、共享5组隔离浏览器及本路browser通过，src/data未改写。日志 `delivery/evidence/final-checker/C30.log`，无重复红绿。正文已更正：模拟失败保持勾选时重试仍失败，取消勾选才重新读取并恢复。
+- 旧H3兼容补验：清单5/5覆盖，MDX AST确认18个正文ID无重复（代码围栏不计）；本轮预检修改后继续保留。
+- 本轮导入validateProducts并接回只读next候选的全量同步预检；不变更请求/计时/焦点接口。实际App专项 `node node_modules/vitest/vitest.mjs run --configLoader runner --config tools/save-overflow-a3.config.mjs` 修前2 failed、修后2/2；真实Chromium修前编辑/新建main=0/form=0，修后表单/草稿/原商品/52/2634800保留且修正可重试，见 `delivery/evidence/save-overflow/C30-{red,green}-{unit,browser}.txt`。
+- 最新C28按正文连续作者拼接：原组件7/7+溢出2/2、Hooks lint和完整源码对照通过，跳过无关旧浏览器；临时catalog镜像48课lint零error/warning，C30为4319字符/9块。专项仅限C29–31，不用于后段Action；交稿 `delivery/agent-3-overflow.md`。
+
+- 2026-10-29 · macOS arm64 · Node 24.22.0、React 19.3.1、Vitest 5.0.5、happy-dom 21.0.4、Chromium 156.0.8078.4。
+- 基线为主agent实际handoff-C28；依赖导入哈希见 `delivery/evidence/real-C28-import.json`，不是首轮继承夹具。
+- 固定输出4/4；当前组件7/7：请求5条覆盖晚成功/晚失败、旧完成时新pending、A→B→A、新signal、重试、卸载和实例独立；另2条保护真实C28表单首错/2000ms边界。
+- 主错误去成功ignore守卫，忽略signal的旧P001结果触发exit1；恢复exit0。额外注入旧finally无条件写状态，同一pending向量exit1→恢复exit0，日志 `C30-{main,finally}-{red,green}.txt`。
+- 前次完整浏览器记录（本轮只重跑溢出向量）：P001文件返回后选P002最终鼠标0；模拟失败/恢复/关闭通过。300/30ms处理延迟在HTTP读取后，不当成Network Timing；与两秒补货计时器区分。
+- 同时验证12→15/16、两秒取消/卸载、不倒退表单、普通取消与筛除后的标题回退、保存改名出筛选回标题；360px页面异常0。
+- 原命令在 `delivery/evidence/C30-final.txt`；从真实C28按正文连续重建后才完整对照源码的作者自审在 `real-prose-assembly.txt`。非主agent独立读者验收。
+- MDX+LessonTask、原md删除、13个旧H2保留；临时catalog镜像课程lint零error/warning，Hooks lint通过。
+- 最终共享checker本路已验收通过；主独立跟做/全站门禁/冻结/Pages仍由主流程完成，汇总由主agent写 [阶段A记录](../../labs/records/A.md)。
+- 未运行：完整DevTools手点、Firefox/Safari、Windows、屏幕阅读器；本路未提交、推送、部署。

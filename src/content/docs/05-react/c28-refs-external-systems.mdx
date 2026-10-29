@@ -1,0 +1,256 @@
+---
+title: C28 useRef 与外部系统
+description: 在当前库存应用保存 DOM 与定时器句柄，完成取消定时补货、错误定位和关闭编辑后的焦点返回。
+sidebar:
+  order: 28
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 14 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟<br />
+> 前置：C23、C25–C27 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+点了延迟补货后，你又发现不需要补货了；编辑保存之后，键盘焦点也应该回到能继续操作的位置。本课只为当前库存页增加**可取消、有焦点去向的连续操作**。商品仍由 reducer 管，草稿仍由表单管；DOM 节点与定时器句柄交给 ref。
+
+<LessonTask lessonId="C28" />
+
+## Java 程序员先看这里
+
+ref 像当前界面实例里保存句柄的可变字段，没有 AtomicReference 的线程同步含义。state 保存要显示的数据，ref 保存事件还要用、却不直接生成 JSX 的东西。
+
+句柄活过一次函数调用，不等于资源永远活着。找到定时器靠 ref，撤销它靠 clearTimeout，组件移除时释放它靠清理。可变的库存 class 也不能因为放进 ref，就变成能可靠驱动界面的 state。
+
+## 1. ref 保存的是一个稳定容器
+
+**useRef 在同一组件身份内返回同一个对象，改变 current 不请求渲染。** 先修改 `StockActions.jsx` 的 React 导入，在组件函数开头加入 timer 和 waiting；原 `restockThree` 保留：
+
+```jsx
+import React, { useRef, useState, useEffect } from "react";
+export default function StockActions({ product, onRestock }) {
+  const timer = useRef(null);
+  const [waiting, setWaiting] = useState(false);
+```
+
+这段替换文件原来的导入与函数开头，不再重复声明 StockActions；文件原来的末尾括号保留。timer 属于当前商品行，不与其他商品行共享。[useRef](https://react.dev/reference/react/useRef) 的初始值仅用于初始化，后续渲染继续得到相同容器。
+
+### 普通变量为什么撑不过下一次渲染
+
+若写 `let timer = null`，安排后 `setWaiting(true)` 会让组件再次执行，新事件读取的是新一轮局部变量。模块级变量虽能保留，却把不同商品的任务混在一起；ref 恰好在这两者之间。
+
+**先猜一猜：** 两个回调都在更新前创建，下列三行会输出什么？这是普通 JS 的闭包预测，可在浏览器 Console 执行：
+
+```js
+const stock = 12;
+const stockRef = { current: stock };
+const readSnapshot = () => stock;
+const readCurrent = () => stockRef.current;
+stockRef.current += 3;
+console.log(readSnapshot(), readCurrent(), stock); // → 12 15 12
+```
+
+一个读固定数字，一个在调用时读取容器里的 current。React 提供的是跨渲染保留容器的能力，不是把旧 state 变成最新数字。Java 对照：类似引用指向的字段可以改变，但捕获的旧值不会自动替换。
+
+## 2. 要在界面显示的值用 state
+
+**waiting 决定文字与按钮，timer 只用来取消。** 在 StockActions 的“延迟补三件”按钮后增加：
+
+```jsx
+    <button type="button" onClick={cancelLater} disabled={!waiting}>取消盘点</button>
+    {waiting && <p>盘点等待中</p>}
+```
+
+`cancelLater` 在第 4 节定义。安排任务后 waiting 为 true，出现等待提示，取消按钮可用。取消或到期后，waiting 为 false，界面随 state 更新。不要用 `timer.current !== null` 直接决定 JSX，也不要把可见 stock 改成 ref。
+
+<a id="盘点数要等输入备注才跳动"></a>
+
+如果库存只改 `stockRef.current += 3`，React 不会因此重渲染；别的输入碰巧触发渲染时才跳到新值，这不是正确的通知路径。可见商品继续由 dispatch 改变，ref 只握住宿主给出的句柄。[ref 与 state 的区别](https://react.dev/learn/referencing-values-with-refs)
+
+Java 对照：字段能记住数据，React 还需要 setter 或 dispatch 才能请求界面更新。
+
+## 3. DOM ref：拿到节点，再调用浏览器方法
+
+**在事件中操作已经存在的节点，不在渲染时 focus。** 先修改 `src/react/App.jsx`：把已有的 React 与 core 导入分别替换为下面两行；保留上一课的提交预检工具，Provider 和展示组件导入不变：
+
+```jsx
+import React, { useState, useRef } from "react";
+import { selectProducts, sortByStock, summarize, nextProductId, validateProducts } from "../core/inventory.js";
+```
+
+在 InventoryView 的 useInventory 后面插入下面一段，原 selectedId 声明保留：
+
+```jsx
+  const trigger = useRef(null);
+  const heading = useRef(null);
+  function openEditor(id, button) { trigger.current = button; setSelectedId(id); }
+  function closeEditor(target = trigger.current) {
+    setSelectedId(null);
+    (target?.isConnected ? target : heading.current)?.focus();
+  }
+```
+
+trigger 记住打开本次表单的按钮；heading 接持续存在的标题。把原 h1 换成 `<h1 ref={heading} tabIndex={-1}>React 库存工作台</h1>`。负 tabIndex 允许代码聚焦，不额外增加日常 Tab 停靠点。
+
+在 App 的原位置替换新建与编辑按钮，并把表单的取消回调改为 `onCancel={() => closeEditor()}`，其余 props 和 key 都保留：
+
+```jsx
+<button onClick={(event) => openEditor("new", event.currentTarget)} disabled={nextProductId(products) === null}>新建商品</button>
+<button onClick={(event) => openEditor(product.id, event.currentTarget)}>编辑 {product.id}</button>
+```
+
+两行分别属于 Toolbar 和 renderActions，不放在一起。取消后焦点回原按钮；如果筛选已移除按钮，isConnected 为 false，回标题。`onCancel` 用包装函数，避免把按钮的 click event 误传成目标节点。
+
+保存改名可能让商品移出当前筛选。整体替换 saveProduct 为下面的完整函数：先保留上一课的全量候选预检，通过后才派发、关闭并返回焦点。
+
+```jsx
+  function saveProduct(value) {
+    const next = selectedId === "new" ? [...products, value]
+      : products.map((product) => product.id === value.id ? value : product);
+    validateProducts(next); summarize(next);
+    const staysVisible = selectedId === "new"
+      || selectProducts([value], { query, category }).length > 0;
+    dispatch({ type: selectedId === "new" ? "created" : "saved", product: value });
+    closeEditor(staysVisible ? trigger.current : heading.current);
+  }
+```
+
+搜索“鼠标”并把 P002 改名为“办公指针”，保存后卡片消失，标题仍获得焦点。保存后仍可见的商品则返回编辑按钮；新建返回始终存在的新建按钮。不要聚焦即将关闭的表单输入。
+
+若合法单价让全量价值超出安全整数，预检会在派发前抛错，表单原有 catch 显示原因；`closeEditor` 不执行，输入和已保存商品都保留。`next` 只是只读提交候选，不是第二份可写商品 state。修正价格后再保存，仍按上面的焦点策略关闭。
+
+### 「提交表单」和「React 提交 DOM」是两件事
+
+form 的提交是用户事件；React 提交是把渲染结果应用到 DOM。`setSelectedId(id)` 后马上读取新表单节点，它还可能是 null。这里继续用表单已有的 `autoFocus` 处理挂载焦点，关闭时只聚焦原本已存在的节点。[用 ref 操作 DOM](https://react.dev/learn/manipulating-the-dom-with-refs)
+
+最后修改 ProductEditor.jsx：React 导入加入 useRef，在 draft 声明后新增 `const fields = useRef({});`。给已有 input 与分类 select 分别增加 ref 属性：
+
+```jsx
+ref={(node) => { fields.current[field] = node; }}
+ref={(node) => { fields.current.category = node; }}
+```
+
+第一行只放到 map 中的 input，第二行放分类 select；回调使用花括号，不返回赋值结果。React 提交节点时登记，移除节点时传入 null。在 submit 的 `if (parsed.hasErrors)` 内，保留 field 的查找，把原 `event.currentTarget.elements.namedItem(field)?.focus()` 替换为：
+
+```jsx
+      fields.current[field]?.focus();
+```
+
+空库存仍定位到库存；draft 决定文本，errors 决定反馈，fields 只负责节点。Java 对照：拿到控件引用后调用 focus 的经验可迁移；React 还要求确认节点已经提交。
+
+## 4. 可变句柄：保存到 ref，取消时读出来
+
+**清空字段不会撤销宿主安排的任务，必须调用 clearTimeout。** 在 StockActions 中，把原 restockLater 整个替换为下面两个函数；连续补货与立即补货保持不动：
+
+```jsx
+  function cancelLater() {
+    clearTimeout(timer.current);
+    timer.current = null; setWaiting(false);
+  }
+  function restockLater() {
+    cancelLater(); setWaiting(true);
+    timer.current = setTimeout(() => {
+      timer.current = null; setWaiting(false); onRestock(product.id, 3);
+    }, 2000);
+  }
+```
+
+**先猜一猜：** P001 从 12 开始，安排延迟补三件，立即补一件，再取消，等满两秒是多少？
+
+结果仍是 **13**。立即补货已经 dispatch；取消撤销尚未执行的延时回调，不撤销已完成的操作。再安排会先取消旧任务，只留最新两秒截止时间；每个商品行的 ref 相互独立。
+
+`clearTimeout` 消费 setTimeout 返回的句柄；`timer.current = null` 只是本组件的记账。两步职责不同。延时回调仍上报 id 与 amount，由 reducer 基于待处理状态计算，因此不会拿旧 product.stock 覆盖中途的补货。[clearTimeout](https://developer.mozilla.org/en-US/docs/Web/API/Window/clearTimeout)
+
+<a id="用普通变量保存会丢在哪一步"></a>
+
+Java 对照：句柄像取消任务时需要的 Future 引用；保存引用与实际调用取消 API 不是一件事。
+
+## 5. Effect：在提交后同步外部系统
+
+**ref 负责找到资源，不会替你释放资源。** 在 StockActions 顶层、waiting 声明后加上最小清理，useEffect 已在第 1 节导入：
+
+```jsx
+  useEffect(() => () => clearTimeout(timer.current), []);
+```
+
+这个 Effect 不在挂载时启动任务，只返回一个 cleanup。当前商品行因删除或筛选离开树时，cleanup 撤销仍在等待的任务，避免卸载后还补货。`[]` 表示这里没有要随渲染重新同步的依赖；清理时从稳定 ref 读取当时的句柄，而不是捕获初次的 null。
+
+### ref 不会替你释放外部资源
+
+点击安排属于事件，随组件离开而释放属于生命周期。渲染只计算 JSX，不在函数主体启动定时器、聚焦或写存储。Effect 的依赖与开发检查随后再展开，本课先建立资源必须有释放路径的习惯。[与 Effect 同步](https://react.dev/learn/synchronizing-with-effects)
+
+Java 对照：像界面对象销毁时释放自己持有的资源；拿到句柄解决“怎么找”，cleanup 解决“什么时候停”。
+
+## 常见错误与调试
+
+### 点了取消，盘点仍在两秒后增加
+
+1. **现象**：在当前 StockActions 暂时把 `const timer = useRef(null);` 换成下面的错误写法。安排延时，等待提示出现后点取消，满两秒仍会补三件。
+
+```jsx
+// 有问题的写法：每次组件执行都会创建新容器。
+let timer = { current: null };
+```
+
+2. **工具**：Sources → `src/react/StockActions.jsx` → 在 cancelLater 的 clearTimeout 行设断点；先安排，再点取消。工作区另运行 `npm run lab -- check C28`。
+3. **证据**：取消事件里的 timer.current 为 null，旧定时器却仍在等待。安排时 setWaiting(true) 已触发一次重渲染。
+4. **原因**：新取消事件闭包读取新创建的容器，真正的句柄还在上一轮执行创建的对象里。
+5. **修复**：恢复 `const timer = useRef(null);`，保留 clearTimeout、waiting state 与卸载 cleanup，不能只把等待文字隐藏。
+6. **确认**：安排→立即补一件→取消→等两秒，P001 保持 13；再次安排仍可工作。相同检查命令中“等待状态重新渲染后仍能取消”的回归由红转绿，另检查替换的两个截止点和卸载撤销。
+
+## 练习
+
+<a id="练习-1回调读到的是什么"></a>
+<a id="练习-2把取消成功变成可观察的测试"></a>
+
+**必做任务：完成当前页的取消与焦点闭环。** 只使用本课三个文件，修复主错误，再走一次下面的连续操作。
+
+:::tip[自己尝试 · 本地 React]
+1. 刷新。P001 点延迟补三件，立即补一件，再取消；等两秒，确认库存 13、全量库存 53。
+2. 重新安排，过一秒再安排一次。旧截止点不补货，第二次安排满两秒只补一次三件。安排另一条后搜索 P002，P001 行卸载；等两秒、清空搜索，P001 不再增加。
+3. 编辑 P004，空库存提交应聚焦库存。保存为 8 后表单关闭、焦点回编辑 P004；重新打开后取消，也返回该按钮。
+4. 搜索鼠标，编辑 P002 并改名为办公指针，保存后卡片移出筛选、焦点回标题。执行 `npm run lab -- check C28`。
+
+预期：可见数据都通过 state/reducer 更新；取消、到期、卸载都结束自己的任务；关闭后焦点不落到消失的输入或 body。
+:::
+
+<details>
+<summary>提示</summary>
+
+句柄、等待提示、业务库存分别是 timer.current、waiting、products 中的 stock。焦点返回要考虑按钮是否仍连在页面上，也要考虑保存后是否将被筛选移除。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+timer 用 useRef 跨渲染保留，cancelLater 同时撤销任务并清空等待状态；cleanup 处理行卸载。App 记录打开按钮，保存前根据新商品判断筛选结果，需要时聚焦持续存在的标题。字段 ref 只保存 DOM，输入值与错误仍是 state。
+
+</details>
+
+## 项目进度
+
+- 同一工作区已有受控表单、草稿身份、reducer/Context 和可取消的延时补货。
+- 表单的名称/库存/价格/分类、业务商品、焦点和任务句柄没有互相替代职责。
+- 验收包含合法 0、空白拒绝、P001→P002 重置、取消后不补货、保存/取消焦点和卸载释放。
+- 在 `notes/next.md` 记录三个文件与下一步；继续保留当前工程，不从最终版 App 重新开始。
+
+## 小结
+
+- ref 保留可变容器，不触发渲染；可见数据仍用 state。
+- DOM ref 在提交后连接节点，事件里可操作已经存在的节点。
+- 取消要调用宿主 API，清空 current 只是记账。
+- 用户动作放事件，组件离开时释放资源放 cleanup。
+
+自测：为什么句柄不用 state？为什么不能靠 current 生成等待提示？取消后为什么要同时更新 waiting？保存后按钮将消失时，焦点该去哪里？
+
+下一课深入 Effect 的依赖、清理与开发检查。
+
+## 延伸阅读
+
+- [React：useRef](https://react.dev/reference/react/useRef)
+- [React：使用 ref 引用值](https://react.dev/learn/referencing-values-with-refs)
+- [React：使用 ref 操作 DOM](https://react.dev/learn/manipulating-the-dom-with-refs)
+- [React：与 Effect 同步](https://react.dev/learn/synchronizing-with-effects)
+- [React：useEffect](https://react.dev/reference/react/useEffect)
+- [MDN：clearTimeout](https://developer.mozilla.org/en-US/docs/Web/API/Window/clearTimeout)

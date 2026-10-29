@@ -1,36 +1,41 @@
 # C35 React UT、集成测试与 E2E 地图 · 示例
 
-配套正文：[C35](../../src/content/docs/05-react/c35-react-testing.md)。固定数据沿用 shared/products，测试推进阶段 4，根工程不加依赖。
+正文：[C35](../../src/content/docs/05-react/c35-react-testing.mdx)。主线在自己的工作区新增测试，不维护第二份业务源码。
 
-| 文件 | 运行 | 说明 |
+## Lab 入口
+
+- 目标发行版 `2026.10-v2.3`：C34 → C35。
+- 新文件：`tests/react/support.jsx` / `inventory.test.jsx`、`tests/e2e/inventory.spec.js`。
+- 在工作区 `npm run lab -- start C35`、`npm run lab -- check C35`。
+- RTL：`node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs`。
+- 严格生产冒烟：`node node_modules/@playwright/test/cli.js test --config tools/playwright.config.mjs`；配套工具构建当前文件、以无 fallback 服务器提供 `/js_web/demos/inventory/`。
+- 专用服务/测试缓存与产物进入 `.lab`，不会清空真实浏览器数据；已有依赖链接只读，不运行 npm ci/install。
+
+## 保留的独立参考
+
+| 文件 | 命令 | 内容 |
 | --- | --- | --- |
-| boundary.js | `node boundary.js` | 复用库存/金额解析，空白、0、小数 |
-| async-order.js | `node async-order.js` | async 拒绝与后续微任务 |
-| fixture.js | `node fixture.js` | 新增 P007、不改变固定起点 |
+| boundary.js | `node boundary.js` | 历史转换边界 |
+| async-order.js | `node async-order.js` | Promise 拒绝顺序 |
+| fixture.js | `node fixture.js` | 历史 reducer 的新增场景 |
 
-## 运行
+根目录 `npm run examples -- c35` 核对固定输出。旧阶段 4 的 testing-forms / testing-async 保留为历史参考，不冒充本次 Lab 测试。
 
-- 仓库根运行 `npm run examples -- c35`，3 个固定输出自动核对。
-- 在 `examples/inventory/04-react` 执行 `npm ci`；`npm test -- tests/testing-forms.test.jsx tests/testing-async.test.jsx` 运行新增的 8 条正常用例。
-- 同目录执行 `npm run lint`、`npm test`、`npm run build`：正常回归累计 171 条，错误起点在 labs，独立运行。
-- E2E：执行 `npx playwright install chromium` 后运行 `npm run test:e2e`。配置自动构建、在 4178 端口启动预览、用 Chromium 检查跨页路径并关闭服务。失败 trace 写入忽略的 test-results。
-- 浏览器跟做：执行 `npm run dev -- --host 127.0.0.1`，打开 `/js_web/#/products`；新增 P007 并编辑为随身转接头 / 配件 / 3 件 / 0.29 元，预期 7 种、55 件、26348.87 元。P002 空库存报错并聚焦，0 可保存，刷新恢复 6 种、52 件。
-- 错误练习：`npm run test:bug -- labs/testing-bugs.test.jsx` 原始起点失败。按正文把 BlankStockBroken 的 Number 转换/范围判断替换为 parseStock / null 判断，重复命令通过；完整答案 BlankStockFixed。仓库保留错误起点。
-- 练习 2：把 CachedProductDetails 首个「重试详情」回调改为空函数，运行 `npm test -- tests/testing-async.test.jsx -t 详情失败后由用户重试成功` 失败；恢复 query.refetch 后通过。
+## 本次真实接续验证
 
-## 文件与边界
+- 2026-10-29 · macOS arm64 · Node 24.22.0 / React 19.3.1 / Vitest 5.0.5 / Playwright 1.64.1 / Chromium 156.0.8078.4；沿用已装依赖，首次 Chromium 下载命令未运行。
+- 从哈希一致的真实 C32 连续接至 C35，`node tools/check.mjs C35` 通过：85 条核心断言、Effect/计时 4 条、Query 6 条、Action 4 条、报表 2 条、RTL 4 条、9 组隔离浏览器场景、生产 E2E 1 条和 Hooks lint。同步 C28 表单用例由异步契约替代。
+- 参考解 RTL 4 条包含正文必做 3 条（空白与 0、创建、详情重试），以及正文明确选做的失败草稿重试 1 条；没有把选做用例当作必做缺失。
+- 创建测试先等待真实初始查询；详情错误断言限定在“商品详情”区，保留上游独立操作提示。每例独立真实仓库、App 与 Query，不 mock 校验函数。
+- 严格生产 E2E 1/1：未知路径 404；P004 筛选→hash 详情→刷新→返回保留条件，无 pageerror。仅本地产物检查，不表示应用已在线部署。
+- `node delivery/red-green-agent-4.mjs real final-real`：空白先变“0”的真实源码变异红 1→恢复绿 0；见 `final-real-C35-blank-{red,green}.log`。
+- `node delivery/red-green-agent-4.mjs real final-real-extra C35-retry`：真实详情“重试”改空回调后红 1→恢复 `detail.refetch()` 绿 0；见 `final-real-extra-C35-retry-{red,green}.log`。
+- `node delivery/assemble-from-prose-agent-4.mjs`：正文 3 条必做 RTL 与 E2E 组装后 `start C35` / `check C35` 通过；作者自审，不是独立读者验收。
+- 根目录 `npm run examples -- c35` 3/3；临时 catalog 副本 48 课 lint 零 error/warning，正式 registry 未改。最终证据在 `delivery/evidence/`，阶段记录由主 agent 写 `labs/records/A.md`。
+- 主集成16快照、独立抽验范围与全站发布验收见 [阶段 A](../../labs/records/A.md)。未执行：首次 Chromium 下载、Firefox/Safari/Windows/屏幕阅读器；真实后端不在范围。
 
-- tests/rtl-support.jsx：导入 jest-dom/vitest，显式 afterEach cleanup，清空独立 QueryClient、恢复 spy/global。仅新测试导入，不改旧测试的挂载辅助文件。
-- testing-forms.test.jsx：空库存、合法 0/29 分、空名称、同名按钮作用域、创建后卡片与统计，共 5 条。
-- testing-async.test.jsx：首次失败/用户重试、手控 Promise 加载态、卸载取消，共 3 条。Query 测试 retry=false、gcTime=Infinity，加载函数为边界替身；真实组件和缓存库保留。
-- e2e/inventory.spec.js：筛选→详情→刷新→返回，静态 JSON 真实读取，保持 /js_web/ 和 hash；验证本地生产产物，不表示阶段 4 应用已部署到课程 Pages。
-- 本课未新增 D2、站点配置或工作流；Pages CI 现有 npm test 会运行新增 RTL，用例范围不包含本地 E2E 命令。
+## 历史夹具与发布
 
-## 验证记录
+早期临时 C32 的 `fixture-*` / `revision-*` 不算正式接续；现以 `final-*` 真实链为准，历史保留在 `delivery/history-agent-4.md`。
 
-- 2026-10-18 · macOS arm64 · Node 24.22.0 / npm 11.19.1：固定输出 3/3、新增正常 8/8、全量 171/171、阶段 4 lint/build 通过。
-- 同日：错误起点 1 项失败，Expected「库存无效」、Received「已保存库存 0」；按正文修改后同命令 1/1 通过，随后恢复错误起点。
-- 同日：练习 2 空回调使成功内容查询超时，恢复回调后通过；隔离的两表单实验漏 cleanup 时第二项报多个匹配，导入清理入口后 2/2 通过，实验文件已移除。
-- 同日 · Playwright 1.64.1 / Chromium 156.0.8078.4（headless，独立进程）：生产产物跨页 E2E 1/1；开发页新增、空库存、合法 0、焦点、刷新与 blank/blank-answer 操作通过；拦截静态读取为 HTTP 503 后重试恢复，应用自动重试另发一次请求。
-- 同日：课程 lint（正文 9115 字符、15 代码块、0 error/warning）、Astro check/build 与 40 页产物检查通过；静态课页 200、标题及正文折叠答案通过；Pages [run 39108651570](https://github.com/socoo123/js_web/actions/runs/39108651570) 成功，新课线上地址 HTTP 200。
-- 未运行：Firefox、Safari、Windows、多浏览器 E2E、屏幕阅读器；全套周视觉验收留 C36。
+第一版 [Pages 39108651570](https://github.com/socoo123/js_web/actions/runs/39108651570) 的 171 条回归属于旧源码。未将旧通过数挪作本次证据。

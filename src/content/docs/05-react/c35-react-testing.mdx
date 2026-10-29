@@ -1,0 +1,299 @@
+---
+title: C35 React UT、集成测试与 E2E 地图
+description: 为当前应用写空库存、创建和失败重试测试，再用一条严格静态浏览器冒烟贯通路由。
+sidebar:
+  order: 35
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 18 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C20、C25、C30–C34 · 运行：Node 24、本地 React · 部分示例未运行，已在对应位置标注
+
+## 这一课解决什么问题
+
+你试过库存输入 3，保存成功。但这没有证明清空输入时会拒绝保存，也没有证明失败后的“重试”真的发起下一次读取。本课不增加新业务功能，而是把这些用户可见合同变成可重复的测试。
+
+<LessonTask lessonId="C35" />
+
+接 C34 自己的完成态，在同一个 `inventory/` 新增测试。App 的可选仓库 prop 与导入已在上一课接好，本课不替换业务实现。
+
+## Java 程序员先看这里
+
+Vitest 类似 JUnit，负责发现用例、断言、mock 和报告。RTL 挂载 React 并查询 DOM；user-event 模拟输入、点击的完整交互；happy-dom 提供 Node 中的 DOM 环境。Playwright 则打开真正的浏览器。它们不是四套相互替代的运行器。
+
+<a id="jest-与快照在这张地图上哪里"></a>
+
+[Jest](https://jestjs.io/docs/getting-started) 与 Vitest 都可搭配 RTL；本项目已有 Vite/Vitest，就沿用这一套。`jest-dom` 是 DOM 断言扩展，名字含 Jest，也能从 `/vitest` 入口接入 Vitest。
+
+<a id="1-先选层级再选工具"></a>
+
+## 1. 按风险选最小有效层级
+
+| 要抓的问题 | 层级 | 保留的真实代码 |
+| --- | --- | --- |
+| 空文本变 0、价格转换错误 | 纯函数 UT | core 转换与校验 |
+| 错误没有显示或没有聚焦 | RTL 组件测试 | ProductEditor、真实 core |
+| 新建后卡片变了而统计没变 | RTL 集成测试 | App、Provider、Query、repository、列表 |
+| 点击重试没有恢复 | RTL 集成测试 | 请求状态、按钮、查询缓存；只控制读取结果 |
+| 子路径资源或详情刷新 404 | Playwright 冒烟 | 实际生产构建、严格服务器、浏览器 |
+
+同样叫 `test`，范围可以完全不同。不要把待测的 parseDraft mock 成“总是正确”，也不要让每条校验边界都经过浏览器。
+
+<a id="把测试工具放对位置"></a>
+
+本发行版已经提供测试工具和配置，沿用锁与依赖，不在网站根目录另装一套。在工作区先执行下面命令，确认配套 Chromium 可用：
+
+> 未运行验证：首次下载 Chromium 的安装命令尚未运行。请按步骤自己尝试。
+
+```sh
+npx playwright install chromium
+```
+
+它只安装 Playwright 对应的浏览器。测试配置由 tools 提供，核心行为断言由你在 tests 中完成。DOM 模拟器没有真实布局，响应式与真实导航继续交给浏览器。
+
+<a id="cleanup-也有业务后果"></a>
+
+新建 `tests/react/support.jsx`，把下面完整代码放进去：
+
+```jsx
+import "@testing-library/jest-dom/vitest";
+import { afterEach, vi } from "vitest";
+import { cleanup } from "@testing-library/react";
+import seed from "../../data/products.json";
+import { createInventoryRepository } from "../../src/services/inventory-repository.js";
+export function freshRepository() {
+  const records = new Map();
+  const storage = { getItem: (key) => records.get(key) ?? null, setItem: (key, text) => records.set(key, text) };
+  return createInventoryRepository({ storage, seed: structuredClone(seed), delay: 0 });
+}
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+  window.history.replaceState(null, "", "/");
+});
+```
+
+<a id="单独能过整套运行出现多个保存商品"></a>
+
+结果：每条集成测试都有独立的内存存储，结束后卸载组件、恢复资源与 URL。它没有清空你浏览器里的商品。仓库仍用真实解析、保存和 Query 连接，只把存储介质换成独立 Map。
+
+<a id="2-按角色找元素按用户动作操作"></a>
+
+## 2. 用角色和 label 操作空库存
+
+新建 `tests/react/inventory.test.jsx`，先加入导入，然后接上本节和后两节的 test。每个 test 都位于模块顶层：
+
+```jsx
+// @vitest-environment happy-dom
+import React from "react";
+import { expect, test, vi } from "vitest";
+import { render, screen, within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { freshRepository } from "./support.jsx";
+import App from "../../src/react/App.jsx";
+import ProductEditor from "../../src/react/ProductEditor.jsx";
+import seed from "../../data/products.json";
+```
+
+<a id="getqueryfind-的等待规则"></a>
+
+**先猜一猜：** 此刻页面应有一个“保存”按钮，但查询不到它，`getByRole` 会得到 null 吗？不会，它立即抛错。`queryByRole` 适合断言不存在；`findByRole` 返回 Promise，等待异步出现。重复名称要用 `within(目标容器)` 缩小范围，不能靠第几个按钮猜商品身份。
+
+<a id="配一条合法的-0防止修复过头"></a>
+
+```jsx
+test("空库存阻止提交并聚焦，合法的 0 可以保存", async () => {
+  const user = userEvent.setup();
+  const save = vi.fn().mockResolvedValue(undefined);
+  render(<ProductEditor product={structuredClone(seed[1])} onSave={save} onCancel={() => {}} />);
+  const stock = screen.getByRole("textbox", { name: "库存", exact: true });
+  await user.clear(stock);
+  await user.click(screen.getByRole("button", { name: "保存", exact: true }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("请输入库存，空白无效");
+  expect(stock).toHaveAccessibleDescription("请输入库存，空白无效");
+  expect(stock).toHaveFocus();
+  expect(save).not.toHaveBeenCalled();
+  await user.type(stock, "0");
+  await user.click(screen.getByRole("button", { name: "保存", exact: true }));
+  expect(await screen.findByText("保存完成")).toBeInTheDocument();
+  expect(save).toHaveBeenCalledExactlyOnceWith(seed[1]);
+});
+```
+
+结果：空输入显示错误、关联说明、聚焦库存框，且没有提交；0 保存一次。当前库存框没有设 `type="number"`，所以角色是 textbox；如果以后换成 number，其隐含角色才是 spinbutton。
+
+这里的 save 是父组件回调的替身，而不是待测的校验函数。组件的对外合同就是“何时以什么数据调用 onSave”。Java DTO 单测的思路适用，但浏览器字段提供字符串，转换边界需要保留。
+
+<a id="3-一条测试说清一个业务结果"></a>
+
+## 3. 创建要测到卡片与统计
+
+<a id="创建商品为什么放在集成测试"></a>
+
+继续向同一文件追加创建用例：
+
+```jsx
+test("新建商品后卡片和统计使用同一份已保存数据", async () => {
+  const user = userEvent.setup();
+  render(<App inventoryRepository={freshRepository()} />);
+  await screen.findByRole("heading", { name: "P001 机械键盘", exact: true });
+  await user.click(screen.getByRole("button", { name: "新建商品", exact: true }));
+  const form = screen.getByRole("form", { name: "商品编辑" });
+  await user.type(within(form).getByLabelText("名称", { exact: true }), "随身转接头");
+  await user.clear(within(form).getByLabelText("库存", { exact: true }));
+  await user.type(within(form).getByLabelText("库存", { exact: true }), "3");
+  await user.clear(within(form).getByLabelText("价格（元）", { exact: true }));
+  await user.type(within(form).getByLabelText("价格（元）", { exact: true }), "0.29");
+  await user.click(within(form).getByRole("button", { name: "保存", exact: true }));
+  expect(await screen.findByRole("heading", { name: /随身转接头/ })).toBeInTheDocument();
+  expect(screen.getByText("库存 55 / 价值 2634887 分")).toBeInTheDocument();
+  expect(screen.queryByRole("form", { name: "商品编辑" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "新建商品", exact: true })).toHaveFocus();
+});
+```
+
+<a id="练习-1预测创建后的数据"></a>
+
+结果：先等待固定商品出现，确保初始查询已完成，再创建 P007。保存后总库存 55，总价值增加 `3 × 29 = 87` 分；表单关闭，焦点回到新建按钮。这里挂载真实 App，从交互一路经过 repository 与查询刷新，不能只断言 mock 被调用。
+
+App 在上一课已把可选的 inventoryRepository 传入 Provider；平时不传参数就用浏览器默认仓库，测试才传独立实例。这是依赖注入，不是另写一个“测试版应用”。
+
+**先猜一猜：** `await user.click` 结束，保存一定已经完成吗？不一定。它等待用户交互，不保证所有外部异步任务结束，所以创建后的标题用 `findByRole` 等待。
+
+<a id="4-异步测试等结果控制外部依赖"></a>
+
+## 4. 异步测试等待结果，不睡固定时间
+
+<a id="请求失败再由用户重试"></a>
+
+向同一文件追加这条请求恢复用例：
+
+```jsx
+test("详情失败后点击重试恢复", async () => {
+  const user = userEvent.setup();
+  const repository = freshRepository();
+  const read = vi.spyOn(repository, "get").mockRejectedValueOnce(new Error("模拟断网"));
+  render(<App inventoryRepository={repository} />);
+  await user.click(await screen.findByRole("link", { name: "详情 P002", exact: true }));
+  const details = screen.getByRole("region", { name: "商品详情", exact: true });
+  expect(await within(details).findByRole("alert")).toHaveTextContent("模拟断网");
+  await user.click(within(details).getByRole("button", { name: "重试详情", exact: true }));
+  expect(await screen.findByText(/P002 无线鼠标.*库存 0/)).toBeInTheDocument();
+  expect(within(details).queryByRole("alert")).not.toBeInTheDocument();
+  expect(read).toHaveBeenCalledTimes(2);
+});
+```
+
+结果：第一次 get 拒绝，详情区出现错误；点击重试后真实仓库返回鼠标 0 件，错误消失。用 within 限定详情区，避免把其他区域的提示也算作这次读取错误。C32 的教学请求已关闭自动重试，让用户重试这条路径可预测；如果应用选择自动重试，测试也必须明确配置，不能让第二个结果被自动请求提前消耗。
+
+只有外部读取结果被控制，Query、按钮和渲染都是真实实现。HTTP 状态转换等细节留给服务层 UT。
+
+<a id="等待出现断言消失"></a>
+
+需要等待现有文字变化时，用 `waitFor(() => expect(...))`；回调应能抛出断言错误。点击和输入放在 waitFor 外，否则重试检查可能再次点击。日常表单测试先用真实时钟；需要 fake timers 时，为 user-event 配 advanceTimers，并在结束后恢复。手动完成外部 Promise 才按需用 act，不用它遮住漏掉的 await。
+
+在工作区运行：
+
+```sh
+node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs
+```
+
+预期：你写的三条用例通过。完整参考解还增加了“保存失败草稿保留→再次保存”的集成用例，它与 C33 的组件检查共同保护失败边界。
+
+<a id="5-一条-e2e-贯通路径快照留给小输出"></a>
+
+## 5. 一条真实浏览器冒烟贯通静态路由
+
+新建 `tests/e2e/inventory.spec.js`，放入完整内容：
+
+```js
+import { test, expect } from "@playwright/test";
+test("严格静态子路径：筛选、详情、刷新和返回", async ({ page, request }) => {
+  const failures = [];
+  page.on("pageerror", (error) => failures.push(error.message));
+  const missing = await request.get("missing-route");
+  expect(missing.status()).toBe(404);
+  await page.goto("./");
+  await page.getByRole("textbox", { name: "搜索", exact: true }).fill("P004");
+  await expect(page.locator("#list article")).toHaveCount(1);
+  await page.getByRole("link", { name: "详情 P004", exact: true }).click();
+  await expect(page).toHaveURL(/#\/products\/P004\?q=P004$/);
+  await expect(page.getByRole("region", { name: "商品详情" })).toContainText("P004 USB-C 扩展坞");
+  await page.reload();
+  await expect(page.getByRole("region", { name: "商品详情" })).toContainText("库存 3");
+  await page.getByRole("link", { name: "返回列表", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "搜索", exact: true })).toHaveValue("P004");
+  await expect(page.locator("#list article")).toHaveCount(1);
+  expect(failures).toEqual([]);
+});
+```
+
+工作区已有 `tools/playwright.config.mjs`，baseURL 是 `/js_web/demos/inventory/`；`tools/static-react-server.mjs` 构建当前实际源码，放到独立的生成目录，以**没有 SPA fallback** 的服务器提供文件。未知路径返回 404，所以没有把开发服务的回退行为当成 Pages 路由能力。
+
+:::tip[自己尝试 · 本地 React]
+在当前工作区执行 `node node_modules/@playwright/test/cli.js test --config tools/playwright.config.mjs`，再执行 `npm run lab -- check C35`。
+
+预期：一条 Chromium 跨页冒烟通过。失败时按终端 trace 路径，用 `npx playwright show-trace 路径` 查看；浏览器使用独立 profile，不改现有商品存储。
+:::
+
+RTL 和 Playwright 的查询名字相近，但后者返回 locator，运行在实际浏览器，断言有自己的自动等待。整页 DOM 快照不能替代这些操作；小而稳定的序列化输出可用快照作补充，更新前仍要审阅差异。
+
+## 常见错误与调试
+
+<a id="空库存被当成-0测试却一直是绿的"></a>
+
+**现象**：清空库存也能保存为 0，但原来的正常输入测试仍绿。**工具**：在 `ProductEditor.jsx` 故意把 `parseDraft(draft)` 改为下面错误版本，运行 `node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs -t "空库存"`：
+
+```jsx
+// 有问题的写法：先把空白改成 0，校验再也看不到原输入
+const parsed = parseDraft({ ...draft, stock: draft.stock.trim() === "" ? "0" : draft.stock });
+```
+
+**证据**：测试找不到预期错误提示，save 收到了库存 0。**原因**：合法值 0 与缺失输入在校验前被混为一谈。**修复**：恢复 `parseDraft(draft)`。**确认**：重复同一命令，从红变绿；再跑完整文件，确保合法的 0 没被修复误伤。不要 mock 这个转换函数，也不要删掉失败断言。
+
+## 练习
+
+<a id="练习-2修好一个选错层级的测试"></a>
+
+完成三条 RTL 用例与一条 E2E。额外做一次边界挑战：把详情重试按钮的回调改成空函数，运行“详情失败后点击重试恢复”，记录失败在哪个用户可见条件，然后恢复正确回调。
+
+<details>
+<summary>提示</summary>
+
+请求发起一次不是恢复成功。测试要看见错误、点击按钮、等待正确商品出现、确认错误消失。把断言改成“按钮存在”会放过这个故障。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+空回调不会重新读取，所以最终鼠标内容一直等不到。恢复 `ProductDetail.jsx` 中的 `onClick={() => detail.refetch()}` 后同一条测试通过。先用最小失败用例定位，再运行整个行为文件和浏览器冒烟，避免只改单独测试能过的实现。
+
+</details>
+
+## 项目进度
+
+- 现有 core UT 保护数据边界，新增 RTL 保护用户交互与数据连接。
+- 一条严格静态浏览器流程覆盖子路径、hash 刷新与筛选返回。
+- 用例与配置留在当前工作区；暂停时在 `notes/next.md` 写还缺哪条观察结果。
+
+## 小结
+
+- 测试范围由风险决定，不由文件名决定。
+- 优先按角色和 label 查询；await 用户操作，再等待异步结果。
+- 只替换外部依赖，保留真实校验与应用连接。
+- DOM 模拟器不验证布局；一条生产浏览器冒烟补齐资源与路由。
+
+自测：空库存测试为什么还要断言没调用保存？find 和 query 各适合什么情况？自动重试会怎样改变这条测试？下一课用三个故障复盘整条数据链。
+
+## 延伸阅读
+
+- [Testing Library：查询选择](https://testing-library.com/docs/queries/about/)
+- [Testing Library：user-event](https://testing-library.com/docs/user-event/intro/)
+- [Testing Library：异步等待](https://testing-library.com/docs/dom-testing-library/api-async/)
+- [Vitest：mock 函数](https://vitest.dev/guide/mocking/functions.html)
+- [Playwright：webServer](https://playwright.dev/docs/test-webserver)
+- [Playwright：测试最佳实践](https://playwright.dev/docs/best-practices)

@@ -1,0 +1,249 @@
+---
+title: C22 Props、组合与渲染模型
+description: 接着当前 React 库存页拆分列表和工具栏，用 props、children 与纯渲染组织组件，分清 render、commit 和绘制。
+sidebar:
+  order: 22
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 11 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C05、C08、C21 · 运行：本地 React、Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+六张卡片已经显示出来，但 App 同时负责准备数据、循环卡片和安排页面。现在只做一次小拆分：列表负责商品集合，卡片负责一件商品，工具栏负责数量与附加内容。数据仍从 App 向下传，组件显示它时不能顺手修改库存。
+
+完成后页面仍是原来的六件商品，新增“显示 6 件商品”和一段说明。你能顺着 props 查到哪一层传错对象，也能解释为什么组件多算一次不能等于多补一次货。
+
+<LessonTask lessonId="C22" />
+
+沿用自己的 C21 工作区与服务，当前目录仍是 `inventory/`。本课只改 `src/react/App.jsx`，新建同目录的 `ProductList.jsx`、`Toolbar.jsx`。`ProductCard.jsx`、main 和 HTML 都保留；卡片已有 product 和 children 参数。
+
+## Java 程序员先看这里
+
+props 就是函数接收的一个对象参数，引用传递规则与 C05 一致；React 额外要求把输入当作只读。`children` 是嵌套内容的约定名，不是继承。Java 普通方法调用没有 React 的 render/commit 分工，后半课直接理解这套新机制。
+
+<a id="1-props让卡片描述传进来的商品"></a>
+
+## 1. Props：名字是契约，值由父组件决定
+
+`<ProductCard product={product} />` 把本轮商品放进名为 product 的 prop。组件的 `{ product, children }` 解构接收它；不是按第几个参数匹配，也不会自动查询数据。
+
+**先猜一猜：** 这两个调用会显示不同商品吗？只阅读，不必同时加入页面。
+
+```jsx
+<ProductCard product={products[0]} /> // P001 机械键盘，12 件
+<ProductCard product={products[1]} /> // P002 无线鼠标，0 件
+```
+
+会。结构由组件决定，字段由传入对象决定。写成 `item={products[1]}` 后，卡片的 product 就是 undefined；写成每次都传 `products[0]` 则六张卡片都会显示键盘。需要在**传值的父组件**修复，不在卡片里猜调用方想显示谁。
+
+数字、数组、对象、函数和 JSX 都能通过 props 传入；它们还是普通 JS 值。[向组件传递 props](https://react.dev/learn/passing-props-to-a-component)
+
+<a id="默认值只补缺失和-undefined"></a>
+
+参数默认值也按 JS 规则，不按 truthy/falsy 规则：
+
+```js
+function label({ count = 6 }) { return `显示 ${count} 件商品`; }
+console.log(label({})); // 显示 6 件商品
+console.log(label({ count: 0 })); // 显示 0 件商品
+console.log(label({ count: null })); // 显示 null 件商品
+```
+
+缺失或 undefined 才用默认值，0/null 都保留。Java 的方法参数也由调用方提供；JS 这一层没有静态类型替你核对属性名。
+
+<a id="2-组合数据向下传内容通过-children-放进去"></a>
+
+## 2. 组合：容器安排位置，调用方提供内容
+
+先创建 `src/react/Toolbar.jsx`，完整内容如下：
+
+```jsx
+import React from "react";
+export default function Toolbar({ count, children }) {
+  return <section aria-label="库存工具栏">
+    <p>{count > 0 ? `显示 ${count} 件商品` : "没有商品"}</p>
+    {children}
+  </section>;
+}
+```
+
+count 为 6 时显示“显示 6 件商品”；count 为 0 时显示“没有商品”。children 放在数量后面，具体是说明、按钮还是链接，由 App 决定。
+
+再创建 `src/react/ProductList.jsx`。把原来 App 中的商品循环搬到这里，卡片本身不搬：
+
+```jsx
+import React from "react";
+import { ProductCard } from "./ProductCard.jsx";
+export default function ProductList({ products, renderActions }) {
+  return <section id="list" aria-label="商品列表">
+    {products.length === 0 && <p role="status">没有匹配的商品。</p>}
+    {products.map((product) => <ProductCard key={product.id} product={product}>
+      {renderActions?.(product)}
+    </ProductCard>)}
+  </section>;
+}
+```
+
+products 为空时显示提示；否则每轮把当前商品传给一张卡片。`renderActions` 是一个可选函数 prop：列表对每件商品调用它，得到的 JSX 作为卡片的 children。`?.` 让没传这个函数时那里保持空白，当前 App 暂时不传操作区。
+
+最后**完整替换** `src/react/App.jsx`：删除原来的 ProductCard import 与循环，由新的列表接手。
+
+```jsx
+import React from "react";
+import products from "../../data/products.json" with { type: "json" };
+import ProductList from "./ProductList.jsx";
+import Toolbar from "./Toolbar.jsx";
+export default function App() {
+  return <main><h1>React 库存工作台</h1>
+    <Toolbar count={products.length}><p>同一固定数据，组件只负责显示。</p></Toolbar>
+    <ProductList products={products} />
+  </main>;
+}
+```
+
+页面出现工具栏和六张卡片，库存不变。Toolbar 标签中间的 p 自动变成它的 children；Toolbar 不需要知道这句话的业务含义。ProductCard 中已有 `{children}`，所以以后列表给它附加内容也能显示。
+
+数据路线是 `App → ProductList → ProductCard`；附加内容则经过 children 放进容器。Java 中“通过组合传入能力”的思路可以复用，React 用 props 与 JSX 表达，不需要让列表继承卡片。
+
+<a id="3-条件渲染返回什么页面就显示什么"></a>
+
+## 3. 条件渲染：先算 JS，再看哪些值显示
+
+使用明确的布尔条件控制可选内容，二选一用三元表达式。Toolbar 的 count 为 0 时，表达式选择“没有商品”；ProductList 的 `products.length === 0` 则决定是否生成空提示。[条件渲染](https://react.dev/learn/conditional-rendering)
+
+**先猜一猜：** P002 没有标签，下面 div 是空的，还是出现 0？
+
+```jsx
+// 有问题的写法：&& 返回了数字 0
+<div>{products[1].tags.length && <p>有标签</p>}</div>
+```
+
+结果出现 0。`&&` 返回操作数，不保证返回 boolean；React 会显示数字。正确的独立表达式如下：
+
+```jsx
+<div>{products[1].tags.length > 0 && <p>有标签</p>}</div>
+<p>{products[1].stock === 0 ? "已售罄" : "有货"}</p>
+```
+
+前一个 div 为空，后面显示“已售罄”。它们可以作为 App 中工具栏的 children 观察，再恢复原说明。Java 的 `&&` 只接受 boolean；JS 允许数字参加，所以要自己写清 `> 0` 或 `=== 0`。
+
+<a id="4-纯渲染描述库存时库存保持原样"></a>
+
+## 4. 纯渲染：显示不是一次补货
+
+渲染只计算界面，保持传入的对象与数组原样。ProductList 被调用两次也应得到同样的六件商品，不改变库存。[保持组件纯粹](https://react.dev/learn/keeping-components-pure)
+
+在 ProductList 的函数开头、return 前加入这行，就会破坏这个规则：
+
+```jsx
+// 有问题的写法：渲染时修改了父组件传来的商品
+products[0].stock += 1;
+```
+
+这会直接污染 App 导入的同一对象。StrictMode 开发检查可能额外调用组件，P001 因而不再是 12；重复计算又继续加。不能把具体调用次数当成业务规则。
+
+正确代码只读取 product。对输入使用 `sort`、`push`、嵌套的 `tags.push` 同样会修改输入；要计算新结果，就创建新的值。你可以修改本次渲染刚创建的局部数组来组织结果，因为它不是外部输入。用户点击补货时才发起更新，不能因为“组件又显示了一次”就补一次货。请求、写存储与手工改 DOM 也放在渲染之外。
+
+Java 的 final 引用也不深冻结对象；React 的只读约定不是语言自动生成的一份深副本。测试可以冻住输入，帮助尽早发现意外写入。
+
+<a id="5-render-与-commit算出界面再更新-dom"></a>
+
+## 5. Render、commit、绘制各做什么
+
+render 是 React 调用组件，算出下一份描述；commit 是把需要的变化落实到 DOM；之后浏览器负责布局与绘制。组件重新计算不等于 DOM 全部重建。[渲染与提交](https://react.dev/learn/render-and-commit)
+
+这段是可在**当前 App**观察节点复用的小实验，不是新的组件文件：
+
+```jsx
+// 在 Toolbar 的 p 后面加入，观察完可删除
+<label>盘点备注 <input aria-label="盘点备注" /></label>
+```
+
+在备注输入“先盘外设”，Console 执行 `window.noteBefore = document.querySelector('[aria-label="盘点备注"]')` 保存节点。保持输入框的标签类型和位置不变，用 React DevTools 的 Components 选 App，展开 props 不会找到商品数据，因为数据是模块导入；向下选 ProductCard 才能看到 product。
+
+若要明确发起一次新 render，可在 main.jsx 的首次 render 后**加一段可选实验代码**，观察完删除，最终入口仍保留原来那一次调用：
+
+```jsx
+window.renderInventory = () => root.render(<React.StrictMode><App /></React.StrictMode>);
+```
+
+Console 调用 `window.renderInventory()` 后，再比较 `document.querySelector('[aria-label="盘点备注"]') === window.noteBefore`，应为 true，输入仍在。同一个根重新计算相同结构，React 可以复用原节点；无需再 createRoot。开发日志次数不等于业务操作次数。
+
+Java 里直接调控件 setter 往往同时表达“做修改”；React 组件先返回描述，把节点修改留给 commit。这就是为什么上节的渲染不能随手写数据。
+
+## 常见错误与调试
+
+<a id="六张卡片全是机械键盘"></a>
+<a id="空标签旁边多出一个-0"></a>
+
+### 没点补货，键盘库存就不再是 12
+
+1. **现象**：在 ProductList 加入第 4 节错误行后刷新，P001 库存变大；没有点击任何业务按钮。
+2. **工具**：安装[官方 React Developer Tools](https://react.dev/learn/react-developer-tools)，DevTools → Components 展开 App → ProductList → ProductCard。Sources 打开 ProductList，在错误行设断点并刷新。
+3. **证据**：进入该行时 `products[0].stock` 为 12，单步后变成 13；再次调用时输入已被污染。卡片的 props.product 也出现了被改过的库存。
+4. **原因**：父子组件共享对象，渲染函数写了调用方输入。StrictMode 只是帮助暴露问题，不是补货来源。
+5. **修复**：删除写库存的那一行，保留前文只读的 ProductList；不关闭 StrictMode。
+6. **确认**：完整刷新让模块重新加载，P001 回到 12；重复渲染不再改变它，`npm run lab -- check C22` 通过。冻结输入的组件回归在错误版抛 TypeError，正确版保持输入不变。
+
+若六张卡片都显示键盘，则在 Components 中对照 ProductList 的 products 与第二张 ProductCard 的 product；检查 map 是否错误地每次传了 `products[0]`，改回本轮 product。
+
+## 练习
+
+<a id="练习-1预测默认值与条件"></a>
+<a id="练习-2修复父组件再保护输入"></a>
+<a id="练习-3换内容保持工具栏通用"></a>
+
+### 必做：拆好职责，证明显示不会改库存
+
+按第 2 节完成三个文件。把 Toolbar 的说明 p 换成 `<strong>优先盘点售罄商品</strong>`，保留 count。复现一次 props 修改故障，收集断点证据再修复；空列表也要能显示提示。
+
+:::tip[自己尝试 · 本地 React]
+1. 六张卡片时，工具栏显示 6 和加粗说明，P002 库存保持 0。
+2. 在 App 把列表的 `products={products}` 改为 `products={[]}`，只验证空提示；随后恢复原传值。
+3. 按调试步骤修复只读错误，执行 `npm run lab -- check C22`。
+
+预期：空列表没有卡片且有“没有匹配的商品。”；恢复后六件商品回来，库存仍是固定值。
+:::
+
+<details>
+<summary>提示</summary>
+
+count 与列表 products 是不同的 prop，实验时只把列表传空，工具栏仍可能显示 6；实际页面中应该让它们来自同一数据口径。加粗内容属于 App，不需要给 Toolbar 新增一个“加粗开关”。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+三个文件之间的连接就是第 2 节的完整代码。Toolbar 原样返回 children，App 只替换嵌套内容；ProductList 始终传本轮 product，空提示使用布尔判断。删除任何渲染时的字段写入，重复计算自然保持库存不变，而不是用多减一次来抵消。
+
+</details>
+
+## 项目进度
+
+- App 持有输入，ProductList 遍历集合，ProductCard 显示一件商品；Toolbar 安排数量与 children。
+- 六商品、空列表、售罄 0 的含义清楚，渲染没有修改输入。
+- 暂停记录“C22 三组件拆分完成；下一步新增补货操作区”。可选 render 实验代码删除后，不影响主线。
+
+## 小结
+
+- props 按名字传值，children 把嵌套 JSX 交给容器；函数也能作 prop。
+- `&&` 返回操作数，可选内容使用明确的布尔判断。
+- 渲染只计算；数据变更来自用户事件等明确入口。
+- render、commit、浏览器绘制分工不同，重新计算不必重建节点。
+
+自测：为什么 key=P002 不能保证传入的是 P002？默认值会接管 null 吗？为什么关闭 StrictMode 没修复数据污染？render 后输入框怎样证明被复用？
+
+下一课用 useState 让补货触发下一次界面更新。
+
+## 延伸阅读
+
+- [React：向组件传递 props](https://react.dev/learn/passing-props-to-a-component)
+- [React：条件渲染](https://react.dev/learn/conditional-rendering)
+- [React：保持组件纯粹](https://react.dev/learn/keeping-components-pure)
+- [React：渲染与提交](https://react.dev/learn/render-and-commit)
+- [React：StrictMode](https://react.dev/reference/react/StrictMode)
+- [React：React Developer Tools](https://react.dev/learn/react-developer-tools)

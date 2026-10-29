@@ -1,0 +1,8 @@
+{
+  "previous": "C26",
+  "files": [
+    "src/react/inventory-reducer.js",
+    "src/react/InventoryProvider.jsx",
+    "src/react/App.jsx"
+  ]
+}

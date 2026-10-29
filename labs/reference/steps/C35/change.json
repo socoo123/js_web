@@ -1,0 +1,4 @@
+{
+  "previous": "C34",
+  "files": ["tests/react/support.jsx", "tests/react/inventory.test.jsx", "tests/e2e/inventory.spec.js"]
+}

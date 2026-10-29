@@ -1,0 +1,9 @@
+{
+  "previous": "C20",
+  "files": [
+    "src/react/index.html",
+    "src/react/main.jsx",
+    "src/react/App.jsx",
+    "src/react/ProductCard.jsx"
+  ]
+}

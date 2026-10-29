@@ -1,0 +1,8 @@
+{
+  "previous": "C29",
+  "files": [
+    "src/services/product-api.js",
+    "src/react/ProductDetail.jsx",
+    "src/react/App.jsx"
+  ]
+}

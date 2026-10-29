@@ -16,7 +16,7 @@ function check(root, id, success = true, failureEvidence) {
   const result = spawnSync(process.execPath, ['tools/check.mjs', id], { cwd: root, encoding: 'utf8', timeout: 300000 });
   if ((result.status === 0) !== success) throw new Error(`${id} ${success ? '应通过' : '错误版应失败'}\n${result.stdout}\n${result.stderr}`);
   if (!success && (result.signal || (failureEvidence && !failureEvidence.test(result.stdout + result.stderr)))) throw new Error(`${id} 错误版没有产生目标业务证据\n${result.stdout}\n${result.stderr}`);
-  console.log(`${id} ${success ? '从正文跟做通过' : '实际错误文件检查失败（符合预期）'}：${(result.stdout + result.stderr).split('\n').filter((line) => /检查失败|初始库存|C41 浏览器|passed|期望：|实际：|toBe|P004|P001|!==/.test(line)).slice(0, 7).join(' | ')}`);
+  console.log(`${id} ${success ? '公开片段自动组装通过' : '实际错误文件检查失败（符合预期）'}：${(result.stdout + result.stderr).split('\n').filter((line) => /检查失败|初始库存|C41 浏览器|passed|期望：|实际：|toBe|P004|P001|!==/.test(line)).slice(0, 7).join(' | ')}`);
   return result;
 }
 async function browserScene(root, id, mode = 'fixed') {
@@ -56,7 +56,7 @@ try {
   await write(language, 'src/core/inventory.js', source.replace('stock ?? 12', 'stock || 12')); check(language, 'C03', false, /初始库存 0/);
   await write(language, 'src/core/inventory.js', source); check(language, 'C03');
 
-  const react = path.join(parent, 'C23'); await materialize('P22', react);
+  const react = path.join(parent, 'C23'); await materialize('C22', react);
   await symlink(path.join(repo, 'labs/inventory/node_modules'), path.join(react, 'node_modules'));
   check(react, 'C23', false, /StockActions.jsx 已创建/);
   const stock = ['c23-setup', null, 'c23-delay', 'c23-controls'].map((id) => id ? snippet(id).code : comparison('c23-state-queue').right.code).join('\n');
@@ -75,5 +75,5 @@ try {
   await write(ui5, prefix + 'view/EditDialog.fragment.xml', snippet('c41-dialog').code); check(ui5, 'C41');
   await write(ui5, prefix + 'controller/Inventory.controller.js', controller.replace('this._editPath = context.getPath()', 'this._editPath = "/products/0"')); check(ui5, 'C41', false, /P001 不变/);
   await write(ui5, prefix + 'controller/Inventory.controller.js', controller); check(ui5, 'C41');
-  console.log('R4 三种形态：起点→按正文区域修改→实际错误失败→修复后通过。C23/C41 仍为明确前置的试做快照，不能替代顺序迁移验收。');
+  console.log('C03/C23/C41：起点→公开片段自动组装→实际错误失败→修复后通过。C23 已接正式 C22；C41 仍为试做。此检查不替代主 agent 的独立读者验收。');
 } finally { await rm(parent, { recursive: true, force: true }); }

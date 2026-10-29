@@ -1,5 +1,5 @@
 {
-  "release": "2026.10-v2.2",
+  "release": "2026.10-v2.3",
   "labs": [
     {
       "labId": "L1",
@@ -131,10 +131,10 @@
         "C03-main"
       ],
       "error": {
-        "trigger": "输入框的 3 是字符串，12 + \"3\" 得 123；Number(空白) 得 0；`stock",
-        "evidence": "",
-        "repair": "12` 把售罄复活",
-        "risk": "Sources：amount 的 typeof 为 string，空文本 trim 后为空；观察默认值操作数"
+        "trigger": "输入框的 3 是字符串，12 + \"3\" 得 123；Number(空白) 得 0；`stock || 12` 把售罄复活",
+        "evidence": "Sources：amount 的 typeof 为 string，空文本 trim 后为空；观察默认值操作数",
+        "repair": "先非空检查、显式转换、整数与范围校验；12+3=15；空白/3件/负数/小数拒绝；0 保留",
+        "risk": "Java parseInt 与 JS parseInt 被说成完全等价；页面、core、参考解三种校验不一致"
       },
       "commands": {
         "start": "npm run lab -- start C03",
@@ -817,7 +817,10 @@
       "startCheckpoint": "C20",
       "endCheckpoint": "C21",
       "files": [
-        "src/react/{main,App,ProductCard}.jsx"
+        "src/react/index.html",
+        "src/react/main.jsx",
+        "src/react/App.jsx",
+        "src/react/ProductCard.jsx"
       ],
       "task": "在 `src/react/{main,App,ProductCard}.jsx` 渲染同一固定库存；保留原生入口便于对照",
       "comparisonTheme": "Java 拼文本/调用函数 / JSX 表达式和组件；声明式 UI 的新机制",
@@ -839,8 +842,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C21"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -853,13 +856,14 @@
       "startCheckpoint": "C21",
       "endCheckpoint": "C22",
       "files": [
-        "ProductList.jsx",
-        "Toolbar.jsx"
+        "src/react/ProductList.jsx",
+        "src/react/Toolbar.jsx",
+        "src/react/App.jsx"
       ],
       "task": "拆 `ProductList.jsx`、`Toolbar.jsx` 与 App；props 单向传递和 children 组合",
       "comparisonTheme": "Java 方法参数 / props；函数返回 / render 与 commit 的边界",
       "acceptance": [
-        "从 Components 定位传错 name；渲染不修改 props；商品卡与工具栏职责明确"
+        "组件只读 props；六商品与空列表正确；工具栏 children 与附加内容函数接线明确"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -876,8 +880,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C22"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -896,7 +900,7 @@
       "task": "在 `StockActions.jsx` 和 App 接入 P001 连续补货、延迟补货；复用 core 的更新能力",
       "comparisonTheme": "Java 连续可变赋值 / React 同一渲染快照、函数式更新",
       "acceptance": [
-        "连点补三件从 12 到 15；延迟补三件期间立即补一件最终 16；解释闭包旧值及 Hooks 规则"
+        "点一次连续补三件从 12 到 15；三秒延迟期间立即补一件最终 16；解释闭包旧值及 Hooks 规则"
       ],
       "comparisonIds": [
         "c23-state-queue"
@@ -917,11 +921,7 @@
       },
       "implemented": true,
       "migrated": true,
-      "trial": {
-        "start": "P22",
-        "end": "P23",
-        "description": "已提供六商品 React 静态列表、props 与共享规则；这是明确前置的试做起点，正式连续路线仍需接回并验收。"
-      }
+      "trial": null
     },
     {
       "lessonId": "C24",
@@ -933,13 +933,15 @@
       "startCheckpoint": "C23",
       "endCheckpoint": "C24",
       "files": [
+        "src/core/collections.js",
         "src/react/App.jsx",
-        "src/react/ProductList.jsx"
+        "src/react/ProductList.jsx",
+        "src/react/StockActions.jsx"
       ],
       "task": "App 将商品集合统一放 state，ProductList 用 id，添加增删/排序/筛选和派生汇总",
       "comparisonTheme": "Java 集合操作 / 不可变更新；对象 ID / React key 的身份语义",
       "acceptance": [
-        "任意商品补货都同步统计；删/排后草稿不串行；不存第二份过滤结果；第二周验收"
+        "任意商品补货都同步当前筛选汇总；增删与分类/排序正确；备注按 id 跟随；不存第二份商品 state"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -956,8 +958,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C24"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -970,30 +972,32 @@
       "startCheckpoint": "C24",
       "endCheckpoint": "C25",
       "files": [
-        "ProductEditor.jsx"
+        "src/react/ProductEditor.jsx",
+        "src/react/App.jsx"
       ],
-      "task": "新增 `ProductEditor.jsx` 调用 core 校验，完成名称/库存/元输入与错误焦点",
+      "task": "在当前列表旁新增受控编辑表单；复用 core 校验，保存才更新商品，取消丢弃草稿",
       "comparisonTheme": "Java DTO 校验 / 字符串表单边界与受控组件",
       "acceptance": [
-        "空名称、空库存、负数、非法价格拒绝；0 合法；纯键盘能编辑、保存、看到错误并聚焦"
+        "空名称、空白/负数/小数/越界库存、非法价格拒绝；0 合法，0.29 元保存为29分",
+        "label/错误关联、首错焦点、键盘 Enter 保存与非提交取消可用，tags 保留"
       ],
       "comparisonIds": [],
       "errorIds": [
         "C25-main"
       ],
       "error": {
-        "trigger": "Number空文本变0；元乘100留下小数误差；错误提示未关联输入",
-        "evidence": "RTL填空/非法价格；Sources看原始文本；Accessibility/label检查",
-        "repair": "调用core转换、字段错误和焦点；0合法、空白拒绝、合法价格存整数分；键盘完成保存",
-        "risk": "UI自己的校验与core分叉；只设input min/required就假设导入数据也安全"
+        "trigger": "将原始库存先 Number 再转字符串后 parseDraft，空白错误接受为0",
+        "evidence": "Sources 比较 draft.stock=空字符串与 Number(draft.stock)=0；空库存 RTL 回归失败",
+        "repair": "直接调用 parseDraft(draft)，保持原始文本；空白拒绝，明确0合法",
+        "risk": "校验前丢掉原始文本；字段反馈未关联；取消按钮误提交"
       },
       "commands": {
         "start": "npm run lab -- start C25",
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C25"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1006,31 +1010,31 @@
       "startCheckpoint": "C25",
       "endCheckpoint": "C26",
       "files": [
-        "src/react/App.jsx",
-        "src/react/ProductEditor.jsx"
+        "src/react/App.jsx"
       ],
-      "task": "修改 App 与 ProductEditor，确立 selectedId/草稿归属、切换商品和取消行为",
+      "task": "只在独立编辑区加入 key={selectedId}，确立直接切换、取消、同商品重开的草稿身份",
       "comparisonTheme": "Java 对象字段生命周期 / 组件位置、类型、key 的状态保留",
       "acceptance": [
-        "改 P001 草稿后取消，再开 P002 看到库存 0；提交才改业务数据；列表/统计同步"
+        "P001 未保存直接切 P002，名称/库存0/错误均重置；取消P001再开P002也为0",
+        "同商品重选/筛选/排序保留草稿；取消后重开同商品重新读取已保存值"
       ],
       "comparisonIds": [],
       "errorIds": [
         "C26-main"
       ],
       "error": {
-        "trigger": "从props初始化state后切P002仍显示P001草稿；关闭弹窗未重置",
-        "evidence": "Components：product.id变化而draft仍旧；按取消→换商品复现",
-        "repair": "明确选中id和草稿所有者，按业务切换重建/重置；P002初始0且取消不改源数据",
-        "risk": "不分“关闭再打开同一件”和“切换另一件”；Effect双向同步造成循环与草稿丢失"
+        "trigger": "去掉独立编辑区 key，未关闭直接切P002会保留P001草稿",
+        "evidence": "Components 对照 props.product.id=P002 与 draft.stock=12；直接切换 RTL 回归失败",
+        "repair": "在当前 ProductEditor 调用恢复 key={selectedId}，草稿仍局部",
+        "risk": "仅测取消后换商品会漏掉缺key；Effect同步草稿会丢输入；随机key反复重置"
       },
       "commands": {
         "start": "npm run lab -- start C26",
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C26"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1043,13 +1047,16 @@
       "startCheckpoint": "C26",
       "endCheckpoint": "C27",
       "files": [
-        "inventory-reducer.js",
-        "InventoryProvider.jsx"
+        "src/react/inventory-reducer.js",
+        "src/react/InventoryProvider.jsx",
+        "src/react/App.jsx"
       ],
-      "task": "增加 `inventory-reducer.js`、`InventoryProvider.jsx`，收拢增删改 action",
+      "task": "复用现有 core 收拢五种纯 action，通过单层 Provider 提供唯一商品来源，UI草稿仍局部",
       "comparisonTheme": "Java 命令分发/纯函数经验 / reducer action；Context 的订阅边界",
       "acceptance": [
-        "reducer 不改输入；未知 action 有明确策略和测试；跨层只共享必要数据，UI 草稿仍本地"
+        "reducer 保留旧数组/商品/tags/action；未知或缺失action明确抛错",
+        "created/saved/deleted/restocked/replaced 有纯函数回归；replaced复制传入商品及tags",
+        "真实Provider队列保持旧事件快照，跨商品更新不把未提交草稿写进共享商品"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1066,8 +1073,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C27"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1081,30 +1088,33 @@
       "endCheckpoint": "C28",
       "files": [
         "src/react/StockActions.jsx",
-        "src/react/ProductEditor.jsx"
+        "src/react/ProductEditor.jsx",
+        "src/react/App.jsx"
       ],
-      "task": "在 StockActions 和 ProductEditor 增加聚焦、取消句柄与取消操作",
+      "task": "给当前延时补货增加可取消句柄与卸载清理，关闭表单正确返焦点，ref不替代可见state",
       "comparisonTheme": "Java 可变句柄 / ref；ref 与 state 并列区分",
       "acceptance": [
-        "保存后焦点正确；取消盘点后不再补货；ref 改动不作为 UI 渲染依据"
+        "安排/立即+1/取消两秒后为13；重复安排只保留新截止时间；筛选卸载撤销任务",
+        "保存和取消回打开按钮；按钮被筛选移除或保存后将移除则回持续存在的h1",
+        "错误定位仍正确，waiting用state，timer/DOM用ref"
       ],
       "comparisonIds": [],
       "errorIds": [
         "C28-main"
       ],
       "error": {
-        "trigger": "用ref保存可见库存，改变后UI不刷新；取消后定时任务仍回写",
-        "evidence": "Components的state没变；Sources看ref与timer/abort句柄；取消后观察",
-        "repair": "可见数据放state，ref放DOM/句柄；取消后不更新；提交后焦点正确",
-        "risk": "每次render建外部资源；误把ref当“绕过渲染”的通用state替代品"
+        "trigger": "timer从useRef改成每次渲染新建普通容器，waiting重渲染后丢句柄",
+        "evidence": "取消事件 timer.current=null；组件测试取消后实际16、期待13",
+        "repair": "恢复useRef，保留clearTimeout/记账null/waiting更新与卸载cleanup",
+        "risk": "只隐藏等待提示并未取消任务；ref读入JSX不会自动渲染；聚焦即将移除节点"
       },
       "commands": {
         "start": "npm run lab -- start C28",
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C28"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1117,12 +1127,14 @@
       "startCheckpoint": "C28",
       "endCheckpoint": "C29",
       "files": [
-        "useInventoryShortcuts.js"
+        "src/react/useInventoryShortcuts.js",
+        "src/react/App.jsx"
       ],
       "task": "新增 `useInventoryShortcuts.js`，为当前库存页同步标题/键盘监听，补 setup/cleanup",
       "comparisonTheme": "Java 订阅/取消订阅 / Effect 生命周期；非构造器类比",
       "acceptance": [
-        "挂载/切换/卸载后监听数量正确；StrictMode 开发检查下只执行一次业务动作；派生汇总不靠 Effect"
+        "根 StrictMode 下 Alt+↑ 一次只让 P001 12→13；更换回调、卸载、重挂载不积累监听",
+        "标题按全部商品种类数；等待补货行卸载后不再回调业务；派生汇总不存第二份 state"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1139,8 +1151,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C29"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1153,12 +1165,15 @@
       "startCheckpoint": "C29",
       "endCheckpoint": "C30",
       "files": [
-        "src/services/product-api.js"
+        "src/services/product-api.js",
+        "src/react/ProductDetail.jsx",
+        "src/react/App.jsx"
       ],
       "task": "新增 ProductDetail 与 `src/services/product-api.js`，完成手工详情请求状态机",
       "comparisonTheme": "Java Future 取消经验 / AbortSignal 与过期响应守卫",
       "acceptance": [
-        "P001 慢→P002 快最终只显示 P002；卸载不回写；404/取消/失败/loading 状态准确"
+        "P001 慢/P002 快最终只显示 P002；忽略 signal 的晚成功/晚失败/卸载均不能回写",
+        "旧请求结束不能关闭新请求 loading；A→B→A 按轮次隔离；当前失败可重试"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1166,7 +1181,7 @@
       ],
       "error": {
         "trigger": "P001慢响应在P002快响应后覆盖；旧请求finally关掉新loading",
-        "evidence": "Network显示完成顺序；断点看当前id与返回id；可控延迟复现",
+        "evidence": "Network看文件读取，Sources看读取后的人工处理与闭包归属；受控Promise指定完成顺序，不把人工延时写成HTTP Timing",
         "repair": "Abort与过期守卫覆盖成功/失败/finally；最终P002，取消不报业务失败，卸载不回写",
         "risk": "只mock最终数据没有乱序；固定sleep偶然通过；复用同一个AbortController导致请求立即取消"
       },
@@ -1175,8 +1190,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C30"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1189,12 +1204,18 @@
       "startCheckpoint": "C30",
       "endCheckpoint": "C31",
       "files": [
-        "useProductRequest.js"
+        "src/services/storage.js",
+        "src/react/useProductRequest.js",
+        "src/react/ProductDetail.jsx",
+        "src/react/InventoryProvider.jsx",
+        "src/react/App.jsx"
       ],
       "task": "提取 `useProductRequest.js`、本地快照 Hook，App 增加列表/详情 hash 路由与 URL 筛选",
       "comparisonTheme": "Java 复用函数/实例 / Hook 复用逻辑；路径参数 / 浏览器 URL",
       "acceptance": [
-        "分享并刷新 P004 详情可用；不存在 ID 显示不存在；两个 Hook 实例状态独立；本地改动可恢复"
+        "Hook 实例独立、依赖完整，C30 竞态回归继续通过",
+        "P004 hash 分享/刷新/返回/后退/未知 ID 在严格静态子路径可用",
+        "快照显式保存恢复，坏导入不覆盖好原文；原生默认 storage key 契约不变"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1211,8 +1232,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C31"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1225,14 +1246,19 @@
       "startCheckpoint": "C31",
       "endCheckpoint": "C32",
       "files": [
+        "src/services/inventory-repository.js",
         "src/react/query-options.js",
-        "src/services/repository.js",
-        "src/react/ProductDetail.jsx"
+        "src/react/InventoryProvider.jsx",
+        "src/react/ProductDetail.jsx",
+        "src/react/App.jsx"
       ],
-      "task": "增加 query-options 与浏览器 mock repository，替换详情手工请求；一次明确数据归属迁移",
+      "task": "迁移为 repository 持有可写商品与持久化、Query 管理列表/详情缓存、组件只存草稿和 UI；移除旧 reducer 与手工请求路径",
       "comparisonTheme": "Java Map 缓存经验 / queryKey、失效与生命周期；不等同 HashMap",
       "acceptance": [
-        "P001/P002 缓存隔离；修改后对应查询更新；默认重试策略可解释；持久化只由 repository 写"
+        "P001/P002 按 ID 隔离、同键去重，查询 retry 明确关闭",
+        "await dispatch 完成写入与列表/对应详情刷新；其他 ID 详情不失效",
+        "P004 保存 8 后详情 8/清筛选总库存 57，刷新仍保持；恢复/导入失效 inventory 前缀",
+        "坏数据/模拟写失败/容量失败保留好业务数据，当前入口不再有第二份 products state"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1240,7 +1266,7 @@
       ],
       "error": {
         "trigger": "queryKey不含id，切商品读旧缓存；mutation后未失效；UI与repository双写",
-        "evidence": "Query缓存/Network：P002无请求、key仍旧；比较UI/repository值",
+        "evidence": "Sources repository.get读次数和实际queryKey；mock仓库不发HTTP，不以Network无GET代替缓存证据",
         "repair": "key含必要参数、精确失效，repository单一数据源；两ID隔离、编辑后更新",
         "risk": "用数组索引当缓存身份；迁入Query后旧请求Effect仍在运行；自动重试导致测试拖延未控制"
       },
@@ -1249,8 +1275,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C32"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1264,12 +1290,14 @@
       "endCheckpoint": "C33",
       "files": [
         "src/react/ProductEditor.jsx",
-        "src/react/StockActions.jsx"
+        "src/react/App.jsx"
       ],
-      "task": "在编辑/补货流程加入异步 Action、提交中与乐观反馈，保留失败回滚",
+      "task": "把当前编辑流程接入异步 Action，等待时防重复，失败回滚预览并保留草稿",
       "comparisonTheme": "Java try/finally 的提交流程 / Action 状态；无一一对应 API",
       "acceptance": [
-        "防重复提交；成功更新、失败回滚且保留草稿；useActionState 参数正确；新 API 分级而非全量强制"
+        "useActionState 签名正确；空白拒绝、0 合法",
+        "pending 禁用编辑区；失败后正式库存 3、预览回 3、草稿仍 8",
+        "重试保存 P004=8；全部总库存 57；其他字段不丢失"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1286,8 +1314,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C33"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1301,12 +1329,15 @@
       "endCheckpoint": "C34",
       "files": [
         "src/react/App.jsx",
-        "src/react/ReportPanel.jsx"
+        "src/react/ReportPanel.jsx",
+        "src/react/ReportErrorBoundary.jsx"
       ],
       "task": "用 Profiler 测库存筛选；按需加载 ReportPanel，增加局部错误边界",
       "comparisonTheme": "Java 缓存经验 / useMemo 依赖；任务优先级 / transition 的边界",
       "acceptance": [
-        "测量后再选优化；补货后统计不旧；区分 lazy fallback、请求状态与渲染错误，不能用 memo 掩盖逻辑 bug"
+        "Profiler 对当前六商品筛选有实际提交记录，不用固定毫秒阈值",
+        "ReportPanel 首次展开才加载；P002 补 1 后外设库存 13、价值 491700 分",
+        "局部错误边界隔离报表，列表/编辑草稿仍可用；清楚区分代码等待、请求状态和渲染失败"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1323,8 +1354,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C34"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1337,12 +1368,16 @@
       "startCheckpoint": "C34",
       "endCheckpoint": "C35",
       "files": [
-        "tests/react/"
+        "tests/react/support.jsx",
+        "tests/react/inventory.test.jsx",
+        "tests/e2e/inventory.spec.js"
       ],
       "task": "在 `tests/react/` 补表单校验、创建、失败重试；在 tests/e2e 保留一条跨页冒烟",
       "comparisonTheme": "JUnit / Vitest；UI 用户行为 / RTL；浏览器流程 / Playwright",
       "acceptance": [
-        "用角色/label 断言；await 用户操作和异步 UI；空库存 bug 真能被抓住；解释 Jest 定位，不再写第二套测试"
+        "RTL 用角色/label、await 用户动作与异步条件；空库存真实回归红→绿",
+        "创建后卡片与统计同源，详情失败可由用户重试",
+        "一条严格静态 /js_web/demos/inventory/ 生产冒烟：P004 筛选、详情、刷新、返回；未知路径 404"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1359,8 +1394,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C35"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1373,12 +1408,16 @@
       "startCheckpoint": "C35",
       "endCheckpoint": "C36",
       "files": [
-        "notes/react-review.md"
+        "notes/react-review.md",
+        "tests/react/review.test.jsx"
       ],
       "task": "在当前应用定位派生统计、请求身份、存储边界三个故障，记录 notes/react-review.md",
       "comparisonTheme": "Java 分层排错经验 / Console→Components→Network→Profiler",
       "acceptance": [
-        "每个故障有证据/修复/复现结果；本地库存快照恢复、详情与统计一致；L3 和第三周验收"
+        "旧统计、缓存缺 id、导入提前写入三故障有原始证据、修复与同输入重放",
+        "鼠标补 1 后列表/详情/汇总一致为 53 / 2647700 分",
+        "非法快照不覆盖好数据；坏主记录能从有效备份恢复并保留 damaged 原文",
+        "L3 收尾与严格生产冒烟通过，暂停记录和未提交草稿边界清楚"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1395,8 +1434,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C36"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {

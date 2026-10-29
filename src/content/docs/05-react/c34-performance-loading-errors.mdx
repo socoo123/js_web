@@ -1,0 +1,257 @@
+---
+title: C34 性能、加载与错误诊断
+description: 测量当前库存筛选，按需加载分类报表，用局部错误边界保住仍可操作的库存页。
+sidebar:
+  order: 34
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 17 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C29、C32、C33 · 运行：Node 24、本地 React · 部分示例未运行，已在对应位置标注
+
+## 这一课解决什么问题
+
+库存页只有六件商品，先加缓存再找理由，通常会让代码变复杂。先录下一次筛选，确认成本；再把平时收起的分类报表按需加载。报表即使渲染失败，编辑和补货仍要能用。
+
+<LessonTask lessonId="C34" />
+
+接 C33 自己的完成态，继续在 `inventory/` 修改。只新增报表与局部边界两个模块，保留原来的商品写入路径。
+
+## Java 程序员先看这里
+
+“先找热点再优化”可以直接沿用。React Profiler 测组件树的渲染，浏览器 Performance 看主线程、布局与绘制，Network 看资源。Transition 调整 React 更新的优先级，不等于 Java 线程池，也不会把同步循环移到另一个线程。
+
+<a id="1-先测量是哪一次交互带动了谁"></a>
+
+## 1. 先录一次真实筛选
+
+在 `src/react/App.jsx` 顶部，将原来的 React 导入替换为下面这一行；保留已有的 `InventoryProvider`、`HashRouter` 等导入：
+
+```jsx
+import React, { useState, useRef, Profiler, lazy, Suspense } from "react";
+```
+
+在组件外增加记录函数，再用下面的 App **替换原来的默认导出 App**。它新增可选 prop `inventoryRepository`，并以 `repository={inventoryRepository}` 传给已导入的 InventoryProvider；InventoryView 的其余实现先不动：
+
+```jsx
+function recordRender(id, phase, actualDuration, baseDuration) {
+  console.info("库存渲染", JSON.stringify({ id, phase, actualDuration, baseDuration }));
+}
+export default function App({ inventoryRepository }) {
+  return <InventoryProvider repository={inventoryRepository}><HashRouter>
+    <Profiler id="inventory-view" onRender={recordRender}><InventoryView /></Profiler>
+  </HashRouter></InventoryProvider>;
+}
+```
+
+结果：挂载记录 mount，搜索输入改变会记录 update。`actualDuration` 是这次提交对应的渲染耗时，`baseDuration` 估计整个子树重渲染的成本；两者都不是网络耗时。包住 InventoryView，才包含它内部的筛选计算。
+
+平时 `main.jsx` 仍渲染 `<App />`，不传参数，Provider 继续使用默认浏览器仓库。组件测试可以传 `<App inventoryRepository={独立仓库} />`，让每条用例拥有独立数据；这只是替换外部依赖，不重写 App 或业务校验。
+
+> 未运行验证：React DevTools Profiler 面板的手动录制尚未运行。请按步骤自己尝试。
+
+:::tip[自己尝试 · 本地 React]
+1. 保持六件初始商品。打开 DevTools → Console，清空日志，在搜索框输入 P004，再清空。
+2. 有 React Developer Tools 时，切到 **Profiler**，开始录制，只做同样一次筛选，停止；选中该提交，看 Flamegraph / Ranked。
+3. 在 `notes/next.md` 记数据规模、操作、actualDuration、观察到的组件。先不要加缓存。
+
+预期：筛选只显示扩展坞，清空回六件；记录能对应这次交互。不同电脑不比较固定毫秒阈值。
+:::
+
+[`Profiler`](https://react.dev/reference/react/Profiler) 本身有开销，普通生产构建默认关闭 profiling。这里先在开发环境判断是否值得继续优化；正式性能结论还要选择对应的生产 profiling 构建。
+
+六件商品的筛选与求和很小，默认保留直接计算。Java 给一次简单乘法加缓存也有管理成本；在这里，缓存更不是业务正确性的条件。
+
+<a id="2-缓存组件计算结果和函数身份"></a>
+
+## 2. 缓存必须跟随它读取的输入
+
+<a id="为什么只包-memo-仍然没用"></a>
+
+`memo` 缓存组件渲染，`useMemo` 缓存计算结果，`useCallback` 保留函数身份。新数组、新函数即使内容相同，Object.is 也不同。
+
+<a id="练习-1是哪一个-prop-变了"></a>
+
+**先猜一猜：** 两次筛选结果相同，下面比较相等吗？
+
+```js
+const first = ["P004"].filter(Boolean);
+const second = ["P004"].filter(Boolean);
+console.log(Object.is(first, second)); // → false
+```
+
+因为它们是不同数组。只给子组件包 memo，却每次传入新数组和回调，未必跳过渲染。没有昂贵的消费者，就不用为稳定身份增加代码。
+
+当前 `InventoryView` 保留这三行，汇总只依赖当前可见列表：
+
+```jsx
+  const filtered = selectProducts(products, { query, category });
+  const visible = order === "stock" ? sortByStock(filtered) : filtered;
+  const summary = summarize(visible);
+```
+
+**先猜一猜：** 清空筛选后，P002 从 0 补到 1，总库存和总价值应是多少？答案是 53 和 2647700 分。优化后的界面也必须满足这条合同。
+
+<a id="让两个真正的输入稳定下来"></a>
+
+若测量证明某段计算昂贵，useMemo 的依赖要包含它读取的 products、query 等所有响应式输入；空依赖不是“永久加速”。删掉优化后业务应仍正确。
+
+<a id="3-transition输入先回显结果稍后跟上"></a>
+
+Transition 可以让耗时结果晚于输入回显，但不减少计算量；本课六行数据无需把受控搜索输入改成两套状态。
+
+<a id="compiler-在哪里"></a>
+
+[React Compiler](https://react.dev/learn/react-compiler/introduction) 是构建期优化工具，需要配置接入；安装 React 不会自动启用它。它不能修复错误的数据归属和缺失的业务更新。
+
+<a id="4-lazy-与-suspense等待哪一种东西"></a>
+
+## 3. lazy 报表：首次需要时才取代码
+
+新建 `src/react/ReportPanel.jsx`，完整内容如下。它读取传来的全部 products，不重新请求一份商品，也不把汇总另存 state：
+
+```jsx
+import React from "react";
+import { categories, summarize } from "../core/inventory.js";
+export default function ReportPanel({ products, fail = false }) {
+  if (fail) throw new Error("模拟报表渲染失败");
+  return <section aria-label="分类报表"><h2>分类报表</h2>
+    <table><caption>当前全部库存，按分类汇总</caption>
+      <thead><tr><th scope="col">分类</th><th scope="col">种类</th><th scope="col">库存</th><th scope="col">价值（分）</th></tr></thead>
+      <tbody>{categories.map((category) => {
+        const summary = summarize(products.filter((product) => product.category === category));
+        return <tr key={category}><th scope="row">{category}</th><td>{summary.count}</td><td>{summary.stock}</td><td>{summary.valueCents}</td></tr>;
+      })}</tbody>
+    </table>
+  </section>;
+}
+```
+
+初始外设一行为“外设 / 2 / 12 / 478800”。给 P002 补 1 件后变为“外设 / 2 / 13 / 491700”，与列表使用同一份已保存商品。
+
+第一节的 React 导入已包含 `lazy`、`Suspense`。现在在 App 文件顶层、组件函数之外加入下面两行；不要再静态导入 ReportPanel：
+
+```jsx
+import ReportErrorBoundary from "./ReportErrorBoundary.jsx";
+const ReportPanel = lazy(() => import("./ReportPanel.jsx"));
+```
+
+lazy 必须在组件外声明，避免每次渲染创建新组件身份。它等待模块的 default 导出；第一次渲染 ReportPanel 才调用加载函数。
+
+在 InventoryView 内、return 前加入两项 UI state 和这段 report：
+
+```jsx
+  const [showReport, setShowReport] = useState(false);
+  const [failReport, setFailReport] = useState(false);
+  const report = <>
+    <button aria-expanded={showReport} aria-controls="inventory-report" onClick={() => setShowReport((open) => !open)}>{showReport ? "收起分类报表" : "查看分类报表"}</button>
+    <label><input type="checkbox" checked={failReport} onChange={(event) => setFailReport(event.target.checked)} />模拟报表故障</label>
+    <div id="inventory-report">{showReport && <ReportErrorBoundary>
+      <Suspense fallback={<p role="status">正在加载报表代码…</p>}>
+        <ReportPanel products={products} fail={failReport} />
+      </Suspense>
+    </ReportErrorBoundary>}</div>
+  </>;
+```
+
+在主 return 中，`<ProductList ... />` 结束之后插入 `{report}`。结果：第一次展开等待代码，之后收起再展开复用模块；编辑器不在报表子树里，身份不变。
+
+在 Network 勾 Disable cache，刷新并筛选 `ReportPanel`：展开前没有该模块请求，展开后才有。Vite 生产构建把动态 import 拆成 chunk。这个模块很小，拆分的意义是练习加载边界，不是承诺体积明显下降。
+
+<a id="5-错误边界一个区域失败其他区域继续工作"></a>
+
+## 4. 错误边界只替换失败区域
+
+新建 `src/react/ReportErrorBoundary.jsx`，完整内容如下：
+
+```jsx
+import React, { Component } from "react";
+export default class ReportErrorBoundary extends Component {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch(error, info) { console.error("报表区域失败", error, info.componentStack); }
+  render() {
+    if (this.state.failed) return <p role="alert">报表暂时无法显示。取消模拟故障后，收起再展开；代码下载失败时检查 Network 并刷新。</p>;
+    return this.props.children;
+  }
+}
+```
+
+结果：勾选“模拟报表故障”后，Console 给出 ReportPanel 堆栈，只有报表被错误提示替换。取消勾选，收起再展开，边界卸载重建后可以恢复；列表和未保存草稿仍在。
+
+这是本课唯一的 class 组件。自定义错误边界目前通过这些生命周期实现；它沿组件树捕获后代渲染错误，不是 Java 调用栈外面的一层普通 try/catch。
+
+<a id="重试之前先弄清失败对象"></a>
+
+<a id="报表加载失败点重试仍然失败"></a>
+
+| 等待 / 失败 | 谁负责 | 恢复 |
+| --- | --- | --- |
+| lazy 模块下载中 | Suspense fallback | 等模块完成 |
+| 商品读取中或请求失败 | Query 的状态与重试按钮 | 重试读取 |
+| 报表渲染异常 | 局部错误边界 | 修正输入后重建子树 |
+| lazy 模块下载失败 | 错误边界、Network | 修好资源或网络后刷新；同一个 lazy 会记住失败结果 |
+
+普通 Effect 中启动 fetch，并不会因此让 Suspense 等它；普通事件与定时器异常在各自入口处理。加载提示、请求错误和渲染错误不能混成一个“加载失败”。
+
+## 常见错误与调试
+
+> 未运行验证：下文 Components 与 Sources 面板的手动取证尚未逐项运行。请按步骤自己尝试。
+
+<a id="补货成功价值仍停在旧数字"></a>
+
+**现象**：补货后商品库存变了，报表或总价仍是旧值。**工具**：Components 看当前 products；Sources 找 useMemo 的依赖；运行 `node node_modules/vitest/vitest.mjs run --config tools/performance.config.mjs`。
+
+**证据**：故意把报表计算输入缓存一次，会使第二次渲染仍读取旧数组：
+
+```jsx
+// 有问题的写法：随后把报表中的 products.filter 改成 cachedProducts.filter
+const cachedProducts = React.useMemo(() => products, []);
+```
+
+**原因**：计算读取 products，却没有声明这个输入。**修复**：删掉这行，改回 `products.filter`；当前规模直接计算足够。**确认**：同一条分类统计测试先失败再通过，P002 补 1 后外设库存为 13、价值为 491700 分。还要重复主页面操作，确认总库存 53，不用缓存掩盖业务错误。
+
+## 练习
+
+<a id="练习-2修好依赖再证明业务仍正确"></a>
+
+按步骤完成三个文件，并保留一段 Profiler 实测记录。再打开 P004 编辑，把草稿改为 8但不保存；触发报表故障并恢复。验收：编辑草稿仍是 8，正式商品仍为 3，报表恢复为初始值。
+
+<details>
+<summary>提示</summary>
+
+报表应是编辑器的兄弟节点。只有报表条件子树卸载重建；不要给整个 App 换随机 key，也不要为刷新报表重建 Provider。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+保留上面的局部 ReportErrorBoundary 和同一个 products prop。恢复时改变 showReport 让这段子树重新挂载即可；六件商品的筛选和统计不必加入 useMemo。测量记录写具体操作与实际数值，不写固定“加速倍数”。
+
+</details>
+
+## 项目进度
+
+- 当前应用有实际渲染测量、按需加载报表和局部渲染恢复。
+- P002 补货后列表、汇总、详情、分类报表跟随同一来源更新。
+- 暂停时把“为什么保留直接计算”的判断与观察结果记进 `notes/next.md`。
+
+## 小结
+
+- 先测具体交互，再选择优化；正确性优先。
+- memo、useMemo、useCallback 各缓存不同对象，依赖和身份都要正确。
+- lazy/Suspense 等代码，Query 管请求，错误边界管局部渲染失败。
+- 重建错误边界不一定重试已经失败的 lazy 下载。
+
+自测：Profiler 为什么包在 InventoryView 外？空依赖为何留下旧统计？报表故障为什么不该卸载草稿？下一课把这些用户行为写成测试。
+
+## 延伸阅读
+
+- [React：Profiler](https://react.dev/reference/react/Profiler)
+- [React：useMemo](https://react.dev/reference/react/useMemo)
+- [React：useTransition](https://react.dev/reference/react/useTransition)
+- [React：lazy](https://react.dev/reference/react/lazy)
+- [React：Suspense 的触发条件](https://react.dev/reference/react/Suspense#what-activates-a-suspense-boundary)
+- [React：错误边界](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary)

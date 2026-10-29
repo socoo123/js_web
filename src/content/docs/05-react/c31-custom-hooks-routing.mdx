@@ -1,0 +1,300 @@
+---
+title: C31 自定义 Hooks 与路由
+description: 提取已有请求逻辑，显式保存库存快照，用 hash 地址分享详情和筛选。
+sidebar:
+  order: 31
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 16 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟\
+> 前置：C30 的工作区 · 运行：本地 React、Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+详情的请求已经可靠，现在让它可以复用，并能从地址直接打开 P004。库存改动还要有明确的保存、导入和恢复入口。本课先保持请求行为不变再搬代码，URL 和快照各有一个清楚的数据来源。
+
+<LessonTask lessonId="C31" />
+
+搬移清单：把 `ProductDetail.jsx` 的请求 state/Effect 搬到新建的 `useProductRequest.js`；Provider 增加快照 Hook；`storage.js` 支持独立 key；App 接路由、URL 筛选和快照控件。已有锁包含 React Router，无需再安装。下面逐项完成这些文件。
+
+## Java 程序员先看这里
+
+提取 Hook 类似提取有明确输入/输出的复用逻辑，但它不是单例服务。每次调用仍属于当前组件的 Hook 序列，各自拥有 state 和 Effect。要共享同一份业务数据，继续读同一个 Provider，不能靠“用了同一个 Hook 函数”实现。
+
+## 1. 自定义 Hook：复用行为，各自保存状态
+
+Hook 名称以 `use` 开头，只在组件或 Hook 顶层调用。[React 的自定义 Hook](https://react.dev/learn/reusing-logic-with-custom-hooks)复用的是逻辑，不自动共享 state。
+
+**先猜一猜：** 同时渲染 P001 和 P002 两个详情，点 P001 的“重试详情”，P002 是否也要重新加载？
+
+不需要。两次调用有自己的 attempt、ignore 和 controller。`tools/request-check.test.jsx` 会同时挂载两个真实详情，重试一个，断言另一个既没有新任务也没有被取消。Java 的两个独立对象可以各持有一份状态；Hook 的实例归属由 React 组件调用位置决定。
+
+## 2. 把请求生命周期提取出来，依赖仍要完整
+
+新建 `src/react/useProductRequest.js`。把 C30 `ProductDetail` 的两个 state 和整个 Effect 搬进下面的 Hook，**Effect 内容和依赖原样保留**。完整文件按上下两块相接：
+
+```js
+import { useEffect, useState } from "react";
+import { getProduct } from "../services/product-api.js";
+export function useProductRequest(productId, { fail = false, loadProduct = getProduct } = {}) {
+  const [request, setRequest] = useState({ id: null, status: "loading" });
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    let ignore = false;
+    setRequest({ id: productId, status: "loading" });
+    async function load() {
+      try {
+        const product = await loadProduct(productId, { signal: controller.signal, fail });
+        if (!ignore) setRequest({ id: productId, status: "success", product });
+      } catch (error) {
+        if (!ignore && error.name !== "AbortError")
+          setRequest({ id: productId, status: "error", error: error.message });
+      }
+    }
+```
+
+```js
+    load();
+    return () => { ignore = true; controller.abort(); };
+  }, [productId, fail, attempt, loadProduct]);
+  const visible = request.id === productId ? request : { status: "loading" };
+  return { request: visible, retry: () => setAttempt((previous) => previous + 1) };
+}
+```
+
+接着把 `ProductDetail.jsx` 全部替换成下面的薄视图，删除原来的请求 Effect、两个 state 和 API 导入：
+
+```jsx
+import React from "react";
+import { useProductRequest } from "./useProductRequest.js";
+export default function ProductDetail({ productId, fail = false, loadProduct }) {
+  const { request: visible, retry } = useProductRequest(productId, { fail, loadProduct });
+  return <section aria-label="商品详情">
+    {visible.status === "loading" && <p role="status">正在加载 {productId}</p>}
+    {visible.status === "error" && <p role="alert">{visible.error}</p>}
+    {visible.status === "success" && <p>{visible.product.id} {visible.product.name}：库存 {visible.product.stock}</p>}
+    <button onClick={retry}>重试详情</button>
+  </section>;
+}
+```
+
+结果：P001 慢/P002 快、失败、关闭和重试行为与 C30 相同；`loadProduct` 仍可注入受控 Promise。不要在调用处写一个每次新建的加载器箭头函数，否则它的新身份会不断更换 Effect 输入。默认加载器来自模块，身份稳定。
+
+## 3. 存储 Hook：先约定范围，再封装读写
+
+快照是显式操作：修改 reducer **不自动写 localStorage**，点保存才写。主快照坏了先显示错误，保留原文；恢复有效备份或导入有效文件才能改变它。继续复用 C14 的格式和字段校验，不建第二套存储规则。
+
+先改 `src/services/storage.js` 的三个函数签名：`saveProducts(storage, products, key = storageKey)`、`readProducts(storage, key = storageKey)`、`recoverProducts(storage, key = storageKey)`。在这三个函数的**函数体内**，把每个 `storageKey` 替换成 `key`，包括 `:backup` 和 `:damaged` 的前缀；保留顶层的 vanilla storageKey 常量以及默认参数里的 storageKey。decodeSnapshot/encodeSnapshot 不改。旧原生页不传 key，行为不变。
+
+把 `InventoryProvider.jsx` 替换为接下来的三块，依次拼成一个文件。第一块是本地快照 Hook 的初始化：
+
+```jsx
+import React, { createContext, useContext, useReducer, useState } from "react";
+import seed from "../../data/products.json" with { type: "json" };
+import { inventoryReducer } from "./inventory-reducer.js";
+import { readProducts, saveProducts, recoverProducts, decodeSnapshot, encodeSnapshot } from "../services/storage.js";
+export const reactStorageKey = "js_web:inventory:react:v2";
+export function useInventorySnapshot() {
+  const [initial] = useState(() => {
+    try { return { products: readProducts(localStorage, reactStorageKey) ?? structuredClone(seed), message: "" }; }
+    catch (error) { return { products: structuredClone(seed), message: `读取失败：${error.message}，可恢复备份或导入快照` }; }
+  });
+  const [message, setMessage] = useState(initial.message);
+```
+
+初始化只读、不写。StrictMode 的开发检查不会因此重复保存；主副本损坏时显示固定数据供继续操作，但坏原文仍留在存储。以下三个动作只在事件调用时执行：
+
+```js
+  function save(products) {
+    try { saveProducts(localStorage, products, reactStorageKey); setMessage("本地快照已保存"); }
+    catch (error) { setMessage(`保存失败：${error.message}`); }
+  }
+  function recover() {
+    try { const products = recoverProducts(localStorage, reactStorageKey); setMessage("备份已恢复"); return products; }
+    catch (error) { setMessage(`恢复失败：${error.message}`); return null; }
+  }
+  function importText(text) {
+    try {
+      const products = decodeSnapshot(text);
+      saveProducts(localStorage, products, reactStorageKey);
+      setMessage("导入完成"); return products;
+    } catch (error) { setMessage(`导入失败：${error.message}`); return null; }
+  }
+  return { initial: initial.products, message, save, recover, importText, report: setMessage };
+}
+```
+
+最后接上 Provider。商品仍只有 reducer 这一份可写 state；Hook 的 initial 只用于首次初始化，不随每次修改双写。
+
+```jsx
+const InventoryContext = createContext(null);
+export function InventoryProvider({ children }) {
+  const snapshot = useInventorySnapshot();
+  const [products, dispatch] = useReducer(inventoryReducer, snapshot.initial);
+  const replace = (next) => { if (next !== null) dispatch({ type: "replaced", products: next }); };
+  const controls = {
+    message: snapshot.message, report: snapshot.report, save: () => snapshot.save(products),
+    recover: () => replace(snapshot.recover()),
+    importText: (text) => replace(snapshot.importText(text)),
+    exportText: () => encodeSnapshot(products),
+  };
+  return <InventoryContext value={{ products, dispatch, snapshot: controls }}>{children}</InventoryContext>;
+}
+export function useInventory() {
+  const value = useContext(InventoryContext);
+  if (value === null) throw new Error("需要 InventoryProvider");
+  return value;
+}
+```
+
+结果：保存 P001=15 后刷新仍为 15；导入 `{bad` 报错且好原文不变。先校验、再持久化、最后 replaced，失败返回 null 不替换业务数据。它类似 Java 应用先验证 DTO 再提交，持久化目标在浏览器同源存储中。
+
+## 4. 路由：把 URL 映射成组件树
+
+使用 [`HashRouter`](https://reactrouter.com/api/declarative-routers/HashRouter)：`#` 后面的地址不发给服务器，所以 Pages 只需要已有的静态入口。不要把 dev 的 history fallback 当成静态服务器支持任意路径。
+
+在 `App.jsx` 导入 React Router 的六个名称，并替换 App 的返回内容；Provider 仍在 Router 外，切换详情不重建库存。
+
+```jsx
+import { HashRouter, Routes, Route, Link, useParams, useSearchParams } from "react-router";
+// App 的返回值：
+return <InventoryProvider><HashRouter><InventoryView /></HashRouter></InventoryProvider>;
+```
+
+<a id="地址变了页面只剩公共导航" />
+
+删除 InventoryView 的 detailId state。把行内“详情”按钮替换成下块第一行的 Link；把原来的“关闭详情”按钮和条件 ProductDetail 替换成剩下的返回链接与 Routes。失败复选框继续保留在 Routes 前面。
+
+```jsx
+<Link to={{ pathname: `/products/${product.id}`, search: `?${searchParams}` }}>详情 {product.id}</Link>
+
+<Link to={{ pathname: "/", search: `?${searchParams}` }}>返回列表</Link>
+<Routes>
+  <Route path="/" element={<p>选择商品查看详情</p>} />
+  <Route path="/products/:id" element={<DetailRoute fail={failRead} />} />
+  <Route path="*" element={<p>未找到页面</p>} />
+</Routes>
+```
+
+在 App 文件最后、InventoryView 函数外增加：
+
+```jsx
+function DetailRoute({ fail }) {
+  const { id } = useParams();
+  return <ProductDetail productId={id} fail={fail} />;
+}
+function download(text) {
+  const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  const link = document.createElement("a"); link.href = url; link.download = "inventory.json"; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+```
+
+结果：`#/products/P004` 显示扩展坞，`#/products/P999` 显示商品不存在，`#/unknown` 显示未找到页面。路径参数是字符串，不自动校验商品是否存在。`download` 用于下一步的快照导出，用完释放 Blob URL。
+
+## 5. 筛选放进 URL，只保留一个来源
+
+删除 App 的 query/category/order 三个 useState，替换成：
+
+```js
+const [searchParams, setSearchParams] = useSearchParams();
+const query = searchParams.get("q") ?? "";
+const rawCategory = searchParams.get("category");
+const category = ["外设", "显示器", "配件", "音频"].includes(rawCategory) ? rawCategory : "全部";
+const order = searchParams.get("order") === "stock" ? "stock" : "id";
+function changeFilter(key, value) {
+  const next = new URLSearchParams(searchParams);
+  if (value === "" || value === "全部" || (key === "order" && value === "id")) next.delete(key);
+  else next.set(key, value);
+  setSearchParams(next, { replace: key === "q" });
+}
+```
+
+<a id="练习-1预测参数复制" />
+
+三个控件的 onChange 分别改为 `changeFilter("q", event.target.value)`、`changeFilter("category", event.target.value)`、`changeFilter("order", event.target.value)`；value 和原有派生计算不变。复制参数后再改，不原地修改 Router 给的对象；搜索输入使用 replace，不让每个字符都占一条后退历史。
+
+不要删除 App 的 heading/trigger ref、closeEditor 或 saveProduct 的 staysVisible 判断。它们现在直接读取 URL 派生的 query/category，仍负责在保存后商品被筛掉时把焦点送回标题。编辑器的 onCancel 继续写 `() => closeEditor()`。保存函数开头的只读 next 候选、validateProducts(next)、summarize(next) 及对应 core 导入也原样保留；本课不替换整个保存函数。
+
+<a id="练习-3让排序跟着分享地址走" />
+
+**先猜一猜：** 打开 `#/products/P004?q=P004&order=unknown`，排序下拉和列表各是什么？
+
+排序回退为编号；列表只剩 P004，详情也为 P004。URL 枚举要归一化，不能让 `<select>` 的值与可见选项不一致。Java 请求参数也需要边界校验；这里参数变化还会驱动当前组件树。
+
+最后在 `useInventory()` 解构中加 `snapshot`，在 Routes 后、ProductEditor 前插入：
+
+```jsx
+<section aria-label="本地库存快照">
+  <button onClick={snapshot.save}>保存本地快照</button><button onClick={snapshot.recover}>恢复备份</button>
+  <button onClick={() => download(snapshot.exportText())}>导出快照</button>
+  <label>导入快照 <input type="file" accept="application/json" onChange={async (event) => {
+    const input = event.currentTarget; const file = input.files[0];
+    try { if (file) snapshot.importText(await file.text()); }
+    catch (error) { snapshot.report(`文件读取失败：${error.message}`); }
+    finally { input.value = ""; }
+  }} /></label>
+  <p role="status">{snapshot.message}</p>
+</section>
+```
+
+结果：保存、恢复、导入均经过 Provider 提供的入口；列表和统计一起更新。事件开始就捕获 input，await 后不依赖 event.currentTarget；finally 清空的是本次文件控件，不改请求 loading。清空后可再次选择同一文件。
+
+## 常见错误与调试
+
+<a id="hook-提取后只记得第一件商品" />
+<a id="练习-2修复不更新的详情" />
+
+1. **现象**：在 useProductRequest 的依赖数组删掉 productId，P001 加载后点 P002，地址已变，详情却停在加载或旧结果。
+2. **工具**：React DevTools → Components 看 ProductDetail 的 productId；Chrome → Sources 看 Hook 的 Effect，Network 看有无 P002 查询参数。
+3. **证据**：prop 为 P002，却没有新 setup 和读取。旧回调仍属于 P001。运行 `npm run lab -- lint` 会指出缺少依赖。
+4. **原因**：只把代码搬进 Hook，不会消除它对参数的响应式读取。
+5. **修复**：恢复 `[productId, fail, attempt, loadProduct]`；不要关闭 lint，也不要给组件随意加随机 key 逃过问题。
+6. **确认**：同一地址切换正确；请求回归从失败变通过，两个实例互不干扰，刷新 P004 hash 地址仍可用。
+
+## 练习
+
+:::tip[自己尝试 · 本地 React]
+在同一工作区完成搬移和连接。打开 `#/products/P004?q=P004`，复制地址到新标签并刷新，再用“返回列表”和浏览器后退。编辑 P004 为 8，点保存本地快照后刷新；导出后再导入一个损坏 JSON，确认库存和存储原文都保留。演练缺 productId 依赖并修复，最后运行检查。
+
+预期：P004 保存后列表库存 8；清空搜索总库存 57；详情此时仍读静态起始 3。未知 ID 有明确错误。刷新不会因 hash 向服务器请求不存在的 HTML。
+:::
+
+<details>
+<summary>提示</summary>
+
+检查搬移清单：ProductDetail 不再保留请求 state；App 不再保留 detailId 和三份筛选 state；storage 的默认 key 留给原生页；React 快照使用独立 key。先保存有效快照两次，才有一份可恢复的备份。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+Hook 的输入与依赖一起搬，返回 request/retry；Provider 保存库存，URL 保存导航与筛选，局部表单保存草稿。快照只响应显式事件，校验失败不 dispatch replaced。hash 不发送给服务器，因此静态子路径刷新仍取得相同入口。
+
+</details>
+
+## 项目进度
+
+- 请求逻辑已抽出且实例独立；旧竞态行为继续受测试保护。
+- hash 分享、返回、刷新与未知路径可用；筛选只有 URL 一个来源。
+- 快照可显式保存/导入/恢复，坏数据不覆盖好原文。将 C31、已改文件和下一步写入 `notes/next.md`。
+
+## 小结
+
+- Hook 复用有状态逻辑，不自动共享实例状态。
+- 抽取后依赖、清理、取消和错误策略仍要保持。
+- URL 管导航/筛选，reducer 管当前商品，存储只管显式快照。
+- HashRouter 适配静态托管，路径参数仍需校验。
+
+自测：重试 A 为什么不重试 B？为什么 initial 不随商品变化写回？真实静态服务器与开发 fallback 有什么区别？
+
+## 延伸阅读
+
+- [React：复用自定义 Hook](https://react.dev/learn/reusing-logic-with-custom-hooks)
+- [React：exhaustive-deps](https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps)
+- [React Router：HashRouter](https://reactrouter.com/api/declarative-routers/HashRouter)
+- [React Router：useSearchParams](https://reactrouter.com/api/hooks/useSearchParams)
+- [MDN：URLSearchParams](https://developer.mozilla.org/zh-CN/docs/Web/API/URLSearchParams)

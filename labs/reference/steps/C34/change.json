@@ -1,0 +1,4 @@
+{
+  "previous": "C33",
+  "files": ["src/react/App.jsx", "src/react/ReportPanel.jsx", "src/react/ReportErrorBoundary.jsx"]
+}

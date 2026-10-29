@@ -1,0 +1,289 @@
+---
+title: C24 数组更新、key 与派生数据
+description: 把当前商品集合统一交给 App，用不可变更新接通补货、增删、筛选与排序，让行备注跟随商品身份。
+sidebar:
+  order: 24
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 12 天** · 阅读跟做约 50 分钟 · 实作约 40 分钟<br />
+> 前置：C05、C08、C22、C23 · 运行：本地 React、Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+上一课 P001 操作区能补货，外面的静态卡片却还是 12。现在把**唯一可写的商品集合**提升到 App，操作区只报告“哪件商品补多少”。卡片、筛选列表和汇总都读取这一份数据，补货后一起变化。
+
+同一任务再接上新增、删除、筛选和排序，并用行备注观察组件身份。完成后，不会因为删除键盘而把它的备注移给鼠标，也不需要维护第二份“筛选商品 state”。
+
+<LessonTask lessonId="C24" />
+
+接自己的 C23 工作区，目录仍是 `inventory/`。主要改动是 `src/react/App.jsx`、`ProductList.jsx`、`StockActions.jsx` 三个文件；另在 `src/core/collections.js` 末尾追加一个编号函数。下面给出完整插入清单，不改 ProductCard、Toolbar、数据文件和包配置。
+
+## Java 程序员先看这里
+
+`[...products]` 和 `new ArrayList<>(old)` 都只复制集合外壳，里面的商品对象仍可能相同。React state 还要求保留旧快照：既创建新数组，也创建被修改的商品。key 可以借业务主键来理解，但 React 用它匹配的是**组件及其局部状态**，不只是数据行。
+
+<a id="1-更新对象保留旧快照提交新引用"></a>
+<a id="为什么直接改字段页面可能没反应"></a>
+
+## 1. 来源放 App，结果随渲染计算
+
+把 `src/react/App.jsx` **整份替换**。这个文件分三段展示：先复制下面的导入和函数开头，不要在此处关闭 App。
+
+```jsx
+import React, { useState } from "react";
+import seed from "../../data/products.json" with { type: "json" };
+import { selectProducts, sortByStock, summarize, updateStock, nextProductId } from "../core/inventory.js";
+import ProductList from "./ProductList.jsx";
+import Toolbar from "./Toolbar.jsx";
+import StockActions from "./StockActions.jsx";
+export default function App() {
+  const [products, setProducts] = useState(() => structuredClone(seed));
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("全部");
+  const [order, setOrder] = useState("id");
+  const filtered = selectProducts(products, { query, category });
+  const visible = order === "stock" ? sortByStock(filtered) : filtered;
+  const summary = summarize(visible);
+```
+
+初始 summary 为 6 种、52 件、2634800 分。只保存商品与用户选择的三个条件；filtered、visible、summary 是**派生数据**，每次渲染从当前输入重算，没有自己的 setter。
+
+本页汇总明确采用**当前筛选结果**：搜索 P004 后为 3 件、89700 分，清空搜索后回到 52 件、2634800 分。若要全量口径，改成 `summarize(products)` 即可，但工具栏与文字也要说明口径。这里始终保持 `summarize(visible)`。
+
+`structuredClone(seed)` 只在初始化时生成独立起始数据。它不是“每次渲染都重置库存”；初始化函数和 updater 一样应保持纯粹。Java 的局部查询结果可以当场计算，这里也无需为了缓存六条记录多维护一份长期字段。
+
+<a id="2-数组更新复制到真正变化的那一层"></a>
+<a id="把增改删写成数组变换"></a>
+
+## 2. 不可变更新：复制到真正变化的那一层
+
+在 App 中紧接上段，加入补货和新增函数：
+
+```jsx
+  function restock(id, amount) {
+    setProducts((previous) => {
+      const product = previous.find((item) => item.id === id);
+      if (!product || product.stock + amount > 99999) return previous;
+      return updateStock(previous, id, product.stock + amount);
+    });
+  }
+  function addSample() {
+    setProducts((previous) => {
+      const id = nextProductId(previous);
+      return id ? [...previous, { id, name: "新商品", category: "配件", stock: 0, priceCents: 0, tags: [] }] : previous;
+    });
+  }
+```
+
+给 P002 补一件，新数组中的 P002 为 1，旧数组中的 P002 仍为 0。`updateStock` 是 C08 已实现的纯函数，第三个参数是**目标库存**，不是增量，所以这里先在 updater 内找到待处理商品，再计算 `product.stock + amount`。
+
+**先猜一猜：** 只复制数组，能保护旧库存吗？这个普通 JS 片段可在 `npm run lab -- console` 中运行；products 是该 Console 提供的独立固定数据。
+
+```js
+// 有问题的写法：商品对象仍共享
+const before = structuredClone(products);
+const after = [...before];
+after[0].stock += 1;
+console.log(before === after, before[0] === after[0]); // false true
+console.log(before[0].stock, after[0].stock); // 13 13
+```
+
+数组不同，商品却是同一个。正确规则是新数组加新目标对象：`map` 匹配 id 时返回 `{ ...product, stock }`，其他商品保持原引用。要改 tags 时，再复制 tags 那一层。Java 浅复制集合也有相同的元素共享问题。[更新数组 state](https://react.dev/learn/updating-arrays-in-state)
+
+展开先保留旧字段，后面的 stock 再覆盖；倒写成 `{ stock: 13, ...product }` 会被旧库存覆盖。useState 的 setter 接收完整下一值，不会自动合并字段补丁。商品对象若只返回 `{ stock: 13 }`，name、id 等字段就丢了。
+
+在 `src/core/collections.js` **末尾追加**下面函数，原有 Inventory、Map/Set 与排序函数保留。`src/core/inventory.js` 已有 `export * from "./collections.js"`，所以不需改导出门面。
+
+```js
+export function nextProductId(products) {
+  const number = Math.max(0, ...products.map((product) => Number(product.id.slice(1)))) + 1;
+  return number > 999 ? null : `P${String(number).padStart(3, "0")}`;
+}
+```
+
+初次新增得到 P007，再新增为 P008；P999 已存在时返回 null，禁用新增。编号在**创建记录时**确定，不在渲染行时随机生成。这个本地练习允许删除末尾后复用编号，长期业务标识通常由后端分配。
+
+<a id="4-派生数据保存来源在渲染时计算结果"></a>
+<a id="排序副本保留源数组"></a>
+
+## 3. 接通界面：事件回到数据拥有者
+
+在 App 的两个处理函数后加入第三段，它包含 return 和 App 的结束大括号：
+
+```jsx
+  return <main><h1>React 库存工作台</h1>
+    <Toolbar count={visible.length}>
+      <label>搜索 <input placeholder="名称或编号" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+      <label>分类 <select aria-label="分类" value={category} onChange={(event) => setCategory(event.target.value)}>
+        {["全部", "外设", "显示器", "配件", "音频"].map((name) => <option key={name}>{name}</option>)}
+      </select></label>
+      <label>排序 <select aria-label="排序" value={order} onChange={(event) => setOrder(event.target.value)}><option value="id">编号</option><option value="stock">库存升序</option></select></label>
+      <button onClick={addSample} disabled={nextProductId(products) === null}>新增示例商品</button>
+    </Toolbar>
+    <p id="summary">库存 {summary.stock} / 价值 {summary.valueCents} 分</p>
+    <ProductList products={visible} renderActions={(product) => <>
+      <StockActions product={product} onRestock={restock} />
+      <button onClick={() => setProducts((previous) => previous.filter((item) => item.id !== product.id))}>删除 {product.id}</button>
+    </>} />
+  </main>;
+}
+```
+
+输入框的 value 来自 query，输入事件把新文本交给 setQuery；select 同理。筛选先 filter，排序再用 `sortByStock` 的副本；源数组不会被原地 sort。删除使用当前商品 id，filter 返回新数组。清空搜索和分类后，隐藏商品仍然存在。
+
+`renderActions` 返回 Fragment，让补货区和删除按钮一起成为卡片内容而不添加一层 DOM。数据向下，事件意图向上：`StockActions → onRestock(id, amount) → App → setProducts → 新 props`。
+
+**整份替换** `src/react/StockActions.jsx`，删除上一课的 useState、updateStock 导入、add 函数与局部 stock：
+
+```jsx
+import React from "react";
+export default function StockActions({ product, onRestock }) {
+  function restockThree() {
+    onRestock(product.id, 1);
+    onRestock(product.id, 1);
+    onRestock(product.id, 1);
+  }
+  function restockLater() {
+    setTimeout(() => onRestock(product.id, 3), 3000);
+  }
+  return <section aria-label={`${product.id} 补货操作`}>
+    <p role="status">{product.id} 当前库存 {product.stock} 件</p>
+    <button type="button" disabled={product.stock > 99996} onClick={restockThree}>连续补三件</button>
+    <button type="button" disabled={product.stock >= 99999} onClick={() => onRestock(product.id, 1)}>立即补一件</button>
+    <button type="button" disabled={product.stock > 99996} onClick={restockLater}>延迟补三件</button>
+  </section>;
+}
+```
+
+现在每件商品都能补货，卡片和操作区库存一致。三次回调最终进入 App 的函数式队列，P001 从 12 到 15；延迟期间立即 +1 仍得到 16。定时回调捕获的是被点击商品的 id，数量累计则根据 App 队列中的待处理状态计算。
+
+若把 visible 另存 state，只在初始化时筛选一次，补货后它还可能引用旧商品。当前代码直接重算，避免这层同步。Java 中缓存查询结果也有失效责任；这里六件数据直接计算更简单。
+
+<a id="3-key组件状态跟随身份而不是显示位置"></a>
+
+## 4. key：备注跟商品，不跟当前第几行
+
+**整份替换** `src/react/ProductList.jsx`。ProductRow 仍放在同一文件顶层，不嵌套定义在 ProductList 内：
+
+```jsx
+import React, { useState } from "react";
+import { ProductCard } from "./ProductCard.jsx";
+export default function ProductList({ products, renderActions }) {
+  return <section id="list" aria-label="商品列表">
+    {products.length === 0 && <p role="status">没有匹配的商品。</p>}
+    {products.map((product) => <ProductRow key={product.id} product={product} renderActions={renderActions} />)}
+  </section>;
+}
+function ProductRow({ product, renderActions }) {
+  const [note, setNote] = useState("");
+  return <ProductCard product={product}>
+    <label>{product.id} 行备注 <input value={note} onChange={(event) => setNote(event.target.value)} /></label>
+    {renderActions?.(product)}
+  </ProductCard>;
+}
+```
+
+备注是尚未保存的用户输入，与业务库存不同，适合局部 state。`value` 与 onChange 把输入和 note 接起来；它不会改商品的 name。每个 ProductRow 由自己的 key 关联这份局部状态。
+
+**先猜一猜：** P001 备注写“键盘待盘点”，P002 写“鼠标待盘点”。删除 P001 后，P002 应留哪份备注？若 key 改成 index 呢？
+
+稳定 id 下保留“鼠标待盘点”。索引 key 则把旧 key=0 的行复用于 P002，留下“键盘待盘点”。商品 prop 已换，组件 state 却跟了旧位置。key 应放在 map **直接返回的元素**上，这里就是 ProductRow。[列表的 key](https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key)
+
+key 只需同级唯一，不作为普通 prop 传入；业务更新仍读 product.id。随机 key 会使每次渲染重建行并清空输入。筛选把一行移出树时也会卸载它，重新显示会初始化空备注；key 不是跨卸载保存草稿的仓库。Java 主键的类比到“匹配记录”为止，React 还用它关联 UI 状态。
+
+## 常见错误与调试
+
+<a id="补货调用了-setter页面仍是-12"></a>
+
+### 数组改了，页面仍是旧库存
+
+在 App 中，用下面错误版本**替换整个 restock 函数**，只用于复现：
+
+```jsx
+// 有问题的写法：修改 state 内的对象，再交回同一个数组
+function restock(id, amount) {
+  const product = products.find((item) => item.id === id);
+  product.stock += amount;
+  setProducts(products);
+}
+```
+
+1. **现象**：刷新到 12，点 P001 的立即补一件，页面仍显示 12。
+2. **工具**：Sources 打开 App，在字段赋值行设断点，点击后单步到 setter 前；Components 选 App 查看商品 state。
+3. **证据**：内存里 stock 已是 13，DOM 仍是 12；setter 收到的仍是原数组，`Object.is(products, products)` 为 true。
+4. **原因**：React 按 Object.is 比较 state，相同引用可以跳过更新；输入对象也已被污染。
+5. **修复**：恢复第 2 节的函数式 updater，调用 updateStock 返回新数组与新目标记录，而不是只套一层 `[...products]`。
+6. **确认**：完整刷新后连续点两次立即补货，卡片与操作区依次为 13、14，汇总也增加。`npm run lab -- check C24` 的库存与旧快照回归从失败恢复通过。
+
+<a id="删除后商品名称和草稿不属于同一件商品"></a>
+
+### 商品正确，备注却属于另一行
+
+将 ProductList 中的 map 改成 `(product, index)`，key 改为 `index`，再刷新复现：
+
+1. **现象**：分别填写键盘/鼠标备注，删除 P001，P002 留下键盘备注。
+2. **工具**：Components 选删除后第一行 ProductRow，展开 props.product 与 Hooks → State；Sources 查看 map。
+3. **证据**：product.id 已为 P002，note 却是“键盘待盘点”；key 对应的是旧位置 0。
+4. **原因**：索引匹配了仍存在的位置，不是仍存在的商品身份。
+5. **修复**：改回 `key={product.id}`，map 的 index 参数也删掉。
+6. **确认**：刷新重新填写、删除；P002 保留自己的备注。再填写 P004 备注并按库存排序，它仍跟随 P004。同一组件回归恢复通过。
+
+## 练习
+
+<a id="练习-1新数组里的对象是谁"></a>
+<a id="练习-2把三组错误修到回归全通过"></a>
+<a id="练习-3增加仅看售罄条件"></a>
+
+### 必做：让当前列表成为一份数据的不同视图
+
+:::tip[自己尝试 · 本地 React]
+1. 按四个文件的清单完成任务，检查初始 52 件、2634800 分。
+2. 刷新后搜索“鼠标”，给 P002 补一件。应只显示它，汇总为 1 件、12900 分；清空搜索后全量为 53 件、2647700 分。
+3. 给 P004 写备注，按库存升序，备注仍跟随 P004；再复现并修好两个主错误。
+4. **重新刷新，从六件固定商品开始**。不设筛选，给 P002 补一件，再删除 P001、新增两次；确认搜索为空、分类为“全部”，得到 P007、P008，总商品数为 7，库存为 41、价值 2168900 分。
+5. 执行 `npm run lab -- check C24`；在 `notes/next.md` 记录结果。
+
+预期：卡片、操作区和当前结果汇总同步；排序不改业务身份，刷新恢复固定六商品。
+:::
+
+<details>
+<summary>提示</summary>
+
+先确认操作都回到 App；StockActions 不再有 stock state。检查 id 而非当前行号；新增编号函数只追加到 collections，别覆盖已有集合规则。搜索隐藏一行会卸载局部备注，所以身份实验先保持全部商品可见。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+App 的三段依次拼接成一个文件，两个组件分别整份替换，collections 只追加编号函数。第 4 步从刷新后的 52 件开始，补鼠标后为 53，删除键盘的 12 件后剩 41；两件 0 库存、0 分的新商品只增加种类。筛选结果、排序与汇总全部由当前来源计算，没有第二份商品 state 需要同步。
+
+</details>
+
+## 项目进度
+
+- App 保存唯一商品集合；StockActions 只通过 `onRestock(id, amount)` 报告意图。
+- 增删改返回新数组，列表用业务 id 匹配行状态，当前筛选汇总与可见数据一致。
+- 第二周的原生页、Node 报表与 core 仍保留；本课不是 L3 终点，下一步在当前应用加入正式编辑表单。
+
+## 小结
+
+- 只复制数组不够，被修改的商品对象也必须替换。
+- state 保存来源与用户选择，派生列表和汇总当场计算。
+- 事件按商品 id 更新；key 按 id 关联同级组件状态。
+- 局部备注可以有 state，但重复保存商品或筛选列表会引入同步问题。
+
+自测：updateStock 的第三个参数为何不是 amount？为什么两层新引用缺一不可？索引 key 怎样让备注错位？筛选后的汇总为什么不再是 52？
+
+下一课接入名称、库存和价格表单，处理文本输入与校验。
+
+## 延伸阅读
+
+- [React：更新对象 state](https://react.dev/learn/updating-objects-in-state)
+- [React：更新数组 state](https://react.dev/learn/updating-arrays-in-state)
+- [React：渲染列表与 key](https://react.dev/learn/rendering-lists)
+- [React：选择 state 结构](https://react.dev/learn/choosing-the-state-structure)
+- [React：保留和重置 state](https://react.dev/learn/preserving-and-resetting-state)
+- [React：useState 的相同值检查](https://react.dev/reference/react/useState#ive-updated-the-state-but-the-screen-doesnt-update)

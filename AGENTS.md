@@ -5,13 +5,18 @@
 ## 续做时先读
 
 1. `docs/STATUS.md`：当前进度和下一步。
-2. `docs/PLAN.md`：总约束、项目数据与阶段、质量门禁、任务队列。
+2. `docs/PLAN.md`：三阶段收尾范围、质量门禁、子 agent 执行与主 agent 验收协议。
 3. `docs/CONTENT_GUIDE.md`：写作硬约束。**写或改任何课程之前必须读完。**
-4. `docs/CURRICULUM.md`：本课那一行和本周的写作范围。
+4. `docs/CURRICULUM.md`：本课那一行和本周的写作范围；`labs/README.md`：五个 Lab 的起点、业务场景与工作区契约。
 
 ## 当前改版任务
 
-2026-10-28：用户要求先 review 贯穿大项目、几个 Lab、Java/JS 并排和逐章错误方案，再交另一位 agent 实现；当前提案为 5 个 Lab。旧 PLAN 已由新的改版计划替代；新目录和 Lab 命令按 R 任务逐步落地，实际范围以 STATUS 与练习 README 为准。用户已明确授权实施与逐批发布；先读 STATUS「下一步」确认 R 任务阶段，不能把试做通过当成全部迁移完成。逐章错误见 `docs/DEBUG_TESTING.md`，页面规格与审阅稿见 `docs/ARCHITECTURE.md`、`docs/review/lesson-layout.html`。
+2026-10-29：用户要求替换旧计划，保留有效成果，明确 Lab，并在新窗口由指定子 agent 实施、主 agent 验收后交接下一阶段。当前唯一队列为 **A React → B 组件库/UI5 → C 交付收尾**，旧 R0–R9 仅为历史。L1/L2 已发布基线保留；实际完成范围以 STATUS 与发行记录为准。
+
+- 每个新窗口只完成 STATUS 指定阶段。主 agent 按 PLAN §7 **同时启动 4 个** `general` 子 agent，均用 `openai/gpt-6.1-sol#max`、`background: true`；主 agent 不计入四个。先核验模型可用性，不静默换模型或减为一路。
+- 四路按 PLAN §7.1 分工，在包含已接管未提交成果的隔离副本工作；共享文件由主 agent 集成，子 agent 不在主目录争抢写入。四路全部交稿、返修结束后，主 agent 集成并独立验收发布，确认 Pages 与线上结果后统一返回四路结果和阶段结论。
+- 主 agent 最终回复生成可复制到全新窗口的接续段落，用户清理上下文后再开启下一阶段；不在子任务仍运行时提前交接。失败继续本阶段，C 成功后结束改版。子 agent 不自行提交推送，不向下委派；返修复用原 session，同时活跃子 agent 最多 4 个。完整协议见 PLAN §7–8。
+- 继承的未提交 React steps、catalog、锁和检查器先审阅再复用，不重置或批量删除；试做/implemented 不等于正文迁移或发布完成。逐章错误与页面规格继续见 `docs/DEBUG_TESTING.md`、`docs/ARCHITECTURE.md`。
 
 ## 用户的要求（不可改变）
 
@@ -42,11 +47,11 @@
 
 - 验证状态必须真实：页首写一行，没运行过的例子在它前面标注，明细写在 `examples/cNN/README.md`。没执行过的例子不能写「已验证」。
 - 不要把规划写成已完成，不要把资料核对写成运行通过，不要把失败写成已上线。
-- 每完成一个任务就按 STATUS 末尾的规则更新 STATUS，写明下一项任务。
+- 每完成一批就按 STATUS 更新规则写实际状态；每阶段证据放 `labs/records/A.md`、`B.md`、`C.md`，不能提前生成通过记录。
 
 ## 文章完成后的 GitHub 同步
 
-用户已授权：每次生成文章后，完成 PLAN §6 的每课门禁，更新 STATUS，再把本次的文章、示例、D2 源码与 SVG 及相关站点改动提交并推送到 `origin`（`socoo123/js_web`），不必再请求许可。
+用户已授权：文章完成后按 PLAN §6 完成每课检查与发布批次门禁，由主 agent 审核并将本次的文章、示例、D2 源码/SVG 和相关改动提交推送到 `origin`（`socoo123/js_web`），不必再请求许可。子 agent 交稿后由主 agent 统一发布；STATUS 的已发布状态在实际核验后更新。
 
 - 在 `main` 上正常提交，提交信息要明确，例如 `docs: publish C06 functions and closures lesson`。
 - 提交前检查 Git 状态和差异，只纳入本次的工作；不要混入用户无关的改动、缓存、依赖目录或凭据。
@@ -57,4 +62,4 @@
 
 ## 关键词 JS_WEB_START
 
-用户发送 `JS_WEB_START` 时，按上面「续做时先读」的顺序读文件，检查 Git 状态和现有代码，从 STATUS「下一步」的第一项继续。不重做规划，不假定仓库是空的。
+用户发送 `JS_WEB_START` 时，按上面「续做时先读」的顺序读文件，检查 Git 状态和现有代码，从 STATUS「下一步」的第一项按主/子 agent 协议继续。不重做规划，不假定仓库是空的；若 STATUS 已写本轮完成，等待具体维护需求，不自动开启下一轮。

@@ -1,45 +1,29 @@
 # C28 useRef 与外部系统 · 示例
 
-配套正文：[C28](../../src/content/docs/05-react/c28-refs-external-systems.md)。普通 JS 在本目录，真实 React 示例在[阶段 4](../inventory/04-react/)。数据沿用 shared/products.js。
-
-| 文件 | 运行 | 说明 |
-| --- | --- | --- |
-| ref-object.js | node ref-object.js | 普通对象的稳定身份与别名 |
-| cancel-handle.js | node cancel-handle.js | Node 定时器真实取消，句柄归空 |
-| prediction.js | node prediction.js | 闭包读取固定数字与可变容器 |
-| 阶段 4 src/App.jsx、ProductForm.jsx | dev / 首页 | 标题 ref 与编辑挂载焦点 |
-| 阶段 4 src/InventoryCounter.jsx | dev / 首页 | 延时记录的句柄、等待状态与清理 |
-| 阶段 4 labs/refs-main.jsx | 下表实验页 | 八个 ref、焦点与定时器实验 |
-| 阶段 4 tests/refs.test.jsx | npm test | 九项新增行为回归 |
-| 阶段 4 labs/refs-bugs.test.jsx | npm run test:bug -- labs/refs-bugs.test.jsx | 两项故意失败，修改 Broken 文件后通过 |
+正文：[C28](../../src/content/docs/05-react/c28-refs-external-systems.mdx)。主线继续自己的 `inventory/`。本轮目标发行版 **2026.10-v2.3**：前置 C27、完成 C28；参考增量 [steps/C28](../../labs/reference/steps/C28/)。发行入口见 [Lab](https://socoo123.github.io/js_web/labs/)，主验收/发布记录位置为 `labs/records/A.md`。
 
 ## 运行
 
-- 仓库根目录执行 `npm run examples -- c28`；本目录也可逐个运行上表 node 命令。
-- 阶段 4 执行 `npm ci`、`npm run dev -- --host 127.0.0.1`，打开终端的 /js_web/ 地址。
-- 在地址后加 labs/refs.html?case=下表值；实验页仅 dev 提供。
-- 阶段 4 运行 `npm test`、`npm run build`，再用 `npm run preview -- --host 127.0.0.1` 检查生产首页。
+| 入口 | 工作目录与命令 | 用途 |
+| --- | --- | --- |
+| 当前工程 | `inventory/`：`npm run lab -- start C28`、`npm run lab -- dev` | 修改三个既有文件 |
+| 本课检查 | `inventory/`：`npm run lab -- check C28` | 实际工作区而非 reference |
+| 专项组件/纯函数 | `inventory/`：`node tools/forms-state-check.mjs C28` | 41 条通过，无后课要求 |
+| 专项浏览器 | `inventory/`：`node tools/forms-state.browser.mjs C28` | 取消、替换、卸载、焦点 fallback |
+| 旧固定输出 | 仓库根：`npm run examples -- c28` | ref-object/cancel-handle/prediction 三个参考例子 |
 
-| case | 操作与预期 |
-| --- | --- |
-| probe | 两次日志、更新版本、再日志；分别为 1/1/0、2/2/0、1/3/1 |
-| count | 三次点击仍显示 0，输入备注后才显示 3 |
-| count-answer | 三次点击依次显示 1、2、3；备注保留 |
-| focus | 提交 3 后库存 15、数量清空并回焦点；Enter 提交 2 后为 17 |
-| early | 首次打开日志为 null，输入出现但焦点仍在按钮 |
-| early-answer | 挂载后由 Effect 聚焦名称输入 |
-| timer | 安排后取消仍在两秒后加三，取消时句柄已丢失 |
-| timer-answer | 取消保留次数，重复安排只保留最新任务，隐藏清理，重挂载归零 |
+## 本轮验证记录
 
-## 验证记录
+- 2026-10-29 · macOS arm64 · Node 24.22.0、npm 11.19.1、React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.4、RTL 16.3.3、Playwright 1.64.1、Chromium 156.0.8078.4。依赖软链接只读，缓存在本副本内，没有安装/改锁。
+- `npm run examples -- c28`：3/3 固定输出通过；正文 12/15/12 闭包机制片段另行实际执行。
+- 已从第1路最终 `handoff-C24` 按最新正文连续组装C25–C28，最终三个文件与参考增量一致；最新组件41/41，含溢出保留/重试、前置队列、取消/替换/卸载和全部焦点回归。是作者回归，不是独立读者抽验。
+- 实际上游 Chromium 在360px走键盘表单、两秒取消/替换/筛选卸载撤销、P004保存8与取消返按钮、按钮移除/改名移出搜索返标题；无pageerror/溢出。初稿旧前置85条Lab/原UI曾通过，本次未重复A4正在接入的共享检查器。
+- 主错误：只在临时 StockActions 将 useRef 改为每次新建普通容器；等待 state 重渲染后取消失效，回归收到16而期待13；恢复 useRef 后同命令通过。正式 steps 均为正确版本。
+- timer ref 保存句柄、waiting state 生成提示；ProductEditor fields ref 只找 DOM；App trigger ref 返焦点，heading ref 处理触发按钮不再存在的边界。没有把可变库存 class 放进 React state。
+- 最终日志在 `delivery/.validation/real-c24-20261029/`，包含实际C24输入hash和每课组装源码；完整作者命令见 `delivery/agent-2.md` §7，入口 `walkthrough-agent-2.mjs`。上游49文件hash前后不变。
+- 衔接已验：C25–C27保留真实上游3000ms，C28按正文改2000ms；保留上游type="button"，有最小卸载清理、name-first/noValidate/heading fallback。后段需继续保留这些能力。
+- 必要返修：MDX静态LessonTask、含组件lint、80锚点及四页静态夹具输出已通过；真实C24连续作者回归和主错误红绿已补验。主集成16快照、全站门禁与发行见 [阶段 A](../../labs/records/A.md)。
+- 跨课输入修复：保留C27的同步全量候选预检，通过后才dispatch/closeEditor；汇总错误留在表单，不移动到关闭焦点。实际App编辑/新建溢出回归先2失败后2通过，新定点浏览器保留草稿/商品/统计并能修正重试，无pageerror；详见 `delivery/agent-2-overflow.md`。其他旧浏览器路径未重复。
+- 未运行：DevTools 界面手动点击、屏幕阅读器、其他浏览器/系统；独立读者抽验范围及全站视觉/Pages由阶段 A 统一记录。
 
-- 2026-10-17 · macOS arm64 · Node 24.22.0、npm 11.19.1。沿用 React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.3；依赖清单和锁未改。
-- 固定输出 3/3；阶段 4 正常回归 86/86，含本课九条；React 生产构建通过。取消测试覆盖等待中重渲染、替换的两个到期点、重新安排、独立实例和卸载时真实撤销定时器。
-- 两项 bug 测试先分别报计数仍为 0、取消后仍加三；按 RefCountFixed 与 InventoryCounter 替换两个 Broken 文件后 2/2，通过后恢复教学错误起点。
-- 独立后台 Chrome 155.0.8059.82：八个实验按正文操作通过；probe 三组日志一致，count 的错误与修复、补货提交后焦点和 Enter、条件挂载的空节点与修复、延时取消和替换均符合上表。隐藏/重新挂载归零，无页面异常，未操作现有窗口。
-- 通过 Chrome 调试接口取得暂停帧：错误计数两次点击前 current 分别为 0、1，页面仍为 0；错误取消事件中 timer 为 null，原任务随后执行加三。没有手动点击 DevTools 界面。
-- 首页按项目步骤：P002 改为 3/129.90 后为 55 件、26737.70 元；首次编辑和切换商品聚焦名称，修改单价保留当前焦点，保存回标题，取消回编辑按钮，筛选隐藏按钮后取消回标题。安排/立即记录一次/取消后仍为 1，商品统计不变；错误字段获焦点，切换重置错误；刷新恢复固定六件与盘点零次。
-- 固定工程版本下复跑 3/3 与 86/86；两项错误回归按相同命令先失败后通过并恢复起点。网站 lint 28 课零 error/warning、check 零诊断、build 固定输出 232/232 与 33 页产物检查通过；正文 7939 字符、13 个代码块，全部代码与源文件或连续节选一致。
-- 生产预览：React 保存后的数值与标题焦点、跨渲染取消通过；课程 HTTP 200，禁用 JS 后 13 段代码与四个折叠区可阅读和展开；路线页 28/48 与 C28 链接正常。
-- Pages：[run 39040017175](https://github.com/socoo123/js_web/actions/runs/39040017175) build/deploy 成功；C28 和路线页均 HTTP 200，课程标题、timerRef/Effect 内容与 28/48 目录已上线。
-- 未运行：屏幕阅读器朗读、DevTools 界面手动点击、Firefox、Safari、Windows。
+旧版验证与发布历史见 [基线 README](https://github.com/socoo123/js_web/blob/93f81d29fef57e4bd86da38cc8f740e12b14775e/examples/c28/README.md)，不作为本轮新源码证据。

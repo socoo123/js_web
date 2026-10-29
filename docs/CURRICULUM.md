@@ -1,14 +1,14 @@
 # 48 课改版任务与验收
 
-2026-10-28 · **用户已授权实施，按 STATUS 逐批迁移与发布。** 本文件替代旧大纲；总体设计见 [PLAN](PLAN.md)，逐章错误见 [DEBUG_TESTING](DEBUG_TESTING.md#revision-v2-errors)，页面规格见 [ARCHITECTURE](ARCHITECTURE.md#revision-v2-ui)。已上线情况以 STATUS 为准。
+2026-10-29 · 本表保留 48 课知识范围与任务，执行队列统一为 [PLAN](PLAN.md) 的 A/B/C。Lab 起点与业务场景见 [Lab 设计](../labs/README.md)，逐章错误见 [DEBUG_TESTING](DEBUG_TESTING.md#revision-v2-errors)，页面规格见 [ARCHITECTURE](ARCHITECTURE.md#revision-v2-ui)。已上线情况以 STATUS 为准。
 
 <a id="revision-v2-curriculum"></a>
 
 ## 怎么使用这张表
 
-C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。每课默认以上一课完成状态为前置；C01 从 C00 骨架开始。表中路径均相对 `labs/inventory/`；逐批实现范围见 STATUS 和 catalog，未接入的课保留旧版入口。正常跟做使用自己的连续工作副本；起点包只用于补课与恢复。
+C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。阶段内接上一课完成态，五个 Lab 可分别从 C00/C10/C20/C36/C44 固定起点补课或恢复。表中路径均相对 `labs/inventory/`；实际发布范围见 STATUS，未接入的课保留旧版入口。正常跟做使用自己的连续工作副本。
 
-每行是一章的必做增量。预测输出、修 bug、项目步骤合并围绕这一增量，不再布置三套独立 demo。对照列指定 Java/JS 卡片的主题，不要求每个前端机制都能翻译成 Java。没有等价机制时明确写“经验类比”，不虚构 Java API。
+每行是一章的主要任务，选型/工具/复盘允许观察、实验或判断。预测、修 bug、项目步骤围绕同一任务。对照列是可用主题，不是强制卡片指标；无合适的 Java 类比时写短说明，不造等价 API。路径可按已有实现做必要调整，同时同步正文与 catalog。
 
 表格前两列保留“学习日 / Cnn 标题”，供 `scripts/sync-roadmap.mjs` 识别；只出现下面连续的 48 行课程记录。额外实现元数据进入 `labs/catalog.json` 后由其生成，不重复手填多份命令。
 
@@ -79,10 +79,10 @@ C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。�
 | 20 | C40 OpenUI5 入门：MVC 与工程 | 在 `adapters/openui5/webapp/` 配 Component、manifest、XML View、Controller，接共享规则桥接 | Java 包/类路径 / UI5 namespace、模块与资源路径 | 列表加载 6 件；Console/Network 定位模块名错误；UI5 CLI 构建能生成静态产物；不手抄第二份业务规则 |
 | 21 | C41 UI5 Model、绑定与业务控件 | 在 Inventory.view/controller、编辑 Fragment 和 i18n 中完成筛选、草稿、保存 | Java Bean/监听经验 / JSONModel.setProperty 与绑定通知 | 筛选 P004 后只改它；取消不污染源数据；汇总与语言切换正确；理解 model 名称、路径与 binding context |
 | 21 | C42 UI5 路由与 OData 起点 | 增加 Detail View/Controller、manifest 路由、静态 metadata 和有限 V2 mock | Java DTO/Repository 经验 / OData 实体集、元数据、模型请求；不是接口等价 | P004 详情刷新/回退正常；有限过滤/排序/分页可观察；JSONModel/ODataModel、V2/V4 区分清楚 |
-| 22 | C43 UI5 Web Components 原生使用 | 在 `adapters/web-components/` 替换原生库存表单输入/按钮，监听真实事件 | Java listener 经验 / CustomEvent；字段值 / attribute 与 property | 两个组件可补货；布尔属性正确；slots、主题/i18n 资源可用；知道 Shadow DOM 边界与 React 原生支持 |
+| 22 | C43 UI5 Web Components 原生使用 | 在 `adapters/web-components/` 沿用原生列表/筛选，替换小编辑表单的输入/按钮，监听真实事件 | Java listener 经验 / CustomEvent；字段值 / attribute 与 property | P004 草稿取消保留3，保存8仅改它；空白拒绝、0合法；布尔属性、slots、主题/i18n资源正确；理解 Shadow DOM 与 React 原生支持 |
 | 22 | C44 UI5 Web Components for React | 在 `adapters/ui5-react/` 改列表和编辑表单，接共享规则/repository | Java adapter 经验 / React 包装 API；继续对照原生组件与经典 UI5 | 原生 form 提交链正确；事件取值/数字转换正确；P004 编辑场景通过；L4 验收，不再重写所有 CRUD |
 
-写作边界：C37 不做市场排名，不安装全部候选库；C38 只完整用 Ant Design，其余短对照。C39 不为概览单开一个必须运行的 UI5 demo，实际运行接到 C40 的 adapter。C40 的模块桥接先由 R4 原型证明。C42 仅有限 V2 浏览器 mock，不做真实 SAP 鉴权、完整 OData CRUD 或 V4 服务。C43/C44 分别按所选版本核对事件、属性、主题和资源文档，不沿用旧 React 限制或已废弃 charts 包。
+写作边界：C37 不做市场排名，不安装全部候选库；C38 只完整用 Ant Design，其余短对照。C39 的运行接到 C40，模块桥接复用已验证原型。C42 仅有限 V2 浏览器 mock，不做真实 SAP 鉴权、完整 OData CRUD 或 V4 服务。C43/C44 按版本核对事件、属性、主题和资源。四种界面共同场景以 Lab 设计为准，不各写一套完整 CRUD。
 
 ## Lab 5 调试与静态交付
 

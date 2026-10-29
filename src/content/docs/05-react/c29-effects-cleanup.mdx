@@ -1,0 +1,216 @@
+---
+title: C29 useEffect 深入与清理
+description: 给当前库存页增加标题和快捷键，用对称清理保证 StrictMode 下按一次只补一件。
+sidebar:
+  order: 29
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 15 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟\
+> 前置：C28 的工作区 · 运行：本地 React、Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+给库存页加一个 `Alt+↑` 快捷键，为 P001 补一件；浏览器标题显示商品种类数。第一次打开就补两件，通常不是 React 把点击执行了两次，而是你留下了两个监听。本课让订阅能停止、重启，并确认已有补货计时器的清理仍然有效。
+
+<LessonTask lessonId="C29" />
+
+## Java 程序员先看这里
+
+可以沿用 Java 的“注册 listener 就负责注销”经验。Effect 不是构造器：组件仍在页面上，依赖变化也会先清理旧资源，再建立新资源。闭包保存某次渲染的值，和可变 Java 实例字段的读取不同。
+
+本课不增加业务数据副本。商品仍来自 `useInventory()` 的 reducer；筛选和汇总仍在渲染时计算。Effect 只接管 React 外面的浏览器标题、全局事件和计时器。
+
+## 1. 每次 setup 都有自己的 cleanup
+
+[`useEffect`](https://react.dev/reference/react/useEffect) 在提交后建立同步，返回的函数结束这次同步。依赖变化时运行旧 cleanup，再运行新 setup；卸载时运行最后一次 cleanup。
+
+新建 `src/react/useInventoryShortcuts.js`，先写标题部分，暂不关闭最外层函数：
+
+```js
+import { useEffect } from "react";
+export function useInventoryShortcuts(count, onRestock) {
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = `库存工作台 · ${count} 件商品`;
+    return () => { document.title = previousTitle; };
+  }, [count]);
+```
+
+随后紧接键盘部分和最外层的右花括号：
+
+```js
+  useEffect(() => {
+    function onKey(event) {
+      if (event.altKey && event.key === "ArrowUp" && !event.repeat && !event.defaultPrevented && !event.isComposing) {
+        event.preventDefault(); onRestock("P001", 1);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onRestock]);
+}
+```
+
+结果：挂载后标题为“库存工作台 · 6 件商品”，每次按键调用一次 `onRestock("P001", 1)`。`repeat` 排除按住按键产生的重复事件；已处理事件和输入法合成事件保持原行为。
+
+<a id="为什么旧清理知道旧编号" />
+
+每次 setup 都创建自己的 `onKey`。cleanup 交回的是**同一个函数对象**，不是重新写一个内容相同的箭头函数。标题与键盘是两个独立同步，各自有依赖和清理。Java 注销 listener 也需要与注册时对应的实例。
+
+在 `App.jsx` 的导入区增加下面的 import，在 `InventoryView` 中、计算 `summary` 后增加调用。已有 `restock(id, amount)` 继续 dispatch，不改 reducer。
+
+```jsx
+import { useInventoryShortcuts } from "./useInventoryShortcuts.js";
+// 以下调用在 InventoryView 顶层、return 之前：
+useInventoryShortcuts(products.length, restock);
+```
+
+这里只改 `App.jsx` 的导入和这一处调用。保留 C28 的 trigger/heading ref、带 `tabIndex={-1}` 的标题、保存前的可见性判断和 `onCancel={() => closeEditor()}`；不要用旧版 App 覆盖它们。表单仍沿用已有的 noValidate、自动聚焦和首错顺序。
+
+已有 C28 的 core 导入还要保留 `validateProducts` 和 `summarize`，saveProduct 开头应当已有下面的只读候选预检，位于 dispatch 和关闭编辑器之前。这里只核对并继承，不重复插入，也不把 next 存进 state：
+
+```js
+const next = selectedId === "new" ? [...products, value]
+  : products.map((product) => product.id === value.id ? value : product);
+validateProducts(next); summarize(next);
+```
+
+单价字段合法，不代表全部商品的总价值仍在安全整数范围。同步预检失败会抛回 ProductEditor 的 catch，显示表单错误并保留草稿；reducer 继续保留同一套规则，正常提交才更新商品。
+
+**先猜一猜：** 只筛选出 P004，标题该显示 1 还是 6？
+
+是 6。传入的是全部 `products.length`，不是筛选后的 `visible.length`。P001 补一件也不会增加商品种类，因此标题仍为 6；新增商品后才变为 7。先选对输入，再讨论 Effect 是否运行。
+
+![左栏展示 setup、StrictMode 的 cleanup 与重新 setup，以及依赖变化和卸载清理；右栏展示请求过期后的响应被拦截。](../../../assets/diagrams/c29-effect-lifecycle.svg)
+
+从左栏往下读：cleanup 结束的是与自己配对的那次 setup。右栏是同一规则应用于请求的时序。
+
+## 2. 依赖由读取的值决定
+
+标题 Effect 读取 `count`；键盘 Effect 读取 `onRestock`，所以分别声明这些依赖。每次渲染创建的 `restock` 是新函数，React 会先注销旧回调再注册新回调，最终仍只有一个活动监听。这里没有 Effect 设置 state，不会因此形成循环。
+
+<a id="比较的是身份不是看起来一样" />
+
+**先猜一猜：** 下列两行分别输出什么？可在浏览器 Console 执行。
+
+```js
+console.log(Object.is("P001", "P001")); // → true
+console.log(Object.is({ id: "P001" }, { id: "P001" })); // → false
+```
+
+React 逐项用 `Object.is` 比较依赖，不深比较对象内容。新对象、新函数即使内容相同，身份也不同；Java 普通对象的 `==` 同样不是业务 `equals`。
+
+<a id="少一个依赖就是留住了一段旧同步" />
+<a id="练习-1旧回调会读到新库存吗" />
+
+把键盘 Effect 改成 `[]`，它就留住初次的 `onRestock` 闭包。尤其当回调读取了变化中的商品时，新界面和旧回调就可能不一致。依赖不是“想运行几次”的开关；[Hooks lint](https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps) 检查的是读取关系。执行 `npm run lab -- lint`，按提示修依赖，不关闭规则。
+
+<a id="lint-帮你核对读取关系" />
+
+不传依赖数组表示每次提交都重新同步；空数组表示没有响应式输入；`[count]` 表示 count 变化才交接。三种写法首次挂载都要 setup，卸载都要清理。ref 容器稳定，改 `.current` 又不触发渲染，把 `.current` 塞进依赖不能建立外部订阅。
+
+## 3. 监听和计时器都要成对释放
+
+C28 的补货计时器已经支持两秒等待、手动取消和卸载清理。直接继承 `StockActions.jsx`，本课不修改它，也不再添加第二个 Effect。已有这一行：
+
+```js
+useEffect(() => () => clearTimeout(timer.current), []);
+```
+
+<a id="计时器清理正确也可能读到旧值" />
+
+这里 setup 返回一个 cleanup，没有创建新计时器。计时器仍由点击“延迟补三件”的事件创建；cleanup 读取句柄 ref，清除最后一个仍在等待的任务。不要在 cleanup 调用 `cancelLater()`：它还会设置已经卸载的 UI state；释放资源只需 `clearTimeout`。
+
+结果：等待期间删除或筛掉 P001，两秒后也不会触发那次补货。waiting state 负责页面提示，timer ref 负责取消句柄；两者继续各司其职。Java 的 Future 句柄也可供取消；这里仍是浏览器计时器，不是后台线程。
+
+## 4. StrictMode 检查的是“能否清理后重新开始”
+
+根部保留 [`StrictMode`](https://react.dev/reference/react/StrictMode)。开发环境首次会执行 setup → cleanup → setup，检查你是否能真正停止同步。正常完成后只有一个监听。它不会自动把用户事件执行两次。
+
+为了观察，在 `addEventListener` 前加 `console.log("setup")`，把 cleanup 暂写为下面这一行；观察完删掉日志，保留清理。
+
+```js
+return () => { console.log("cleanup"); window.removeEventListener("keydown", onKey); };
+```
+
+初始日志是 setup、cleanup、setup。输入搜索会更换 `restock`，也会看到旧清理再建立；一次按键依然只增加 1。卸载后按键不能再触发业务。判断正确与否要数**活动资源和业务结果**，不是要求 setup 永远只出现一次。
+
+用 ref 跳过第二次 setup 会破坏这项保证：第一次 cleanup 已移除资源，第二次被挡住，页面反而没有监听。生产构建没有这轮额外检查，但真实的卸载、重挂载与依赖变化仍会发生。
+
+## 5. 派生值直接算，用户操作放在事件里
+
+保留 `App.jsx` 的原有派生关系：
+
+```js
+const filtered = selectProducts(products, { query, category });
+const visible = order === "stock" ? sortByStock(filtered) : filtered;
+const summary = summarize(visible);
+```
+
+<a id="有货列表触发连续更新" />
+
+固定输入立即得到 6 种、52 件。不要用 Effect 把 `visible` 再存入 state：那会多一次更新，还需要维护两个来源。Effect 若更新某个 state，而该 state 又改变依赖，就可能反复执行。内容相同的新数组仍有新身份。
+
+保存、删除、补货由用户操作触发，放在事件处理函数。标题、订阅由当前页面和输入决定，放在 Effect。Java 能即时计算的汇总也不必另存一份需要同步的字段；前端多了外部同步生命周期这一层。
+
+## 常见错误与调试
+
+<a id="一条通知处理多次切换后还出现旧编号" />
+
+1. **现象**：在 `useInventoryShortcuts.js` 只删掉移除 keydown 监听的 return 行，重新载入开发页，按一次 `Alt+↑`，P001 可能增加两件或更多。
+2. **工具**：Chrome → Sources → 打开该文件，在 `onRestock("P001", 1)` 行号上设断点；按键后逐次 Resume。
+3. **证据**：一次 keydown 停在多个不同的闭包中。Console 的 setup 不断增加，却没有匹配的 cleanup。
+4. **原因**：每次 setup 留下一个新监听；StrictMode 首次检查和普通重渲染都能暴露它。
+5. **修复**：恢复传回同一个 `onKey` 的 `removeEventListener`，保留 `[onRestock]` 和 StrictMode。
+6. **确认**：重新载入，P001 12→13；修改搜索后再按一次只到 14。运行 `npm run lab -- check C29`，卸载/重挂载回归也应通过。
+
+本课提供的 `tools/effect-a3.test.jsx` 直接导入当前 Hook 和补货组件：在 StrictMode 下按键、更换回调、卸载、重挂载；卸载后再发事件不能触发旧回调。删除 cleanup 时这条行为测试必须变红，不能只断言页面上少了一个节点。
+
+## 练习
+
+<a id="练习-2把四项失败变成通过" />
+
+:::tip[自己尝试 · 本地 React]
+在同一工作区完成 Hook 和 App 两个文件。演练一次缺 cleanup 的故障，再恢复它。筛选 P004、清空筛选，按键仍只补 P001 一件；等待补货期间筛掉对应行，等两秒后清空筛选，不应出现晚到操作。再打开编辑器，筛掉打开按钮后取消，焦点应回到标题。最后运行检查与 lint。
+
+预期：固定起点一次按键 12→13；筛选汇总与全部商品标题各自正确；取消和卸载都能释放等待任务。
+:::
+
+<details>
+<summary>提示</summary>
+
+先区分“谁创建资源”和“谁持有句柄”。window 持有回调，cleanup 用同一函数注销；timer ref 持有当前计时器编号。不要把注册监听本身放进 render。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+标题 Effect 依赖 count；键盘 Effect 依赖 onRestock 并对称注销。StockActions 沿用已有的两秒计时与清理，不增加第二个 Effect。保留所有派生计算、reducer 和编辑焦点回退，不需要新的商品 state。
+
+</details>
+
+## 项目进度
+
+- 当前库存页已有可重启的标题与键盘同步；一次按键只有一次业务动作。
+- C28 的手动取消、保存后焦点继续可用；补货行卸载也清理任务。
+- 在 `notes/next.md` 记录 C29、两个已改文件、观察结果；下次从本目录继续请求详情。
+
+## 小结
+
+- setup 和 cleanup 描述一段同步；依赖变化和卸载都可能结束它。
+- 依赖反映闭包读取，逐项按 Object.is 比较。
+- 事件做业务操作，渲染计算派生值，Effect 管外部同步。
+- 保留 StrictMode，以资源和业务结果验证清理。
+
+自测：旧 cleanup 为什么能找到旧回调？函数依赖变化一定会形成循环吗？卸载定时器为什么不用更新 waiting？
+
+## 延伸阅读
+
+- [React：useEffect](https://react.dev/reference/react/useEffect)
+- [React：响应式 Effect 生命周期](https://react.dev/learn/lifecycle-of-reactive-effects)
+- [React：你可能不需要 Effect](https://react.dev/learn/you-might-not-need-an-effect)
+- [React：StrictMode](https://react.dev/reference/react/StrictMode)
+- [MDN：removeEventListener](https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/removeEventListener)

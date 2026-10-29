@@ -2,7 +2,7 @@
 
 面向**会 Java、初学前端**的开发者，用中文从 HTML/CSS 和浏览器讲起，逐步掌握 JavaScript、工程工具、React、开源组件与 SAP UI5。以同一个库存管理应用贯穿课程，每课包含可运行示例、预期输出、Java 对照、调试任务和练习答案。
 
-**第一版 48 课必修主线已完结**，配套七阶段库存项目、四张速查页、14 张 D2 机制图与本地学习进度。V2 正按 [新计划](docs/PLAN.md) 逐批迁移为一个工作区、5 个 Lab；C01–C20 已接入连续路线，C23/C41 使用明确前置的试做快照。完成与验证记录见 [STATUS](docs/STATUS.md)。
+**第一版 48 课必修主线已完结**，配套七阶段库存项目、四张速查页、14 张 D2 机制图与本地学习进度。工作区改版按 [三阶段收尾计划](docs/PLAN.md) 推进；[五个 Lab 的设计](labs/README.md) 已明确。本版 C01–C36 接入连续路线，C23 使用正式 C22 起点；C41 仍为试做。React 批次证据见 [阶段 A](labs/records/A.md)，实际发布与下一步以 [STATUS](docs/STATUS.md) 为准。
 
 [V2 库存工作区](https://socoo123.github.io/js_web/labs/)提供初始工程、固定命令、版本化快照与恢复说明。旧 examples 链接与学习进度保留，未迁移的课程继续使用原入口。
 
@@ -54,7 +54,7 @@ npm run dev -- --host 127.0.0.1
 
 D2 准备脚本需要 Bash、curl、tar、Python 3，以及 `shasum` 或 `sha256sum`；首次下载工具与中文字体需要联网。自动准备支持 macOS/Linux 的 arm64、x64，已实测 macOS arm64 与 Linux x64；其他环境与手动准备方式见 [D2 说明](diagrams/README.md)。
 
-构建会实际运行 Java 对照，需要 JDK 21（`java --version`）。完整工作区跟做检查还需要在 `labs/inventory` 安装一次锁定依赖，并准备 Playwright Chromium：`npm ci --prefix labs/inventory`、`npm exec --prefix labs/inventory -- playwright install chromium`，然后在根目录运行 `npm run test:lab-walkthrough`。
+构建会实际运行 Java 对照，需要 JDK 21（`java --version`）。工作区检查还需要在 `labs/inventory` 安装一次锁定依赖，并准备 Playwright Chromium：`npm ci --prefix labs/inventory`、`npm exec --prefix labs/inventory -- playwright install chromium`。然后在根目录运行 `npm run test:lab-walkthrough` 和 `npm run test:lab-react`，分别检查前置自动组装与 C21–C36 实际快照；独立读者抽验另记在阶段记录中。
 
 构建并检查生产预览，在仓库根目录执行：
 
@@ -113,8 +113,10 @@ Pages 发布课程网站；七阶段库存应用供本地练习，未作为在�
 | `npm run lint:lessons` | 48 课结构、篇幅、代码块和教学约定 |
 | `npm run examples -- c03` | 指定课程的固定输出示例；省略 `-- c03` 检查全部 |
 | `npm run check` | Astro 内容与类型 |
+| `npm run test:lab-walkthrough` | 前置连续源码及 C03/C23/C41 片段自动组装、错误红绿；不等同独立读者验收 |
+| `npm run test:lab-react` | C21–C36 各自真实快照的必要前置、组件、请求、浏览器与测试检查 |
 | `npm run test:progress` | 进度格式、合并、备份与故障恢复 |
-| `npm run build` | 课程 lint → 全量固定输出 → 进度数据测试 → 路线同步 → D2 → Astro/Pagefind → 页面与子路径资源检查 |
+| `npm run build` | Lab 包与契约 → Java 对照 → 课程 lint → 固定输出 → 进度数据 → 路线/D2 → Astro/Pagefind → 页面、包与子路径资源检查 |
 | `npm run check:build` | 检查已有 `dist/` 的页面、链接、资源、练习折叠区、进度与速查导航 |
 
 项目测试在对应阶段目录运行。阶段 4 的 `npm run lint`、`npm test`、`npm run build` 已接入 Pages CI；其他阶段的单元/浏览器测试入口见各阶段 README。故意失败的 `test:bug`、`lint:bug` 等是教学练习，单独运行。
@@ -165,7 +167,8 @@ docs/                   计划、规范、架构、来源与状态
 | 文档 | 用途 |
 | --- | --- |
 | [STATUS](docs/STATUS.md) | 实际完成状态、发布记录、已知问题与下一步 |
-| [PLAN](docs/PLAN.md) | 总目标、固定数据、项目阶段与验收标准 |
+| [PLAN](docs/PLAN.md) | 三阶段收尾、固定数据、验收、主/子 agent 协作与接续提示词 |
+| [Lab 设计](labs/README.md) | 五个 Lab 的固定起点、任务边界、共同场景与恢复契约 |
 | [CURRICULUM](docs/CURRICULUM.md) | 48 课范围、学习节奏与选修方向 |
 | [CONTENT_GUIDE](docs/CONTENT_GUIDE.md) | 写课规范；修改课程前必读 |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | 内容模型、进度、搜索、D2 与站点边界 |
@@ -176,7 +179,7 @@ docs/                   计划、规范、架构、来源与状态
 
 推送 `main` 或手动触发[工作流](.github/workflows/deploy.yml)后，Actions 安装锁定依赖、检查 React 参考项目与课程网站，再发布 `dist/`。发布地址为 `https://socoo123.github.io/js_web/`；资源和链接必须保留 `/js_web/` 子路径。实际运行结果见 [Actions](https://github.com/socoo123/js_web/actions)。当前工作流未配置 PR 自动触发。
 
-接续维护时，在本仓库上下文中发送 **`JS_WEB_START`**，按 AGENTS 的顺序读取 STATUS、PLAN、CONTENT_GUIDE 与 CURRICULUM。主线队列已完成，后续按反馈维护。
+接续改版时，新开主 agent 窗口并发送 **`JS_WEB_START`**（完整提示词见 PLAN §8）。主 agent 按 STATUS 同时启动 **4 个 `openai/gpt-6.1-sol#max` 子 agent**，按 PLAN §7 分工和隔离；等四路全部交稿/返修结束，集成并独立验收发布后，统一返回结果与下一窗口接续文本。用户清理上下文后继续，每窗口完成 A/B/C 中一个阶段；C 完成后转入按需维护。
 
 ## 当前范围与待办
 

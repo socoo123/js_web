@@ -14,7 +14,7 @@ description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和�
 
 先读示例、亲手运行，再做预测与排错练习。每课包含 Java 对照和操作说明，库存管理项目贯穿全程。
 
-V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 22 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。
+V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 37 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。
 
 ## 第 1 周：历史、语言、结构与浏览器
 
@@ -45,27 +45,27 @@ V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 22 课接
 | 第 9 天 | [C18 npm：项目、版本与可复现安装](../04-runtime-tooling/c18-npm-reproducible-installs/) | 已接工作区<span data-lesson-status="C18" hidden></span> |
 | 第 10 天 | [C19 Yarn、pnpm、Bun 的职责与选择](../04-runtime-tooling/c19-yarn-pnpm-bun/) | 已接工作区<span data-lesson-status="C19" hidden></span> |
 | 第 10 天 | [C20 构建工具与第一次 UT](../04-runtime-tooling/c20-vite-vitest/) | 已接工作区<span data-lesson-status="C20" hidden></span> |
-| 第 11 天 | [C21 React 来由、JSX 与第一个组件](../05-react/c21-react-jsx-components/) | 已发布<span data-lesson-status="C21" hidden></span> |
-| 第 11 天 | [C22 Props、组合与渲染模型](../05-react/c22-props-composition-render/) | 已发布<span data-lesson-status="C22" hidden></span> |
-| 第 12 天 | [C23 useState：状态快照与更新队列](../05-react/c23-state-snapshot-queue/) | 已接工作区（前置试做）<span data-lesson-status="C23" hidden></span> |
-| 第 12 天 | [C24 数组更新、key 与派生数据](../05-react/c24-arrays-keys-derived/) | 已发布<span data-lesson-status="C24" hidden></span> |
+| 第 11 天 | [C21 React 来由、JSX 与第一个组件](../05-react/c21-react-jsx-components/) | 已接工作区<span data-lesson-status="C21" hidden></span> |
+| 第 11 天 | [C22 Props、组合与渲染模型](../05-react/c22-props-composition-render/) | 已接工作区<span data-lesson-status="C22" hidden></span> |
+| 第 12 天 | [C23 useState：状态快照与更新队列](../05-react/c23-state-snapshot-queue/) | 已接工作区<span data-lesson-status="C23" hidden></span> |
+| 第 12 天 | [C24 数组更新、key 与派生数据](../05-react/c24-arrays-keys-derived/) | 已接工作区<span data-lesson-status="C24" hidden></span> |
 
 ## 第 3 周：详细 React 与组件工程
 
 | 主线学习日 | 课程 | 状态 |
 | --- | --- | --- |
-| 第 13 天 | [C25 表单、校验与可访问性](../05-react/c25-forms-validation-accessibility/) | 已发布<span data-lesson-status="C25" hidden></span> |
-| 第 13 天 | [C26 状态提升、保留与重置](../05-react/c26-state-ownership-reset/) | 已发布<span data-lesson-status="C26" hidden></span> |
-| 第 14 天 | [C27 useReducer 与 Context](../05-react/c27-reducer-context/) | 已发布<span data-lesson-status="C27" hidden></span> |
-| 第 14 天 | [C28 useRef 与外部系统](../05-react/c28-refs-external-systems/) | 已发布<span data-lesson-status="C28" hidden></span> |
-| 第 15 天 | [C29 useEffect 深入与清理](../05-react/c29-effects-cleanup/) | 已发布<span data-lesson-status="C29" hidden></span> |
-| 第 15 天 | [C30 请求状态与竞态调试](../05-react/c30-requests-races/) | 已发布<span data-lesson-status="C30" hidden></span> |
-| 第 16 天 | [C31 自定义 Hooks 与路由](../05-react/c31-custom-hooks-routing/) | 已发布<span data-lesson-status="C31" hidden></span> |
-| 第 16 天 | [C32 认识 TanStack Query 与服务端状态](../05-react/c32-tanstack-query-server-state/) | 已发布<span data-lesson-status="C32" hidden></span> |
-| 第 17 天 | [C33 现代 React 19 与更新速查](../05-react/c33-modern-react-actions/) | 已发布<span data-lesson-status="C33" hidden></span> |
-| 第 17 天 | [C34 性能、加载与错误诊断](../05-react/c34-performance-loading-errors/) | 已发布<span data-lesson-status="C34" hidden></span> |
-| 第 18 天 | [C35 React UT、集成测试与 E2E 地图](../05-react/c35-react-testing/) | 已发布<span data-lesson-status="C35" hidden></span> |
-| 第 18 天 | [C36 React 项目复盘与故障排查](../05-react/c36-react-project-debugging/) | 已发布<span data-lesson-status="C36" hidden></span> |
+| 第 13 天 | [C25 表单、校验与可访问性](../05-react/c25-forms-validation-accessibility/) | 已接工作区<span data-lesson-status="C25" hidden></span> |
+| 第 13 天 | [C26 状态提升、保留与重置](../05-react/c26-state-ownership-reset/) | 已接工作区<span data-lesson-status="C26" hidden></span> |
+| 第 14 天 | [C27 useReducer 与 Context](../05-react/c27-reducer-context/) | 已接工作区<span data-lesson-status="C27" hidden></span> |
+| 第 14 天 | [C28 useRef 与外部系统](../05-react/c28-refs-external-systems/) | 已接工作区<span data-lesson-status="C28" hidden></span> |
+| 第 15 天 | [C29 useEffect 深入与清理](../05-react/c29-effects-cleanup/) | 已接工作区<span data-lesson-status="C29" hidden></span> |
+| 第 15 天 | [C30 请求状态与竞态调试](../05-react/c30-requests-races/) | 已接工作区<span data-lesson-status="C30" hidden></span> |
+| 第 16 天 | [C31 自定义 Hooks 与路由](../05-react/c31-custom-hooks-routing/) | 已接工作区<span data-lesson-status="C31" hidden></span> |
+| 第 16 天 | [C32 认识 TanStack Query 与服务端状态](../05-react/c32-tanstack-query-server-state/) | 已接工作区<span data-lesson-status="C32" hidden></span> |
+| 第 17 天 | [C33 现代 React 19 与更新速查](../05-react/c33-modern-react-actions/) | 已接工作区<span data-lesson-status="C33" hidden></span> |
+| 第 17 天 | [C34 性能、加载与错误诊断](../05-react/c34-performance-loading-errors/) | 已接工作区<span data-lesson-status="C34" hidden></span> |
+| 第 18 天 | [C35 React UT、集成测试与 E2E 地图](../05-react/c35-react-testing/) | 已接工作区<span data-lesson-status="C35" hidden></span> |
+| 第 18 天 | [C36 React 项目复盘与故障排查](../05-react/c36-react-project-debugging/) | 已接工作区<span data-lesson-status="C36" hidden></span> |
 
 ## 第 4 周：开源组件、UI5 与项目交付
 

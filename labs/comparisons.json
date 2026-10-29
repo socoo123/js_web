@@ -38,7 +38,7 @@
     "right": {
       "label": "React",
       "lang": "jsx",
-      "checkpoint": "P23",
+      "checkpoint": "C23",
       "file": "src/react/StockActions.jsx",
       "region": "queue",
       "caption": "一次点击的处理函数，add 复用共享更新规则",

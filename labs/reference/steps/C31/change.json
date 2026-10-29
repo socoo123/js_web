@@ -1,0 +1,10 @@
+{
+  "previous": "C30",
+  "files": [
+    "src/services/storage.js",
+    "src/react/useProductRequest.js",
+    "src/react/ProductDetail.jsx",
+    "src/react/InventoryProvider.jsx",
+    "src/react/App.jsx"
+  ]
+}

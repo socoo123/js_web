@@ -1,0 +1,11 @@
+{
+  "previous": "C31",
+  "remove": ["src/react/useProductRequest.js", "src/react/inventory-reducer.js", "src/services/product-api.js"],
+  "files": [
+    "src/services/inventory-repository.js",
+    "src/react/query-options.js",
+    "src/react/InventoryProvider.jsx",
+    "src/react/ProductDetail.jsx",
+    "src/react/App.jsx"
+  ]
+}

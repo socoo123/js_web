@@ -1,33 +1,31 @@
-# C32 认识 TanStack Query 与服务端状态 · 示例
+# C32 TanStack Query 与服务端状态 · 示例
 
-配套正文：[C32](../../src/content/docs/05-react/c32-tanstack-query-server-state.md)。Node 示例导入阶段 4 的 query-client.js，使用实际 TanStack Query；先在 `examples/inventory/04-react` 执行 `npm ci`。
+正文：[C32](../../src/content/docs/05-react/c32-tanstack-query-server-state.mdx)。同一 `inventory/`，发行版 `2026.10-v2.3`，C31→C32；主集成、独立抽验与发布见 [阶段 A](../../labs/records/A.md)。业务数据由repository持有，Query负责列表和详情缓存。
 
-| 文件 | 运行 | 说明 |
-| --- | --- | --- |
-| cache-reads.js | `node cache-reads.js` | 同键并发与新鲜缓存复用 |
-| keys.js | `node keys.js` | 内容匹配、编号隔离、对象字段换序 |
-| invalidation.js | `node invalidation.js` | 无观察者时失效保留数据，显式读取新值 |
-| retries.js | `node retries.js` | retry 1 共尝试两次 |
-| prediction.js | `node prediction.js` | 售罄库存失效后仍为 0 |
-| cache-isolation.js | `node cache-isolation.js` | 两个客户端不共用缓存 |
+| 入口 | 命令 / 说明 |
+| --- | --- |
+| cache-reads.js、keys.js、invalidation.js、retries.js、prediction.js、cache-isolation.js | 根目录 `npm run examples -- c32`，6个机制参考，不替代新Lab |
+| 当前工作区 | `npm run lab -- start C32`、`npm run lab -- dev`、`npm run lab -- check C32` |
+| 实际组件 | 工作区 `node node_modules/vitest/vitest.mjs run --configLoader runner --config tools/request.config.mjs` |
+| 浏览器/严格静态hash | 工作区 `node tools/browser-a3.mjs C32` |
 
-## 运行
+## 当前验证记录
 
-- Node：在本目录执行表中命令，或在根目录执行 `npm run examples -- c32`，固定输出 6/6。
-- React：阶段 4 执行 `npm run dev -- --host 127.0.0.1`，打开 `/js_web/labs/query.html`。实验用同一个客户端与 mock，支持切换商品/观察者、快慢响应、失败一次/持续失败、保存失败。
-- 错误起点：`labs/query.html?case=key-bug`。键盘成功后选鼠标仍显示键盘；向 QueryKeyBroken 的 queryKey 加入 productId 后恢复。`npm run test:bug -- labs/query-bugs.test.jsx` 对原始起点失败，修复后通过。
-- 正常回归：阶段 4 执行 `npm run lint`、`npm test`、`npm run build`。query.test.jsx 新增 9 条、query-core.test.jsx 新增 4 条，共 144 条；旧路由测试适配 Query 异步通知与详情标签，手工 Hook 回归保留。
-- 生产预览：`npm run preview -- --host 127.0.0.1`；打开 `/js_web/#/products/P002?q=鼠标`。详情用查询缓存与浏览器 mock；列表继续用本地 reducer，两个区域有明确说明，mock 补货不会改列表。刷新恢复 mock 与缓存。
-- 模拟写入只更新当前页面内存 Map；Network 中只有读取静态 JSON 的 GET。实验速度在 GET 前增加 mock 等待，不把这段等待当作网络传输耗时。
-- CI 先安装阶段 4 锁定依赖并运行 lint/测试/构建，随后站点 build 才运行全量 Node 示例；网站根依赖与根锁不变。
+- 主 agent 只按公开正文从独立C31迁移到C32；仅工具补丁修复连续缓存故障后，原业务源码完整check通过，缓存key漏id故障红→绿。完成后才对照参考终态，改动及观察记录见阶段 A。
 
-## 验证记录
+- 最终checker验收：39 tools完整只读镜像、本路12专用工具无回退；最新C21–32重建后完整 `node tools/check.mjs C32` exit0：85条实际文件断言、Vitest 11/11、共享5组隔离浏览器及本路browser/严格静态hash通过，src/data未改写。日志 `delivery/evidence/final-checker/C32.log`；未重复红绿，汇总 `delivery/final-checker-acceptance.md`。
+- 旧H3兼容补验：清单9/9覆盖，MDX AST确认21个正文ID无重复（代码围栏不计），本轮继续保留。
+- 上游保存预检接回后，本课只补正文迁移说明：替换旧saveProduct时同步预检交给repository.commit，移除App不再使用的validateProducts导入。C32业务源码、repo校验/App异步catch和接口完全不变；从最新C28按正文重建后的组件8/8、Hooks lint/完整源码对照通过，未重跑C32完整浏览器。临时镜像课程lint零error/warning，C32为5522字符/15块。见 `delivery/agent-3-overflow.md`。
 
-- 2026-10-18 · Node 24.22.0、npm 11.19.1、React 19.3.1、TanStack Query 5.104.4 · macOS arm64：阶段 4 `npm ci` 成功；C32 固定输出 6/6、React 正常回归 144/144，通过 Hooks lint。
-- 同日 · Chrome 155.0.8059.82（独立 headless）：按正文实验操作，快网成功后返回与增加观察者未增加 GET；同键双观察者补货只读回一次，均为 13；模拟保存失败维持 13；慢响应显示后台更新并保留旧详情。
-- 同日：失败一次增加两次查询尝试后成功；持续失败显示错误与旧库存，恢复后可重读；离线时分别显示缓存/等待连接，联网后恢复。模拟速度与 HTTP 传输分开记录。
-- 同日：错误 key 选择 P002 后无 P002 GET、仍显示 P001；给浏览器模块响应补上编号后出现 P002 GET 且显示 P002。同一 Vitest bug 用例先失败，修改源文件加入编号后通过，随后还原教学错误起点。
-- 同日：应用 hash 详情补货后库存为 1，回列表仍为本地库存 0、总数 52；重入复用详情缓存，刷新恢复 0，资源路径保留 /js_web/。
-- 同日：去掉 onSuccess 后，mock 保存断点显示 current.stock=12、saved.stock=13，缓存仍为 12、没有新 GET；恢复后显示 13 且只读回一次。源文件已恢复。
-- 同日：根目录 lint:lessons（32 课零 error/warning）、check（零诊断）、build 通过；全量固定输出 249/249 与 37 页子路径/资源/折叠区检查通过。阶段 4 生产构建与 hash 详情预览通过；静态正文禁用 JS 后可阅读及展开 6 个折叠区。Pages [run 39087677999](https://github.com/socoo123/js_web/actions/runs/39087677999) 成功，课程与路线页 HTTP 200，线上目录为 32/48。
-- 未运行：Firefox、Safari、Windows、真实后端和多用户同步。
+- 2026-10-29 · macOS arm64 · Node 24.22.0、React 19.3.1、TanStack Query 5.104.4、Vitest 5.0.5、happy-dom 21.0.4、Chromium 156.0.8078.4。
+- 固定输出6/6；实际组件8/8：repository/Query/Provider六条覆盖Promise/克隆/并发补货/CRUD/校验/模拟与容量失败/取消/恢复/缓存隔离/去重/重试/精确失效；另两条保护真实C28表单和两秒计时契约。
+- queryKey删id的当前源码红绿exit1→恢复exit0，见 `delivery/evidence/C32-main-{red,green}.txt`。
+- repository唯一可写商品与持久化，products从Query派生；await dispatch(saved P004=8)后详情8、总库存57，P002 key未失效；导入按inventory前缀刷新。失败保持好数据。
+- 原样继承真实C28 StockActions/ProductEditor；App保存前判staysVisible并捕获target，await成功后closeEditor(target)。浏览器验证正常返按钮、取消时按钮筛除返标题、异步保存改名出筛选返标题，不把事件当DOM。
+- 浏览器另覆盖12→15/16、2000ms取消/卸载、P004保存/刷新、失败保留旧数据并重试、坏导入保护、hash/返回/未知ID/非法枚举；360px页面异常0。
+- 实际生产build+无fallback `/js_web/demos/inventory/` hash详情/刷新通过，history路径404；未发布在线演示。
+- 最终命令在 `C32-final.txt`；从真实C28起点按正文连续重建C29–32、执行后才完整对照终态见 `real-prose-assembly.txt`。这是作者自审，不是主agent独立跟做。
+- 精确最终接口/文件表见 `delivery/final-C32-interface.md`；无dispatch接口分叉，无第二份products或旧请求Effect。
+- MDX+LessonTask、原md删除、12个旧H2保留；临时catalog镜像48课lint零error/warning，Hooks lint通过。
+- 最终共享checker本路已验收通过；主独立跟做、连续依赖缓存修复与全站门禁/冻结/Pages证据见 [阶段A记录](../../labs/records/A.md)。
+- 未运行：真实后端/多用户、跨浏览器、Windows、屏幕阅读器；本路未提交、推送、部署。

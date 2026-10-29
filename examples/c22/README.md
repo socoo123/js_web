@@ -1,36 +1,31 @@
 # C22 Props、组合与渲染模型 · 示例
 
-配套正文：[C22](../../src/content/docs/05-react/c22-props-composition-render.md)。纯 JS 使用共享商品数据；React 文件在 [阶段 4](../inventory/04-react/)。
+正文：[C22](../../src/content/docs/05-react/c22-props-composition-render.mdx)。接自己 C21 的工作区，不切换到旧阶段 4。
 
-| 文件 | 运行 | 说明 |
+| 材料 | 入口 | 用途 |
 | --- | --- | --- |
-| props.js | node props.js | 解构参数、undefined/null 与默认值 |
-| conditions.js | node conditions.js | 0、false、售罄与标签判断 |
-| purity-broken.js、purity-fixed.js | node 对应文件 | 对照修改输入与只读计算 |
-| prediction.js | node prediction.js | 练习 1 预测输出 |
-| 阶段 4 src | npm run dev | 工具栏、列表、卡片与单向数据流 |
-| 阶段 4 labs/props.html | dev 服务 | children、空列表、错误 props 与孤立 0 |
-| 阶段 4 labs/render-commit.html | dev 服务 | 重复 render、标题变化、DOM 节点保留 |
-| 阶段 4 tests | npm test | 正常商品、组合、空列表与输入只读回归 |
+| props.js、conditions.js、purity-broken/fixed.js、prediction.js | 仓库根目录 `npm run examples -- c22` | 5 个固定输出 |
+| [C22 steps](../../labs/reference/steps/C22/) | C21 → C22 | App、ProductList、Toolbar；原卡片保留 |
+| [c22.test.jsx](../../labs/inventory/tools/c22.test.jsx) | 当前工作区组件回归 | 冻结 props、空态、children、附加内容函数 |
 
-## 运行
+## Lab 与运行
 
-- 仓库根目录：`npm run examples -- c22`，核对 5 个固定输出文件。
-- 阶段 4：`npm ci`，再 `npm run dev -- --host 127.0.0.1`；打开终端给出的 /js_web/ 地址。
-- 实验在上述地址后接 `labs/props.html`，case 查询值为 wrong、zero、empty；不加 case 时展示 count=0 与链接 children。
-- 渲染实验：`labs/render-commit.html`，填写备注，Console 保存 `window.noteBefore = document.querySelector("#note")`；点两个按钮后比较节点身份与备注。
-- 错误 props：`npm run test:bug -- labs/props.test.jsx`；空标签：`npm run test:bug -- labs/tags.test.jsx`。仓库保留故意错误的起点，两条各自预期失败；按正文修复后通过。
-- 正常发布构建：阶段 4 执行 `npm test`、`npm run build`、`npm run preview -- --host 127.0.0.1`。labs 只由 dev 服务提供。
+- 发行版 `2026.10-v2.3`，C21 起点/C22 终点；下载目录 `downloads/inventory/2026.10-v2.3/`；主验收与上线证据见 [阶段 A](../../labs/records/A.md)。
+- 当前 `inventory/` 执行 `npm run lab -- start C22`、`npm run lab -- dev`、`npm run lab -- check C22`；源码在 `src/react/`。
+- 专用组件回归：工作区执行 `node node_modules/vitest/vitest.mjs run --config tools/foundations.config.mjs tools/c21.test.jsx tools/c22.test.jsx`。
+- 汇总证据与发布状态见 [A 记录](../../labs/records/A.md)；本路交稿位于该记录所列隔离副本的 `delivery/agent-1.md`。
 
-## 验证记录
+## 本次验证 · 2026-10-29
 
-- 2026-10-17 · macOS arm64 · Node 24.22.0、npm 11.19.1；沿用 C21 的 React/react-dom 19.3.1、Vite 8.3.4 与 Vitest 5.0.5，依赖清单及各锁文件未改。
-- `npm run examples -- c22` 5/5，阶段 4 正常 `npm test` 6/6。props 错误测试实际从失败到修复通过；临时加入 product.stock += 1，冻结输入测试抛 TypeError，恢复后 6/6。
-- Chrome（桌面原生 DevTools）：首页显示六件商品及固定库存；props 实验的 count=0、链接 children、自定义空提示正确；wrong 页面最初六张机械键盘，修复后第二张无线鼠标、0 件、¥129.00。
-- React Developer Tools 8.0.0：官方商店显示已安装；实际从 DevTools 的 More tabs 打开 Components，树为 PropsPreview → ProductListBroken → 六个 ProductCard；选中 key=P002 的卡片，其 product 误为 P001，父组件 products 为六项数组。Profiler 入口可见；正式应用选中 P002，product 已正确显示无线鼠标。
-- render-commit 实验：重复 render 有日志，StrictMode 开发调用重复；标题切换后 Console 比较 same=true，备注值保持「先核对外设」。
-- zero 页面最初显示孤立 0，tags.test.jsx 失败；改为 length > 0 后页面只剩标题，同一测试通过，最终恢复教学错误起点。
-- 阶段 4 重装 npm ci、正常测试及生产构建通过；练习 3 加粗说明实际构建/预览后恢复参考基线，再次正常测试与构建通过。网站 lint 为 22 课零 error/warning，check 零诊断，build 固定输出 207/207、26 个 HTML 与 22 课产物检查通过；C22 正文 7,869 字符、16 个代码块，具名代码与示例逐字一致。
-- 本地静态课程 HTTP 200，Chrome 显示新课与侧栏入口，6 个练习折叠区及路线页 22 / 48 已检查。
-- 未运行：Firefox、Safari、Windows；Profiler 性能录制（本课只介绍入口）。
-- Pages：[run 39018608877](https://github.com/socoo123/js_web/actions/runs/39018608877) 构建与部署成功；C22 和路线页 HTTP 200，线上标题、正文、6 个答案折叠区与 22 / 48 入口正确。
+- macOS arm64；Node 24.22.0/npm 11.19.1；React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.4；未对提供的依赖链接安装。
+- `npm run examples -- c22` 5/5；本课组件回归 3/3；`lab check C22` 85 条当前工作文件检查与六卡页面通过。
+- 在真实 ProductList return 前加入 `products[0].stock += 1`：冻结输入回归抛 TypeError，空态也失败；删除后 3/3 通过。不是只测另一份纯函数。
+- headless Chromium 156.0.8078.4：错误页未点击就显示 P001=14；CDP Sources 断点单步为 12→13；恢复只读组件后为 12。
+- 按正文加入同一个 App 的可选备注、给现有 root 再 render：输入保留“先盘外设”，节点比较 true。此实验只改独立验证副本，完成后恢复。
+- 三份主体文件与正文片段一致；建议注册表镜像中的 lint：4788/8000 字、11 块、零 error/warning；原有 18 个标题/显式锚点保留。
+- QA 使用真实 C21→C22 参考链；独立读者抽验由主 agent 执行。
+- 本路未运行：重新 npm ci、手动 React DevTools UI、Profiler 录制、Firefox/Safari/Windows。本批 Sources 证据来自独立浏览器 CDP；主集成的安装、16快照、构建及视觉/发布记录见阶段 A。
+
+## 历史
+
+2026-10-17 旧阶段 4 发布：[Pages 39018608877](https://github.com/socoo123/js_web/actions/runs/39018608877)。旧示例保留，但不作为当前工作区的完成证据。

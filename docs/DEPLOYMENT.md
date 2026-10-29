@@ -30,27 +30,30 @@ C32 的 Node 示例复用阶段 4 安装的 TanStack Query，因此全量构建�
 - `npm run setup:diagrams`：按当前 macOS/Linux 的架构下载固定 D2 和中文字体，核对 SHA-256，保存在被忽略的 `.cache/tools/`。首次准备需要网络；生成图本身可离线。
 - `npm run sync:roadmap`：从 `docs/CURRICULUM.md` 的 48 课大纲与现有文章生成路线页；已有文章显示链接，其余显示「待发布」。
 - `npm run check`：Astro 内容与类型检查。
-- `npm run build`：课程 lint 与全量固定输出示例 → 学习进度数据测试 → 同步目录 → 重建 D2 SVG → Astro 静态构建与 Pagefind 索引 → 检查 `/js_web/` 页面/资产链接、中文语言、课程折叠区、进度入口与四张速查侧栏。任一步失败都会停止。
+- `npm run build`：生成 Lab 包并检查契约 → 执行 Java 对照 → 课程 lint 与固定输出 → 进度数据测试 → 路线/D2 → Astro/Pagefind → `/js_web/` 页面/资产、折叠区、进度、速查与下载校验。任一步失败都会停止。
+- `npm run test:lab-walkthrough` 与 `npm run test:lab-react`：前置自动组装/错误回归，以及 C21–C36 实际快照检查；先安装 `labs/inventory` 的锁定依赖与 Playwright Chromium。它们独立于根 build，独立读者抽验按 PLAN §6 另做。
 - `npm run test:progress:browser`：生产预览运行后检查进度标记、导入导出、损坏恢复、存储受限、跨标签与禁用 JS 阅读，准备方式见根 README。默认端口 8751，可通过 `PROGRESS_BASE_URL` 指定地址。
 
 如果更新 D2 版本或字体，先核查官方来源，再同时更新下载摘要、固定版本与许可信息，不能仅改版本号。
 
 ## 每次生成文章后的同步
 
-用户已授权自动提交和推送，完整约定在 [AGENTS.md](../AGENTS.md)，门禁定义在 [PLAN §6](PLAN.md)。执行者每次完成文章后：
+用户已授权自动提交和推送，完整约定在 [AGENTS.md](../AGENTS.md)，门禁定义在 [PLAN §6](PLAN.md)。每阶段按 PLAN §7 同时启动 4 个指定模型子 agent，主 agent 等四路及返修全部结束，集成验收并负责发布：
 
-1. 运行 `npm run examples -- cNN`、`npm run lint:lessons`、`npm run check`、`npm run build`。构建也会自动检查全部课程与固定输出示例；验证细节写进 `examples/cNN/README.md`。
-2. 在 `docs/STATUS.md` 的「已发布课程」加一行，更新「下一步」。路线页由构建自动同步。
+1. 每课运行相应固定输出、Lab/错误行为检查；发布批次运行 `npm run lint:lessons`、`npm run check`、`npm run build` 及本批必要浏览器检查。同一源码/环境不重复执行 build 已包含的全量检查。验证明细写进 `examples/cNN/README.md` 并链接阶段记录。
+2. 主 agent 等待全部子任务完成并独立验收；准备阶段记录，STATUS 在发布核验后更新现有课程行、实际状态与下一步。路线页由构建自动同步。
 3. 审阅 Git 差异，只提交本次的文章、配套示例、图和相关网站改动；不提交缓存、凭据或用户无关的工作。
 4. 检查远端，再正常提交并推送到 `origin/main`，例如 `docs: publish C06 functions and closures lesson`。不强制推送。
-5. 等对应的 Actions 完成，确认新文章线上地址返回 200；失败时继续修复，或如实报告具体的阻塞。
+5. 等对应提交的 Actions 完成，确认课程/Lab/下载线上入口与资源正常、下载校验值一致；失败修复或明确报告阻塞。记录更新若触发再次部署，也等待该次完成。
 6. 全套视觉验收（宽度、亮暗模式、搜索、禁用 JS）按 PLAN §6 每周做一次。
 
 这是执行者的项目约定。仅编辑并保存一个文件不会自行创建 Git 提交；提交并推送到 `main` 后，Pages 工作流会自动部署。用户当次要求「仅本地草稿」或「暂不发布」时遵循该要求。
 
+每阶段成功后，主 agent 按 PLAN §8 输出全新窗口可复制的接续段落；失败仍接续同阶段，C 成功后结束改版。
+
 ## Pages 自动部署
 
-[工作流](../.github/workflows/deploy.yml) 在 `main` 推送或手动触发时运行：固定 Node → 安装网站与阶段 4 锁定依赖 → 阶段 4 lint/测试/构建 → 准备 D2/字体 → 检查 → 构建与链接检查 → 上传静态输出 → Pages 发布。
+[工作流](../.github/workflows/deploy.yml) 在 `main` 推送或手动触发时运行：固定 Node/JDK → 安装网站与工作区锁定依赖/Chromium → 前置自动组装与 React 快照检查 → 安装并检查旧阶段 4 → 准备 D2/字体 → Astro 检查 → 全量构建与产物检查 → 上传静态输出 → Pages 发布。
 
 GitHub 仓库的 Settings → Pages → Source 需要选择 **GitHub Actions**。工作流的构建任务只有读取内容与 Pages 配置的权限，部署任务取得 `pages: write` 和 `id-token: write`；不需要额外的网站部署密钥。
 

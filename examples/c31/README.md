@@ -1,46 +1,30 @@
 # C31 自定义 Hooks 与路由 · 示例
 
-配套正文：[C31](../../src/content/docs/05-react/c31-custom-hooks-routing.md)。普通 JS 在本目录，React 在[阶段 4](../inventory/04-react/)，沿用固定商品数据。
+正文：[C31](../../src/content/docs/05-react/c31-custom-hooks-routing.mdx)。同一 `inventory/`，发行版 `2026.10-v2.3`，C30→C31；主集成与发布见 [阶段 A](../../labs/records/A.md)。主 agent 从独立完成的C30继续本课，真实npm ci后完整check通过，漏productId依赖的lint/请求回归红→绿。旧阶段4只作参考。
 
-| 文件 | 运行 | 说明 |
-| --- | --- | --- |
-| url-parts.js | node url-parts.js | 区分原生 URL 的 path/search/hash 和片段内路由 |
-| catalog-params.js | node catalog-params.js | URL 筛选解析与非法枚举回退 |
-| storage-recovery.js | node storage-recovery.js | 注入简单存储对象，检查缺失/正常/损坏/非文本；不运行 React |
-| prediction.js | node prediction.js | 参数复制与字符串类型 |
-| 阶段 4 src/useProductRequest.js、ProductDetails.jsx | 首页详情 / request | 提取 C30 生命周期，保持清理、取消与重试 |
-| 阶段 4 src/useLocalStorage.js、storage-text.js、InventoryNote.jsx | 首页 / storage | 浏览器固定 key 的文本存储、损坏恢复、写入失败提示 |
-| 阶段 4 src/useCatalogFilters.js、catalog-url.js | 首页 | URL 是筛选唯一来源，逐次 replace、保留其他字段 |
-| 阶段 4 src/main.jsx、App.jsx、InventoryLayout.jsx | 首页 | HashRouter、嵌套/默认路由与 Outlet，Provider 跨路由保留 |
-| 阶段 4 src/ProductDetailRoute.jsx、NotFound.jsx | 首页 | 参数检查、初始快照、明确返回链接与未知路径 |
-| 阶段 4 labs/hooks-main.jsx | 下表 | 四个 dev 实验；不进入生产构建 |
-| 阶段 4 tests/hooks.test.jsx、routes.test.jsx | npm test | 21 条新增回归，原 App 测试增加 MemoryRouter 上下文 |
-| 阶段 4 labs/hooks-bugs.test.jsx | npm run test:bug -- labs/hooks-bugs.test.jsx | 缺 productId 依赖的一项失败起点 |
-
-## 运行
-
-- 根目录 `npm run examples -- c31`；本目录可逐个运行 node 命令。
-- 阶段 4 `npm ci`、`npm run dev -- --host 127.0.0.1`；已有完整锁文件无需重复 install。若在自己的 C30 工程上跟做，先执行 `npm install --save-exact react-router@8`。
-- 阶段 4 `npm run lint`、`npm test`、`npm run build`，再 `npm run preview -- --host 127.0.0.1`；所有路径以终端的 /js_web/ 地址为起点。
-- 生产首页 #/products 为列表，#/products/P002?q=鼠标 为详情；本阶段产物只做本地预览，未发布到课程 Pages。
-
-| case（labs/hooks.html?case= 后） | 操作与预期 |
+| 入口 | 命令 / 说明 |
 | --- | --- |
-| counters | 点两次 A，A=2、B=0；每次 Hook 调用状态独立 |
-| storage | A 保存/刷新，B 独立；损坏 A 的 JSON 再刷新得到默认值和错误；再次输入修复 |
-| request | C30 的正确请求组件改用 Hook，快速切换、取消与重试保持原行为 |
-| stale | P001 成功后选 P002，没有新请求，详情仍停在 P001；补上 productId 依赖修复 |
+| url-parts.js、catalog-params.js、storage-recovery.js、prediction.js | 根目录 `npm run examples -- c31`，4个机制参考 |
+| 当前工作区 | `npm run lab -- start C31`、`npm run lab -- dev`、`npm run lab -- check C31` |
+| 实际组件 | 工作区 `node node_modules/vitest/vitest.mjs run --configLoader runner --config tools/request.config.mjs` |
+| 浏览器/严格静态hash | 工作区 `node tools/browser-a3.mjs C31` |
 
-## 验证记录
+## 当前验证记录
 
-- 2026-10-18 · macOS arm64 · Node 24.22.0、npm 11.19.1；React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.3。新增 react-router 8.4.0 及两项传递依赖，只改阶段 4 清单/锁；网站根依赖不变。
-- `npm run examples -- c31` 4/4；阶段 4 `npm ci`、正常 lint、131/131 回归与生产构建通过。新增 11 条 Hook / 存储、10 条路由回归，原 C30 的 13 条竞态测试全部保留通过。
-- Hook 覆盖独立计数/独立取消、无关渲染不重请求、挂载只读、损坏/类型错误、读取权限/写入容量失败、恢复保存及相同 key 不自动共享 state。
-- 路由覆盖 URL 初始筛选、保留其他参数、非法值回退、嵌套详情与焦点、未知路径/编号不请求、跨页保留库存/丢弃草稿、参数切换失效、后退与 replace 历史。
-- 缺依赖的 lint 与 bug 回归先分别报 missing productId 和期望 P002/实为 P001；加入 productId 依赖后，两项原命令通过，再恢复教学错误起点。Chrome 调试接口真实暂停帧：修复前切到 P002 无新请求也不再命中加载断点，修复后断点读到 productId=P002，出现 P002.json 并显示正确详情。
-- 独立后台 Chrome 155.0.8059.82：四个 Hook 实验按正文步骤运行；备注保存/刷新/损坏/重新输入恢复、独立实例、旧请求隔离及取消/重试均通过；没有操作用户现有窗口。
-- 开发与生产预览均通过：完整 hash 地址的新标签分享/刷新、前进后退、保留 q/category/order、未知路径/编号返回入口、标题焦点、跨页库存保留、草稿卸载及备注恢复。P002 初始 JSON 为 /js_web/data/products/P002.json、HTTP 200、库存 0；原标签补货往返维持 53 / 26477.00，新标签和刷新恢复 52 / 26348.00。
-- 网站 lint 31 课零 error/warning，check 零诊断，build 固定输出 243/243、36 页产物检查通过；正文 7887 字符、15 个代码块，所有 JS/JSX 与完整文件或连续片段一致。
-- 静态课程生产预览 HTTP 200；禁用 JS 后 15 段代码、6 个答案折叠区与 /js_web/ 内部链接可用，路线页 31/48 与 C31 链接正确。
-- Pages：[run 39082631885](https://github.com/socoo123/js_web/actions/runs/39082631885) build/deploy 成功；C31 与路线均 HTTP 200，标题、自定义 Hook、存储、hash 路由正文与 31/48 目录及链接已上线。
-- 未运行：DevTools 界面手动点击、屏幕阅读器朗读、Firefox、Safari、Windows。
+- 最终checker验收：39 tools完整只读镜像、本路12专用工具无回退；最新C21–32重建后完整 `node tools/check.mjs C31` exit0：85条实际文件断言、Vitest 15/15、共享5组隔离浏览器及本路browser/严格静态hash通过，src/data未改写。日志 `delivery/evidence/final-checker/C31.log`；未重复红绿，汇总 `delivery/final-checker-acceptance.md`。
+- 旧H3兼容补验：清单5/5覆盖，MDX AST确认17个正文ID无重复（代码围栏不计）；本轮预检修改后继续保留。
+- 本轮接回validateProducts导入和saveProduct的只读next全量预检；错误同步留在ProductEditor，未新增state。实际App专项 `node node_modules/vitest/vitest.mjs run --configLoader runner --config tools/save-overflow-a3.config.mjs` 修前2 failed、修后2/2；Chromium修前编辑/新建main=0/form=0，修后错误/草稿/原商品/52/2634800保留且修正可保存，见 `delivery/evidence/save-overflow/C31-{red,green}-{unit,browser}.txt`。
+- 最新C28按正文连续作者拼接：原组件10/10+溢出2/2、Hooks lint与完整源码对照通过，跳过无关旧浏览器；临时catalog镜像48课lint零error/warning，C31为4790字符/12块。专项仅限C29–31；交稿 `delivery/agent-3-overflow.md`。
+
+- 2026-10-29 · macOS arm64 · Node 24.22.0、React 19.3.1、React Router 8.4.0、Vitest 5.0.5、happy-dom 21.0.4、Chromium 156.0.8078.4。
+- 当前链来自真实handoff-C28；StockActions/ProductEditor逐字节继承，App保留标题ref回退/可见性预判/onCancel包装。
+- 固定输出4/4；实际组件10/10：请求5条、快照与storage可选key兼容3条、真实C28表单/2000ms边界2条。快照仅显式保存，不自动双写。
+- 主错误在当前useProductRequest删productId依赖，原回归exit1；恢复原字节exit0，日志 `delivery/evidence/C31-main-{red,green}.txt`。
+- 前次完整浏览器记录（本轮只重跑溢出向量）：P004保存8/快照刷新、hash分享/返回/后退/未知ID/未知路径/非法枚举/坏导入通过；详情仍读静态起始数据，和reducer修改区分。
+- 实际生产build挂无fallback `/js_web/demos/inventory/`，P004 hash打开/刷新通过；history路径products/P004明确404。未发布在线演示。
+- 真实C28保留向量：12→15/16、两秒取消/卸载、noValidate/autoFocus、取消返按钮与筛除后返标题、保存改名出筛选返标题；360px页面异常0。
+- 假时钟的筛除向量先等待URL导航提交并确认行卸载，再推进2300ms；不把“发起导航”当成组件已经卸载。
+- 原命令 `C31-final.txt`；按正文从真实C28连续重建后再完整对照终态的作者自审 `real-prose-assembly.txt`。非主agent独立读者跟做。
+- MDX+LessonTask、原md删除、12个旧H2保留；临时catalog镜像48课lint零error/warning，Hooks lint通过。
+- 最终checker本路已验收通过；主独立跟做、全站门禁与冻结/Pages证据见 [阶段A记录](../../labs/records/A.md)。
+- 未运行：完整DevTools手点、Firefox/Safari、Windows、屏幕阅读器；本路未提交、推送、部署。

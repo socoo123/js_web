@@ -120,7 +120,7 @@ C46/C47 给一条完整流程即可：打开部署子路径 → 导航课程或�
 
 ## V2 逐章错误与改版回归矩阵
 
-2026-10-28 · **用户已授权实施，按 STATUS 逐批迁移与发布。** 下表列的是每章应该能复现和解释的学习错误，以及改版时需要防止的回归；不是宣称线上 48 课当前都存在这些 bug。故障设计来自现有课程的典型错误和新工作区的边界。具体复现文件采用 [CURRICULUM](CURRICULUM.md#revision-v2-curriculum) 拟定路径。
+2026-10-29 · 下表保留每章主错误与回归风险，按 [PLAN](PLAN.md) 的 A/B/C 范围执行，具体 Lab 场景见 [Lab 设计](../labs/README.md)。不是宣称线上 48 课当前都存在这些 bug；已有 L1/L2 记录有效，未改动部分不重新制造全部故障。具体文件见 [CURRICULUM](CURRICULUM.md#revision-v2-curriculum)。
 
 每章正文选一个主要错误深入走完“现象→工具→证据→原因→修复→确认”，表中的边界再进入验收。实现者需把错误入口、正确入口、输入、预期输出和实际执行结果写进该课验证 README；不能将本表当作已经运行的证据。
 
@@ -132,7 +132,7 @@ C46/C47 给一条完整流程即可：打开部署子路径 → 导航课程或�
 | --- | --- | --- | --- | --- |
 | C01 | 在 Node 里访问 document，或把 npm 当成执行 JS 的语言；运行宿主探测 | Console/终端：document 未定义，而浏览器中有 DOM；查看实际启动命令 | 把浏览器 API 留在界面层；纯库存计算两端结果一致；P001 价值 478800 分 | 初始骨架要求先学 npm/React 才能打印；把 Bun 只归为包管理器；沿用过时标准年份 |
 | C02 | app.js 拼成 ap.js，卡片出现但按钮不工作；页面用固定宽度撑破手机 | Network 的脚本请求 404；Elements/Computed 显示超出可用宽度 | 改正确相对路径、流式宽度；刷新有脚本执行，360px 无整页横滚；断点能命中 | 开发服务 fallback 用 HTML 200 掩盖脚本错误；省略 label、语义结构与脚本加载解释 |
-| C03 | 输入框的 3 是字符串，12 + "3" 得 123；Number(空白) 得 0；`stock || 12` 把售罄复活 | Sources：amount 的 typeof 为 string，空文本 trim 后为空；观察默认值操作数 | 先非空检查、显式转换、整数与范围校验；12+3=15；空白/3件/负数/小数拒绝；0 保留 | Java parseInt 与 JS parseInt 被说成完全等价；页面、core、参考解三种校验不一致 |
+| C03 | 输入框的 3 是字符串，12 + "3" 得 123；Number(空白) 得 0；`stock \|\| 12` 把售罄复活 | Sources：amount 的 typeof 为 string，空文本 trim 后为空；观察默认值操作数 | 先非空检查、显式转换、整数与范围校验；12+3=15；空白/3件/负数/小数拒绝；0 保留 | Java parseInt 与 JS parseInt 被说成完全等价；页面、core、参考解三种校验不一致 |
 | C04 | 循环写 `i <= products.length`，读取最后一个 undefined 导致异常/NaN；var 覆盖外层变量 | 条件断点停在 i=length；Scope 显示 product 未定义或共享变量 | 改 for-of 或 `< length`；总库存 52、空列表 0；let/const 作用域正确 | 为了防报错每处塞默认值，掩盖真正越界；将 const 写成冻结对象 |
 | C05 | `{...product}` 复制后修改 draft.tags，取消也改变原商品；解析成功即信任 JSON | Sources 比较 draft.tags===product.tags 得 true；查看导入字段类型 | 复制被修改的嵌套路径；解析后校验结构；取消不改 tags；坏数据不替换好数据 | 用最终复杂深克隆库掩盖引用教学；把 Java/JS 参数描述成按引用传参 |
 | C06 | 用 var 循环创建函数，点击三个操作都读到最后一个值；复用外部计数器导致实例共享 | Scope/Watch：回调捕获同一绑定；分别调用两个工厂 | 用每次迭代的 let 绑定或显式参数；计数器输出 1/2 与独立的 1；筛选工厂不串分类 | 把闭包说成创建时复制值；正文机制实验正确，实际库存入口仍读共享全局变量 |
@@ -169,9 +169,9 @@ C46/C47 给一条完整流程即可：打开部署子路径 → 导航课程或�
 | C27 | reducer修改原state；未知action返回undefined；所有UI草稿进Context | 单元测试冻结/保留before引用并比较；检查Provider值与action分支 | 纯函数返回新值；明确未知action错误；有变化才改业务状态，草稿留局部 | 将用例只写成点击UI而无规则测试；引入Context后形成第二份商品来源 |
 | C28 | 用ref保存可见库存，改变后UI不刷新；取消后定时任务仍回写 | Components的state没变；Sources看ref与timer/abort句柄；取消后观察 | 可见数据放state，ref放DOM/句柄；取消后不更新；提交后焦点正确 | 每次render建外部资源；误把ref当“绕过渲染”的通用state替代品 |
 | C29 | Effect缺cleanup造成重复快捷键；依赖每次新对象引发循环；闭包用旧值 | setup/cleanup日志、事件断点、React Hooks lint；观察挂载/卸载计数 | 稳定必要依赖、对称清理；一次操作一次业务变化；保留StrictMode | 以禁用StrictMode或忽略lint作为修复；把按钮保存与派生汇总塞入Effect |
-| C30 | P001慢响应在P002快响应后覆盖；旧请求finally关掉新loading | Network显示完成顺序；断点看当前id与返回id；可控延迟复现 | Abort与过期守卫覆盖成功/失败/finally；最终P002，取消不报业务失败，卸载不回写 | 只mock最终数据没有乱序；固定sleep偶然通过；复用同一个AbortController导致请求立即取消 |
+| C30 | P001慢响应在P002快响应后覆盖；旧请求finally关掉新loading | Network看静态文件读取；Sources看读取后处理与闭包归属；受控Promise指定完成顺序 | Abort与过期守卫覆盖成功/失败/finally；最终P002，取消不报业务失败，卸载不回写 | 把读取后的人工延时写成HTTP Timing；只mock最终值；固定sleep偶然通过；复用同一个AbortController |
 | C31 | 两次调用Hook误以为共享状态；依赖漏id；Pages详情刷新404 | Components看两个实例；URL/Network与Hook入参；严格静态刷新 | Hook复用逻辑不共享实例；参数依赖齐全；hash详情/回退/未知id可用 | 抽Hook同时改变行为而无基准；用dev history fallback冒充Pages支持任意路由 |
-| C32 | queryKey不含id，切商品读旧缓存；mutation后未失效；UI与repository双写 | Query缓存/Network：P002无请求、key仍旧；比较UI/repository值 | key含必要参数、精确失效，repository单一数据源；两ID隔离、编辑后更新 | 用数组索引当缓存身份；迁入Query后旧请求Effect仍在运行；自动重试导致测试拖延未控制 |
+| C32 | queryKey不含id，切商品读旧缓存；mutation后未失效；UI与repository双写 | Sources看repository.get读次数及实际queryKey；比较UI/repository值；浏览器mock不发HTTP | key含必要参数、精确失效，repository单一数据源；两ID隔离、编辑后更新 | 以Network无GET代替缓存证据；用数组索引当身份；迁入Query后旧请求Effect仍运行；未控制自动重试 |
 | C33 | 把form action单参数函数交给useActionState，formData实际是prevState；失败未回滚 | Sources看参数类型；提交失败后乐观行仍存在 | 正确签名与状态边界；pending防重复、成功提交、失败回滚且保留草稿 | 把浏览器Action写成服务器持久化；未缓存Promise直接交use；未经官方核对批量展示新API |
 | C34 | useMemo空依赖留下旧总价；到处memo但卡顿仍在；用Suspense包普通fetch | Profiler定位实际提交；补货后state变而memo值不变；观察加载边界 | 先正确计算再测量，声明依赖；lazy和错误边界各司其职；当前总价随库存变化 | 用固定毫秒阈值验收不同电脑；性能优化吞掉正确性；把渲染错、网络错、加载混成一种 |
 | C35 | 测试不await事件/异步；只断言内部state或mock调用，空输入bug仍绿 | 失败堆栈/act警告；RTL角色查询显示真实错误；故意引入业务回归 | await user-event、findBy等条件等待；用户可见行为断言；非法输入和失败重试真的红→绿 | mock了被测校验函数；用timeout掩盖问题；把DOM模拟器当真实布局浏览器 |
@@ -187,7 +187,7 @@ C46/C47 给一条完整流程即可：打开部署子路径 → 导航课程或�
 | C40 | namespace/module名不匹配导致404；在sap.ui.define内直接粘ESM | Network找失败模块URL；Console首个解析/加载错误；检查bridge产物 | manifest、命名空间与路径一致；使用已验证的构建桥；六商品加载且静态构建可用 | 共享纯函数变成手工复制的第二份；本地CDN缓存掩盖离线/版本问题 |
 | C41 | 筛选后可见第一行指向P004，却按索引0写P001；直接改getData对象UI不更新；取消已污染Model | Sources看binding context `/products/3` 与id；Model值和控件值对照 | 使用context/id和setProperty；草稿单独Model；P004改动只影响它，取消不写入，汇总/i18n正确 | 把XML绑定的模型名/相对路径写错；提前把正式Model双向绑定到可取消草稿 |
 | C42 | 用可见索引拼路由；把当前分页子集统计当全量；混用V2/V4接口 | hash参数、binding context、Network查询及metadata命名 | 路由传稳定id、未知id有结果；明确页数据与全量；有限V2读取/过滤/分页可观察 | 声称浏览器mock等于真实SAP服务；部署缺metadata/json；静态站承诺完整OData写服务 |
-| C43 | `disabled="false"`仍禁用；拿错事件字段；全局CSS无法穿透Shadow DOM | Elements看属性存在；Console看disabled/property与event.detail；检查shadow树/slots | 布尔属性按存在/移除或property；按当前事件契约取值；用支持的主题接口；补货有效 | 漏打包主题/i18n资源；把attribute字符串与property类型混为一谈 |
+| C43 | `disabled="false"`仍禁用；拿错事件字段；全局CSS无法穿透Shadow DOM | Elements看属性存在；Console看disabled/property与event.detail；检查shadow树/slots | 按当前属性/事件契约取值；用主题接口；P004草稿取消保留3、保存8只改它，非法输入拒绝 | 漏打包主题/i18n资源；把attribute字符串与property类型混为一谈 |
 | C44 | UI5布局Form被当原生form，保存未触发；包装事件沿用AntD签名 | Sources提交断点不命中；Elements没有HTML form祖先；查看实际事件对象 | 建正确原生表单链，按包装API取值/转换；键盘Enter与按钮均保存一次，错误阻止提交 | 把经典UI5绑定语法混入React props；使用废弃组件包；只通过鼠标点击验收 |
 
 ### L5 调试与静态交付

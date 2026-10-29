@@ -1,0 +1,259 @@
+---
+title: C21 React 来由、JSX 与第一个组件
+description: 在当前库存工作区加入 React 入口，用 JSX 和函数组件显示同一份六商品数据，保留原生页面与业务规则。
+sidebar:
+  order: 21
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 2 周 · 第 11 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
+> 前置：C11、C15、C16、C20 · 运行：本地 React、Node 24 · 示例已运行验证
+
+## 这一课解决什么问题
+
+原生库存页已经能编辑、筛选和保存。现在在**同一个工作区**增加 React 入口，用组件描述六张商品卡片。原生页面、Node 报表、校验和固定数据继续保留，不重新创建 Vite 工程，也不重写业务规则。
+
+这一课只完成首次显示：六个编号各出现一次，库存依次为 12、0、7、3、25、5。学完后，你能从入口追到组件、从 JSX 追到浏览器 DOM，也能分清 React 与 Vite 的职责。
+
+<LessonTask lessonId="C21" />
+
+继续自己的 C20 工作区。需要补课时，用任务卡的 C20 起点解压到一个**新目录**，在该目录执行一次 `npm ci`。下面所有路径都相对这个 `inventory/`；不要改网站工程。**先写完下文四个文件，再执行任务卡的 start/dev 命令**。停止原生页服务后启动 React 服务，打开终端地址，开发入口通常是 `http://127.0.0.1:8060/`。
+
+本课的三个 JSX 文件是主要改动；另加一个只负责容器的 HTML 文件。完整清单：`src/react/index.html`、`main.jsx`、`App.jsx`、`ProductCard.jsx`，都在同一个 `src/react/` 目录。现有依赖已经包含 React 与 JSX 转换插件。
+
+## Java 程序员先看这里
+
+函数参数、ESM 导入和返回值仍是普通 JS。新机制在于：组件返回的是**界面描述**，React 决定怎样把描述落实到 DOM。Java 中直接调用控件 setter 的经验不能代替这一步，因此这里不造一个 Java 版 React。
+
+<a id="1-从逐项改节点到描述界面"></a>
+
+## 1. 声明式 UI：写结果，不分散更新节点
+
+React 在 2013 年开源。交互一多，手工维护“这次该更新哪些节点”容易遗漏；组件把结构和它依赖的数据放在一起。[React 的设计来由](https://legacy.reactjs.org/blog/2013/06/05/why-react.html)
+
+你已经写过 `nameNode.textContent = product.name`。现在创建 `src/react/ProductCard.jsx`，完整内容如下：
+
+```jsx
+import React from "react";
+import { formatPriceCents } from "../core/inventory.js";
+export function ProductCard({ product, children }) {
+  return <article data-id={product.id}>
+    <h2>{product.id} {product.name}</h2>
+    <p>库存 {product.stock} 件</p>
+    <p>单价 {formatPriceCents(product.priceCents)} 元</p>
+    {children}
+  </article>;
+}
+```
+
+传入 P001 时显示“P001 机械键盘”“库存 12 件”“单价 399.00 元”。`formatPriceCents` 仍来自现有 core，金额继续以整数分保存。`data-id` 保留业务编号，方便 Elements 和测试定位。
+
+函数的唯一参数是一个对象，解构得到 `product` 和 `children`。前者决定显示哪件商品，后者给附加内容留位置；没传 children 时那里为空。React 通过 `<ProductCard />` 使用这个函数，不需要 `new`。
+
+声明式不是“随便改变量，页面都会刷新”，而是描述**给定数据对应的界面**；交互更新需要明确触发。Java 的普通方法返回业务值，这里返回的是由库继续处理的界面值。
+
+<a id="2-vite-建项目createroot-连接浏览器"></a>
+<a id="html-保留容器js-启动-react"></a>
+
+## 2. HTML 容器与 createRoot：接上浏览器
+
+在 `src/react/` 创建 `index.html`，不动 `src/vanilla/index.html`：
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>React 库存工作台</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="./main.jsx"></script>
+</body>
+</html>
+```
+
+`root` 只是浏览器中的空容器。它下面的 module 脚本加载入口。再创建 `src/react/main.jsx`：
+
+```jsx
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+import "../vanilla/styles.css";
+const root = createRoot(document.getElementById("root"));
+root.render(<React.StrictMode><App /></React.StrictMode>);
+```
+
+创建下一节的 App 后，页面内容会出现在 `div#root` 里面。`createRoot` 接收真实 DOM 容器，返回 React 根对象；`root.render` 接收界面描述。只在入口创建这个根，不在组件函数中重复创建。[createRoot](https://react.dev/reference/react-dom/client/createRoot)
+
+`react` 提供组件等能力，`react-dom/client` 把它连接到浏览器 DOM，Vite 处理模块与 JSX。样式直接复用原生页的 CSS；切到 React 并不会取消 HTML、CSS 或浏览器的作用。
+
+`StrictMode` 不产生包装节点，只增加开发检查。即使组件在开发时被重复调用，入口也不因此每次建一个根。它不是 Java 的主线程或某个 UI 控件。
+
+<a id="3-函数组件和-jsx结构与计算写在一起"></a>
+<a id="大写名字代表组件小写名字代表标签"></a>
+
+## 3. JSX：大写组件、表达式与分组
+
+创建 `src/react/App.jsx`，用现有固定数据生成六张卡片：
+
+```jsx
+import React from "react";
+import products from "../../data/products.json" with { type: "json" };
+import { ProductCard } from "./ProductCard.jsx";
+export default function App() {
+  return <main><h1>React 库存工作台</h1>
+    <section id="list" aria-label="商品列表">
+      {products.map((product) => <ProductCard key={product.id} product={product} />)}
+    </section>
+  </main>;
+}
+```
+
+输出六张卡片；P002 是无线鼠标、0 件、129.00 元。JSON 导入相对**当前文件**向上两层到 data，卡片则从同目录导入。ProductCard 是具名导出，所以导入带大括号；App 是默认导出，所以 main 的导入不带大括号。
+
+`map` 仍是 C08 的数组变换，只是每项返回 JSX；`key` 先使用稳定编号。`<ProductCard />` 的大写名指向组件函数，`<article>`、`<main>` 的小写名指向标签。[你的第一个组件](https://react.dev/learn/your-first-component)
+
+**先猜一猜：** 把卡片中标题换成下面两种写法，P001 分别显示什么？
+
+```jsx
+<h2 title={product.name}>product.name</h2>
+<h2 title="product.name">{product.name}</h2>
+```
+
+第一行可见文字是 `product.name`，title 是“机械键盘”；第二行恰好相反。引号和普通文本不执行表达式，只有 `{}` 内按 JS 求值。读完后保持文件里的正确标题，不必把这两行同时加入项目。
+
+<a id="从-html-迁移时记住这些改动"></a>
+<a id="4-大括号放表达式样式接收对象"></a>
+<a id="classname-管常规样式style-传动态值"></a>
+
+JSX 是 JS 的语法扩展，不是 HTML 字符串。标签必须闭合；普通 CSS 类写 `className`，label 的关联写 `htmlFor`，`aria-label`、`data-id` 保留连字符。表达式能放字段、计算或函数调用，if/for 等语句放在 return 前。
+
+相邻内容可以用 Fragment 分组，且不增加 DOM 包装。下面是可阅读的短表达式，也可以在 App 的 h1 后加上观察，再移除：
+
+```jsx
+<>
+  <p style={{ marginTop: 8 }}>库存：{products[1].stock ?? 12}</p>
+  <p>布尔：{false}；空值：{null}；数字：{0}</p>
+</>
+```
+
+**先猜一猜：** 第一行是 0 还是 12？第二行哪些值显示出来？
+
+输出“库存：0”和“布尔：；空值：；数字：0”。`??` 保留有业务意义的 0；false/null 作为子内容不显示，数字 0 会显示。`style` 的外层大括号进入 JS，内层创建对象，`marginTop: 8` 是 8px。常规排版仍放 CSS。
+
+对象本身不能直接作为文字，例如 `{product}`；先取字段，或使用 `JSON.stringify` 得到字符串。`return` 后换行时，把左括号留在 return 同一行，避免 JS 提前结束返回语句。Java 的表达式求值经验可复用，JSX 的显示规则需要另外记住。
+
+<a id="5-jsx-转成-jsreact-再更新-dom"></a>
+
+## 4. JSX、React 元素、DOM 是三个层次
+
+JSX 由工具转成 JS 调用，得到 React 元素描述；React 再据此管理真实 DOM。`document.createElement` 创建的是浏览器节点，React 的 `createElement` 创建的是描述，名字相近、职责不同。
+
+在当前工作区终端执行这个不含 JSX 的对照，Node 直接运行普通 JS：
+
+```sh
+node --input-type=module -e '
+import { createElement } from "react";
+const element = createElement("h2", null, "机械键盘");
+console.log(element.type, element.props.children); // h2 机械键盘
+console.log(typeof element.appendChild); // undefined
+'
+```
+
+输出是 `h2 机械键盘` 和 `undefined`。再看当前开发服务的转换结果：在 **Network → JS** 过滤中打开 `ProductCard.jsx` 请求，在 Response 搜索 `article` 和 `jsx`。你会看到创建描述的 JS helper 调用，而非浏览器原样执行 JSX。
+
+:::tip[自己尝试 · 本地 React]
+1. 在当前工作区启动本课服务，核对六张卡片。
+2. Elements 展开 `div#root`，检查 main、section 和六个 article；StrictMode 没有对应标签。
+3. Network 打开 ProductCard 的模块响应；Sources 中打开原文件，对照 return 和 source map。
+4. 运行 `npm run lab -- check C21`。
+
+预期：P001 显示 12 件，P002 显示 0 件；模块响应已是 JS，源码视图仍可定位 JSX。
+:::
+
+完整顺序是：Vite 转换 → 浏览器运行 JS → React 计算并提交 DOM → 浏览器布局、绘制。把 JSX 文件直接交给 Node，或把 JSX 粘进 Console，都绕过了转换入口。
+
+## 常见错误与调试
+
+<a id="商品标题变成了-productname"></a>
+
+### 六张商品卡片都没出现
+
+先在 App 的 map 中，把正确的 `<ProductCard ... />` 改成下面这一行；保留原来的 import：
+
+```jsx
+// 有问题的写法：小写名被当成标签，不会调用 ProductCard 函数
+{products.map((product) => <productCard key={product.id} product={product} />)}
+```
+
+1. **现象**：标题还在，六张正常卡片消失；Console 可能报告大小写或未知标签提示。
+2. **工具**：DevTools → Elements 展开 `#list`；Sources 打开 ProductCard，在 return 行设断点并刷新。
+3. **证据**：列表里是 `productcard` 标签，没有 article；卡片组件的断点未命中。
+4. **原因**：JSX 编译器按小写标签处理名字，没引用导入的函数。
+5. **修复**：改回大写 `ProductCard`，保持具名导入一致。
+6. **确认**：刷新后六个 article 回来，断点可命中；`check C21` 恢复通过。该检查会对当前 App 运行商品内容回归，错误版找不到六张卡片。
+
+若标题只是字面的 `product.name`，按第 3 节比较 Elements 的文本和 title，再补上字段访问的大括号。
+
+## 练习
+
+<a id="练习-1预测文字与属性"></a>
+<a id="练习-2卡片没有出现哪里丢了返回值"></a>
+
+### 必做：保留业务规则，完成六张卡片
+
+按前文创建四个文件，先预测 P001/P002 的文字，再复现一次小写组件错误并修复。
+
+验收：六个编号各出现一次，库存依次为 12、0、7、3、25、5；P001/P002 单价分别为 399.00/129.00 元，原始 JSON 不变，`check C21` 通过。
+
+<details>
+<summary>提示</summary>
+
+map 每轮传入当前商品，字段来自同一条记录。若完全没有卡片，先查组件大小写与实际返回值，再查数据。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+App 的 map 为六件商品各生成一张 ProductCard；卡片读取 product，复用 core 格式化单价。P002 的 0 正常显示，不使用默认值覆盖它。
+
+</details>
+
+<a id="练习-3给卡片补上库存价值"></a>
+
+<details>
+<summary>可选深入：给卡片补上库存价值</summary>
+
+完成六卡后，可在 ProductCard 的单价段落后加 `<p>库存价值 {formatPriceCents(product.stock * product.priceCents)} 元</p>`。先以“分”相乘，再格式化：P001 为 4788.00 元，P002 为 0.00 元。此增量可以保留到后续课；下一课只拆 App，不替换 ProductCard。
+
+</details>
+
+## 项目进度
+
+- `src/react` 已有独立入口；`src/vanilla` 与 core、数据、Node 报表都保留。
+- 六张卡片与固定库存一致，JSX 经过 Vite 后交给浏览器执行。
+- 暂停时在 `notes/next.md` 记录 C21、已改的四个文件、检查结果，以及“下一步拆列表和工具栏”。
+
+## 小结
+
+- 组件描述界面，React 管理容器内的 DOM；Vite 管转换和开发服务。
+- 入口建一个根，组件首字母大写，返回 JSX。
+- JSX 的大括号求值，Fragment 分组；数字 0 与空内容要分清。
+- 调试时同时看数据、JSX 和实际 DOM，不因使用 React 放弃浏览器基础。
+
+自测：ProductCard 的 import 为何带大括号？createRoot 接收什么？小写组件为何不执行函数？React 元素为什么不能调用 appendChild？
+
+下一课让列表、卡片和工具栏各自负责一件事。
+
+## 延伸阅读
+
+- [React：你的第一个组件](https://react.dev/learn/your-first-component)
+- [React：使用 JSX 书写标签](https://react.dev/learn/writing-markup-with-jsx)
+- [React：在 JSX 中通过大括号使用 JavaScript](https://react.dev/learn/javascript-in-jsx-with-curly-braces)
+- [React DOM：createRoot](https://react.dev/reference/react-dom/client/createRoot)
+- [React：createElement](https://react.dev/reference/react/createElement)
+- [Vite：JSX 支持](https://vite.dev/guide/features#jsx)

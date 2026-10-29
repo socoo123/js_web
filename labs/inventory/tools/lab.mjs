@@ -42,6 +42,10 @@ export async function viteConfig(id, production = false) {
   const overrides = existsSync(own) ? (await import(pathToFileURL(own))).default : {};
   return mergeConfig({
     configFile: false, publicDir, root: path.join(workspace, entry), appType: 'mpa', plugins,
+    cacheDir: path.join(workspace, '.lab/vite-cache', entry.replaceAll('/', '-')),
+    // Prebundle the full React entry graph before serving a C31 -> C32 increment.
+    // plugin-react already includes react, react-dom and both JSX runtimes.
+    optimizeDeps: entry === 'src/react' ? { include: ['react-dom/client', 'react-router', '@tanstack/react-query'] } : undefined,
     base: production ? (process.env.LAB_BASE ?? '/js_web/demos/inventory/') : '/',
     server: { host: '127.0.0.1', port: 8060, strictPort: true, fs: { allow: [workspace] } },
     build: { outDir: path.join(workspace, 'dist', entry.replaceAll('/', '-')), emptyOutDir: true, sourcemap: true },
@@ -94,6 +98,7 @@ async function main() {
   if (command === 'compare') {
     const { compare } = await import('./reference.mjs'); await compare(id); return;
   }
+  if (command === 'lint') { await run(process.execPath, ['node_modules/eslint/bin/eslint.js', '--config', 'tools/eslint.config.mjs', 'src/react']); return; }
   if (command === 'report') {
     if (Number(state.lessonId.slice(1)) < 17) throw new Error('报表从 C17 开始；先完成 src/cli/report.js。');
     await run(process.execPath, ['src/cli/report.js']); return;

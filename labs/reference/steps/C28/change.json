@@ -1,0 +1,8 @@
+{
+  "previous": "C27",
+  "files": [
+    "src/react/StockActions.jsx",
+    "src/react/ProductEditor.jsx",
+    "src/react/App.jsx"
+  ]
+}

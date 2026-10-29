@@ -161,10 +161,43 @@ try {
     equal('空白库存校验', core.parseDraft({ ...draft, stock: '' }).hasErrors, true);
     equal('合法零库存', core.parseDraft({ ...draft, stock: '0' }).value.stock, 0);
   }
-  if (n >= 23 && n <= 39) {
+  if (n >= 21 && n <= 24) {
+    const files = ['tools/c21.test.jsx'];
+    if (n >= 22) files.push('tools/c22.test.jsx');
+    if (n === 24) files.push('tools/c24.test.jsx');
+    await run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/foundations.config.mjs', ...files]);
+  }
+  if (n === 23) {
     equal('src/react/StockActions.jsx 已创建', existsSync(path.join(workspace, 'src/react/StockActions.jsx')), true);
     await run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/vitest.config.mjs']);
   }
+  if (n >= 25 && n <= 28) {
+    await run(process.execPath, ['tools/forms-state-check.mjs', id]);
+    await run(process.execPath, ['tools/forms-state.browser.mjs', id]);
+  }
+  if (n >= 29 && n <= 36) {
+    const args = ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/effect.config.mjs'];
+    if (n >= 30 && n <= 32) args.push('--exclude', 'tools/contract-a3.test.jsx');
+    // C30–32 request tests run this contract once. C33+ keeps its timer test,
+    // but the synchronous C28 form assertion is replaced by Action/RTL coverage.
+    if (n >= 33) args.push('-t', '^(?!真实C28表单契约)');
+    await run(process.execPath, args);
+  }
+  if (n >= 30 && n <= 36) {
+    const args = ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/request.config.mjs'];
+    if (n >= 33) args.push('tools/query-a3.test.jsx');
+    await run(process.execPath, args);
+  }
+  if (n >= 29 && n <= 31) await run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/save-overflow-a3.config.mjs']);
+  if (n >= 29 && n <= 32) await run(process.execPath, ['tools/browser-a3.mjs', id]);
+  if (n >= 21 && n <= 36) await run(process.execPath, ["tools/react-ui-check.mjs", id]);
+  if (n >= 33 && n <= 36) await run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/action.config.mjs']);
+  if (n >= 34 && n <= 36) await run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/performance.config.mjs']);
+  if (n >= 35 && n <= 36) {
+    await run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/behavior.config.mjs']);
+    await run(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', '--config', 'tools/playwright.config.mjs']);
+  }
+  if (n >= 29 && n <= 36) await run(process.execPath, ["node_modules/eslint/bin/eslint.js", "--config", "tools/eslint.config.mjs", "src/react"]);
   if (n >= 41 && n <= 42) {
     equal('view/EditDialog.fragment.xml 已创建', existsSync(path.join(workspace, 'adapters/openui5/webapp/view/EditDialog.fragment.xml')), true);
     await run(process.execPath, ['tools/ui5-check.mjs']);

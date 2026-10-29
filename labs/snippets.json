@@ -15,28 +15,28 @@
   },
   "c23-setup": {
     "lang": "jsx",
-    "checkpoint": "P23",
+    "checkpoint": "C23",
     "file": "src/react/StockActions.jsx",
     "region": "setup",
     "verified": true
   },
   "c23-delay": {
     "lang": "jsx",
-    "checkpoint": "P23",
+    "checkpoint": "C23",
     "file": "src/react/StockActions.jsx",
     "region": "delay",
     "verified": true
   },
   "c23-controls": {
     "lang": "jsx",
-    "checkpoint": "P23",
+    "checkpoint": "C23",
     "file": "src/react/StockActions.jsx",
     "region": "controls",
     "verified": true
   },
   "c23-app": {
     "lang": "jsx",
-    "checkpoint": "P23",
+    "checkpoint": "C23",
     "file": "src/react/App.jsx",
     "region": "app",
     "verified": true

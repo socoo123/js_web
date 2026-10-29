@@ -13,9 +13,17 @@ test('48 个稳定 ID、前置与五个 Lab 连续', () => {
     assert.equal(row.lessonId, `C${String(i + 1).padStart(2, '0')}`);
     assert.equal(row.startCheckpoint, `C${String(i).padStart(2, '0')}`);
     assert.equal(row.previousLesson, row.startCheckpoint);
-    assert(row.files.length && row.error.trigger && row.acceptance.length);
+    assert(row.files.length && row.acceptance.length);
+    for (const field of ['trigger', 'evidence', 'repair', 'risk']) assert(row.error[field]?.trim(), `${row.lessonId} 缺少错误字段 ${field}`);
   });
   assert.equal(new Set(catalog.lessons.map((row) => row.labId)).size, 5);
+});
+test('C03 的逻辑或属于代码，不能截断错误字段或移位证据', () => {
+  const { error } = catalog.lessons.find((row) => row.lessonId === 'C03');
+  assert.match(error.trigger, /`stock \|\| 12` 把售罄复活/);
+  assert.match(error.evidence, /^Sources：amount 的 typeof 为 string/);
+  assert.match(error.repair, /0 保留/);
+  assert.match(error.risk, /Java parseInt 与 JS parseInt/);
 });
 test('快照路径与下载包拒绝越界、缓存、符号链接', () => {
   for (const file of ['../a', '/tmp/a', 'src/../a', 'a\\b', 'a//b']) assert.throws(() => safePath('/tmp/x', file));

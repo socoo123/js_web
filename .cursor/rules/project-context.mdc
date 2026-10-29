@@ -10,8 +10,9 @@ alwaysApply: true
 - 续做关键词为 JS_WEB_START。依次读 docs/STATUS.md → docs/PLAN.md → docs/CONTENT_GUIDE.md → docs/CURRICULUM.md 中本课那一行。
 - 写或改任何课程前必须读完 docs/CONTENT_GUIDE.md，遵守其中的篇幅上限、模板和禁用写法；`npm run lint:lessons` 报 error 不能发布。
 - 正文写给学员：验证过程、作者环境、补丁版本号、内部编号不进正文，明细写在 examples/cNN/README.md。
-- 库存数据用 PLAN §3.1 的固定数据，项目按 PLAN §3.2 的阶段目录推进。
+- 库存数据用 PLAN §3.1，五个 Lab 的起点与验收见 labs/README.md；保留已完成成果。
 - 读者会 Java、初学前端；中文教学，可运行代码、Java 对照、练习与答案；需要动手的内容标「自己尝试」；必须覆盖调试工具与 UT。
 - 图只用 D2；静态站发布到 GitHub Pages 的 /js_web/ 子路径。
 - 当前阶段以 docs/STATUS.md 为准；不要把未完成、未验证或未上线的工作标为完成。
-- 每篇文章完成后按 PLAN §6 的每课门禁验证，更新 STATUS，提交并推送到 socoo123/js_web，确认 Pages 部署成功。全套视觉验收每周做一次。
+- 唯一队列是 A React → B 组件库/UI5 → C 交付收尾，旧 R0–R9 仅为历史。每窗口完成一个阶段，主 agent 按 PLAN §7 同时启动 4 个 general 子 agent，均指定 openai/gpt-6.1-sol#max、background: true；按四路表分工、隔离副本工作。
+- 四路全部交稿及返修结束后，主 agent 集成、独立验收、按 PLAN §6 发布并核验 Pages，再统一返回四路结果和下一窗口接续文本，用户清理上下文后继续。不得提前交接；失败继续同阶段，C 完成后结束改版。

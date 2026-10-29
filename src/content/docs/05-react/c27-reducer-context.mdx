@@ -1,0 +1,270 @@
+---
+title: C27 useReducer 与 Context
+description: 把当前库存的增删改写成纯 reducer，通过一个 Provider 提供商品与 dispatch，草稿继续局部保存。
+sidebar:
+  order: 27
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 14 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟<br />
+> 前置：C23–C26 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+App 已经有补货、删除、保存和新建四条更新路径。继续拆组件前，先回答一个问题：**哪些操作会怎样改变商品？** 本课把这些转换移到纯 reducer，再用一个 Provider 提供共同的商品来源。页面功能和 C26 的草稿策略保持不变，不重新搭一个大应用。
+
+<LessonTask lessonId="C27" />
+
+## Java 程序员先看这里
+
+action 可以类比命令对象，reducer 可以类比按命令类型分发的纯业务函数。区别不在 switch 语法，而在约定：**旧 state + action → 新 state**，不能原地改旧对象。
+
+Context 更接近“在这个界面子树的作用域里提供一个值”，不是保存全局库存的容器。真正持有 state 的是 Provider 中的 useReducer。筛选、选中编号、表单草稿依然有各自的所有者。
+
+## 1. action 说发生了什么，reducer 算下一份数据
+
+**action 只带一次业务操作需要的信息。** 在 `src/react/inventory-reducer.js` 新建完整函数，复用已有 core：
+
+```js
+import { createDraft, updateStock, restockProduct, validateProducts, summarize } from "../core/inventory.js";
+export function inventoryReducer(products, action) {
+  let next;
+  switch (action?.type) {
+    case "created": next = [...products, createDraft(action.product)]; break;
+    case "saved":
+      if (!products.some((product) => product.id === action.product.id)) throw new Error("商品不存在");
+      next = products.map((product) => product.id === action.product.id ? createDraft(action.product) : product); break;
+    case "deleted": next = products.filter((product) => product.id !== action.id); break;
+    case "restocked": {
+      const product = products.find((item) => item.id === action.id);
+      if (!product) throw new Error("商品不存在");
+      if (Number.isInteger(action.amount) && action.amount >= 0 && product.stock + action.amount > 99999) return products;
+      next = updateStock(products, action.id, restockProduct(product, String(action.amount)).stock); break;
+    }
+    case "replaced": next = action.products.map(createDraft); break;
+    default: throw new Error(`未知 action：${action?.type}`);
+  }
+  validateProducts(next); summarize(next);
+  return next;
+}
+```
+
+这只是已有 map/filter/core 调用的集中，不是第二套商品规则。createDraft 复制商品和 tags；validateProducts 检查完整记录与唯一编号；summarize 同时守住统计安全范围。
+
+补货沿用前课策略：其他操作已把库存推近上限时，不能再容纳的补货保留当前 state，避免旧延时任务冲破上限。负数等非法数量仍由 core 拒绝。
+
+| type | 其余字段 | 含义 |
+| --- | --- | --- |
+| restocked | id、amount | 根据当前商品补指定数量，检查上限 |
+| created | product | 加入表单校验通过的新商品 |
+| saved | product | 按 product.id 替换已有商品，复制 tags |
+| deleted | id | 按稳定编号删除；不存在时数据内容不变 |
+| replaced | products | 整批校验并复制后替换，供显式恢复使用 |
+
+**先猜一猜：** 从固定六商品开始，给 P002 补 1 件，再删除 P001，总库存是多少？旧 P002 会变吗？
+
+结果是 **41 件，旧 P002 仍为 0**：52 + 1 − 12。连续调用时，把上一次返回的数组交给下一次，不是每次都拿初始数组。`replaced` 只定义转换，本课不增加恢复按钮或自动存储。
+
+Java 对照：纯函数返回新集合与目标记录；仅复制 List 容器却修改内部对象，两种语言都会污染旧快照。
+
+## 2. useReducer 把纯计算接到 React 上
+
+**useReducer 保存当前商品，dispatch 请求下一次状态转换。** 新建 `src/react/InventoryProvider.jsx`，完整内容如下：
+
+```jsx
+import React, { createContext, useContext, useReducer } from "react";
+import seed from "../../data/products.json" with { type: "json" };
+import { inventoryReducer } from "./inventory-reducer.js";
+const InventoryContext = createContext(null);
+export function InventoryProvider({ children }) {
+  const [products, dispatch] = useReducer(inventoryReducer, seed, structuredClone);
+  return <InventoryContext value={{ products, dispatch }}>{children}</InventoryContext>;
+}
+export function useInventory() {
+  const value = useContext(InventoryContext);
+  if (value === null) throw new Error("需要 InventoryProvider");
+  return value;
+}
+```
+
+首次渲染得到固定六商品。第三个参数 structuredClone 只用来建立这个 Provider 的独立初始值；后续 state 由 React 继续保存。[useReducer](https://react.dev/reference/react/useReducer) 和 useState 一样必须在组件或自定义 Hook 顶层调用。
+
+**先猜一猜：** P002 当前是 0，在同一事件里派发两次补一件，事件末尾打印的旧 products 与下一次页面各是多少？
+
+```js
+dispatch({ type: "restocked", id: "P002", amount: 1 });
+dispatch({ type: "restocked", id: "P002", amount: 1 });
+console.log(products.find((product) => product.id === "P002").stock); // → 当前事件仍是 0
+```
+
+这段是事件中的机制片段，不放到组件函数主体。下一次页面显示 P002 为 **2**、全量库存 **54**。action 按队列作用在待处理状态上；事件中的 products 仍是旧渲染快照。dispatch 本身没有返回结果，也不是 Promise。
+
+Java 对照：普通同步 Service 方法可能立即返回新值；这里请求更新和读取当前事件快照是两件事。
+
+## 3. 复杂更新集中，边界也集中
+
+**迁移的是商品所有权，不是复制一份 state。** 修改 `src/react/App.jsx`：删除 seed 的导入，新增下面第一行；把原 core 导入整行替换为第二行。只移除 App 不再直接调用的 `updateStock`，保留提交预检需要的 `validateProducts` 和 `summarize`；其他 React、展示组件导入不变：
+
+```jsx
+import { InventoryProvider, useInventory } from "./InventoryProvider.jsx";
+import { selectProducts, sortByStock, summarize, nextProductId, validateProducts } from "../core/inventory.js";
+```
+
+把原来的 `export default function App() {` 与紧接的 products/setProducts 声明一起替换为下面这段。原先 selectedId、筛选、派生计算和 return 都留在新 InventoryView 的函数体里，文件末尾原来的 `}` 用来闭合它：
+
+```jsx
+export default function App() {
+  return <InventoryProvider><InventoryView /></InventoryProvider>;
+}
+function InventoryView() {
+  const { products, dispatch } = useInventory();
+```
+
+现在 products 来自 Provider，App 内不再调用 useState 保存商品。接着把原 `restock` 和 `saveProduct` 两个函数整体替换为：
+
+```jsx
+  function restock(id, amount) { dispatch({ type: "restocked", id, amount }); }
+  function saveProduct(value) {
+    const next = selectedId === "new" ? [...products, value]
+      : products.map((product) => product.id === value.id ? value : product);
+    validateProducts(next); summarize(next);
+    dispatch({ type: selectedId === "new" ? "created" : "saved", product: value });
+    setSelectedId(null);
+  }
+```
+
+在 renderActions 中只替换删除按钮，其他 JSX 保留，包括 ProductEditor 的 key：
+
+```jsx
+      <button onClick={() => dispatch({ type: "deleted", id: product.id })}>删除 {product.id}</button>
+```
+
+保存 P002 为 3 件、129.90 元，仍得到库存 55、价值 2673770 分。`next` 只是本次提交的候选数组，不写入另一份 state，也不改旧商品；真正的商品更新仍只有 reducer 一条路径。
+
+单商品字段合法，不代表全量汇总安全。例如 P001 库存12、单价输入 `90071992547409.91` 元，单价恰为安全整数分，乘库存后却超出汇总范围。派发前同步调用 core 预检，异常才会回到 ProductEditor 已有的 `onSave` catch：显示“汇总超出安全整数范围”，保留草稿、商品与统计。修正单价后可原地重试。不要把预检挪到 dispatch 后：reducer 由 React 稍后计算，它的异常不在这次表单调用栈内。
+
+### 纯函数让规则可重复计算
+
+reducer 不聚焦、不发请求、不写存储、不安排定时器。编号已由新建事件的商品草稿带入；不要在 reducer 使用模块变量 `nextId++` 或读取时间生成身份。开发 StrictMode 会额外调用 reducer 与初始化函数检查纯度，采用其中一次结果；纯函数不会因此多补货。
+
+未知 action 明确抛错，让拼写错误暴露在调用处；不能漏 return 导致整个 state 变成 undefined。字段与提交限额错误由表单和同步预检反馈；程序员绕过提交入口传错 action 或非法业务记录，仍由 reducer 的检查与测试定位。
+
+Java 对照：把 IO 留在调用层，纯业务转换才能用相同输入重复测试。
+
+## 4. Context 让后代读取同一份库存
+
+**Context 传递 value，useReducer 才持有 state。** 上面的 useInventory 把读取动作封装为一个 Hook；InventoryView 调用它后，得到最近 InventoryProvider 的 `{ products, dispatch }`。
+
+```jsx
+<InventoryProvider><InventoryView /></InventoryProvider>
+```
+
+这段已经在 App 中，不再额外套第二层。InventoryView 及未来拆出的后代都能读取同一来源；两个 InventoryProvider 实例各自运行 useReducer，就会有两份独立库存。Provider 只能覆盖后代，不能覆盖自己函数中已经调用的 useContext。
+
+当前工作区使用 React 19，支持 `<InventoryContext value={...}>`。旧项目里常见的 `.Provider` 写法表达相同提供关系。[createContext](https://react.dev/reference/react/createContext) 返回通道标识，提供方与消费方必须使用同一个 Context 对象。
+
+Context 值变化会通知读取它的消费者。这里提供一个小的业务对象，暂时没有必要为六件商品拆很多订阅通道。展示组件 ProductList、StockActions、ProductEditor 仍接收 props，继续可以独立测试。
+
+Java 对照：可以借用按作用域提供依赖的经验；React 的作用域由渲染树决定，而不是某个进程级单例。
+
+## 5. 哪些数据放进去，由谁需要它决定
+
+**只共享商品来源，不把所有 UI 都装进 Context。** ProductEditor 的更新仍是局部操作，保持不改：
+
+```jsx
+setDraft((previous) => ({ ...previous, [field]: value }));
+```
+
+输入 P001 的未保存名称，再给 P002 补一件：P001 草稿保留，列表仍显示机械键盘，P002 变 1，统计变 53。只有表单保存时才派发 saved。
+
+| 信息 | 本课完成后的所有者 |
+| --- | --- |
+| products | InventoryProvider 的 reducer |
+| selectedId、query/category/order | InventoryView 的 useState |
+| draft/errors | ProductEditor 的 useState |
+| selected/visible/summary | 用当前来源渲染时计算 |
+
+本课是内存中的本地业务数据，刷新恢复固定六商品。将来接外部数据时再明确服务、缓存与请求状态的归属；Context 本身不提供缓存、重试或持久化。Java 对照：共享范围应由需求决定，编辑草稿不是因为用了“全局工具”就必须全局化。
+
+## 常见错误与调试
+
+### 补货函数跑了，页面还显示 0
+
+1. **现象**：在当前 `inventory-reducer.js` 将 restocked 分支换成下面的错误分支。补 P002 后界面可能不动，旧快照已经改变；开发纯度检查还可能重复修改。
+
+```js
+// 有问题的写法：原地修改旧对象，再返回同一个数组。
+case "restocked": {
+  const product = products.find((item) => item.id === action.id);
+  product.stock += action.amount;
+  next = products;
+  break;
+}
+```
+
+2. **工具**：Sources → `src/react/inventory-reducer.js` → 在 `product.stock += action.amount` 行设断点。另在工作区运行 `npm run lab -- check C27`，查看“补货保留旧输入”的回归。
+3. **证据**：第一次暂停时 P002.stock 为 0，单步后旧 product 变 1，next 与 products 是同一数组；冻结输入的测试在赋值处失败。
+4. **原因**：返回相同引用时 React 可以跳过更新；复制外层数组也不能修复已经修改的内部对象。
+5. **修复**：恢复第 1 节的 restocked 分支，通过 restockProduct 算值、updateStock 返回新数组与目标记录。保留 default 的未知 action 异常。
+6. **确认**：一次补货得到 P002=1、统计 53。相同测试命令由红转绿，同时断言旧 P002=0、新 P002=1、数组与目标记录不同，不能只验证新值。
+
+<a id="按钮和统计用了两份库存"></a>
+
+若 reducer 已经纯净但统计仍旧，去 Components 检查是否无意套了第二个 InventoryProvider：最近 Provider 不同，就会读到不同的 state 实例。当前 App 只保留一层。
+
+## 练习
+
+<a id="练习-1算一组-action"></a>
+<a id="练习-2修-bug再验证非法-action"></a>
+
+**必做任务：完成所有权迁移，证明旧快照和未提交草稿都还在。** 使用本课三个文件，不新增另一套 App。
+
+:::tip[自己尝试 · 本地 React]
+1. 修复上面的可变 reducer。刷新，编辑 P001 名称但不保存，给 P002 立即补一件。
+2. 确认草稿仍在、列表 P001 仍为机械键盘、P002=1、全量库存 53。取消，再编辑 P002 为 3 件、129.90 元并保存。
+3. 新建合法的零库存商品，确认出现 P007，删除它后恢复六商品；在检查输出中确认 created/saved/deleted/restocked/replaced 与未知 action 回归。
+4. 执行 `npm run lab -- check C27`。
+
+预期：保存后库存 55、价值 2673770 分；操作只有一个商品来源；任何失败的转换不修改旧输入。
+:::
+
+<details>
+<summary>提示</summary>
+
+搜索 App 中的 `setProducts`，迁移后应没有调用。未知 type 测试要用 `expect(() => inventoryReducer(...)).toThrow(...)`，让断言执行会抛错的函数。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+Provider 独占商品 state，InventoryView 用 useInventory 读取，三个事件派发最小 action。ProductEditor 不改，局部输入不会派发业务 action。未知 type 拼成 restokced 时抛“未知 action：restokced”；replaced 校验并复制传入商品，调用者之后改它的 tags 也不会污染 reducer state。
+
+</details>
+
+## 项目进度
+
+- 商品的增删改和整批替换集中为一个纯转换入口，表单和统计继续读取同一来源。
+- Context 只提供 `{ products, dispatch }`，草稿、筛选和选择没有被全局化。
+- 冻结旧数组、目标商品和 tags 的测试能抓住原地修改；未知 action 有明确错误。
+- 在 `notes/next.md` 记下三个文件与五种 action。暂停后继续当前工程，replaced 只是为后续显式恢复准备的接口。
+
+## 小结
+
+- action 描述业务意图，reducer 返回下一份商品。
+- dispatch 按待处理状态计算，当前事件仍读旧快照。
+- Context 提供作用域，不自动决定或保存业务所有权。
+- 局部草稿继续局部，派生统计继续直接计算。
+
+自测：为什么只复制数组不够？dispatch 为什么不返回保存结果？两个同名 Provider 为什么会有两份库存？未知 action 为什么不能漏 return？
+
+下一课保存节点与取消句柄，让焦点和定时任务也有清楚的归属。
+
+## 延伸阅读
+
+- [React：把状态逻辑提取到 reducer](https://react.dev/learn/extracting-state-logic-into-a-reducer)
+- [React：useReducer](https://react.dev/reference/react/useReducer)
+- [React：reducer 与 Context](https://react.dev/learn/scaling-up-with-reducer-and-context)
+- [React：createContext](https://react.dev/reference/react/createContext)
+- [React：useContext 与最近的 Provider](https://react.dev/reference/react/useContext)

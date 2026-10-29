@@ -1,0 +1,200 @@
+---
+title: C26 状态提升、保留与重置
+description: 在当前编辑区用商品编号表达身份，区分取消、重新打开和直接切换时的草稿生命周期。
+sidebar:
+  order: 26
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 13 天** · 阅读跟做约 35 分钟 · 练习约 35 分钟<br />
+> 前置：C22–C25 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+你已经能编辑 P001。把名称改成“键盘待盘点”，不保存，直接点“编辑 P002”：标题换了，输入却仍是键盘。props 已经更新，为什么草稿没有重新创建？本课只做一个增量：**为当前编辑区确立身份，让该保留的输入保留，该结束的会话结束**。
+
+<LessonTask lessonId="C26" />
+
+## Java 程序员先看这里
+
+Java 对象的字段活多久，通常取决于你是否还持有那个对象。React 的 state 则由 React 保存，并与组件在渲染树里的身份关联。**再次执行组件函数不是重新创建一份组件 state**。
+
+`useState(() => toDraft(product))` 像编辑会话建立时初始化 DTO，不是每次 props 改变都重新绑定。选中商品可存 id，草稿可与商品不同；它们表达不同的信息。
+
+## 1. 状态提升：让卡片和统计读同一份商品
+
+**需要协调的组件，读取最近共同父节点拥有的业务来源。** C24 已把 products 放在 App，本课沿用这条路径，StockActions 不再另存库存：
+
+```jsx
+<StockActions product={product} onRestock={restock} />
+```
+
+`onRestock(id, amount)` 把操作交回 App。若给 P002 立即补一件，商品从 0 变 1，全量统计从 52 变 53。调用回调是上报意图；新的 product 仍从父节点向下传。
+
+如果在 StockActions 再写 `useState(product.stock)`，只改本地 stock，卡片可能显示 1，统计仍为 52。应删除这第二份业务 state，而不是额外同步一份合计。状态提升强调所有权，不要求所有 UI 状态都搬到应用顶层。[共享 state](https://react.dev/learn/sharing-state-between-components)
+
+Java 对照：像多个视图共用同一个模型；React 仍通过 setter 替换来源并请求渲染，而不是原地修改模型字段。
+
+## 2. 受控设计与最小 state：一份事实，一个所有者
+
+### 保存编号，从当前数组查记录
+
+App 已有 selectedId。编辑已有商品时，沿用这段查找；不用再保存一个 selectedProduct state：
+
+```js
+const selectedId = "P002";
+const before = [{ id: "P002", stock: 0 }];
+const selectedCopy = before.find((product) => product.id === selectedId);
+const after = before.map((product) => ({ ...product, stock: 3 }));
+console.log(selectedCopy.stock); // → 0
+console.log(after.find((product) => product.id === selectedId).stock); // → 3
+```
+
+这是页内机制预测，不替换工作区商品数据。不可变更新创建新对象，旧引用不会自动转向新对象。按 id 从当前 products 查找，才能得到当前记录；删除后查找结果为空，条件表单也随之消失。
+
+### 草稿值得保存，统计直接计算
+
+当前分工如下，代码位置保持不动：
+
+| 信息 | 所有者 | 为什么 |
+| --- | --- | --- |
+| products | App | 列表与统计共同读取的已保存商品 |
+| selectedId | App | 决定同一编辑区正在编辑谁 |
+| query/category/order | App | 控制展示，不是第二份商品数据 |
+| draft/errors | ProductEditor | 未提交输入与这次提交的反馈 |
+| selected/visible/summary | 渲染时计算 | 都能从上述来源得到 |
+
+把 P002 草稿改成 `"3"`，列表仍为 0、统计仍为 52；保存才变为 3 和 55。若每次输入都改 products，取消便失去了意义。Java 对照：草稿是待确认 DTO，统计是基于当前集合的查询结果。
+
+## 3. 状态保留：看树中的位置和类型
+
+**相同父节点位置、相同组件类型、相同 key 会保留 state。** ProductEditor 的开头继续是：
+
+```jsx
+const [draft, setDraft] = useState(() => toDraft(product));
+```
+
+**先猜一猜：** 打开 P001，改名称后切换排序，初始化函数会重新执行并把输入清空吗？
+
+不会。排序只重新安排列表，独立编辑区还在原位置、还是 ProductEditor。draft 保留，props 的变化也不会让 useState 再取初值。[保留和重置 state](https://react.dev/learn/preserving-and-resetting-state)
+
+### 位置不等于屏幕坐标
+
+CSS 调整、滚动、父节点重新执行都不等于卸载。条件使组件从树里消失、组件类型变化、祖先节点被替换，才会结束原身份。组件函数定义在模块顶层；若把 ProductEditor 定义到 App 函数里面，每次渲染产生新函数类型，反而可能反复清空输入。
+
+Java 对照：局部变量每次调用都重建；React state 不存在普通函数调用栈中，树中的身份才决定它是否延续。
+
+## 4. 用 key 表达“这次是另一件商品”
+
+**换商品需要整份新草稿，就在表单位置写业务 key。** 找到 `App.jsx` 中 `ProductList` 后的 ProductEditor 调用，将这一行替换为：
+
+```jsx
+    {selected && <ProductEditor key={selectedId} product={selected} onSave={saveProduct} onCancel={() => setSelectedId(null)} />}
+```
+
+这就是本课唯一的业务代码改动。保留 `product`、`onSave`、`onCancel`；key 由 React 使用，不会作为普通 prop 传进组件。`"new"` 区分新建会话，商品编号区分已有记录。
+
+**先猜一猜：** P001 草稿名称已改、库存已清空并报错，直接切 P002 后会留下哪些输入与错误？
+
+都不留下。key 从 P001 变成 P002，旧编辑子树卸载，新表单从无线鼠标初始化：名称无线鼠标、库存 `"0"`、价格 `"129.00"`，errors 为空。切回 P001，又从已保存机械键盘开始。
+
+列表卡片的 `key={product.id}` 管的是那组卡片；不能代替独立编辑区里的 key。这里也不用 Effect 把 product 反复同步回 draft，整个会话边界已经表达清楚。[按 key 重置全部 state](https://react.dev/learn/you-might-not-need-an-effect#resetting-all-state-when-a-prop-changes)
+
+随机数、时间戳、正在输入的名称都不适合作 key：它们可能在普通输入时变化，让表单每次重新挂载。稳定 id 让“同一商品”和“另一件商品”成为可预测的规则。
+
+Java 对照：像新建一个编辑会话时创建 DTO；同一会话内的输入保留，换业务身份才建新会话。
+
+## 5. 把草稿策略写成可观察的行为
+
+**key 不是草稿缓存，取消也不是 CSS 隐藏。** 原取消回调继续清空选择：
+
+```jsx
+onCancel={() => setSelectedId(null)}
+```
+
+`selected` 随后为空，条件中的表单从树里移除。再开同一个 P001，即便编号相同，也是重新挂载，因此从已保存值开始。若只是用 `display: none` 隐藏仍挂着的表单，它的 state 会保留。
+
+| 操作 | 当前策略 |
+| --- | --- |
+| 输入 / 再次点击同商品编辑 | 保留本次草稿，商品不变 |
+| 筛选 / 排序 | 编辑区独立于列表，保留草稿 |
+| 直接切另一件商品 | key 改变，草稿与错误一起重置 |
+| 取消 / 保存成功 | 清空选择，表单卸载 |
+| 关闭再开同一件 | 新会话，从已保存记录初始化 |
+| 删除当前商品 | selected 查找为空，编辑区消失 |
+
+### 如果要求“切回来继续写”
+
+那是另一条业务规则：应把草稿提升到不会卸载的父节点，按 id 显式保存 draftById，并定义保存、取消时何时删除条目。相同 key 不能复活已经销毁的 state。本任务选择切换即丢弃，继续只保留一份本地 draft。
+
+Java 对照：像把需要跨会话保留的数据放到生命周期更长的所有者；存储范围由业务决定，不能由碰巧没卸载决定。
+
+## 常见错误与调试
+
+<a id="鼠标补货了总库存没动"></a>
+
+### 选中鼠标，输入框里还是键盘
+
+1. **现象**：在当前 App 暂时去掉刚加的 key。打开 P001，改名称为“键盘待盘点”，直接点编辑 P002；标题为 P002，名称却仍是旧草稿，库存仍为 12。
+2. **工具**：打开 React DevTools → Components → 选 ProductEditor，对照右侧 props.product 与 Hooks 中的 draft。也可在 Sources 的 ProductEditor 函数内设断点。
+3. **证据**：product.id 是 P002，product.stock 是 0，draft.name 仍是键盘待盘点、draft.stock 仍是 `"12"`。数据已传到，错误不是查错商品。
+4. **原因**：同位置、同类型、无变化的 key，React 保留原 state；初始化函数没有重新建立 draft。
+5. **修复**：在 App 的 ProductEditor 调用恢复 `key={selectedId}`，不改 `toDraft`，也不增加第二份商品 state。
+6. **确认**：先取消后开 P002、直接切 P002、关闭后重开 P001 都符合上表。运行 `npm run lab -- check C26`，直接切换的回归应在去掉 key 时失败、恢复后通过；取消本来就卸载，单测取消不足以查出缺 key。
+
+## 练习
+
+<a id="练习-1key-与草稿存储各负责什么"></a>
+<a id="练习-2保留该保留的重置该重置的"></a>
+<a id="练习-3检查隐藏卡片的编辑会话"></a>
+
+**必做任务：把草稿身份的六种操作走成一条流程。** 从当前 App 继续，只修表单的 key，按下面的行为验收。
+
+:::tip[自己尝试 · 本地 React]
+1. 刷新。打开 P001，名称改为键盘待盘点，库存清空后提交，确认库存报错；不关闭，直接开 P002。
+2. 确认名称无线鼠标、库存 0、价格 129.00、无旧错误。改库存为 3，再次点 P002 编辑、切换排序，草稿仍为 3，统计仍为 52。
+3. 取消，重新打开 P002，库存应回 0。再打开 P001，修改名称后取消；重新打开 P001，应回机械键盘。
+4. 打开 P001 并修改名称，搜索 P002，编辑区仍保留 P001 草稿；取消、清空搜索后重开 P001。最后把 P002 库存 3、价格 129.90 保存并检查。
+
+预期：保存前任何草稿都不污染商品；最终库存 55、价值 2673770 分。`npm run lab -- check C26` 通过。
+:::
+
+<details>
+<summary>提示</summary>
+
+分清两条重置路径：取消使表单卸载，直接切换使 key 改变。排序和筛选不更换独立编辑区的身份，应该保留输入。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+App 只保存 selectedId，并从完整 products 找 selected；ProductEditor 保持局部 draft/errors。加稳定 key 后，切商品重建整份表单；取消清空选择，因此同商品重开也从已保存值开始。不要把 selected 改成从 visible 查找，否则筛选会意外结束编辑。
+
+</details>
+
+## 项目进度
+
+- 同一工作区已经有明确的商品、选择、草稿与派生值归属。
+- 取消、同商品重开、直接换商品分别验收，P002 的合法 0 不会被 P001 的草稿覆盖。
+- 筛选与排序保留当前编辑会话；保存才更新列表和统计。
+- 在 `notes/next.md` 记下 key 的位置与草稿策略。暂停后继续这一份工程，不用重新复制 App。
+
+## 小结
+
+- 一份业务事实只有一个所有者，子组件通过回调上报操作。
+- 保存 id 并查当前记录，避免旧对象引用成为第二份来源。
+- React 按位置、类型和 key 保存 state，props 更新不等于重建草稿。
+- key 决定身份；跨身份保存草稿需要显式设计存储。
+
+自测：取消为什么不用改 key 也能重置？直接切换为什么需要 key？同商品再次点击编辑为什么不清空？筛选隐藏卡片后草稿为何还在？
+
+下一课集中商品更新逻辑，草稿仍留在这张表单里。
+
+## 延伸阅读
+
+- [React：共享组件间的 state](https://react.dev/learn/sharing-state-between-components)
+- [React：选择 state 结构](https://react.dev/learn/choosing-the-state-structure)
+- [React：保留和重置 state](https://react.dev/learn/preserving-and-resetting-state)
+- [React：按 key 重置全部 state](https://react.dev/learn/you-might-not-need-an-effect#resetting-all-state-when-a-prop-changes)

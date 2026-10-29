@@ -1,46 +1,30 @@
 # C27 useReducer 与 Context · 示例
 
-配套正文：[C27](../../src/content/docs/05-react/c27-reducer-context.md)。数据沿用 shared/products.js；React 代码在[阶段 4](../inventory/04-react/)。
-
-| 文件 | 运行 | 说明 |
-| --- | --- | --- |
-| action-flow.js | node action-flow.js | 同一 reducer 顺序处理补货与删除 |
-| immutable-update.js | node immutable-update.js | 新旧容器、目标记录和未变记录的引用 |
-| invalid-action.js | node invalid-action.js | 未知 type、缺失 id、非法保存数据 |
-| prediction.js | node prediction.js | 用 reduce 计算一组 action 的结果 |
-| 阶段 4 src/products-reducer.js | npm test | 四种 action，保存边界与纯更新 |
-| 阶段 4 src/InventoryContext.jsx | dev / 首页 | 库存和 dispatch 两个 Context |
-| 阶段 4 src/InventoryCatalog.jsx、InventorySummary.jsx、App.jsx | dev / 首页 | 业务容器读取 Context，展示组件仍用 props |
-| 阶段 4 labs/reducer-context-main.jsx | 下表实验页 | 队列、同引用错误与 Provider 作用域 |
-| 阶段 4 tests/reducer.test.jsx、context.test.jsx | npm test | 业务、非法 action 与共享范围回归 |
-| 阶段 4 labs/reducer-context-bugs.test.jsx | npm run test:bug -- labs/reducer-context-bugs.test.jsx | 两项故意失败，修复 Broken 文件后通过 |
+正文：[C27](../../src/content/docs/05-react/c27-reducer-context.mdx)。主线为自己的 `inventory/`。本轮目标发行版 **2026.10-v2.3**：前置 C26、完成 C27；参考增量 [steps/C27](../../labs/reference/steps/C27/)。发行入口见 [Lab](https://socoo123.github.io/js_web/labs/)，主 agent 的阶段验收与发布证据位置为 `labs/records/A.md`。
 
 ## 运行
 
-- 仓库根目录：`npm run examples -- c27` 自动核对四份固定输出；本目录可分别运行 node 命令。
-- 阶段 4 目录：`npm ci`，再 `npm run dev -- --host 127.0.0.1`，打开终端的 /js_web/ 地址。
-- 在地址后加 labs/reducer-context.html?case=下表值；实验页仅通过 dev 提供。
-- 正常检查：阶段 4 执行 `npm test`、`npm run build`，然后 `npm run preview -- --host 127.0.0.1` 检查生产首页。
+| 入口 | 工作目录与命令 | 用途 |
+| --- | --- | --- |
+| 当前工程 | `inventory/`：`npm run lab -- start C27`、`npm run lab -- dev` | 迁移三个文件，UI 草稿继续局部 |
+| 本课检查 | `inventory/`：`npm run lab -- check C27` | 真实工程行为 |
+| 专项组件/纯函数 | `inventory/`：`node tools/forms-state-check.mjs C27` | 35 条通过，6 条后课跳过 |
+| 专项浏览器 | `inventory/`：`node tools/forms-state.browser.mjs C27` | Provider 更新不污染本地草稿 |
+| 旧固定输出 | 仓库根：`npm run examples -- c27` | action-flow/immutable-update/invalid-action/prediction 四个参考例子 |
 
-| case | 操作与预期 |
-| --- | --- |
-| queue | 点击一次由 0 到 2，再次到 4；首次 Console 为点击时 0、派发后 0 undefined |
-| mutation | 点击后页面仍为鼠标 0、总库存 52；旧快照已被错误修改 |
-| mutation-answer | 一次点击为鼠标 1、总库存 53；再次为 2、54 |
-| split | 补货按钮更新外层库存，内层统计仍为 52 |
-| split-answer | 同一 Provider 下补货后统计为 53 |
-| scope | 库存 A 补货后 53，独立库存 B 仍为 52 |
-| missing | 无 Provider，读取 createContext 的默认 null，显示尚未连接库存 |
+旧示例使用旧 productsReducer 接口，不是新工作区 inventoryReducer 的第二份实现。新接口为 restocked{id,amount}/created{product}/saved{product}/deleted{id}/replaced{products}。
 
-## 验证记录
+## 本轮验证记录
 
-- 2026-10-17 · macOS arm64 · Node 24.22.0、npm 11.19.1；沿用 React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.3。依赖清单与锁文件未改。
-- 四份固定输出 4/4；阶段 4 正常回归 77/77，含 reducer 22 条和 Context 6 条；React 生产构建通过。保存校验、未知 action/编号、不可变输入、队列、上限、Provider 隔离与草稿保留均有回归。
-- 两项 bug 回归先分别报旧库存变成 1、统计仍为 52；按正文替换两个 Broken 文件后，同一测试命令 2/2 通过，随后恢复教学错误起点。练习 2 的独立测试片段另行执行通过。
-- 独立后台 Chrome 155.0.8059.82：七个实验均按正文操作通过；queue 日志首次为点击时 0、派发后 0 undefined，按钮依次 2、4；mutation 仍显示 0/52，修复版依次 1/53、2/54；split 统计仍为 52，修复版为 53；scope 为 A=53/B=52，missing 显示默认值提示。未操作已有窗口。
-- 通过 Chrome 调试接口取得暂停帧：错误补货前 stock=0、product===products[1]、type=restocked；split 的内层消费者起点为 0，点击后外层 Provider 为 1，而内层统计仍为 52。未在 DevTools 界面手动点击 Components 或 Sources。
-- 首页确认：P001 草稿与搜索鼠标在 P002 补货时保留，总库存 53；取消回标题，重开恢复机械键盘。保存 P002 为 3/129.90 后为 55 件、26737.70 元；排序保留草稿，Enter 保存聚焦标题，重开读到保存值。新增 P007/P008 后过滤删除鼠标，得到 7 种、52 件、26348.00 元；刷新回六件商品，无页面异常。
-- 网站 lint 27 课零 error/warning，check 零诊断，build 固定输出 229/229、32 个 HTML 与 27 课产物检查通过；正文 7922 字符、14 个代码块。14 个 JS/JSX 片段均与源码一致或已单独运行。
-- 生产预览：React 补货、保存与标题焦点通过；课程 HTTP 200，禁用 JS 后正文、14 段代码与四个答案折叠区可读可展开，路线为 27/48。
-- Pages：[run 39038415280](https://github.com/socoo123/js_web/actions/runs/39038415280) build/deploy 成功；C27 与路线页均 HTTP 200，正确标题、reducer/Context 内容与 27/48 目录已上线。
-- 未运行：React DevTools 界面手动操作、屏幕阅读器朗读、Firefox、Safari、Windows。
+- 2026-10-29 · macOS arm64 · Node 24.22.0、npm 11.19.1、React/react-dom 19.3.1、Vite 8.3.4、Vitest 5.0.5、happy-dom 21.0.4、RTL 16.3.3、Playwright 1.64.1、Chromium 156.0.8078.4。依赖软链接只读，未 install/ci 或改锁。
+- `npm run examples -- c27`：4/4 固定输出通过。
+- 已从第1路最终 `handoff-C24` 按最新正文连续接C25→C26→C27，三个文件与参考解一致；最新组件/纯函数35 passed/6后课skipped，含全量汇总溢出和既有纯函数/草稿/队列回归。是作者回归，不是独立读者抽验。
+- 实际 Provider 队列：一次事件两次补货，事件快照 0、dispatch 返回 undefined、页面 2；两个 Provider A 补到 1 而 B 仍 0。正文连续 action 52+1−12=41、旧 P002=0 实测。
+- 实际上游 Chromium 确认P001未提交草稿在P002 dispatch后保留，已保存P001不改、P002=1、总库存53；表单与身份前置通过。初稿旧前置85条Lab/原UI曾通过，本次未重复A4正在接入的共享检查器。
+- 主错误：只在临时 reducer 的 restocked 分支原地改 product 并返回 products；冻结输入测试红（只读 stock 赋值异常），恢复 core 的新数组更新后同命令绿。不是只比较最终库存。
+- 最终日志在 `delivery/.validation/real-c24-20261029/`，含实际C24输入hash和各课生成源码；完整命令见 `delivery/agent-2.md` §7，入口 `walkthrough-agent-2.mjs`。上游49文件hash前后不变。
+- 必要返修：MDX静态LessonTask、含组件lint、80锚点及四页静态夹具输出已通过；真实C24连续作者回归和主错误红绿已补验。主集成16快照、全站门禁与发行见 [阶段 A](../../labs/records/A.md)。
+- 跨课输入修复：saveProduct在dispatch前对完整候选集合validateProducts/summarize，失败由表单catch显示并保留草稿，不存第二份商品state。实际App编辑/新建溢出回归先2失败后2通过，定点浏览器先main/form清空、修后保留输入/商品/52与2634800并能修正重试；详见 `delivery/agent-2-overflow.md`，未重跑其他旧浏览器路径。
+- 未运行：DevTools 界面手工步骤、屏幕阅读器、Firefox/Safari/Windows；未增加 Java 可执行对照片段。独立读者抽验范围及全站视觉/Pages由阶段 A 统一记录。
+
+旧版验证与发布历史见 [基线 README](https://github.com/socoo123/js_web/blob/93f81d29fef57e4bd86da38cc8f740e12b14775e/examples/c27/README.md)。

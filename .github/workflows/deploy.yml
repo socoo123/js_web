@@ -40,6 +40,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Rehearse lessons from their actual starting points
         run: npm run test:lab-walkthrough
+      - name: Check the continuous React lesson snapshots
+        run: npm run test:lab-react
       - name: Install locked React example dependencies
         run: npm ci --prefix examples/inventory/04-react
       - name: Check React reference project

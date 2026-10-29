@@ -1,6 +1,6 @@
 # V2 实际验证记录
 
-本次续作：[R5 · C01–C20 连续迁移](R5.md)，发行版2026.10-v2.2；[Pages 40713752220](https://github.com/socoo123/js_web/actions/runs/40713752220)与线上课程/下载/恢复核验通过。下面保留R1–R4的历史证据。
+当前执行记录：[A · C21–C36 / L3 React](A.md)。最新已发布基线：[R5 · C01–C20 连续迁移](R5.md)，发行版2026.10-v2.2；[Pages 40713752220](https://github.com/socoo123/js_web/actions/runs/40713752220)与线上课程/下载/恢复核验通过。2026-10-29 起按 [PLAN](../../docs/PLAN.md) 的 A/B/C 收尾。下面保留 R1–R4 历史证据，其中“从正文组装”只证明自动组装与行为，不等同独立读者跟做。
 
 发行版：2026.10-v2.1。2026-10-28 · macOS arm64 · Node 24.22.0 / npm 11.19.1 / Java 21.0.2 / Chromium 156.0.8078.4。旧 examples 通过不代表新工作区通过。
 
@@ -19,7 +19,7 @@
 | C23 | P22 明确前置：六商品静态 React 列表与共享规则；缺 StockActions 的检查失败 | 三次直接替换得到 13；延迟回调捕获旧值，插入立即 +1 后最终 15；同样实际文件让行为测试失败 | 按 setup/queue/delay/controls/App 区域组装；连续补货 15，交错补货 16；真实页面与 3 条 React 行为测试通过（含混合队列→2） |
 | C41 | P40 明确前置：Component/JSONModel/i18n/共享桥；缺编辑 Fragment 的检查失败 | Sources 对应的真实 context 为 `/products/3`、P004；实际写死 `/products/0` 后，检查失败“P001 不变，8 !== 12” | 按 View/Controller/Fragment 区域组装；取消保留 3，空白拒绝，保存 P004=8/P001=12，tags 保留、可见汇总与中英切换通过 |
 
-C23/P22→P23 与 C41/P40→P41 是 R4 的前置试做，不代表 C04–C22/C40 已连续迁移。R6/R7 必须接回正式相邻快照并重新验收。
+C23/P22→P23 与 C41/P40→P41 是 R4 的前置试做，不代表其余课程已连续迁移。当前 A/B 必须接回正式相邻快照并重新验收。
 
 ## 构建、恢复和视觉
 
@@ -35,4 +35,4 @@ C23/P22→P23 与 C41/P40→P41 是 R4 的前置试做，不代表 C04–C22/C40
 
 提交 `11259e9`；[Pages run 40684581291](https://github.com/socoo123/js_web/actions/runs/40684581291) build/deploy 成功。线上 C03/C23/C41 与 Lab 入口 HTTP 200，8 个快照双格式下载及 SHA-256 全部通过。实际发布字节冻结于 labs/releases/2026.10-v2.1；后续 R5 使用新发行版，不覆盖旧包。
 
-本机线上核验使用 npm 已配置的可信 CA 文件（NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem），保持 TLS 验证。R5 续作与当前范围见上方记录，后续为 R6 React 正式连续迁移。
+本机线上核验使用 npm 已配置的可信 CA 文件（NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem），保持 TLS 验证。R5 与当前范围见上方记录；下一步以 STATUS 的阶段 A 为准。

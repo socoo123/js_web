@@ -4,14 +4,15 @@ import { chromium, expect } from '@playwright/test';
 import { viteConfig } from './lab.mjs';
 const n = Number(process.argv[2]?.slice(1));
 const config = await viteConfig(process.argv[2]);
-config.server.port = 8062; config.server.hmr = false;
+const port = Number(process.env.LAB_NATIVE_CHECK_PORT ?? 8062);
+config.server.port = port; config.server.hmr = false;
 const server = await createServer(config);
 let browser;
 try {
   await server.listen(); browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 360, height: 900 } });
   const page = await context.newPage();
-  await page.goto('http://127.0.0.1:8062/');
+  await page.goto(`http://127.0.0.1:${port}/`);
   await expect(page.locator('#list article')).toHaveCount(6);
   await expect(page.locator('#summary')).toContainText('库存 52');
   await page.getByRole('search').getByPlaceholder('名称或编号').fill('P004');

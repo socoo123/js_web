@@ -1,0 +1,264 @@
+---
+title: C25 表单、校验与可访问性
+description: 在当前库存工作区加入商品编辑，保留字符串草稿，提交时校验并把错误关联到输入。
+sidebar:
+  order: 25
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 13 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟<br />
+> 前置：C03、C11、C23、C24 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+列表已经能补货、筛选和删除。现在只增加一件事：**用一张表单编辑商品，合法输入才写回列表**。库存清空是“还没填”，库存 `0` 是“已经售罄”；两者不能混在一起。输入期间保留草稿，保存才更新商品和统计，取消则什么也不改。
+
+<LessonTask lessonId="C25" />
+
+`start` 只选择任务，不会替你改代码。缺前课代码时，从 [Lab 起点与恢复说明](/js_web/labs/) 另存前置快照到新目录，不覆盖自己的工程。以下片段都在当前工作区组装，不切到旧演示目录。
+
+## Java 程序员先看这里
+
+把草稿看成尚未绑定成功的表单参数，把商品看成通过校验的 DTO。Java 的整数转换会拒绝空文本；JavaScript 的 `Number("")` 却得到 `0`，所以必须先检查输入边界。
+
+React 受控输入还有一条额外规则：显示值来自 state，输入事件必须把新文本写回 state。修改 DTO 字段本身，不会请求 React 重新渲染。这里复用已有 core，不在组件里另写一套库存和价格规则。
+
+## 1. 受控与非受控：当前值存在哪里
+
+**受控输入由 state 决定当前显示值。** 在 `src/react/ProductEditor.jsx` 新建下面的开头。先保留函数体，后面继续加入提交函数和 `return`，最后再闭合组件。
+
+```jsx
+import React, { useState } from "react";
+import { categories, toDraft, parseDraft } from "../core/inventory.js";
+export default function ProductEditor({ product, onSave, onCancel }) {
+  const [draft, setDraft] = useState(() => toDraft(product));
+  const [errors, setErrors] = useState({});
+  function change(field, value) {
+    setDraft((previous) => ({ ...previous, [field]: value }));
+  }
+```
+
+打开 P002 时，`toDraft` 产生名称“无线鼠标”、库存文本 `"0"`、价格文本 `"129.00"`，并复制 tags。输入只更新 draft，原商品仍是库存数字 `0`、价格整数分 `12900`。展开对象保留其他字段，`[field]` 只替换这一次编辑的字段。
+
+输入控件稍后接 `value={draft[field]}` 与 `onChange`。只传 `value` 却不更新 state，键入的文字会被旧显示值覆盖。[React input](https://react.dev/reference/react-dom/components/input) 把这一点称为受控输入的闭环。
+
+<a id="只在提交时读取可以用非受控输入"></a>
+<a id="select-读-valuecheckbox-读-checked"></a>
+
+另一种选择是非受控输入：`defaultValue` 只给初值，当前值交给 DOM，在提交时用 `new FormData(form)` 读取。FormData 按 `name` 收集字段，文本得到字符串，缺失项得到 `null`。本课需要保留与检查编辑中间态，统一采用受控方式。`select` 读 `value`；以后加 checkbox 时，是否勾选读布尔值 `checked`。
+
+Java 对照：像“文本组件自己保存输入”与“界面模型决定显示值”的区别；React 的受控模型还需要 setter 通知渲染。
+
+## 2. 草稿保存字符串，提交时生成业务数字
+
+**允许草稿暂时无效，保存前再调用 core。** 在工作区另开终端执行 `npm run lab -- console`，下面的 `inventory` 和 `products` 已由命令提供。
+
+**先猜一猜：** 空库存与明确输入 `0` 的解析结果相同吗？
+
+```js
+const mouseDraft = inventory.toDraft(products[1]);
+console.log(Number(""), typeof mouseDraft.stock); // → 0 string
+console.log(inventory.parseDraft({ ...mouseDraft, stock: "" }).hasErrors); // → true
+console.log(inventory.parseDraft({ ...mouseDraft, stock: "0" }).value.stock); // → 0
+```
+
+`parseDraft` 先检查空白，再检查库存是否为 0–99999 的整数。失败时返回字段错误和 `value: null`，成功时才产出业务商品。不要在 `onChange` 里先调用 `Number`，否则还没提交就丢掉了“空白”信息；也不要用 `if (!stock)` 拒绝合法的 0。
+
+### 元转分：先检查小数位，再做精确换算
+
+价格按元输入、按分保存。**先猜一猜：** `0.29` 元的两种换算会完全相同吗？继续在同一个 Console 执行：
+
+```js
+console.log(0.29 * 100); // → 28.999999999999996
+console.log(inventory.parsePriceCents("0.29")); // → 29
+console.log(inventory.parseDraft({ ...mouseDraft, price: "129.999" }).hasErrors); // → true
+```
+
+core 检查最多两位小数，再把整数部分与补齐两位的小数部分拼成整数分，最后检查安全整数。三位小数、负价格、带单位文本都拒绝，不静默舍入。组件直接复用它，库存和金额规则只有一个来源。按 Ctrl+D 退出 Console。
+
+Java 对照：BigDecimal 能处理更一般的十进制业务；本项目利用“非负、最多两位小数”的约定，将输入精确转成整数分。
+
+## 3. 提交入口：原生约束与业务校验各做一层
+
+**按钮和 Enter 都经过 form 的 `onSubmit`。** 在 ProductEditor 的 `change` 后面加入 `submit`，仍放在组件函数里面：
+
+```jsx
+  function submit(event) {
+    event.preventDefault();
+    const parsed = parseDraft(draft);
+    setErrors(parsed.errors);
+    if (parsed.hasErrors) {
+      const field = ["name", "stock", "price", "category"].find((key) => parsed.errors[key]);
+      event.currentTarget.elements.namedItem(field)?.focus();
+      return;
+    }
+    try { onSave(parsed.value); }
+    catch (error) { setErrors({ form: error.message }); }
+  }
+```
+
+空库存提交后，`onSave` 不调用，库存错误显示，焦点回库存。三个字段都错时，错误全部显示，焦点按界面顺序先到名称。`currentTarget` 是注册处理函数的 form；`elements.namedItem` 按输入的 `name` 找到控件。
+
+<a id="原生约束先挡住简单错误"></a>
+<a id="自定义错误信息时仍然执行完整业务校验"></a>
+
+HTML 的 `required/min/max/step` 可以提供原生反馈，原生校验失败时通常不会进入 submit。这里用 `noValidate` 让所有提交统一进入自定义校验，显示一致的中文字段错误。`inputMode` 只是移动设备键盘提示，不是校验。core 也供导入与其他界面使用，不能只依赖 HTML 属性。
+
+`preventDefault` 阻止表单默认导航。只把保存按钮设为 `submit`，取消按钮显式写 `type="button"`，取消才不会误触保存。Java 对照：类似校验 DTO 后再决定保存或返回字段错误，网页还需要处理默认提交行为。
+
+## 4. 可访问性：名称、原因和下一步都要找得到
+
+**字段要有名称，错误要有文字关联。** 紧接 `submit` 加入下面的 `return`，最后的 `}` 闭合 ProductEditor，文件至此完整：
+
+```jsx
+  return <form aria-label="商品编辑" noValidate onSubmit={submit}>
+    <h2>编辑 {product.id}</h2>
+    {[["name", "名称"], ["stock", "库存"], ["price", "价格（元）"]].map(([field, label]) =>
+      <div key={field}><label htmlFor={`edit-${field}`}>{label}</label>
+        <input id={`edit-${field}`} name={field} autoFocus={field === "name"}
+          inputMode={field === "stock" ? "numeric" : field === "price" ? "decimal" : "text"}
+          value={draft[field]} onChange={(event) => change(field, event.target.value)}
+          aria-invalid={Boolean(errors[field])} aria-describedby={`error-${field}`} />
+        <p id={`error-${field}`} role="alert">{errors[field]}</p>
+      </div>)}
+    <label>编辑分类 <select aria-label="编辑分类" name="category" value={draft.category}
+      aria-invalid={Boolean(errors.category)} aria-describedby="error-category"
+      onChange={(event) => change("category", event.target.value)}>
+      {categories.map((name) => <option key={name}>{name}</option>)}
+    </select></label>
+    <p id="error-category" role="alert">{errors.category}</p>
+    <p role="alert">{errors.form}</p>
+    <button type="submit">保存</button><button type="button" onClick={onCancel}>取消</button>
+  </form>;
+}
+```
+
+点“名称”会聚焦相应输入。提交纯空格名称，名称获得焦点，`aria-invalid` 为 true，`aria-describedby` 指向具体错误文字。颜色之外，错误原因仍能被识别。原生 Tab 顺序是名称→库存→价格→分类→保存→取消，Shift+Tab 反向移动；Enter 提交，按钮仍保留浏览器的键盘行为。
+
+`autoFocus` 在表单挂载时聚焦名称，后续输入不会反复抢焦点。全页只有一个编辑表单，因此这些字段 id 不重复。[WAI 表单反馈](https://www.w3.org/WAI/tutorials/forms/notifications/) 说明了 label、错误通知与字段关联的职责。
+
+Java 对照：控件标签与焦点经验可以迁移；网页的 label/ARIA 关系还会进入可访问性树。
+
+## 5. 编辑草稿和商品列表各保存什么
+
+**App 保存已确认商品，表单只上报通过校验的商品。** 修改 `src/react/App.jsx`：在已有组件导入后新增 `import ProductEditor from "./ProductEditor.jsx";`；在已有 core 导入列表中加入 `validateProducts`。其他导入保留。
+
+紧接 `products/setProducts` 声明后插入选择状态与当前商品计算：
+
+```jsx
+  const [selectedId, setSelectedId] = useState(null);
+  const selected = selectedId === "new"
+    ? { id: nextProductId(products), name: "", category: "配件", stock: 0, priceCents: 0, tags: [] }
+    : products.find((product) => product.id === selectedId);
+```
+
+删除原来整个 `addSample` 函数，在原位置加入保存函数；原 `restock` 不变：
+
+```jsx
+  function saveProduct(value) {
+    const next = selectedId === "new" ? [...products, value]
+      : products.map((product) => product.id === value.id ? value : product);
+    validateProducts(next); summarize(next);
+    setProducts(next); setSelectedId(null);
+  }
+```
+
+`validateProducts` 守住完整商品与唯一编号，`summarize` 检查总价值的安全范围。保存成功才替换数组并关闭表单。输入 P002 库存 3 时统计仍为 52；保存后才变成 55。
+
+把 Toolbar 内“新增示例商品”按钮整行替换为：
+
+```jsx
+      <button onClick={() => setSelectedId("new")} disabled={nextProductId(products) === null}>新建商品</button>
+```
+
+最后，在 `ProductList` 的 `renderActions` 中，紧接 StockActions 后新增编辑按钮；原删除按钮保留。`ProductList` 后、`</main>` 前加入表单：
+
+```jsx
+    <ProductList products={visible} renderActions={(product) => <>
+      <StockActions product={product} onRestock={restock} />
+      <button onClick={() => setSelectedId(product.id)}>编辑 {product.id}</button>
+      <button onClick={() => setProducts((previous) => previous.filter((item) => item.id !== product.id))}>删除 {product.id}</button>
+    </>} />
+    {selected && <ProductEditor product={selected} onSave={saveProduct} onCancel={() => setSelectedId(null)} />}
+```
+
+新建时只打开一个空名称草稿，提交才新增编号；取消不会消耗商品。tags 随草稿与保存值保留，本课不增加标签编辑。筛选、排序、统计继续从 products 派生。Java 对照：草稿像尚未确认的 DTO，保存才替换模型里的记录。
+
+## 常见错误与调试
+
+<a id="名称刚输入就弹回机械键盘"></a>
+
+名称输不进去时，先对照 `onChange` 是否写回 `event.target.value`。本课的主错误是空库存误保存，直接在当前 ProductEditor 里复现。
+
+### 库存清空后，竟然保存成 0
+
+1. **现象**：把 `submit` 的解析行改成下面的错误写法；编辑 P002，清空库存再保存，表单关闭，空白被当成 0 接受。
+
+```jsx
+// 有问题的写法：校验前先转换，已经丢掉空白信息。
+const parsed = parseDraft({ ...draft, stock: String(Number(draft.stock)) });
+```
+
+2. **工具**：F12 → Sources → 打开 `src/react/ProductEditor.jsx`，在这行行号处设置断点，重新提交空库存。
+3. **证据**：暂停时在 Scope 看 `draft.stock` 是 `""`；在 Console 求值 `Number(draft.stock)` 得到 `0`，传给解析器的已是 `"0"`。
+4. **原因**：校验函数收到的是合法零库存，再也无法知道用户没有填写。
+5. **修复**：恢复为 `const parsed = parseDraft(draft);`，保持原始字符串一直到 core 校验。
+6. **确认**：空库存显示“请输入库存，空白无效”并聚焦库存；明确填 `0` 才能保存。在工作区运行 `npm run lab -- check C25`；其中空库存回归应先失败、修复后通过，旧商品和统计保持不变。
+
+## 练习
+
+<a id="练习-1formdata-里的值和类型"></a>
+<a id="练习-2一次发现三个非法字段"></a>
+<a id="练习-3只用键盘完成编辑"></a>
+
+**必做任务：完成同一张表单，并用键盘走过一次错误与保存。** 从本课两个文件继续，不另建演示。先修复上述空库存错误，再接受下面的检查。
+
+:::tip[自己尝试 · 本地 React]
+1. 刷新恢复六商品。只用 Tab 找到“编辑 P002”，Enter 打开；名称会获得焦点。
+2. 填纯空格名称、空库存、价格 `129.999`，按 Enter。确认三项错误，焦点回名称，列表和统计不变。
+3. 改成无线鼠标、`0`、`0.29`，用 Enter 保存。重新打开，确认 0 件、0.29 元，再修改草稿并用 Tab 到取消。
+4. 刷新后再把 P002 保存为 3 件、129.90 元，运行 `npm run lab -- check C25`。
+
+预期：非法输入不关闭表单；零库存合法；取消不保存；最后全量库存 55、价值 2673770 分。新建商品必须经过同样的校验，不能有空名称记录。
+:::
+
+<details>
+<summary>提示</summary>
+
+每次输入只调用 `change`，每次提交只走 `submit`。空白与负数在 core 拒绝；`type="button"` 让取消避开提交入口。错误关联可在 Elements 选输入后检查 ARIA 属性。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+表单保留字符串，解析成功后调用 App 的 `saveProduct`。P002 从 0 件改为 3 件，增加库存 3、价值 `3 × 12990 = 38970` 分，所以总价值为 2673770 分。取消仅清空选择、卸载表单，已保存数组不动。
+
+</details>
+
+## 项目进度
+
+- 现在能编辑与新建商品，名称、库存、价格、分类共用 core 规则；列表与统计只有一个商品来源。
+- 空名称、空库存、负数与非法价格拒绝；合法 0、整数分与 tags 保留通过检查。
+- 此时先保存或取消，再打开另一件商品；直接切换时草稿身份的处理留到接下来的任务。
+- 暂停时在 `notes/next.md` 记下本课、两个改动文件、观察结果和下一步。刷新恢复固定数据，当前改动尚不写入浏览器存储。
+
+## 小结
+
+- 受控输入读 state，并在输入事件中写回新文本。
+- 草稿允许暂时为空；提交校验通过才生成业务商品。
+- 保存与 Enter 共用 onSubmit；取消不是提交按钮。
+- label 提供名称，字段错误和焦点帮助定位问题。
+
+自测：为什么空库存不能先转 Number？为什么 0 不能用 falsy 判断拒绝？错误文字如何与字段关联？输入期间统计为什么不变？
+
+下一课给编辑会话明确的身份，解决切换商品时草稿残留。
+
+## 延伸阅读
+
+- [React：受控与非受控 input](https://react.dev/reference/react-dom/components/input)
+- [React：select](https://react.dev/reference/react-dom/components/select)
+- [MDN：FormData](https://developer.mozilla.org/zh-CN/docs/Web/API/FormData/FormData)
+- [MDN：约束校验](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Guides/Constraint_validation)
+- [WAI：表单错误通知](https://www.w3.org/WAI/tutorials/forms/notifications/)

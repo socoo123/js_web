@@ -2,6 +2,8 @@
 
 状态：48 课主线、四张速查页、七阶段库存项目、14 张 D2 图与本地学习进度已实现。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。课程 React 示例使用独立阶段工程，站点尚无需要 React island 的交互示例。
 
+2026-10-29 收尾约定：本文件保留现有架构及组件规格；唯一执行队列为 [PLAN](PLAN.md) 的 A/B/C，Lab 边界见 [Lab 设计](../labs/README.md)。已有工作区、快照、片段与双栏门禁直接复用，下文历史的“规划/拟新增”不构成重建任务。
+
 ## 技术选择
 
 采用 **Astro + Starlight + Markdown/MDX + 少量 React islands**。
@@ -81,7 +83,7 @@ js_web/
 ├── examples/
 │   ├── cNN/                   # 每课的独立例子、.expected.txt 与 README
 │   ├── shared/                # PLAN §3.1 固定样例数据
-│   └── inventory/             # 当前第一版的 7 个阶段；改版映射见新 PLAN §9
+│   └── inventory/             # 第一版 7 阶段保留参考；主线改用 labs/inventory
 ├── scripts/                   # D2、路线同步、产物检查、课程 lint 与固定输出检查
 ├── public/                    # 静态数据与可下载练习资料
 ├── tests/                     # 必要的站点关键行为验收
@@ -213,7 +215,7 @@ Pages 自动部署已实现，第一版交付记录见 STATUS；改版门禁以�
 
 ## V2 页面与工作区呈现规格（逐批实施）
 
-2026-10-28。上文记录当前线上架构；以下是 [新 PLAN](PLAN.md) 的目标设计；实际接入范围见 STATUS。可在浏览器打开 [HTML 审阅稿](review/lesson-layout.html)，查看 C03 和 C23 的排版及五个 Lab 的入口。审阅稿不连接本地工作文件，也不执行 Lab 命令。
+以下保留 V2 页面规格；实际接入范围见 STATUS，实施按新 PLAN 收尾。HTML 审阅稿为历史材料，已有 Astro 组件优先复用。Java 对照按教学价值选用，允许只讲前端新机制；Lab 阶段间提供固定恢复起点。
 
 ### 页面信息顺序
 
@@ -255,13 +257,13 @@ Pages 自动部署已实现，第一版交付记录见 STATUS；改版门禁以�
 
 ### 组件与元数据契约
 
-拟新增的组件只负责呈现，不执行学员代码：
+现有组件及入口沿用以下职责，不执行学员代码：
 
 | 组件/入口 | 数据与职责 | 不承担什么 |
 | --- | --- | --- |
 | `CodeCompare.astro` | 输入 `pairId`，从受控清单读取题目、两侧代码/语言/输出/差异和验证状态；内部用 Code 组件 | 不 eval MDX 字符串，不把未验证代码标成已验证 |
 | `LessonTask.astro` | 输入 `lessonId`，显示 catalog 的 Lab、文件、命令、验收、起止快照 | 不自动覆盖文件或改变站点完成进度 |
-| `LabOverview.astro` | 5 个 Lab 的业务产物、所属课程、当前课入口、恢复说明 | 不把 5 个 Lab 做成 5 套账号/安装流程 |
+| Lab 总览入口 | 5 个 Lab 的业务产物、所属课程、当前课入口、恢复说明；复用现有页面 | 不为符合早期组件命名新造 `LabOverview.astro`，不做 5 套安装流程 |
 | `CourseContent.astro` | 保留 MarkdownContent 包装与 F1，按 catalog 关联当前课 | 不在每页加载 React、Ant Design 或 UI5 |
 | `src/content/docs/labs/` | Lab 总览与 5 个说明页，静态链接到课程和练习包 | 不承诺浏览器可直接运行完整 Node/UI5 工具链 |
 
@@ -273,7 +275,7 @@ MDX 使用 `<CodeCompare pairId="c03-input-number" />` 一类稳定引用。不�
 
 ### 门禁与生成链的具体改动
 
-| 当前入口 | 实施改动 | 必要验证 |
+| 现有入口 | 保留的职责 | 必要验证 |
 | --- | --- | --- |
 | `scripts/lint-lessons.mjs` | 在原有规则上识别 CodeCompare 的清单片段；计算两侧代码块/行数及组件承载的正文 | 普通16块/难点20块、单块25行；导入片段超限、缺来源、未运行标注缺失均能被发现 |
 | `scripts/run-examples.mjs` | 旧行为保留；新增独立 Lab 检查入口，不靠其自动发现带package.json的工程 | check导入学员/参考快照的实际文件，故意改错真实代码能让它失败 |

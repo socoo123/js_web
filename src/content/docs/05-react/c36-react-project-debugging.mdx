@@ -1,0 +1,250 @@
+---
+title: C36 React 项目复盘与故障排查
+description: 在当前库存应用定位旧统计、缓存身份和坏快照三个故障，用证据与重放完成 Lab 3。
+sidebar:
+  order: 36
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 3 周 · 第 18 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C25–C35 · 运行：Node 24、本地 React · 部分示例未运行，已在对应位置标注
+
+## 这一课解决什么问题
+
+鼠标库存是 1，汇总却仍为 52；URL 已是 P002，详情却仍是键盘；导入文件失败后，好记录也找不回了。这三种现象都像“页面没更新”，根因却在不同层。本课在同一个应用里复现、取证、修复，再重放，不另开三个 demo。
+
+<LessonTask lessonId="C36" />
+
+接 C35 自己的完成态，仍在 `inventory/`。演练后把被改错的应用源码修回，留下复盘记录与三条回归，不另建业务工程。
+
+## Java 程序员先看这里
+
+你可以沿用按层排错的方法，但先找对“谁拥有数据”。repository 是商品和持久化的主人，Query 是读缓存，组件 state 只存 UI 与草稿。给组件加 key 不会改变 Query 的缓存键；关闭浏览器缓存也不会清掉 QueryClient。
+
+<a id="1-先找数据的主人再追更新"></a>
+
+## 1. 一份业务事实，从来源追到显示
+
+<a id="用对象身份检查更新链"></a>
+
+<a id="练习-1说明每一次保留发生在哪里"></a>
+
+| 数据 | 主人 | 暂停 / 刷新 |
+| --- | --- | --- |
+| 已保存的 products | repository | 合法 mutation 持久化后可重新读取 |
+| 列表与详情缓存 | QueryClient | 页面内按键复用，刷新重新建立 |
+| selectedId、报表开关 | 当前组件 | 随组件生命周期变化 |
+| draft、字段错误、等待预览 | ProductEditor | 未保存草稿不进入商品快照 |
+| q、category、order | hash URL | 分享、刷新、返回保留 |
+| 汇总与分类报表 | 从当前输入直接计算 | 不保存第二份统计 state |
+
+**先猜一猜：** P002 从 0 补到 1，在没有筛选时总库存和总价值是什么？答案是 53、2647700 分；详情也必须是 1。Query 刷新与 repository 的数据来源应该指向同一笔修改。
+
+在 `notes/react-review.md` 写下表头，每完成一段演练填一行实际观察：
+
+```md
+| 故障 | 最短操作 | 工具与原始证据 | 根因 | 修复位置 | 同操作重放 / 回归 |
+| --- | --- | --- | --- | --- | --- |
+```
+
+<a id="2-让每个面板回答一个问题"></a>
+
+<a id="慢和错分别留证据"></a>
+
+Console 查异常，Components 查 props/Hooks，Sources 暂停看参数，Network 查实际资源和传输，Application 查存储原文，Profiler 最后分析正确但慢的交互。拿到根因就修，不必为每个故障把所有面板轮一遍。
+
+## 2. 故障一：商品变了，统计没有变
+
+<a id="鼠标变成-1-件统计仍是-52"></a>
+
+> 未运行验证：下文 DevTools 各面板的手动断点与取证尚未逐项运行。请按步骤自己尝试。
+
+先导出当前有效库存。为便于比较，用独立练习目录从 C35 起点开始，保留六件固定商品。不要清空平时浏览器的存储。
+
+在 `App.jsx` 的 InventoryView 里找到 `const summary = summarize(visible)`，故意替换为：
+
+```jsx
+// 有问题的写法：派生值只在挂载时取一次
+const [summary] = useState(() => summarize(visible));
+```
+
+**现象**：给 P002 立即补 1 件，卡片为 1，汇总仍 52。**工具**：Components 选 InventoryView，查看 products 与 summary；Sources 在汇总处设断点。**证据**：products 的鼠标库存已是 1，summary.stock 仍为 52，Console 没有异常。
+
+**原因**：useState 初始化只发生于挂载，新的 visible 不会重新初始化它。**修复**：恢复直接计算；不要另加 Effect 去同步第二份统计。**确认**：从相同初始数据重复补货，结果为 53 / 2647700，详情库存为 1。
+
+新建 `tests/react/review.test.jsx`，先加入以下导入，后面三条用例继续追加在模块顶层：
+
+```jsx
+// @vitest-environment happy-dom
+import React from "react";
+import { expect, test } from "vitest";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { QueryClient } from "@tanstack/react-query";
+import { freshRepository } from "./support.jsx";
+import App from "../../src/react/App.jsx";
+import { detailOptions } from "../../src/react/query-options.js";
+import { createInventoryRepository } from "../../src/services/inventory-repository.js";
+import seed from "../../data/products.json";
+```
+
+```jsx
+test("补货后卡片、详情和派生统计一致", async () => {
+  const user = userEvent.setup();
+  render(<App inventoryRepository={freshRepository()} />);
+  await user.click(await screen.findByRole("link", { name: "详情 P002", exact: true }));
+  expect(await screen.findByText(/P002 无线鼠标.*库存 0/)).toBeInTheDocument();
+  const actions = screen.getByRole("region", { name: "P002 补货操作", exact: true });
+  await user.click(within(actions).getByRole("button", { name: "立即补一件", exact: true }));
+  expect(await screen.findByText("库存 53 / 价值 2647700 分")).toBeInTheDocument();
+  expect(await screen.findByText(/P002 无线鼠标.*库存 1/)).toBeInTheDocument();
+});
+```
+
+结果：错误版本卡在新汇总条件，恢复直接计算后通过。它经过实际 App，能防止“纯汇总函数正确，界面却存了旧结果”的连接错误。
+
+## 3. 故障二：缓存忘了商品身份
+
+<a id="编号切到-p002内容仍是-p001"></a>
+
+在 `src/react/query-options.js` 的 `inventoryKeys.detail` 中，故意把返回数组改成不含 id 的 `['inventory', 'detail']`，其他配置保持不变。
+
+**现象**：先打开 P001，等键盘详情出现，再在缓存新鲜期打开 P002，URL 变了但内容仍是 P001。**工具**：Sources 在 detailOptions 设断点，查看 id 和 queryKey；Components 看当前 productId。**证据**：参数为 P002，key 却与 P001 完全相同。
+
+这里的 repository 是浏览器 mock，`get()` 不一定产生 HTTP 请求。Network 没有新请求不能单独证明缓存命中，要结合 Sources 里的调用与 Query 键。真实 HTTP 应用再核对请求 URL、状态和响应。
+
+**原因**：闭包变了，不代表缓存身份变了。**修复**：恢复 `detail: (id) => ['inventory', 'detail', id]`。**确认**：重新打开练习页面，从 P001 切 P002，鼠标库存为 0；追加这条查询层回归：
+
+```jsx
+test("新鲜缓存仍按商品 id 隔离", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+  try {
+    const repository = freshRepository();
+    const first = await client.fetchQuery(detailOptions(repository, "P001"));
+    const second = await client.fetchQuery(detailOptions(repository, "P002"));
+    expect([first.id, second.id, second.stock]).toEqual(["P001", "P002", 0]);
+  } finally { client.clear(); }
+});
+```
+
+**先猜一猜：** 给 `<ProductDetail key={productId}>` 换 key 能修好这个故障吗？不能。它重建组件实例，却仍访问同一个 QueryClient 中相同的查询键。Java 的数据库主键与页面控件身份也不是同一层合同。
+
+<a id="3-本地快照也要经过输入边界"></a>
+
+## 4. 故障三：快照先落盘，校验才失败
+
+<a id="读写恢复分别发生在什么时候"></a>
+
+**外部文本先解析、检查版本和字段，再替换商品与好记录。** JSON 能解析，不代表库存是整数、id 唯一、金额在安全范围内。C32 起，持久化只有 repository 一条写路径；组件不加另一条自动保存 Effect。
+
+先检查 `src/services/inventory-repository.js` 的 `importText(text)`：它应在写入前调用 decodeSnapshot。Sources 在解析、持久化两处设断点，导入一个字段非法的文件。正确顺序是解析时失败，持久化断点没有命中；Application 的原记录原文不变。
+
+在自己的独立副本中打开 `src/services/inventory-repository.js`，找到 `async importText(text) { commit(decodeSnapshot(text)); return structuredClone(current()); },` 这一行。只在 `commit` 前加一条写入语句，故意改成下面这样；`store()` 和 `reactStorageKey` 都是这个现有模块里的名称：
+
+```js
+// 有问题的写法：先覆盖原文，再发现输入不合法
+async importText(text) {
+  store().setItem(reactStorageKey, text);
+  commit(decodeSnapshot(text)); return structuredClone(current());
+},
+```
+
+现在导入非法字段，会得到“报错了，但好原文已被覆盖”的故障。只在本练习的独立副本操作，不动网站学习进度键。**修复**只删除新增的 `store().setItem(reactStorageKey, text);`，恢复先解码、后提交的原顺序，再用同一个文件和下面的回归重放。
+
+<a id="练习-2修复第三个故障损坏记录"></a>
+
+以下用例使用独立 Map，不会破坏真实浏览器存储。追加到同一个 review 文件：
+
+```jsx
+test("坏快照不覆盖好数据；损坏后可恢复有效备份并保留原文", async () => {
+  const records = new Map();
+  const storage = { getItem: (key) => records.get(key) ?? null, setItem: (key, value) => records.set(key, value) };
+  const repository = createInventoryRepository({ storage, seed: structuredClone(seed) });
+  await repository.saveSnapshot();
+  await repository.restock("P004", 5);
+  const before = new Map(records);
+  await expect(repository.importText('{"version":1,"products":[{"stock":""}]}')).rejects.toThrow();
+  expect(records).toEqual(before);
+  expect((await repository.get("P004")).stock).toBe(8);
+  const key = [...records.keys()].find((name) => !name.endsWith(":backup") && !name.endsWith(":damaged"));
+  records.set(key, "{bad");
+  await repository.recover();
+  expect((await repository.get("P004")).stock).toBe(3);
+  expect(records.get(key + ":damaged")).toBe("{bad");
+  expect(records.get(key)).toBe(records.get(key + ":backup"));
+});
+```
+
+结果：非法导入拒绝，8 件仍在，好记录与备份未变。随后人为损坏主记录，恢复回上一份 P004=3，并把损坏原文留在 `:damaged`。这是恢复旧版本，不是把刚才的 8 重新算出来。
+
+**现象**是导入报错后存储原文已变；**工具**是 Application 与 Sources；**证据**是 setItem 先于解码执行；**原因**是副作用顺序错误；**修复**是先校验后写；**确认**是同输入不再覆盖，坏主记录仍能恢复。把自己的实际值填进复盘表，而不是只记“测试通过”。
+
+## 常见错误与调试
+
+<a id="读测试失败也按输入到输出追一遍"></a>
+
+只看最后一屏绿测，会漏掉测试有没有能力抓住故障。三次演练都保留原始失败信息，修复后用**相同输入**重放。工作区可分别运行：
+
+```sh
+node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs -t "补货后"
+node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs -t "新鲜缓存"
+node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs -t "坏快照"
+```
+
+<a id="4-从构建文件和失败测试回到源码"></a>
+
+若错误出在生产产物，先在工作区执行 `npm run lab -- build`。构建已开启 source maps；Sources 中打开映射后的 App/repository，确认断点值对应当前文件。Network 的 JS/.map URL 对不上时，先检查资源，不在旧产物上继续猜 React 状态。
+
+## 练习
+
+<a id="练习-3第三周库存-v2-验收"></a>
+
+完成三条回归与三行复盘记录，再做下面的 L3 收尾流程。每次使用独立固定数据；不要为了回到起点删除正在使用的商品存储。
+
+:::tip[自己尝试 · 本地 React]
+1. 新建 P007，名称“随身转接头”、配件、库存 3、价格 0.29；预期 7 种、55 件、2634887 分。进入其详情，再刷新，数据仍在。
+2. P004 草稿改 8 后取消，正式值仍 3；再次编辑保存，只有 P004 改成 8，全部总库存增加 5。
+3. 导出快照，尝试导入坏 JSON 与非法字段：好数据不变。按上面的独立恢复测试验证坏记录可恢复。
+4. 执行 `npm run lab -- check C36`，填写实际结果；用键盘打开、保存、取消，检查焦点与错误定位。
+
+预期：CRUD、详情、失败重试、统计、恢复与严格静态冒烟共同通过；未提交草稿不会被导出成正式商品。
+:::
+
+<details>
+<summary>提示</summary>
+
+先分清统计是可见子集还是全部库存；清空筛选再核对总数。新建后的详情由 repository 查新 id，不要求存在一份 P007 静态 JSON。坏输入应在提交边界停止。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+P007 增加 3 件与 87 分，所以初始数据变为 55 / 2634887。之后 P004 从 3 到 8，再增加 5 件与 149500 分。恢复会切回明确的备份版本，因此先说明要恢复哪一次记录，再判断数字；列表与详情应一起刷新库存前缀缓存。
+
+</details>
+
+## 项目进度
+
+- [Lab 3](/js_web/labs/l3/) 的 React 主线已具备组件、状态/草稿、Effect、请求/路由、Query、Action、报表与测试。
+- 复盘文件留下三个故障的证据、修复位置和重放结果，不增加另一份业务应用。
+- 暂停前导出商品，记录当前课与未提交草稿；下一阶段继续这份 C36 完成态。
+
+## 小结
+
+- 错统计先查来源与冗余 state；错详情先查缓存身份。
+- 浏览器 mock 没有写请求，Network 证据要按执行环境解释。
+- 快照先解析校验再写，失败保留好原文与恢复路径。
+- 测试需要能先抓住故障，再保护修复；绿测不能代替原始证据。
+
+自测：summary 为什么不用另存 state？商品 id、组件 key、query key 分别控制什么？恢复为何可能回到 3 而不是 8？下一课比较组件库，用同一业务边界做界面适配。
+
+## 延伸阅读
+
+- [React：选择 state 结构](https://react.dev/learn/choosing-the-state-structure)
+- [React：开发者工具](https://react.dev/learn/react-developer-tools)
+- [TanStack Query：查询键](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys)
+- [MDN：localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+- [Chrome：source maps](https://developer.chrome.com/docs/devtools/javascript/source-maps)
+- [Vitest：筛选用例](https://vitest.dev/guide/filtering)

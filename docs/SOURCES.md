@@ -43,6 +43,8 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 
 ## React
 
+- 2026-10-29 · 连续课程依赖缓存：核对 [Vite自动发现与缓存](https://vite.dev/guide/dep-pre-bundling)、[optimizeDeps.include](https://vite.dev/config/dep-optimization-options#optimizedeps-include) 与 [server.hmr](https://vite.dev/config/server-options#server-hmr)。命中旧缓存后新增导入可能触发重优化/重载；React入口显式预打包 react-dom/client、react-router、TanStack Query，配合插件自带的React/JSX入口。旧C31缓存接C32的双React模块身份及修复证据见 [阶段 A](../labs/records/A.md)，未升级依赖。
+
 - [Learn](https://react.dev/learn)：组件、交互、状态与外部系统的主线。
 - [State as a Snapshot](https://react.dev/learn/state-as-a-snapshot)：C23 核心依据。
 - [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)、[useEffect](https://react.dev/reference/react/useEffect)：C29 边界与清理。
@@ -492,3 +494,23 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - C01/C16：复核 [Ecma年度标准](https://ecma-international.org/publications-and-standards/standards/ecma-262/) 与 [完成提案表](https://github.com/tc39/proposals/blob/main/finished-proposals.md)；toSorted属ES2023、withResolvers属ES2024，Node24实际可用；标准流程与环境支持分开。
 - C17–C19：复核 [Node24 inspect](https://nodejs.org/download/release/latest-v24.x/docs/api/inspector.html)、[npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci/)、[Yarn/Corepack](https://yarnpkg.com/getting-started/install)、[PnP](https://yarnpkg.com/features/pnp)、[pnpm安装](https://pnpm.io/installation)与[Bun运行时](https://bun.com/docs/runtime)。实验固定npm11/pnpm12，只调用局部/临时工具，未全局启用Corepack；Bun文档页头当前1.4.4，不沿用旧的实现语言陈述。
 - C20：复核 [Vite TS职责](https://vite.dev/guide/features.html#typescript)、[Vitest](https://vitest.dev/guide/)和[TS6命令行变更](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html)；隔离tsc使用ignoreConfig，转译/检查分别实测。安装审计依据[Happy DOM公告](https://github.com/advisories/GHSA-834v-8h66-3h79)固定21.0.4；UI5 CLI上游[pacote](https://github.com/advisories/GHSA-w4pp-8pjf-rmxw)、[sigstore](https://github.com/advisories/GHSA-52v5-jr5w-gjxr)告警与兼容边界记入R5记录，没有强制降级或静默覆盖。
+
+## 阶段 A 的 API 核查（2026-10-29）
+
+沿用锁定 React 19.3.1 与既有框架版本；以下为四路核查后由主 agent 合并的 API 依据，运行证据另见 [A 记录](../labs/records/A.md)。
+
+- C21：[组件名称](https://react.dev/learn/your-first-component)、[createRoot](https://react.dev/reference/react-dom/client/createRoot)；根在入口创建，JSX 描述与 DOM 分清；2013 年资料仅作历史来源。
+- C22：[props/children](https://react.dev/learn/passing-props-to-a-component)、[纯组件](https://react.dev/learn/keeping-components-pure)、[render/commit](https://react.dev/learn/render-and-commit)；默认值处理 undefined，渲染不修改输入，计算与 DOM 提交分开。
+- C23：[useState](https://react.dev/reference/react/useState)、[更新队列](https://react.dev/learn/queueing-a-series-of-state-updates)；传值替换与 updater 累计、开发纯函数检查仍按当前契约教学。
+- C24：[更新数组](https://react.dev/learn/updating-arrays-in-state)、[key](https://react.dev/learn/rendering-lists)、[state 结构](https://react.dev/learn/choosing-the-state-structure)；稳定同级身份，避免重复可写商品来源。
+- C25：[input](https://react.dev/reference/react-dom/components/input)、[select](https://react.dev/reference/react-dom/components/select)、[表单错误反馈](https://www.w3.org/WAI/tutorials/forms/notifications/)；受控字符串、显式按钮类型、字段说明与错误焦点。
+- C26：[保留与重置 state](https://react.dev/learn/preserving-and-resetting-state)；按树位置、类型、key 关联状态，直接切商品和关闭后重开分别验证。
+- C27：[useReducer](https://react.dev/reference/react/useReducer)、[createContext](https://react.dev/reference/react/createContext)、[useContext](https://react.dev/reference/react/useContext)；React 19 直接 Context provider，dispatch 不改变本次绑定，草稿留局部。
+- C28：[useRef](https://react.dev/reference/react/useRef)、[Effect 清理](https://react.dev/reference/react/useEffect)、[focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus)；稳定句柄与可见 state 分离，节点提交后操作，移除节点前保留可聚焦去向。
+- C29–C30：[useEffect](https://react.dev/reference/react/useEffect)、[AbortController.abort](https://developer.mozilla.org/en-US/docs/Web/API/AbortController/abort)；setup/cleanup 对称、Object.is 依赖、根 StrictMode 额外开发周期；取消请求与阻止过期 Promise 提交各有职责。
+- C31：[复用 Hook 逻辑](https://react.dev/learn/reusing-logic-with-custom-hooks)、[HashRouter](https://reactrouter.com/api/declarative-routers/HashRouter)、[useSearchParams](https://reactrouter.com/api/hooks/useSearchParams)；Hook 实例独立，react-router 导出与锁定版本相符，hash 不发给服务器，参数更新触发导航。
+- C32：[queryKey](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys)、[默认值](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults)、[mutation 后失效](https://tanstack.com/query/latest/docs/framework/react/guides/invalidations-from-mutations)、[useMutation](https://tanstack.com/query/latest/docs/framework/react/reference/useMutation)；参数进入键，浏览器查询默认重试三次，本课显式关闭；mutateAsync 与 onSuccess 的 Promise 等待相关刷新。repository/mock 不发 HTTP，缓存证据从实际调用与查询键观察。
+- C33：[useActionState](https://react.dev/reference/react/useActionState)、[form action](https://react.dev/reference/react-dom/components/form)、[useOptimistic](https://react.dev/reference/react/useOptimistic)、[reset](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/reset)；previousState 在 payload 前，函数 action 运行于 Transition，乐观预览随 Action 结束回到来源；受控草稿与原生 reset 分开处理。客户端 Action 不等于 Server Function。
+- C34：[Profiler](https://react.dev/reference/react/Profiler)、[lazy](https://react.dev/reference/react/lazy)、[错误边界](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary)、[Compiler](https://react.dev/learn/react-compiler/introduction)；普通生产构建默认关闭 profiling，lazy 在首次渲染加载并缓存，渲染错误与事件/请求异常分开；Compiler 需构建接入。
+- C35：[user-event](https://testing-library.com/docs/user-event/intro)、[异步查询](https://testing-library.com/docs/dom-testing-library/api-async/)、[Vitest 环境](https://vitest.dev/guide/environment.html)、[Query 测试](https://tanstack.com/query/latest/docs/framework/react/guides/testing)；await 用户操作、条件等待与独立 QueryClient，DOM 模拟器不替代布局浏览器。
+- C35：[Playwright webServer](https://playwright.dev/docs/test-webserver)、[安装浏览器](https://playwright.dev/docs/browsers#install-browsers)；实际构建配严格静态服务，`npx playwright install chromium` 仅安装配套 Chromium。首次下载未在本批重跑，已装浏览器的 E2E 另记运行证据。
