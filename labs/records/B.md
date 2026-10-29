@@ -1,6 +1,6 @@
-# B · 组件库与 UI5 连续主线（进行中）
+# B · 组件库与 UI5 连续主线（成功）
 
-2026-10-29。范围仅 C37–C44 / L4；发行版 `2026.10-v2.4` 已本地冻结。独立教学验收、根检查/构建、整批回归与受影响页视觉已通过；待提交和线上发布核验。
+2026-10-29。范围仅 C37–C44 / L4；发行版 `2026.10-v2.4` 已冻结发布。四路交付及返修、主独立教学验收、批次门禁、Pages部署与线上核验全部通过。阶段 B 成功；下一阶段为 C，由用户在新窗口启动。
 
 ## 当前进度快照
 
@@ -10,10 +10,10 @@
 | Lab 与代码 | `src/content/docs/labs/l4.mdx`、`labs/reference/steps/C37/` 至 `C44/`、四个 adapter 和检查器已集成；逐课验证见 `examples/c37/README.md` 至 `examples/c44/README.md` |
 | 四路交付 | 四个子 agent 及全部返修已结束；范围、sessionID 和结果见下表 |
 | 主验收 | 公开 C40 起点→C41–C44 独立跟做、根 `check` / `build`、8快照回归、10页60组视觉、发行契约与冻结源码核对通过 |
-| 尚未完成 | 提交推送、Pages 与线上下载核验，以及实际发布记录 |
-| Git / 线上 | 本次文章、代码和记录均在本地，尚未 Git 提交；线上仍是阶段 A 发布版本。阶段 B 不能记为成功 |
+| 阶段结论 | B 成功；八课、L4、四个 adapter 与发行包已发布，下一阶段 C 尚未开始 |
+| Git / 线上 | 内容提交 `195c4d6` 已推送main；[Pages 40892019506](https://github.com/socoo123/js_web/actions/runs/40892019506) build/deploy成功；14个页面、4份清单、234包SHA及D2/搜索资源通过 |
 
-四路和本地验收均已结束，用户确认继续B收尾。已有跟做结果和构建日志可复用，当前进入提交发布。
+四路及全部返修已结束，主 agent 已完成集成、独立验收与发布核验。本窗口止于 B；记录提交触发的部署结果在最终回复给出。
 
 ## 基线与四路
 
@@ -70,25 +70,27 @@
 
 ## 最终门禁与发布
 
-八课 implemented/migrated 均为 true，trial 为空；主独立验收已通过。这些元数据表示本地实现和正文迁移，阶段成功仍以最终验收与实际发布为准。
+八课 implemented/migrated 均为 true，trial 为空；主独立验收已通过。最终门禁与实际发布证据如下；C45–C48的改版实现/迁移标记仍为false。
 
 - 第一轮根8快照回归C37–C43通过，C44因隔离node_modules软链的字体realpath落在Vite许可外而403；正常安装与生产已通过。B4原session复现后只给开发检查器增加实际依赖目录realpath许可，未扩大父目录、未改学员CLI/业务或资源断言；软链开发6/6/生产6/6通过，单文件补丁已集成，返修结束。见 `agent-4/delivery/followup-symlink-report.md`。
 - 根check发现C41退出最后一个trial后JSON推断trial为null，旧展示分支产生3条never属性诊断；主删去已无数据使用的试做展示分支，任务卡统一正式起止字段。修正后33文件零诊断；任务卡实际DOM保持正式链原样。
 - `npm run check`：33 文件，0 errors / 0 warnings / 0 hints；原始日志 `final-astro-check-fixed.log`。
 - `npm run build`：已完成并通过，原始日志 `final-build.log`。内含 Lab/源码门禁9项、22个Java完整源文件、48课lint零error/warning、固定输出示例307/307、学习进度数据测试15/15；生成61页，生产输出的中文、`/js_web/`链接/资源、搜索入口、四张速查导航及课程折叠区/D2检查通过。这里的产物检查不代替浏览器视觉验收。
-- 新版真实C00默认页检查通过：P001/12、6种/52库存、未来课程功能尚未接通、360px无溢出；见 `final-c00.log`。29个机械外壳文件与工作区镜像逐字节一致。
+- 新版真实C00默认页检查通过：P001/12、6种/52库存、未来课程功能尚未接通、360px无溢出；见 `final-c00.log`。29个机械外壳文件与工作区镜像逐字节一致。日志所列根 `.lab/c43-fixture-Unixus` 检查副本已原样移至隔离根 `c00-default-page-fixture/` 保存，不进入Git或发行包。
 - 上述原始日志均在「基线与四路」列出的隔离根；本记录保存关键结果，日志未作为发行内容。首次8快照失败日志 `final-ui5-snapshots.log` 保留，不能据此声明修复后的整批通过。
 - 最终视觉：八课及Lab首页/L4共10页，360/768/1280px × 亮暗共60组，无整页溢出；任务卡、双栏布局、图片/alt与无JS阅读通过。共用控件的键盘复制/拒绝提示、答案与三词搜索通过；另逐页执行八课任务命令复制、所有双栏键盘复制、答案展开/收起，全部通过。主查看C38窄屏亮色、C40桌面暗色、C44窄屏暗色、L4桌面亮色代表截图，正文/导航/任务区可读。证据为 `final-visual.log`、`final-B-interactions.json` 及 `.cache/qa/v2/site-review/`；未扩大为本批全站/F1浏览器复检。
-- 发行契约：`check-release.mjs` 通过，148个历史文件原字节保留，45个快照/90候选包SHA正确；C36 React/services/core源码在C36–C44保留，start/compare只读、非空恢复拒绝且原文件保留、恢复文件精确一致。证据 `release-contract-result.json`；发行冻结尚待整批回归结果。
+- 发行契约：`check-release.mjs` 通过，148个历史文件原字节保留，45个快照/90候选包SHA正确；C36 React/services/core源码在C36–C44保留，start/compare只读、非空恢复拒绝且原文件保留、恢复文件精确一致。证据 `release-contract-result.json`。
 - 修复后整批 `npm run test:lab-ui5` 已通过：C37–C44全部8个真实连续快照，C38/C40/C42/C43/C44的严格静态检查通过；C44开发与生产均6/6，本地字体实际请求成功。日志 `final-ui5-snapshots-fixed.log`，首次失败日志保留用于追溯。
-- 本地冻结：`labs/releases/2026.10-v2.4/` 保存C00–C44共90包和manifest；随后 `npm run build:labs` 通过冻结源码摘要校验，未改写历史发行字节。冻结不等于已发布。
+- 发行冻结：`labs/releases/2026.10-v2.4/` 保存C00–C44共90包和manifest；随后 `npm run build:labs` 通过冻结源码摘要校验，未改写历史发行字节。线上发布另按下节核验。
 
-## 剩余步骤（按此顺序继续）
+## 发布
 
-1. **修复后整批回归已通过**：8个真实快照全部通过。已完成的 `check` / `build` 不因更新本记录而重复执行；若后续实质代码变更，再补对应检查。
-2. **受影响页面验收已通过**：见上述60组视觉与八课交互结果；最终产物不变时复用本次证据。
-3. **发行契约与本地冻结已通过**：发行包已保存，`npm run build:labs` 冻结源码摘要校验通过。
-4. **审核并发布**：审阅本批diff与未跟踪文件（包括测试生成的 `.lab/`），只纳入相关成果；重新核查远端差异，在main正常提交推送。等待对应Pages成功，再执行隔离根 `verify-online.mjs`（`NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem`）；目标为八课、六个Lab入口、四份清单与234个下载包SHA，当前尚未执行。
-5. **记录实际发布结果**：将真实commit、Pages run与线上核验写入本文件和STATUS，再提交记录并等待该次Pages。B成功后才交接C。
+- 内容提交：[`195c4d6637c65ad80ee9b9edcc44b972ca8d362d`](https://github.com/socoo123/js_web/commit/195c4d6637c65ad80ee9b9edcc44b972ca8d362d)，已正常推送main。提交前审阅本批diff、未跟踪文件及远端；锁/C36/历史发行无改动，测试副本保存在隔离根。
+- [Pages 40892019506](https://github.com/socoo123/js_web/actions/runs/40892019506)：build/deploy均成功，完成于2026-10-29 14:40:46 UTC。CI中的真实起点跟做、React连续快照、UI5连续快照、根检查与静态构建均通过。
+- 线上核验完成于2026-10-29 14:42:32 UTC：C37–C44八课任务卡与v2.4正式起点正确，Lab首页及L1–L5共6入口返回200；4份manifest与仓库冻结字节一致；234个下载包逐包SHA-256一致（v2.1/2/3/4分别16/50/78/90包）；C39 D2 SVG与Pagefind资源返回200。命令为 `NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem node <隔离根>/verify-online.mjs`，结果保存于 `online-result.json`。
+- 线上入口：[C37](https://socoo123.github.io/js_web/06-components-ui5/c37-component-ecosystem-selection/)、[C44](https://socoo123.github.io/js_web/06-components-ui5/c44-ui5-react/)、[L4](https://socoo123.github.io/js_web/labs/l4/)、[v2.4 manifest](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.4/manifest.json)。Lab页面与学习包已发布，adapter应用的严格静态运行证据来自本地验收。
+- 发布记录回写本文件、STATUS、Lab设计与发行索引；仅维护文档变更，按PLAN §6检查差异/引用，不重复本地全量测试。记录提交的Pages仍须等待，结果在最终回复给出，不循环追加自身SHA/run。
 
-恢复时保留全部未提交成果、冻结历史和读者副本；`integrate.py` 是已执行的一次性集成脚本，不要再次运行。四路已结束，已有失败修复与独立跟做证据在本文件，无需重新派发整轮实现。当前没有B发布提交号或Pages run。
+## 下一步
+
+用户清理上下文并新开窗口后，用 `JS_WEB_START` 启动阶段 C：C45–C48 / L5、导航下载、C15定点修正及最终验收。按PLAN §7核验模型并同时启动新的四路 `general` / `openai/gpt-6.1-sol#max`；保留本批发布成果、冻结历史与现有Git工作。C成功后本轮结束，下一阶段为“无”。
