@@ -45,7 +45,7 @@ CI 中四个 `test:lab-*` 行为检查仍各执行一次。旧阶段 4 的 `lint
 
 ### 冻结和恢复
 
-当前发行版由 `labs/catalog.json` 指定；C 阶段目标为 `2026.10-v2.5`、C00–C48。正文和验证接通后才将相应课标为 implemented/migrated，不能用空步骤凑齐快照。五个阶段起点沿用同一格式的 C00/C10/C20/C36/C44，不新增另一套阶段包。
+当前发行版由 `labs/catalog.json` 指定；`2026.10-v2.5`、C00–C48已冻结发布，C阶段及本轮改版已完成，见[C记录](../labs/records/C.md)。正文和验证接通后才将相应课标为 implemented/migrated，不能用空步骤凑齐快照。五个阶段起点沿用同一格式的 C00/C10/C20/C36/C44，不新增另一套阶段包。
 
 发布前核对 `public/downloads/inventory/<release>/manifest.json` 的逐包 SHA、tar/JSON 两种格式与源码清单，再由主 agent 把实际发布包冻结到 `labs/releases/<release>/`。后续构建核对冻结包本身，当前版还要和实际参考源码一致；`check:build` 再核对 **dist 中全部发行版**，防止历史下载漏复制或被改写。
 

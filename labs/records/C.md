@@ -1,6 +1,6 @@
-# C · 交付、导航与终验（验收完成，待发布）
+# C · 交付、导航与终验（已发布）
 
-2026-10-29–30。范围为 C45–C48 / L5、导航与参考入口、学习包和构建/CI、C15 定点修正及全站视觉/F1。四路及返修全部结束，主验收与正式冻结已完成；提交、Pages 和线上核验待执行。
+2026-10-29–30。范围为 C45–C48 / L5、导航与参考入口、学习包和构建/CI、C15 定点修正及全站视觉/F1。四路及返修全部结束，主验收、正式冻结、提交、Pages和线上核验均通过。**本轮改版完成，下一阶段：无。**
 
 ## 基线与四路
 
@@ -16,7 +16,7 @@
 | 3 | 学习包/恢复/冻结、构建与 CI | `ses_e77d2d49cffe4vz9mqd6H6fq8i` | 最终补验通过，已结束，无源码返修 |
 | 4 | C15 定点修正、全站视觉与 F1 | `ses_e77d28afdffe0ca13ePgGDfPFZ` | 最终61页/366组及F1通过，已结束 |
 
-共享 catalog、注册表、package/lock、来源、状态与发行生成物由主 agent 集成；L5 从 C44 保留的 React 主应用继续。发行版为 `2026.10-v2.5`，已正式冻结，尚未发布。全部子任务与自建服务已结束。
+共享 catalog、注册表、package/lock、来源、状态与发行生成物由主 agent 集成；L5 从 C44 保留的 React 主应用继续。发行版为 `2026.10-v2.5`，已正式冻结发布。全部子任务与自建服务已结束。
 
 ## 接管核对
 
@@ -39,7 +39,7 @@
 
 ## 集成与主门禁
 
-首稿68项操作及第2路两文件返修已集成；主合并v2.5 catalog、C15注册表删除、最终scripts，修正C46 D2嵌套路径并重建SVG。C45–C48 implemented/migrated已按独立验收设true；这不是已发布状态。最终1971份源码与主实际dist同步回四个隔离副本后，原会话并行补验全部通过。
+首稿68项操作及第2路两文件返修已集成；主合并v2.5 catalog、C15注册表删除、最终scripts，修正C46 D2嵌套路径并重建SVG。C45–C48 implemented/migrated按独立验收设true；正式发布另由下方commit/Pages/线上证据确认。最终1971份源码与主实际dist同步回四个隔离副本后，原会话并行补验全部通过。
 
 - 主 `npm run check`：34文件，0 errors/warnings/hints。
 - 主 `npm run build`：16条Lab/片段契约、21张Java双栏及95片段、48课lint零error/warning、310固定输出、18条F1数据测试、14张D2、61页面、5版332包全部通过。构建包含的子命令未另做全量重复执行。
@@ -51,7 +51,7 @@
 ## 四路最终候选补验
 
 - 第1路：四课85条必要core、4/5/6/7组浏览器、C47九条/C48十二条Vitest、10组真实故障红绿与C35兼容1/1通过；74个旧锚点保留。最终报告在`agent-1/delivery/final-report.md`。
-- 第2路：60入口HTTP200、1125站内链接与205锚点、五起点/24学习日/预算/命令责任一致；v2.5 98包和5927项包内源码SHA通过。Astro preview自动解码gzip的边界已记录，线上仍须验证响应头与浏览器实际另存SHA。报告在`agent-2/delivery/final-report.md`。
+- 第2路：60入口HTTP200、1125站内链接与205锚点、五起点/24学习日/预算/命令责任一致；v2.5 98包和5927项包内源码SHA通过。Astro preview自动解码gzip的边界已记录，主随后完成下方线上响应头与浏览器实际另存SHA验证。报告在`agent-2/delivery/final-report.md`。
 - 第3路：332包tar/JSON文件集合与SHA相同；五个实际下载起点恢复、只读/暂停/拒绝覆盖/坏包保护通过；独立副本模拟冻结99文件字节稳定，工具改错拒绝且原冻结不变，历史/当前产物四种故障红绿。正式冻结由主执行，报告在`agent-3/delivery/final-report.md`。
 - 第4路：最终61页×三宽度×亮暗=366组、14张D2、键盘/双侧复制/答案/七词搜索、61页360px无JS阅读及完整F1通过；F1包含真实JSON下载、跨标签、坏数据与三类写满保护。453张截图和结果保存在`agent-4/.cache/qa/final-integrated-C/`，报告在`agent-4/delivery/final-report.md`。
 - 第1路个人模板后续返修：`examples/c46/deploy-react.yml`的build补`contents:read/pages:read`，主最小合入模板和README，并独立解析YAML核对权限。锁定action源码及官方权限已核对；这是配置验证，个人仓库云端仍未运行。
@@ -65,8 +65,25 @@
 
 ## 验证边界
 
-主与子路浏览器验证使用macOS/Chromium；未执行Firefox、Safari/WebKit、Edge、Windows、真机/触摸、屏幕阅读器或真人DevTools GUI分析。个人库存仓库Actions/Pages未发布，课程网站发布不等于Lab演示已上线。C45/C46正文与示例记录保留相应未运行标注；自动装配、独立读者抽验与截图目视证据分别记录。
+主与子路本地浏览器验证使用macOS/Chromium，Pages CI另外执行Linux构建与四条行为门禁；未执行Firefox、Safari/WebKit、Edge、Windows、真机/触摸、屏幕阅读器或真人DevTools GUI分析。个人库存仓库Actions/Pages未发布，课程网站发布不等于Lab演示已上线。C45/C46正文与示例记录保留相应未运行标注；自动装配、独立读者抽验与截图目视证据分别记录。
 
 ## 发布
 
-待提交、对应Pages成功及线上课程/清单/332包SHA、五个Lab起点浏览器实际下载核验后填写。
+- 内容提交：[`d1f2604f0f1a0511c1325234a16239734cb4b32d`](https://github.com/socoo123/js_web/commit/d1f2604f0f1a0511c1325234a16239734cb4b32d)。推送前fetch核对远端无新提交；在main普通提交推送，所有锁及历史发行字节未改。
+- 对应[Pages run 40983642651](https://github.com/socoo123/js_web/actions/runs/40983642651)的build/deploy均成功，2026-10-30 01:18 UTC部署结束。Linux中根check/build、保留的旧React检查和四条Lab行为门禁全部成功。
+- 主执行隔离根`verify-online.mjs`：**60页HTTP200**（48课、首页/路线、6个Lab页、4速查），每课任务与v2.5起点正确；**5份清单逐字一致、332包压缩SHA一致、11项代表资源200**，含C46新D2及Pagefind脚本。结果为`online-result.json`。
+- 主执行`browser-downloads.mjs`：从线上五个Lab页实际点击C00/C10/C20/C36/C44下载链接，Chromium成功保存tar.gz，压缩SHA全部与冻结清单一致；Pages返回`Content-Type: application/gzip`且无`Content-Encoding`，没有本地Astro preview的自动解码问题。结果与响应头为`online-browser-downloads/results.json`。Node网络请求通过`NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem`保持TLS验证。
+- 线上入口：[网站](https://socoo123.github.io/js_web/)、[五个Lab](https://socoo123.github.io/js_web/labs/)、[L5](https://socoo123.github.io/js_web/labs/l5/)、[发行清单](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.5/manifest.json)。完成状态记录另作维护提交；按PLAN §6等待其部署，最终回复给出该次结果，不循环追加自身SHA。
+
+## PLAN §9 六项关闭依据
+
+| 条件 | 实际证据与结论 |
+| --- | --- |
+| 1. 48课范围与主线一致 | catalog全部implemented/migrated、trial=null；主审计48旧URL/任务/锚点、必做目录与固定数据通过；C23/C41正式接续分别见A/B，旧demo降为参考。通过。 |
+| 2. 五个Lab稳定可跟做 | C00/C10/C20/C36/C44起点、单一任务、验收和恢复说明一致；主在C44候选只看公开正文独立完成C45–C48，业务向量及键盘检查通过。通过。 |
+| 3. 下载恢复与冻结 | 五起点实际下载/恢复，start不改源码、compare只读、暂停、拒绝非空/链接、坏包保护、无未来答案；正式冻结99文件，历史238文件字节保留，线上332包SHA通过。通过。 |
+| 4. 实际源码与门禁 | 主根check/build、四条行为链、10组交付错误红绿、独立跟做及Linux CI全部通过；README/CI命令责任一致，未测环境标明。通过。 |
+| 5. 页面交互与发布 | 61页/366组、14D2、七词搜索、F1、键盘/复制/答案/无JS通过；Pages成功，线上60入口/资源/全包与五个浏览器下载通过。通过。 |
+| 6. 完成状态统一 | STATUS、根README、Lab设计/记录索引、PLAN/部署说明关闭本轮；课程导航为48课/五Lab，选修与既有维护项按用户具体需求处理。通过。 |
+
+**阶段C成功；A/B/C全部关闭。下一阶段：无。** 新窗口仅按用户提出的具体维护需求行动。

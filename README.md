@@ -4,6 +4,8 @@
 
 48 课必修正文、四张速查页、14 张 D2 机制图与本地阅读进度保留。当前学习导航以 Lab 为主：阶段内连续修改，阶段间可用固定快照补课。C23/C41 分别接正式 C22/C40，L4 保留 React 主应用并提供四种并列适配，L5 回到 React 主应用交付。实际发布版本、验证范围与维护状态以 [STATUS](docs/STATUS.md) 和 [阶段记录](labs/records/)为准。
 
+**本轮改版完成，下一阶段：无。** `2026.10-v2.5` 已发布，L1–L5 与 C00–C48 快照齐全；最终验收、Pages 和线上下载证据见 [C 记录](labs/records/C.md)。
+
 **[从 Lab 开始跟做](https://socoo123.github.io/js_web/labs/) · [48 课学习路线](https://socoo123.github.io/js_web/roadmap/) · [在线阅读](https://socoo123.github.io/js_web/) · [C48 自测与复盘](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/)**
 
 ## 学员从这里开始
