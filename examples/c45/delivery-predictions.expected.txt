@@ -1,0 +1,4 @@
+/products.json
+/js_web/demos/inventory/products.json
+false
+true

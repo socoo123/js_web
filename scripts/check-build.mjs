@@ -1,10 +1,9 @@
-import { existsSync, readFileSync, statSync, globSync } from 'node:fs';
+import { existsSync, readFileSync, statSync, globSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { importedContent } from './lesson-sources.mjs';
 import catalog from '../labs/catalog.json' with { type: 'json' };
-import { createHash } from 'node:crypto';
-import { gunzipSync } from 'node:zlib';
+import { repo, checkpointIds, verifyRelease } from '../labs/snapshots.mjs';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const origin = 'https://socoo123.github.io';
@@ -19,7 +18,7 @@ const lessons = globSync('**/c[0-9][0-9]-*.{md,mdx}', { cwd: docsRoot }).sort().
   const diagrams = [...source.matchAll(/assets\/diagrams\/([^\s)"']+)\.svg/g)].map((match) => match[1]);
   return [path.basename(file).slice(0, 3).toUpperCase(), file.replace(/\.(?:md|mdx)$/, ''), diagrams, source];
 });
-for (const required of ['index.html', 'roadmap/index.html', 'pagefind/pagefind.js', ...references.map((slug) => `${slug}/index.html`), ...lessons.map(([, slug]) => `${slug}/index.html`)]) {
+for (const required of ['index.html', 'roadmap/index.html', 'labs/index.html', 'pagefind/pagefind.js', ...references.map((slug) => `${slug}/index.html`), ...lessons.map(([, slug]) => `${slug}/index.html`)]) {
   if (!existsSync(path.join(dist, required))) errors.push(`缺少输出：${required}`);
 }
 for (const page of pages) {
@@ -76,24 +75,21 @@ for (const [id, slug, diagrams, source] of lessons) {
   }
 }
 for (const lab of catalog.labs) if (!existsSync(path.join(dist, `labs/${lab.labId.toLowerCase()}/index.html`))) errors.push(`缺少 Lab 页：${lab.labId}`);
-const releaseManifest = path.join(dist, `downloads/inventory/${catalog.release}/manifest.json`);
-if (!existsSync(releaseManifest)) errors.push('缺少版本化快照清单');
-else {
-  const manifest = JSON.parse(readFileSync(releaseManifest, 'utf8'));
-  const hash = (data) => createHash('sha256').update(data).digest('hex');
-  for (const [id, entry] of Object.entries(manifest.checkpoints)) {
-    const dir = path.dirname(releaseManifest);
-    for (const [suffix, expected] of [['json.gz', entry.sha256], ['tar.gz', entry.archiveSha256]]) {
-      const file = path.join(dir, `${id}.${suffix}`);
-      if (!existsSync(file) || hash(readFileSync(file)) !== expected) errors.push(`快照缺失或校验失败：${id}.${suffix}`);
-    }
-    const bundle = JSON.parse(gunzipSync(readFileSync(path.join(dir, `${id}.json.gz`))).toString());
-    for (const [file, digest] of Object.entries(entry.files)) if (hash(bundle.files[file] ?? '') !== digest) errors.push(`快照源码校验失败：${id}/${file}`);
-  }
+const frozenRoot = path.join(repo, 'labs/releases');
+const frozenReleases = readdirSync(frozenRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+let archives = 0;
+for (const release of new Set([...frozenReleases, catalog.release])) {
+  const directory = path.join(dist, 'downloads/inventory', release);
+  try {
+    const manifest = await verifyRelease(directory, release);
+    archives += Object.keys(manifest.checkpoints).length * 2;
+    if (release === catalog.release && JSON.stringify(Object.keys(manifest.checkpoints)) !== JSON.stringify(checkpointIds())) errors.push(`${release} 快照范围不符，必须覆盖全部已实现课程`);
+    if (frozenReleases.includes(release) && !readFileSync(path.join(directory, 'manifest.json')).equals(readFileSync(path.join(frozenRoot, release, 'manifest.json')))) errors.push(`${release} 已冻结清单被改写`);
+  } catch (error) { errors.push(`发行包检查失败：${release}：${error.message}`); }
 }
 const roadmap = readFileSync(path.join(dist, 'roadmap/index.html'), 'utf8');
 if ((roadmap.match(/data-progress\s/g) ?? []).length !== 1 || lessons.some(([id]) => !roadmap.includes(`data-lesson-status="${id}"`))) {
   errors.push('学习路线缺少进度管理或课程状态入口。');
 }
 if (errors.length) throw new Error(errors.join('\n'));
-console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口、${references.length} 张速查导航与 ${lessons.length} 课折叠区/D2 图。`);
+console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口、${references.length} 张速查导航与 ${lessons.length} 课折叠区/D2 图；${new Set([...frozenReleases, catalog.release]).size} 版 ${archives} 个学习包/源码清单。`);

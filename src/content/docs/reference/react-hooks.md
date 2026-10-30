@@ -7,6 +7,8 @@ sidebar:
 
 先确定谁拥有数据、什么触发变化，再选 Hook。普通派生计算可以直接写在组件中。[React 官方 Hooks 目录](https://react.dev/reference/react/hooks)适合查完整 API，本页连接已学过的库存场景。
 
+跟做入口是 [L3 React 库存应用](../../labs/l3/)：从 C20 开始，在自己的 `src/react/` 逐课增加能力。这里是查阅表，不要求另开旧示例工程；逐课 `examples/cNN/README.md` 保留验证记录。
+
 ## 保存数据与共享入口
 
 | API 与课程 | 场景与规则 |
@@ -17,6 +19,8 @@ sidebar:
 | <code style="white-space: nowrap">useRef</code><br>[C28](../../05-react/c28-refs-external-systems/) | DOM 节点、定时器句柄、跨渲染可变容器。current 改变不触发渲染；可见数字用 state；DOM 操作安排在提交后或事件中 |
 
 业务 id 定位商品；组件 key 决定同级状态的身份；query key 区分查询数据。它们不是 Hook，但决定了许多 Hook 状态何时复用。[C26 保留与重置](../../05-react/c26-state-ownership-reset/)、[C32 查询缓存](../../05-react/c32-tanstack-query-server-state/)
+
+C24–C31 的业务商品由 React/reducer 管理；C32 起 repository 管商品与持久化，Query 管缓存，组件 state 留筛选、选中项与草稿。别把查询结果再塞进另一份可写 state，也别同时让 Effect 与 repository 写同一快照。
 
 ## 外部同步与逻辑复用
 
@@ -62,4 +66,4 @@ Effect 与 useMemo 的依赖逐项按 Object.is 比较。更换一个新建的�
 
 普通 Hook 在组件或自定义 Hook 顶层调用，保持调用顺序；use 的条件调用是专门规则。初始化函数、reducer 和渲染保持纯粹，写存储这样的操作放到明确的事件或同步阶段。[Hooks 规则](https://react.dev/reference/rules/rules-of-hooks)
 
-遇到「更新了但看起来没变」，回到 [C36 项目复盘](../../05-react/c36-react-project-debugging/)运行三个错误起点：统计来源、缓存身份、损坏的本地输入分别需要不同证据。
+遇到「更新了但看起来没变」，在自己的工作区按 [C36 项目复盘](../../05-react/c36-react-project-debugging/)复现与修复：统计来源、缓存身份、损坏的本地输入分别需要不同证据。[L5](../../labs/l5/)继续保留的 React 主应用做排错和交付；没有必要把所有问题都改写为 Hook 问题。

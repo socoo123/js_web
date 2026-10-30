@@ -1,6 +1,6 @@
 # C15 CSS 布局与响应式 · 示例
 
-配套正文：[C15](../../src/content/docs/03-async-modules/c15-css-layout-responsive.md)。网页无需第三方依赖，固定数据取自 shared/products.json。
+配套正文：[C15](../../src/content/docs/03-async-modules/c15-css-layout-responsive.mdx)。主线在连续工作区修改 `src/vanilla/styles.css`；下表旧网页仅供机制实验参考，固定数据取自 shared/products.json。
 
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
@@ -47,4 +47,11 @@
 
 ## V2 连续工作区
 
-2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C15` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。
+2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C15` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。旧例子保留为可选参考。网站使用原 URL 与 F1 课号。
+
+阶段 C 定点修正：删除 Java 几何算术对照，正文直接引用 C15 的完整 CSS，保留相同跟做起点、布局结果、故障步骤与原锚点。Swing/JavaFX 仅作经验引入。
+
+- 2026-10-29 · macOS arm64、Node 24.22.0 / npm 11.19.1、Playwright 1.64.1 / Chromium 156.0.8078.4：`npm run examples -- c15` 2/2，课程 lint 零 error/warning；`npm run check` 零诊断，Astro 静态构建及 `npm run check:build` 通过。
+- 在独立 `2026.10-v2.4/C14` 恢复副本，仅复制本次正文渲染的 13 行 CSS；`LAB_NATIVE_CHECK_PORT=19402 npm run lab -- check C15` 68 条通过。360/768/1280px 为 1/2/4 列；纯键盘筛选 P004、保存 8 后总库存 57，P001 仍 12，刷新保留；空白拒绝并聚焦错误字段。
+- 在该副本的实际样式文件加 `article { min-width:600px; }`，360px 视口的滚动宽为 616px；移除故障后为 360px。截图、Computed 数值及完整本地站点自动审计见作者工作记录；主集成终验和发布由阶段 C 记录另行确认。
+- 本次未测：Firefox、Safari、Edge、Windows、真机、屏幕阅读器；未手动操作 DevTools GUI。

@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-这是查阅索引。遇到具体问题时回到对应课程跟做，再来这里查年度归属。判断新能力的方法见 [C16](../../03-async-modules/c16-modules-dependencies/)。
+这是查阅索引，不是一套额外练习。主线从[库存工作区与五个 Lab](../../labs/)进入；遇到具体问题时回到对应课程，在自己的工作区跟做。判断新能力的方法见 [C16](../../03-async-modules/c16-modules-dependencies/)。
 
 ## 怎样读这张表
 
@@ -29,7 +29,7 @@ sidebar:
 | ES2024 | Object.groupBy/Map.groupBy 直接分组；Promise.withResolvers 分开创建 Promise 与其 resolve/reject | 可用 | [Map.groupBy C16](../../03-async-modules/c16-modules-dependencies/)；其他为本页索引 |
 | ES2025 | Iterator 的 map 等辅助方法按需处理序列；Set 的 union 等方法表达集合运算 | 可用 | 本页索引：[Iterator.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Iterator/map)、[Set.union](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/union) |
 
-年度表的代表功能可运行仓库 examples/c16/annual-support.js，浏览器可打开同目录的 support-browser.html 查看 Console。它检验代表行为与方法存在性，不等于对某一年度做完整符合性测试。
+可选机制参考保留在仓库 `examples/c16/annual-support.js`；浏览器入口为同目录的 `support-browser.html`。它检验代表行为与方法存在性，不等于对某一年度做完整符合性测试；库存主线仍在自己的工作区继续。
 
 ## ES2026：标准已经出版，运行时支持逐项判断
 
@@ -45,7 +45,7 @@ Ecma 已发布 ECMAScript 2026，第 17 版。下表列出新增组的主要 API
 | 辨认 Error 对象 | [Error.isError](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/isError) | 存在 | 存在 |
 | 把异步来源收集成数组 | [Array.fromAsync](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/fromAsync) | 存在 | 存在 |
 
-同一份环境探测在 Node 与浏览器会得到不同输出。运行 examples/c16/year-support.js 时，以自己的结果和 MDN 兼容表作决定。金额仍按课程约定存整数分；sumPrecise 不是十进制定点金额类型。
+同一份环境探测在 Node 与浏览器会得到不同输出。可选参考 `examples/c16/year-support.js` 的运行结果要结合 MDN 兼容表判断。金额仍按课程约定存整数分；sumPrecise 不是十进制定点金额类型。
 
 ## Stage 4、在研提案和标准年份
 

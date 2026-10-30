@@ -31,8 +31,8 @@ export default defineConfig({
         ThemeSelect: './src/components/ThemeSelect.astro',
       },
       sidebar: [
-        { label: '学习路线与课程目录', slug: 'roadmap' },
         { label: '库存工作区与 5 个 Lab', slug: 'labs' },
+        { label: '学习路线与课程目录', slug: 'roadmap' },
         ...courseSections
           .filter(([directory]) => existsSync(new URL(`./src/content/docs/${directory}`, import.meta.url)))
           .map(([directory, label]) => ({ label, items: [{ autogenerate: { directory } }] })),

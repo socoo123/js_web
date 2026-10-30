@@ -1,4 +1,5 @@
-# 个人练习仓库模板：保留本仓库目录结构，仓库名为 js_web。
+# 个人练习仓库模板：把完整 Lab 工作区放在自己的仓库根目录，仓库名为 js_web。
+# 公开入口 /js_web/demos/inventory/；本模板未在个人仓库实际发布。
 # 此文件放到个人仓库 .github/workflows/deploy-react.yml 后才会运行。
 name: Deploy React inventory to Pages
 on:
@@ -13,25 +14,25 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: examples/inventory/04-react
+    permissions:
+      contents: read
+      pages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version-file: .node-version
+          node-version: '24'
           cache: npm
-          cache-dependency-path: examples/inventory/04-react/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm ci
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build
-      - run: npm run check:pages
+      - run: npm run lab -- start C46
+      - run: npm run lab -- build
+      - run: mkdir -p site/demos/inventory
+      - run: cp -R dist/src-react/. site/demos/inventory/
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
-          path: examples/inventory/04-react/dist
+          path: site
   deploy:
     needs: build
     runs-on: ubuntu-24.04

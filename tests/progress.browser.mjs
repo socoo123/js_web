@@ -1,17 +1,22 @@
-// 复用阶段 4 已锁定的浏览器工具；运行方式见 README。
-import { chromium, expect } from '../examples/inventory/04-react/node_modules/@playwright/test/index.mjs';
+// 复用连续工作区锁定的浏览器工具，不再为站点回归另装旧阶段工程。
+import { chromium, expect } from '../labs/inventory/node_modules/@playwright/test/index.mjs';
 import assert from 'node:assert/strict';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import path from 'node:path';
 import { PROGRESS_KEY, BACKUP_KEY, DAMAGED_KEY, LESSON_IDS } from '../src/lib/progress.mjs';
 
 const base = process.env.PROGRESS_BASE_URL ?? 'http://127.0.0.1:8751/js_web/';
 const lesson1 = '01-history-web/c01-story-ecosystem/';
 const lesson2 = '01-history-web/c02-web-debugging/';
 const lesson48 = '07-project/c48-review-next-steps/';
-const qa = new URL('../.cache/qa/f1/', import.meta.url);
+const qa = path.resolve(process.env.PROGRESS_QA_DIR ?? '.cache/qa/f1');
 await mkdir(qa, { recursive: true });
 const browser = await chromium.launch();
 const errors = [];
+const evidence = { phase: process.env.PROGRESS_PHASE ?? 'local (not integrated acceptance)', base, browser: browser.version(), checks: [], screenshots: [], errors, status: 'running' };
+const capture = async (page, name) => {
+  await page.screenshot({ path: path.join(qa, name) }); evidence.screenshots.push(name);
+};
 const track = (page) => {
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('response', (response) => { if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`); });
@@ -32,10 +37,13 @@ try {
   await expect(page.getByRole('button', { name: '撤销完成', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await page.reload();
   await expect(summary(page)).toHaveText('C01 已完成 · 已完成 1 / 48 课');
+  assert.deepEqual(JSON.parse(await raw(page, BACKUP_KEY)), { version: 1, completed: ['C01'] });
   for (const route of [lesson2, lesson48]) {
     await page.goto(base + route);
     await page.getByRole('button', { name: '标记完成', exact: true }).click();
   }
+  assert.deepEqual(JSON.parse(await raw(page, BACKUP_KEY)), { version: 1, completed: ['C01', 'C02'] });
+  evidence.checks.push('keyboard mark, undo, refresh, previous-valid backup');
   await page.getByRole('link', { name: '查看学习路线', exact: true }).click();
   await expect(summary(page)).toHaveText('已完成 3 / 48 课');
   await expect(page.locator('[data-lesson-status]')).toHaveCount(48);
@@ -51,6 +59,7 @@ try {
   const download = await downloadEvent;
   assert.equal(download.suggestedFilename(), 'js-web-progress.json');
   assert.deepEqual(JSON.parse(await readFile(await download.path(), 'utf8')), { version: 1, completed: ['C02', 'C48'] });
+  evidence.checks.push('cross-tab undo and real downloaded JSON export');
 
   const imported = JSON.stringify({ version: 1, completed: ['C03', 'C01', 'C03'] });
   await upload(page, imported);
@@ -60,19 +69,30 @@ try {
   await expect(page.locator('[data-progress-message]')).toHaveText('已导入并合并进度。');
   assert.deepEqual(JSON.parse(await raw(page)).completed, ['C01', 'C02', 'C03', 'C48']);
   const saved = await raw(page);
+  const savedBackup = await raw(page, BACKUP_KEY);
   for (const content of ['{', 'null', '{"version":2,"completed":[]}', '{"version":1,"completed":["C49"]}', ' '.repeat(65537)]) {
     await upload(page, content);
     await expect(page.locator('[data-progress-message]')).toHaveAttribute('data-error', '');
     assert.equal(await raw(page), saved);
+    assert.equal(await raw(page, BACKUP_KEY), savedBackup);
   }
+  evidence.checks.push('import deduplication, merge, repeated import, invalid/oversized file preserves primary and backup bytes');
 
   await other.evaluate((key) => localStorage.setItem(key, '{broken'), PROGRESS_KEY);
   await expect(page.getByRole('button', { name: '从本地备份恢复', exact: true })).toBeVisible();
   assert.equal(await raw(page), '{broken');
-  await page.getByRole('button', { name: '从本地备份恢复', exact: true }).click();
+  await capture(page, 'progress-damaged-with-backup.png');
+  await page.getByRole('button', { name: '从本地备份恢复', exact: true }).focus();
+  await page.keyboard.press('Enter');
   await expect(summary(page)).toHaveText('已完成 4 / 48 课');
   assert.equal(await raw(page, DAMAGED_KEY), '{broken');
   await expect(page.getByRole('button', { name: '导入进度', exact: true })).toBeFocused();
+  evidence.checks.push('cross-tab damaged record, keyboard backup restore, raw damage preserved, focus returned');
+  await other.evaluate((key) => localStorage.removeItem(key), PROGRESS_KEY);
+  await expect(summary(page)).toHaveText('已完成 0 / 48 课');
+  await other.evaluate(() => localStorage.clear());
+  await expect(summary(page)).toHaveText('已完成 0 / 48 课');
+  evidence.checks.push('cross-tab remove and clear events');
   await page.evaluate(({ key, backup }) => { localStorage.setItem(key, 'bad'); localStorage.setItem(backup, 'bad backup'); }, { key: PROGRESS_KEY, backup: BACKUP_KEY });
   await page.reload();
   await expect(page.getByRole('button', { name: '从本地备份恢复', exact: true })).toBeHidden();
@@ -88,6 +108,7 @@ try {
   await page.getByRole('button', { name: '重新开始', exact: true }).click();
   await expect(summary(page)).toHaveText('已完成 0 / 48 课');
   assert.equal(await raw(page, DAMAGED_KEY), 'broken again');
+  evidence.checks.push('no valid backup: import recovery, canceled restart preserves raw, confirmed restart archives raw');
   await upload(page, JSON.stringify({ version: 1, completed: LESSON_IDS }));
   await expect(summary(page)).toHaveText('已完成 48 / 48 课');
   await expect(page.locator('.lesson-completed')).toHaveCount(48);
@@ -97,14 +118,15 @@ try {
 
   for (const route of ['roadmap/', lesson48]) {
     await page.goto(base + route);
-    for (const width of [1280, 360]) for (const theme of ['light', 'dark']) {
+    for (const width of [360, 768, 1280]) for (const theme of ['light', 'dark']) {
       await page.setViewportSize({ width, height: 950 });
       await page.locator('starlight-theme-select select').first().selectOption(theme, { force: true });
       await page.locator('[data-progress]').scrollIntoViewIfNeeded();
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-      await page.screenshot({ path: new URL(`progress-${route === 'roadmap/' ? 'roadmap' : 'lesson'}-${width}-${theme}.png`, qa).pathname });
+      await capture(page, `progress-${route === 'roadmap/' ? 'roadmap' : 'lesson'}-${width}-${theme}.png`);
     }
   }
+  evidence.checks.push('48/48 states and meter, empty import does not erase progress, 12 width/theme captures');
   for (const route of ['', 'reference/java-js/']) {
     await page.goto(base + route); await expect(page.locator('[data-progress]')).toHaveCount(0);
   }
@@ -120,19 +142,51 @@ try {
   await expect(denied.locator('html')).toHaveAttribute('data-theme', 'dark');
   await denied.locator('starlight-theme-select select').first().selectOption('light', { force: true });
   await expect(denied.locator('html')).toHaveAttribute('data-theme', 'light');
+  await capture(denied, 'progress-storage-denied.png');
+  evidence.checks.push('storage getter denied: disabled controls, readable lesson, light/dark theme usable');
   const quota = await browser.newContext();
-  await quota.addInitScript((key) => {
+  const good = JSON.stringify({ version: 1, completed: ['C01'] });
+  await quota.addInitScript(({ key, good }) => {
     const original = Storage.prototype.setItem;
+    original.call(localStorage, key, good);
     Storage.prototype.setItem = function (name, value) {
       if (name === key) throw new DOMException('full', 'QuotaExceededError');
       return original.call(this, name, value);
     };
-  }, PROGRESS_KEY);
+  }, { key: PROGRESS_KEY, good });
   const full = await quota.newPage(); track(full);
   await full.goto(base + lesson1);
-  await full.getByRole('button', { name: '标记完成', exact: true }).click();
-  await expect(summary(full)).toHaveText('C01 未完成 · 已完成 0 / 48 课');
+  await full.getByRole('button', { name: '撤销完成', exact: true }).click();
+  await expect(summary(full)).toHaveText('C01 已完成 · 已完成 1 / 48 课');
   await expect(full.locator('[data-progress-message]')).toContainText('保存失败');
+  assert.equal(await raw(full), good);
+  await capture(full, 'progress-primary-quota.png');
+  evidence.checks.push('primary quota failure preserves previous progress and does not claim success');
+
+  for (const scenario of [
+    { name: 'backup', key: BACKUP_KEY, primary: good, backup: JSON.stringify({ version: 1, completed: ['C02'] }) },
+    { name: 'damaged-archive', key: DAMAGED_KEY, primary: '{broken', backup: good },
+  ]) {
+    const failed = await browser.newContext();
+    await failed.addInitScript(({ primaryKey, backupKey, scenario }) => {
+      const original = Storage.prototype.setItem;
+      original.call(localStorage, primaryKey, scenario.primary);
+      original.call(localStorage, backupKey, scenario.backup);
+      Storage.prototype.setItem = function (name, value) {
+        if (name === scenario.key) throw new DOMException('full', 'QuotaExceededError');
+        return original.call(this, name, value);
+      };
+    }, { primaryKey: PROGRESS_KEY, backupKey: BACKUP_KEY, scenario });
+    const failedPage = await failed.newPage(); track(failedPage);
+    await failedPage.goto(base + lesson1);
+    await failedPage.getByRole('button', { name: scenario.name === 'backup' ? '撤销完成' : '从本地备份恢复', exact: true }).click();
+    await expect(failedPage.locator('[data-progress-message]')).toContainText('保存失败');
+    assert.equal(await raw(failedPage), scenario.primary);
+    assert.equal(await raw(failedPage, BACKUP_KEY), scenario.backup);
+    await capture(failedPage, `progress-${scenario.name}-quota.png`);
+    evidence.checks.push(`${scenario.name} quota failure preserves primary and backup bytes`);
+    await failed.close();
+  }
 
   const nojs = await browser.newContext({ javaScriptEnabled: false });
   const rawPage = await nojs.newPage(); track(rawPage);
@@ -147,8 +201,13 @@ try {
       await detail.locator('summary').click(); await expect(detail).toHaveAttribute('open', '');
     }
   }
+  evidence.checks.push('no JavaScript: lesson 1/48 and roadmap readable, controls hidden, native details expand');
   assert.deepEqual(errors, []);
-  console.log(`F1 浏览器回归通过（${browser.version()}）：标记/撤销/刷新/48 课状态、跨标签同步、导出/合并/拒绝坏文件、损坏恢复/重开、权限/写满失败、八组宽度主题、禁用 JS 阅读。${base}`);
+  evidence.status = 'passed';
+  console.log(`F1 浏览器自动回归通过（${evidence.phase}，Chromium ${browser.version()}）：标记/撤销/刷新/48 课状态、跨标签同步/移除/清空、导出/合并/拒绝坏文件、备份/损坏恢复/重开、权限/主记录/备份/损坏留档写满、12 组宽度主题、禁用 JS 阅读。证据：${qa}。待主 agent 在最终集成版本验收。`);
+} catch (error) {
+  evidence.status = 'failed'; evidence.failure = error.stack; throw error;
 } finally {
+  await writeFile(path.join(qa, 'results.json'), JSON.stringify(evidence, null, 2) + '\n');
   await browser.close();
 }

@@ -1,20 +1,32 @@
 ---
 title: 学习路线与课程目录
-description: 4 周 48 课主线与 8 周慢速路线，查看已发布课程和后续计划。
+description: 4 周 48 课与 8 周慢速路线，从五个 Lab 进入同一个库存工作区。
 ---
 
-<!-- 由 scripts/sync-roadmap.mjs 从课程大纲与已有文章生成。 -->
+<!-- 由 scripts/sync-roadmap.mjs 从课程大纲、catalog 与已有文章生成。 -->
 
-**已发布 48 / 48 课。** 有链接的课程可以阅读；「待发布」仅表示计划主题。
+**可阅读 48 / 48 课。** 第一次学习先到[库存工作区与 5 个 Lab](../labs/)准备工程，再按课号跟做。
 
 ## 选择你的节奏
 
 - **4 周主线：** 每周 6 个学习日，每天按目录顺序学习 2 课，投入 3–4 小时；第 7 天休息或补课。
 - **8 周慢速与深化：** 每周 6 个学习日，每天按课号学习 1 课，用剩余时间练习、调试和复习。
 
-先读示例、亲手运行，再做预测与排错练习。每课包含 Java 对照和操作说明，库存管理项目贯穿全程。
+每课先看任务卡，在自己的 inventory/ 修改，再对照输出、收集错误证据并检查。Lab 收尾包含在课程时间里；网站阅读标记与本地工作区检查分别管理。
 
-V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 44 课接入，试做课会明确标注前置。其余课程继续保留旧版正文和示例。
+48 课均已接入连续工作区。阶段内接自己的上一课，固定起点只用于补课或恢复；旧 examples 保留为机制参考与验证记录。
+
+## 五个 Lab，一条连续主线
+
+| Lab | 课程 | 补课起点 | 阶段产出 |
+| --- | --- | --- | --- |
+| [L1 库存规则与数据](../labs/l1/) | C01–C10 | C00 | 从商品卡片到可撤销的库存规则 |
+| [L2 可用的原生库存页](../labs/l2/) | C11–C20 | C10 | 列表、请求、存储、布局与第一批测试 |
+| [L3 React 库存应用](../labs/l3/) | C21–C36 | C20 | 从组件到状态、表单、异步与测试 |
+| [L4 组件库与 UI5 适配](../labs/l4/) | C37–C44 | C36 | 同一规则与编辑场景，四种界面 |
+| [L5 调试与静态交付](../labs/l5/) | C45–C48 | C44 | 从排错到可恢复的静态交付 |
+
+起点是前一课的完成参考态，不是本 Lab 的答案。正常跟做沿用自己的目录；L4 保留 React 主应用，L5 回到 src/react 做交付。
 
 ## 第 1 周：历史、语言、结构与浏览器
 
@@ -79,11 +91,15 @@ V2 正在分批接入[库存工作区与 5 个 Lab](../labs/)；当前 44 课接
 | 第 21 天 | [C42 UI5 路由与 OData 起点](../06-components-ui5/c42-routing-odata/) | 已接工作区<span data-lesson-status="C42" hidden></span> |
 | 第 22 天 | [C43 UI5 Web Components 原生使用](../06-components-ui5/c43-native-web-components/) | 已接工作区<span data-lesson-status="C43" hidden></span> |
 | 第 22 天 | [C44 UI5 Web Components for React](../06-components-ui5/c44-ui5-react/) | 已接工作区<span data-lesson-status="C44" hidden></span> |
-| 第 23 天 | [C45 全链路 Debug 与交付前检查](../07-project/c45-debug-delivery-checks/) | 已发布<span data-lesson-status="C45" hidden></span> |
-| 第 23 天 | [C46 静态构建与 GitHub Pages](../07-project/c46-static-build-pages/) | 已发布<span data-lesson-status="C46" hidden></span> |
-| 第 24 天 | [C47 综合项目与测试选择](../07-project/c47-project-testing-strategy/) | 已发布<span data-lesson-status="C47" hidden></span> |
-| 第 24 天 | [C48 总复盘与后续路线](../07-project/c48-review-next-steps/) | 已发布<span data-lesson-status="C48" hidden></span> |
+| 第 23 天 | [C45 全链路 Debug 与交付前检查](../07-project/c45-debug-delivery-checks/) | 已接工作区<span data-lesson-status="C45" hidden></span> |
+| 第 23 天 | [C46 静态构建与 GitHub Pages](../07-project/c46-static-build-pages/) | 已接工作区<span data-lesson-status="C46" hidden></span> |
+| 第 24 天 | [C47 综合项目与测试选择](../07-project/c47-project-testing-strategy/) | 已接工作区<span data-lesson-status="C47" hidden></span> |
+| 第 24 天 | [C48 总复盘与后续路线](../07-project/c48-review-next-steps/) | 已接工作区<span data-lesson-status="C48" hidden></span> |
 
 ## 源码与练习
 
-课程的必要文件和验证记录保存在 [GitHub 的 examples 目录](https://github.com/socoo123/js_web/tree/main/examples)。按每课说明选择浏览器或本地环境，不需要为阅读课程安装站点构建工具。
+必做任务、版本化学习包和恢复说明从 [Lab 入口](../labs/)进入。课程内写明当前目录、改动位置、启动和检查方式；在线阅读无需安装网站构建工具。
+
+[GitHub 的 examples 目录](https://github.com/socoo123/js_web/tree/main/examples)保留逐课机制参考、固定输出与验证记录；旧七阶段工程仅作参考，不作为日常切换目录。
+
+随时查阅：[ES 版本](../reference/es-versions/)、[Java ↔ JS](../reference/java-js/)、[React Hooks](../reference/react-hooks/)、[UI5 家族](../reference/ui5-family/)。

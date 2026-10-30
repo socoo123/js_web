@@ -1,0 +1,293 @@
+---
+title: C48 总复盘与后续路线
+description: 独立给当前应用增加低库存筛选，定位浅复制故障，用十题自测与项目证据安排后续学习。
+sidebar:
+  order: 48
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 4 周 · 第 24 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C01–C47 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+关掉答案，你能给现有应用加一个小条件，解释旧状态为什么必须保留，再拿测试证明没有破坏已有行为吗？最后一课用同一个工作区回答，而不是再下载一份完整项目。
+
+从自己的C47完成态继续：给 `src/react/App.jsx` 加“仅低库存”，新建 `tests/react/final-filter.test.jsx` 和 `notes/final-review.md`。先只读需求、自己实现；完成后再展开下方参考答案。还要在已有规则里复现一次浅复制故障，修复并补回归。
+
+<LessonTask lessonId="C48" />
+
+增量、排错、测试和十题自测共同完成[L5](/js_web/labs/l5/)。自动检查提供行为结果，网站完成标记仍由你决定；能运行参考解和能独立解释是两件事。
+
+现场数值从固定数据开始：先导出当前个人快照，再导入C45保留的baseline.json。不要让上课已经保存的P004=8影响本课“初始低库存”的验收；完成后可导入个人快照恢复。
+
+## Java 程序员先看这里
+
+Java经验最有价值的是分层、引用与测试思维，而不是把每个前端API翻译成Java。`new ArrayList<>(rows)`和数组展开都只复制容器；Java的HashMap常用equals/hashCode，JS的Map对象键按身份；React更新、DOM与CSS则需要自己的运行模型。需要逐项查语法时，使用[Java ↔ JS速查](/js_web/reference/java-js/)。
+
+## 1. 从历史到生态：先说清代码在哪里运行
+
+<a id="1-从历史到生态先说清代码在哪里运行"></a>
+
+JavaScript从浏览器脚本发展为年度ECMAScript标准，也进入Node、Bun等宿主。把技术放回负责的层，才能解释“同一份代码为什么这里能跑、那里不能跑”。
+
+| 层次 | 本项目中的例子 | 负责什么 |
+| --- | --- | --- |
+| 语言与内建结构 | 函数、Promise、Array/Map/Set | 值与执行规则 |
+| 引擎与宿主 | V8；浏览器、Node、Bun | 执行语言；提供DOM、文件或I/O |
+| 工程工具 | npm/Yarn/pnpm、Vite、Vitest | 安装依赖、构建与测试 |
+| UI与业务 | HTML/CSS、React、四个adapter | 把库存规则变成可操作界面 |
+
+Node和Bun是运行时；Bun还集成包管理等工具。npm、Yarn、pnpm主要管包与工程任务，不能和语言、数据结构混为一类。Java也会区分JVM、构建工具和业务库。
+
+SAPUI5、OpenUI5、UI5 Web Components与React包装库分别保留在[UI5家族速查](/js_web/reference/ui5-family/)。本次现场增量回到React主应用，不把四种界面再全部实现一遍。
+
+## 2. Java经验继续用，值与身份重新判断
+
+<a id="2-java-经验继续用值与身份重新判断"></a>
+
+现场需求只增加一个已学过的条件：**低库存为1–5件，售罄0不算**。不新增框架、不增加第二份商品state，也不改公共业务数据。
+
+具体约定：
+
+- 在App的Toolbar内加原生checkbox，label为“仅低库存”；选中写入hash查询参数 `stock=low`，取消删除该参数。
+- 在InventoryView里，从searchParams派生条件；接在现有名称/分类筛选之后、排序之前，与它们取交集。未知stock值按未选中处理。
+- 可见摘要仍由visible计算。初始选中只显示P004/P006，8件、539200分；清除后恢复六种、52件、2634800分。
+- 条件随hash刷新恢复；筛选不能调用repository保存。低库存内把P004保存为8，它应离开结果，焦点回标题；清除筛选看到它仍是8、全量57，P001仍12。
+
+**先猜一猜：** 新数组能保证修改后旧商品不变吗？
+
+```js
+const oldItems = [{ id: "P002", stock: 0 }];
+const newItems = [...oldItems];
+console.log(oldItems === newItems); // → false
+console.log(oldItems[0] === newItems[0]); // → true
+```
+
+容器换身份，内部对象仍共享。过滤和排序应派生视图，库存写入则保持已有不可变更新链。Java复制集合与复制内部对象也是两个动作。
+
+## 3. 十个机制自测：解释规则，再拿出证据
+
+<a id="3-十个机制自测解释规则再拿出证据"></a>
+
+每题先说规则，再指出项目里的值或操作。记录0/1/2分：解释不清、提示后能做、独立解释并重现。分数用于安排补缺，不是考试证书。
+
+**先猜一猜：** await暂停了调用方的所有代码吗？在Node或Console执行：
+
+```js
+async function reviewOrder() { console.log("开始"); await Promise.resolve(); console.log("继续"); }
+const reviewing = reviewOrder();
+console.log("调用方");
+await reviewing;
+// → 开始、调用方、继续
+```
+
+await只暂停当前async函数，调用方仍往下走。本例没有新工作线程；Java的Future经验不能直接当作JS的线程模型。
+
+| 题 | 解释什么 | 从哪里拿证据 |
+| --- | --- | --- |
+| 1 | 文本“0”、数字0、空白的转换与校验 | C03与当前空库存表单 |
+| 2 | const、别名、浅复制分别限制或共享什么 | 本课旧值与身份回归 |
+| 3 | 闭包保留绑定，工厂调用为何独立 | C06计数器与Scope |
+| 4 | this由调用方式决定，原型上有什么 | C07回调查询 |
+| 5 | 数组排序是否修改来源，Map/Set如何认键 | C08/C09输出 |
+| 6 | await暂停谁，HTTP404为什么单独检查 | 上例与C13Network |
+| 7 | state快照、更新队列与key各解决什么 | C23/C24操作 |
+| 8 | Effect清理与旧请求身份怎样配合 | C29/C30重放 |
+| 9 | 模块URL、包解析、锁与构建分别负责什么 | C16/C18实验 |
+| 10 | base、hash、真实HTML和静态托管的边界 | C46严格预览 |
+
+把每题的分数、证据入口和下一次重做动作写进notes/final-review.md。能指到一个URL、断点或失败断言，比“我看懂了”更有用。
+
+## 4. 阅读新版本：把标准状态与环境支持分开
+
+<a id="4-阅读新版本把标准状态与环境支持分开"></a>
+
+看到新特性先问它解决什么问题，再分别查“正式标准/提案阶段”“目标环境支持”“项目如何采用”。例如toSorted解决复制排序，但对象元素仍共享引用：
+
+```js
+const reviewedStocks = [12, 0, 7];
+console.log(reviewedStocks.toSorted((a, b) => a - b)); // → [0, 7, 12]
+console.log(reviewedStocks); // → [12, 0, 7]
+```
+
+toSorted已进入正式标准；支持范围仍看[MDN兼容表](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted)。旧环境可复制后sort，转译处理语法，polyfill补运行时API，两者不同。Java升级也会核对运行环境，前端还要考虑用户浏览器。
+
+Stage4是完成的提案，具体进入哪一年度再看正式收录；更早阶段仍会改变。React看官方版本与迁移说明，Node看维护阶段；不要仅凭“包安装成功”决定升级。保留清单、锁、可恢复提交和风险回归。
+
+## 5. 后续路线：用补缺结果安排一周
+
+<a id="5-后续路线用补缺结果安排一周"></a>
+
+先补两个最弱机制，再选择一条深入方向。任务写到“做什么、看到什么、哪天重做”，例如“重放P001慢/P002快，最后保持P002”，而不是“继续学异步”。
+
+| 目标 | 下一步 | 一周内的小交付 |
+| --- | --- | --- |
+| 写稳界面 | CSS/可访问性，再补TypeScript桥接 | 键盘可编辑；类型检查与JSON校验分开 |
+| 深入React | 复杂表单、性能、框架边界 | 先测量再优化，保留前后证据 |
+| 连接后端 | Node I/O或自己的Java服务 | 一个校验过的分页读取与失败恢复 |
+| 面向SAP | OData/CAP/Fiori Elements | 有metadata的本地服务，区分mock和真实写入 |
+| 测试工程 | 依赖治理与测试深化 | 可复现安装，能抓住一个实际回归 |
+
+这些是后续选修方向，不是完成48课之前新增的必做阶段。Java经验继续用于业务建模，浏览器机制通过小交付补齐。
+
+## 常见错误与调试
+
+<a id="数组换了旧库存却跟着变了"></a>
+
+**现象**：P002补成1，旧库存也成了1。在 `src/core/stock.js` 的updateStock里保留现有校验，把最后的return暂时换成：
+
+```js
+// 有问题的写法：只复制数组，修改的商品仍共享
+const next = [...products];
+next.find((product) => product.id === id).stock = stock;
+return next;
+```
+
+**工具**：Sources在赋值行设断点，或运行本课的浅复制测试。**证据**：数组不同，P002对象相同；旧值由0变1。**原因**：展开只复制引用，没有复制目标记录。
+
+**修复**：恢复这行，只复制被修改的路径：
+
+```js
+return products.map((product) => product.id === id ? { ...product, stock } : product);
+```
+
+**确认**：新P002=1，旧P002=0；新数组和目标对象不同，未改P001仍共享。新库存正确只是一个条件，必须同时保护旧快照。Java里的浅集合复制也要注意内部可变对象。
+
+## 练习
+
+<a id="练习-1关闭教程讲清十个机制"></a>
+<a id="练习-2补货正确也要保住旧状态"></a>
+<a id="练习-3演示项目交一张个人补缺表"></a>
+
+:::tip[自己尝试 · 本地 React]
+先关闭下面的参考答案，按第2节需求完成App、测试与notes/final-review.md。修改位置是InventoryView的筛选变量、filtered表达式、Toolbar、saveProduct的可见性判断；现有changeFilter、useSearchParams、summary与repository继续复用。
+
+验收：低库存1–5排除0，与名称/分类相交；刷新恢复；保存8后离开结果且焦点可达。浅复制错误必须让“旧值仍0”的断言失败，修复后通过。最后运行 `npm run lab -- check C48`，展示C45排错、C46交付和C47风险计划。
+:::
+
+<details>
+<summary>提示</summary>
+
+不存过滤结果state；先派生一个判断商品是否满足库存条件的函数，再复用到filtered和保存后的可见性判断。修改可能让触发编辑的按钮消失，此时把焦点交给已有heading。测试从独立repository开始，期望8/539200来自固定数据。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+在App中，紧接order变量后加入前两行；把原来的filtered行替换成第三行。visible与summary保持原样：
+
+```js
+const lowOnly = searchParams.get("stock") === "low";
+const matchesStock = (product) => !lowOnly || (product.stock >= 1 && product.stock <= 5);
+const filtered = selectProducts(products, { query, category }).filter(matchesStock);
+```
+
+在Toolbar内、排序后新建按钮前插入：
+
+```jsx
+<label><input type="checkbox" checked={lowOnly}
+  onChange={(event) => changeFilter("stock", event.target.checked ? "low" : "")} />仅低库存</label>
+```
+
+saveProduct中，把原有staysVisible声明替换为下面这行，target及后续dispatch不变：
+
+```js
+const staysVisible = selectProducts([value], { query, category }).length > 0 && matchesStock(value);
+```
+
+新建tests/react/final-filter.test.jsx，依次加入下面的导入与三条测试。第一条给浅复制故障留回归，后两条检查真实UI与焦点：
+
+```jsx
+// @vitest-environment happy-dom
+import React from "react";
+import { expect, test } from "vitest";
+import { render, screen, within, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { freshRepository } from "./support.jsx";
+import { updateStock } from "../../src/core/inventory.js";
+import App from "../../src/react/App.jsx";
+import seed from "../../data/products.json";
+```
+
+```jsx
+test("浅复制故障：新库存正确之外，还必须保留旧值与身份", () => {
+  const before = structuredClone(seed);
+  const after = updateStock(before, "P002", 1);
+  expect(before[1].stock).toBe(0);
+  expect(after[1].stock).toBe(1);
+  expect(after).not.toBe(before);
+  expect(after[1]).not.toBe(before[1]);
+  expect(after[0]).toBe(before[0]);
+});
+```
+
+```jsx
+test("低库存排除0，与分类和搜索取交集；筛选不写业务库存", async () => {
+  const user = userEvent.setup();
+  const repository = freshRepository();
+  render(<App inventoryRepository={repository} />);
+  await screen.findByRole("heading", { name: "P001 机械键盘", exact: true });
+  const before = await repository.exportText();
+  await user.click(screen.getByRole("checkbox", { name: "仅低库存", exact: true }));
+  expect(screen.getAllByRole("article")).toHaveLength(2);
+  expect(screen.queryByRole("heading", { name: "P002 无线鼠标", exact: true })).not.toBeInTheDocument();
+  expect(screen.getByText("库存 8 / 价值 539200 分")).toBeInTheDocument();
+  await user.selectOptions(screen.getByRole("combobox", { name: "分类", exact: true }), "配件");
+  expect(screen.getAllByRole("article")).toHaveLength(1);
+  await user.type(screen.getByRole("textbox", { name: "搜索", exact: true }), "P006");
+  expect(screen.queryAllByRole("article")).toHaveLength(0);
+  expect(await repository.exportText()).toBe(before);
+});
+```
+
+```jsx
+test("保存8后离开低库存结果，焦点回标题；清除筛选能见已保存值", async () => {
+  const user = userEvent.setup();
+  render(<App inventoryRepository={freshRepository()} />);
+  await screen.findByRole("heading", { name: "P004 USB-C 扩展坞", exact: true });
+  const low = screen.getByRole("checkbox", { name: "仅低库存", exact: true });
+  await user.click(low);
+  await user.click(screen.getByRole("button", { name: "编辑 P004", exact: true }));
+  const form = screen.getByRole("form", { name: "商品编辑", exact: true });
+  const stock = within(form).getByLabelText("库存", { exact: true });
+  await user.clear(stock); await user.type(stock, "8");
+  await user.click(within(form).getByRole("button", { name: "保存", exact: true }));
+  await waitFor(() => expect(screen.queryByRole("form", { name: "商品编辑" })).not.toBeInTheDocument());
+  expect(screen.queryByRole("heading", { name: "P004 USB-C 扩展坞", exact: true })).not.toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "React 库存工作台", exact: true })).toHaveFocus();
+  await user.click(low);
+  expect(screen.getByText("库存 57 / 价值 2784300 分")).toBeInTheDocument();
+  expect(screen.getAllByRole("article")).toHaveLength(6);
+});
+```
+
+预期三条通过；错误复制版本的第一条会在旧值比较处红。实际库存由repository写入，筛选只管理URL；保存后目标不再可见就聚焦标题，清除条件仍能看到已确认的8。
+
+</details>
+
+## 项目进度
+
+- 五个Lab仍是同一条库存主线，旧示例只作参考，不要求切回旧工程完成。
+- 保留四份notes、回归与本地dist/src-react；修改源码后重新build。个人Pages发布要另外核对对应提交与线上路径。
+- notes/final-review.md写十题结果、现场增量、浅复制证据、两个补缺日期和一条后续路线。未完成项如实保留。
+
+## 小结
+
+- 用已有工具独立完成小增量，比重跑答案更能检查理解。
+- 过滤是派生视图，正式修改仍走repository；浅复制要检查内部身份。
+- 标准状态、环境支持与项目升级分别核对。
+- 排错、测试与交付记录共同说明你能做什么，后续先补最弱机制。
+
+自测：低库存为什么排除0？筛选为什么不另存商品state？新数组为什么仍会污染旧对象？保存后行消失，焦点应该去哪？48课主线结束，带着自己的补缺表继续做一个小交付。
+
+## 延伸阅读
+
+- [React：数组中的对象更新](https://react.dev/learn/updating-arrays-in-state)
+- [React：state是一份快照](https://react.dev/learn/state-as-a-snapshot)
+- [MDN：Baseline与兼容范围](https://developer.mozilla.org/en-US/docs/Glossary/Baseline/Compatibility)
+- [Node：发行与维护阶段](https://nodejs.org/en/about/previous-releases)
+- [React：版本与发布入口](https://react.dev/versions)
+- [TC39：完成提案与收录年份](https://github.com/tc39/proposals/blob/main/finished-proposals.md)

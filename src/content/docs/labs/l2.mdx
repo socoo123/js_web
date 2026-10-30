@@ -1,12 +1,44 @@
 ---
 title: L2 可用的原生库存页
-description: 在持续修改的库存工作区完成这一阶段的业务交付。
+description: 从 C10 规则接出原生库存页，完成请求、存储、响应式布局、模块、Node 报表与第一次 UT。
 sidebar:
   order: 2
 ---
 
 import LabOverview from '../../../components/LabOverview.astro';
+import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
-从[工作区入口](/js_web/labs/)安装一次，按课程顺序修改自己的代码。阶段收尾使用同一工程验收；不需要再安装一个 Lab。
+## 从哪里开始
+
+继续 L1 自己完成的 `inventory/`。需要补课时，将 <WorkspaceDownload checkpoint="C10" label="C10 起点包" />解压到新的空目录，执行一次 `npm ci`；也可在已有工程运行 `npm run lab -- restore C10 ../inventory-web`，非空目标会被拒绝。安装、校验与升级说明见[工作区入口](/js_web/labs/)。
+
+在工作区执行 `npm run lab -- start C11`、`npm run lab -- dev`。C10 已有规则与单商品卡片；六商品列表、存储和构建由这一阶段逐步完成，不必另建原生项目。
+
+## 在同一页面推进
+
+| 学习段 | 增加什么 | 看得到的结果 |
+| --- | --- | --- |
+| C11–C14 | DOM/事件、Promise、请求、存储与导入导出 | 六商品列表；筛选后编辑正确 id；加载/错误可见；刷新可恢复 |
+| C15–C16 | CSS 布局、响应式与一次模块拆分 | 360/768/1280px 可用，焦点可见；业务行为不因拆分改变 |
+| C17–C20 | Node 报表、npm scripts、隔离工具实验、Vite 与 Vitest | 浏览器与 Node 用同一规则；空白输入回归能先红后绿 |
+
+C16 列出完整的文件搬移清单，按正文一次完成。C18/C19 的锁与管理器实验在 `.lab/sandboxes/`，不切换主工程锁。Node/Bun 是运行时，npm/Yarn/pnpm 是包管理器；TypeScript 只做短桥接。
+
+## 收尾：页面真的可用
+
+每个场景从独立固定数据开始，按 [C20](/js_web/04-runtime-tooling/c20-vite-vitest/)完成：
+
+1. 筛选 P004，库存草稿填 8 后取消，仍为 3/总库存 52；重新保存 8，只改 P004，总库存 57，P001 仍 12。
+2. 刷新保留已保存值；坏 JSON 或非法字段导入被拒绝，好数据原文保持不变。
+3. 手机无整页横滚；360/768/1280px 单/双/四列，键盘能编辑与保存。
+4. 独立初始数据的 Node 报表为 6/52/2634800；正常、空集合、非法输入的 UT 覆盖真实规则。
+
+在当前目录执行 `npm run lab -- check C20`，按课内步骤检查构建和 source map。开发服务器能显示页面，不代表生产路径也正确。
+
+## 暂停、恢复与下一步
+
+在 `notes/next.md` 留下当前课、改动、观察结果和下一步；商品数据先从应用导出，源码另行备份。网页阅读进度不会备份这些内容。
+
+完成后从自己的 C20 继续 [L3](/js_web/labs/l3/)。需要对照时再用 <WorkspaceDownload checkpoint="C20" label="C20 完成参考解" />另存到新目录，不用它覆盖已有作业。
 
 <LabOverview labId="L2" />

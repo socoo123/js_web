@@ -25,26 +25,30 @@ async function get(name) {
   });
 }
 export function validateBundle(bundle, release = catalog.release) {
-  if (bundle.release !== release || !bundle.files || typeof bundle.files !== 'object') throw new Error('参考包发行版不匹配');
+  if (!bundle || bundle.release !== release || !bundle.files || typeof bundle.files !== 'object' || Array.isArray(bundle.files) || !Object.keys(bundle.files).length) throw new Error('参考包发行版不匹配或文件清单无效');
   for (const [name, text] of Object.entries(bundle.files)) {
-    if (typeof text !== 'string' || path.isAbsolute(name) || name.includes('\\') || name.split('/').some((part) => !part || part === '..' || part === '.') || /(^|\/)(node_modules|dist|\.lab|\.git|\.env[^/]*)(\/|$)/.test(name)) throw new Error(`不安全的参考文件：${name}`);
+    if (typeof text !== 'string' || path.isAbsolute(name) || name.includes('\\') || name.includes('\0') || name.split('/').some((part) => !part || part === '..' || part === '.') || /(^|\/)(node_modules|dist|\.lab|\.git|\.cache|coverage|test-results|reference|\.env[^/]*)(\/|$)/.test(name)) throw new Error(`不安全的参考文件：${name}`);
+    const parts = name.split('/');
+    while (parts.pop() && parts.length) if (Object.hasOwn(bundle.files, parts.join('/'))) throw new Error(`参考文件与目录冲突：${name}`);
   }
   return bundle;
 }
 async function load(id) {
   if (!/^[CP]\d{2}$/.test(id)) throw new Error(`错误快照：${id}`);
   const manifest = JSON.parse((await get('manifest.json')).toString());
-  const entry = manifest.checkpoints[id];
+  const entry = manifest.checkpoints?.[id];
   if (manifest.release !== catalog.release || !entry) throw new Error(`本发行版未提供 ${id}；没有修改源码。`);
   const bytes = await get(`${id}.json.gz`);
   if (createHash('sha256').update(bytes).digest('hex') !== entry.sha256) throw new Error('参考包校验值不匹配');
-  return validateBundle(JSON.parse(gunzipSync(bytes).toString()));
+  const data = validateBundle(JSON.parse(gunzipSync(bytes, { maxOutputLength: 64 * 1024 * 1024 }).toString()));
+  const names = Object.keys(data.files).sort();
+  if (!entry.files || JSON.stringify(names) !== JSON.stringify(Object.keys(entry.files).sort()) || names.some((name) => createHash('sha256').update(data.files[name]).digest('hex') !== entry.files[name])) throw new Error('参考包源码清单校验失败');
+  return data;
 }
 export async function restore(id, target) {
   // 拒绝任何已存在的非空目录或符号链接；先校验整个包，再写文件。
-  if (existsSync(target)) {
-    if ((await lstat(target)).isSymbolicLink() || !(await lstat(target)).isDirectory() || (await readdir(target)).length) throw new Error('恢复目标非空或不是普通目录；没有修改文件。');
-  }
+  const info = await lstat(target).catch((error) => { if (error.code !== 'ENOENT') throw error; });
+  if (info && (!info.isDirectory() || (await readdir(target)).length)) throw new Error('恢复目标非空或不是普通目录；没有修改文件。');
   const data = await load(id);
   const parent = path.dirname(target);
   await mkdir(parent, { recursive: true });

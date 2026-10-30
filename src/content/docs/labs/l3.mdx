@@ -6,10 +6,11 @@ sidebar:
 ---
 
 import LabOverview from '../../../components/LabOverview.astro';
+import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
 ## 从哪里开始
 
-继续你在 L2 完成的 `inventory/`；不用再新建 React 工程。需要补课时，直接下载 [2026.10-v2.3 的 C20 起点包](/js_web/downloads/inventory/2026.10-v2.3/C20.tar.gz)，解压到**新的空目录**，在其中执行一次 `npm ci`，然后 `npm run lab -- start C21`、`npm run lab -- dev`。
+继续你在 L2 完成的 `inventory/`；不用再新建 React 工程。需要补课时，下载 <WorkspaceDownload checkpoint="C20" label="本发行版的 C20 起点包" />，解压到**新的空目录**，在其中执行一次 `npm ci`，然后 `npm run lab -- start C21`、`npm run lab -- dev`。
 
 C20 只包含前一阶段的原生库存与规则，React 组件由你从 C21 开始加入。已有工程也可用 `npm run lab -- restore C20 ../inventory-react` 恢复到新目录；非空目录会被拒绝，不覆盖自己的源码。安装、下载校验与恢复说明见[工作区入口](/js_web/labs/)。
 
@@ -42,6 +43,6 @@ C20 只包含前一阶段的原生库存与规则，React 组件由你从 C21 �
 
 在 `notes/next.md` 写当前课、已改文件、观察结果、下一步。导出的是已保存商品，未提交草稿要另存。`start` 不安装答案，`compare` 只读；网页完成标记与你的本地检查分别管理。
 
-完成后直接从自己的 C36 继续 L4。需要对照时再用本发行版的 [C36 完成参考解](/js_web/downloads/inventory/2026.10-v2.3/C36.tar.gz)，不要覆盖现有工程。
+完成后直接从自己的 C36 继续 [L4](/js_web/labs/l4/)。需要对照时再用 <WorkspaceDownload checkpoint="C36" label="本发行版的 C36 完成参考解" />另存到新目录，不要覆盖现有工程。
 
 <LabOverview labId="L3" />

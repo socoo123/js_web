@@ -4,23 +4,20 @@ import path from 'node:path';
 import os from 'node:os';
 import { gzipSync } from 'node:zlib';
 import { spawnSync } from 'node:child_process';
-import { repo, catalog, materialize, bundle, hash } from '../labs/snapshots.mjs';
+import { repo, catalog, materialize, bundle, hash, checkpointIds, verifyRelease } from '../labs/snapshots.mjs';
 
 const out = path.join(repo, 'public/downloads/inventory', catalog.release);
 await mkdir(out, { recursive: true });
 const releases = path.join(repo, 'labs/releases');
 for (const entry of await readdir(releases, { withFileTypes: true })) if (entry.isDirectory()) {
+  await verifyRelease(path.join(releases, entry.name), entry.name);
   await cp(path.join(releases, entry.name), path.join(repo, 'public/downloads/inventory', entry.name), { recursive: true });
 }
 const frozenFile = path.join(releases, catalog.release, 'manifest.json');
 const frozenText = existsSync(frozenFile) ? await readFile(frozenFile, 'utf8') : null;
 const frozen = frozenText ? JSON.parse(frozenText) : null;
 await writeFile(path.join(repo, 'labs/inventory/tools/catalog.json'), JSON.stringify(catalog, null, 2) + '\n');
-const checkpoints = { C00: {} };
-for (const lesson of catalog.lessons) if (lesson.implemented) {
-  if (lesson.trial) { checkpoints[lesson.trial.start] = {}; checkpoints[lesson.trial.end] = {}; }
-  else checkpoints[lesson.endCheckpoint] = {};
-}
+const checkpoints = Object.fromEntries(checkpointIds().map((id) => [id, {}]));
 const manifest = { release: catalog.release, checkpoints };
 if (frozen && JSON.stringify(Object.keys(frozen.checkpoints)) !== JSON.stringify(Object.keys(checkpoints))) throw new Error(`${catalog.release} 已发布，快照范围变动需要新发行版。`);
 for (const id of Object.keys(checkpoints)) {

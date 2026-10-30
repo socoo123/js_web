@@ -1,5 +1,17 @@
 # C48 总复盘与后续路线 · 示例
 
+## 当前 Lab 主线
+
+- 发行版 `2026.10-v2.5`，C47→C48；App加入URL中stock=low筛选，新增final-filter.test.jsx和notes/final-review.md。C44起点不含本课答案。主独立跟做、最终补验与发布状态见 [阶段C](../../labs/records/C.md)。
+- 工作区 `npm run lab -- check C48`：12条必要Vitest、7组严格浏览器；从自己的连续代码做，参考答案默认折叠。自动组装入口为根 `LAB_DELIVERY_PORT=19102 node scripts/verify-delivery-lab.mjs`，不等同读者独立跟做。
+- 2026-10-29 · Node 24.22.0/npm 11.19.1/macOS arm64/Chromium 156.0.8078.4：12/12、7组通过；固定低库存P004/P006、8/539200，清除回6/52/2634800，与分类/搜索相交、刷新条件保留。
+- 低库存内保存P004=8后它离开结果、焦点回标题；清除后6项/57，P001仍12。筛选前后repository导出原文相同，不新增商品state或写入旁路。
+- 将实际src/core/stock.js改为浅复制数组后原地写商品，第一条测试期望旧0、实际1，先红；恢复map按路径复制后绿。把低库存边界改为包含0，真实浏览器期望2项、实际3，红→绿。
+- `npm run examples -- c48` 8/8；新增delivery-review.js对应当前正文预测。原七个例子只作参考，不再切到七阶段工程完成主线。
+- 主agent已从公开C44起点独立完成四课，C48先实现再对照答案；记录见阶段C。未运行：真实手机/输入法、屏幕阅读器、Firefox/Safari、Windows、个人Pages发布；全站及线上结果另记。
+
+## 第一版参考（非 Lab 主线）
+
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
 | runtime-boundary.js | `node runtime-boundary.js` | 语言内建、DOM、Node 与共享请求能力 |
@@ -18,7 +30,7 @@
 - 修复复用阶段 4 `productsReducer`，既有回归 `npm test -- tests/reducer.test.jsx`；本课不新增业务逻辑和重复回归。
 - 十题自测、评分与个人补缺表在正文；分数和重测日由学员填写。F1 网站学习进度已在后续任务完成，当前状态与测试入口见[根 README](../../README.md)。
 
-## 验证记录
+## 第一版验证记录（历史，非本轮源码证据）
 
 - 2026-10-19 · macOS arm64 · Node 24.21.0 / npm 11.7.0：七个固定输出 7/7；错误起点旧/新鼠标 1/1，答案 0/1、新旧总库存 53/52。
 - Node inspect 实际断在 review-broken.js 写入前：before!==after、before[1]===after[1]；库存 0，stepOver 后旧/新均 1。通过独立 inspector 协议执行，Chrome 界面点击路径未手工操作。feature-check 在隔离 vm 中禁用 toSorted 后，降级分支输出一致。

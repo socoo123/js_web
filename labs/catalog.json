@@ -1,5 +1,5 @@
 {
-  "release": "2026.10-v2.4",
+  "release": "2026.10-v2.5",
   "labs": [
     {
       "labId": "L1",
@@ -586,9 +586,7 @@
       "acceptance": [
         "360/768/1280px 分别单/双/四列；无整页横滚；键盘焦点可见；用 Computed 找固定宽度溢出"
       ],
-      "comparisonIds": [
-        "c15-layout-budget"
-      ],
+      "comparisonIds": [],
       "errorIds": [
         "C15-main"
       ],
@@ -1768,28 +1766,29 @@
       "files": [
         "notes/debug.md"
       ],
-      "task": "在当前 src/react 应用依次复现状态/资源/存储/布局问题，写 notes/debug.md",
+      "task": "回到保留的React主应用，在当前文件按状态、资源、存储与布局收集排错证据，写notes/debug.md",
       "comparisonTheme": "Java 堆栈/调试经验 / 浏览器跨层证据与 source maps",
       "acceptance": [
-        "每个修复可复现并回归；做键盘/手机检查；Performance/Memory 有前后证据，不凭一张快照断言泄漏"
+        "绕开dispatch的补货故障可红→绿，修复后P001=13、总库存53；P004取消3/52、保存8/57且P001仍12",
+        "资源404、非法快照原文与360px布局可定位；性能/内存手工采样分别记录"
       ],
       "comparisonIds": [],
       "errorIds": [
         "C45-main"
       ],
       "error": {
-        "trigger": "补货改同一state引用所以UI不动；资源404被误当JS错；重挂载保留监听",
-        "evidence": "Console/Components/Network按层收证；source map映射；Memory前后对照",
-        "repair": "从最早可见错误定位，修引用/路径/清理；原操作复测，写证据与修复；布局/键盘一起检查",
-        "risk": "以清缓存、刷新、加日志当根因；测脚本破坏学员快照；只保存最终截图"
+        "trigger": "App.restock直接修改Query读取结果，按钮执行但未走dispatch/repository",
+        "evidence": "Sources字段已13、界面仍12，实际浏览器断言失败；Network、Application、Computed分别收证",
+        "repair": "恢复await dispatch，让repository持久化与Query失效后重读，重放同一操作",
+        "risk": "把清缓存当根因；用内存mock冒充HTTP；检查清空学员存储；单张堆图判定泄漏"
       },
       "commands": {
         "start": "npm run lab -- start C45",
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C45"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1802,13 +1801,14 @@
       "startCheckpoint": "C45",
       "endCheckpoint": "C46",
       "files": [
-        "tools/lab.mjs",
+        "vite.config.js",
         "notes/delivery.md"
       ],
-      "task": "修改构建 base、严格静态预览和交付说明；学习个人 Pages 流程",
+      "task": "配置React嵌套base，构建dist/src-react并用已有产物的严格静态服务验收，写运行与恢复说明",
       "comparisonTheme": "Java 打包部署经验 / Node 构建与浏览器运行的边界",
       "acceptance": [
-        "`/js_web/` 及演示嵌套路径资源无 404；深层/hash 刷新可用；无开发服务器 fallback 掩盖错误，无服务端 API 假设"
+        "base=/js_web/demos/inventory/，入口资源、products.json、按需报表和同次source map可用",
+        "hash P004详情刷新成功，干净详情路径与缺失JS返回真正404；错误base不能被服务器修复或fallback掩盖"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1825,8 +1825,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C46"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1839,13 +1839,15 @@
       "startCheckpoint": "C46",
       "endCheckpoint": "C47",
       "files": [
-        "notes/test-plan.md",
-        "tests/react/regression.test.jsx"
+        "tests/react/regression.test.jsx",
+        "src/react/App.jsx",
+        "notes/test-plan.md"
       ],
-      "task": "写 notes/test-plan.md，给目前项目补 3–5 条风险驱动回归",
+      "task": "按四项风险补两条必要回归并复用已有重试/严格静态测试，修复真实连续输入时机",
       "comparisonTheme": "JUnit 分层经验 / Vitest、RTL、Playwright 各自边界",
       "acceptance": [
-        "至少覆盖非法快照保护、连续交互、请求失败恢复；不用快照数量充当覆盖；完成恢复与键盘验收"
+        "非法快照抛错且主键/备份原文不变；真实源码写入顺序故障使断言先红后绿",
+        "逐字输入P004完整、可清空；详情与保存失败可重试；键盘/刷新/静态404继续通过"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1853,7 +1855,7 @@
       ],
       "error": {
         "trigger": "先setItem再校验导致坏快照替换好数据；大量快照断言遗漏连续输入与重试",
-        "evidence": "UT保存前后原文比较；RTL连续输入；浏览器离线→恢复操作",
+        "evidence": "UT保存前后原文比较；RTL与生产浏览器逐字输入；浏览器内repository失败→人工重试",
         "repair": "校验成功再持久化；3–5条对具体风险有用的测试；拒绝非法值后旧副本逐字不变",
         "risk": "只增加测试数量；E2E重复全部纯函数分支；假等待让竞态消失"
       },
@@ -1862,8 +1864,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C47"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     },
     {
@@ -1876,12 +1878,15 @@
       "startCheckpoint": "C47",
       "endCheckpoint": "C48",
       "files": [
+        "src/react/App.jsx",
+        "tests/react/final-filter.test.jsx",
         "notes/final-review.md"
       ],
-      "task": "在 notes/final-review.md 记录十题自测、现场增量、排错记录和下一阶段",
+      "task": "先独立增加URL低库存筛选，定位浅复制故障并记录十题自测、现场证据与补缺路线",
       "comparisonTheme": "Java/JS 本次最易错的对照回看；不新增业务框架",
       "acceptance": [
-        "不看答案给当前应用加一条筛选并解释测试；现场定位一个已学故障；能说清语言→UI→工具→交付；L5/最终验收"
+        "仅低库存1–5排除0，与搜索/分类相交；初始P004/P006、8/539200，清除回6/52/2634800，hash刷新恢复",
+        "低库存内保存P004=8后离开结果、焦点回标题，清除后全量57且P001仍12；浅复制回归同时检查旧值与对象身份"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1898,8 +1903,8 @@
         "dev": "npm run lab -- dev",
         "check": "npm run lab -- check C48"
       },
-      "implemented": false,
-      "migrated": false,
+      "implemented": true,
+      "migrated": true,
       "trial": null
     }
   ]

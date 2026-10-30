@@ -89,3 +89,38 @@ test('保留损坏记录失败时不覆盖原记录', () => {
   assert.throws(() => writeProgress(storage, emptyProgress()));
   assert.equal(storage.getItem(PROGRESS_KEY), 'broken');
 });
+
+test('待保存进度非法时，主记录、备份与损坏原文逐字不变', () => {
+  const entries = { [PROGRESS_KEY]: JSON.stringify(progress('C01')), [BACKUP_KEY]: JSON.stringify(progress('C02')), [DAMAGED_KEY]: '{old' };
+  const storage = storageFor(entries);
+  assert.throws(() => writeProgress(storage, progress('C49')));
+  for (const [key, raw] of Object.entries(entries)) assert.equal(storage.getItem(key), raw);
+});
+
+test('备份写满时不尝试覆盖主记录，失败后仍能读取原进度', () => {
+  const original = JSON.stringify(progress('C01'), null, 2);
+  const backup = JSON.stringify(progress('C02'));
+  const storage = storageFor({ [PROGRESS_KEY]: original, [BACKUP_KEY]: backup });
+  const writes = [];
+  const set = storage.setItem;
+  storage.setItem = (key, value) => { writes.push(key); if (key === BACKUP_KEY) throw new Error('quota'); set(key, value); };
+  assert.throws(() => writeProgress(storage, progress('C01', 'C03')));
+  assert.deepEqual(writes, [BACKUP_KEY]);
+  assert.equal(storage.getItem(PROGRESS_KEY), original);
+  assert.equal(storage.getItem(BACKUP_KEY), backup);
+  assert.deepEqual(readProgress(storage).progress, progress('C01'));
+});
+
+test('恢复时主记录写满，损坏原文与有效备份仍可再次恢复', () => {
+  const backup = JSON.stringify(progress('C04'));
+  const storage = storageFor({ [PROGRESS_KEY]: '{broken', [BACKUP_KEY]: backup });
+  const set = storage.setItem;
+  storage.setItem = (key, value) => { if (key === PROGRESS_KEY) throw new Error('quota'); set(key, value); };
+  assert.throws(() => writeProgress(storage, progress('C04')));
+  assert.equal(storage.getItem(PROGRESS_KEY), '{broken');
+  assert.equal(storage.getItem(DAMAGED_KEY), '{broken');
+  assert.equal(storage.getItem(BACKUP_KEY), backup);
+  storage.setItem = set;
+  writeProgress(storage, readProgress(storage).backup);
+  assert.deepEqual(readProgress(storage).progress, progress('C04'));
+});

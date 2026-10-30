@@ -1,5 +1,19 @@
 # C45 全链路 Debug 与交付前检查 · 示例
 
+## 当前 Lab 主线
+
+- 发行版 `2026.10-v2.5`，C44→C45，工作区 `labs/inventory` / `src/react`；主独立跟做、最终补验与发布状态见 [阶段C](../../labs/records/C.md)。
+- 在自己的工作区执行 `npm run lab -- start C45`、`dev`、`check C45`（后两项同样接在 `npm run lab --` 后）。start只选择任务，不复制答案。排错记录写自己的 `notes/debug.md`。
+- 作者回归：根目录 `LAB_DELIVERY_PORT=19102 node scripts/verify-delivery-lab.mjs`，真实C44装配后逐课追加；这是自动组装/源码行为回归，不是独立读者跟做。
+- 新增 `delivery-predictions.js` 对应当前正文的嵌套URL/浅复制预测；其余三个Node文件保留为第一版参考，不再是必做入口。
+- 2026-10-29 · macOS arm64 · Node 24.22.0/npm 11.19.1 · Chromium 156.0.8078.4：当前文件85条核心断言及4组独立浏览器场景通过；P001绕过dispatch时界面12（期望13），恢复后13/53。
+- 当前P004取消3/52、空白拒绝、Enter保存8/57且P001仍12；刷新、详情模拟失败/重试、坏导入原文与备份恢复通过。浏览器新context，不清理学员现有存储。
+- `npm run examples -- c45` 4/4。正文图形DevTools断点、Performance/Memory人工分析未执行并就近标注；CDP诊断与其人工解释分别记录，不沿用下方旧源码的通过证据。
+- 新源码CDP实际证据：三轮分类往返，正确版keydown监听器/heap中onKey closure均1→1，漏清理均3→9，恢复后1→1；报表首次模块请求1次、再次展开总数仍1。最终本机TaskDuration约0.0566s/0.0219s，不设性能阈值；完整命令和限制见第1路delivery/report.md。
+- 未运行：真实手机/软键盘、屏幕阅读器、Firefox/Safari、Windows；发布/线上由主 agent 验收。
+
+## 第一版参考（非 Lab 主线）
+
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
 | paths.js | `node paths.js` | 域名根、应用 base 和商品 URL |
@@ -25,7 +39,7 @@
 - 修复：img.src 使用 import.meta.env.BASE_URL 加 media/inventory.svg；asset-answer 保留完整版本。
 - 验证：正确资源返回 200、naturalWidth=96；再打开错误入口仍可复现 404。正文练习 3 可依此结构保存自己的记录。
 
-## 验证记录
+## 第一版验证记录（历史，非本轮源码证据）
 
 - 2026-10-19 · macOS arm64 · Node 24.22.0 / npm 11.19.1：固定输出 3/3；阶段 4 Hooks lint、195/195 业务回归和生产构建通过。新增 5 条回归覆盖可见状态更新、base/编号/signal、HTTP 503、200 HTML 与卸载清理。
 - Playwright 1.64.1 / 独立后台 Chrome 155.0.8059.82：开发实验 3/3 通过。资源 404、JSON Accept 请求 404、默认 Accept 的 200 HTML 解析失败分别复现；离线失败与恢复重试通过。

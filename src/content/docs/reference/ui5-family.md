@@ -7,6 +7,8 @@ sidebar:
 
 先看工程入口，再找对应文档。名字里都有 UI5，不表示它们共享同一套控件、模型和事件接口。
 
+跟做入口在 [L4 组件库与 UI5 适配](../../labs/l4/)：从 C36 的同一工作区继续，保留 React 主应用，在 `adapters/` 做四种并列界面。旧示例工程只作参考，不用每课换一份项目。
+
 ## 名称与使用入口
 
 | 名称 | 负责什么 | 工程里通常看到什么 | 课程 |
@@ -23,12 +25,14 @@ SAPUI5 与 OpenUI5 的库范围及使用条件分别核对。经典 UI5 控件�
 
 | 方案 | 草稿 | 校验与保存 | 界面更新 |
 | --- | --- | --- | --- |
-| Ant Design + React | Form 实例字段 | 应用校验后更新 products | React 传新数据给 Table |
+| Ant Design + React | Form 实例字段 | 公共规则校验，mutation 调 repository.save | 查询失效后取回商品，React 传给 Table |
 | 经典 OpenUI5 | 独立 JSONModel | Controller 校验后 setProperty | 模型通知绑定控件 |
 | 原生 Web Components | 普通 JS 草稿 | 事件处理函数校验与更新数组 | 应用更新 DOM |
-| UI5 React | 组件 draft state | 校验后 setProducts | React 新 props 更新包装控件 |
+| UI5 React | 组件 draft state | 公共规则校验，repository.save | 重新读取列表，再用 React 新 props 更新包装控件 |
 
 JSONModel 的绑定路径、React state 与组件库 Form 实例是不同接口。ODataModel 则处理服务元数据、请求和缓存；真实读写还依赖服务端权限与部署。[经典 UI5 JSONModel](https://ui5.github.io/docs/04_Essentials/json-model-96804e3.html)
+
+四个 adapter 用独立固定数据验收：P004 草稿 8 后取消仍 3/总库存 52；保存 8 后只有它改变，总库存 57，P001 仍 12。空白库存拒绝、0 合法。OpenUI5 另外看详情/hash 刷新与有限 OData V2 查询，UI5 React 另外看 Enter 与按钮每次只提交一次。
 
 ## React 包装层的常用映射
 
@@ -58,3 +62,5 @@ React 19 已能直接使用自定义元素。直接 JSX 标签的事件入口用
 当前 charts 包已弃用，选图表时另查维护情况；不同包的版本兼容以 peerDependencies 为准。[官方包清单与安装说明](https://github.com/UI5/webcomponents-react)
 
 主题和翻译可能按需加载，静态交付包含整个构建目录。组件语言与业务文案分别管理；Pages 上的练习使用静态数据或浏览器内 mock。[资源说明](https://ui5.github.io/webcomponents/docs/advanced/using-assets/)
+
+完成 C44 后去 [L5](../../labs/l5/)，`start C45` 回到保留的 `src/react/` 做静态交付；四个 adapter 留在原处。默认本地生产目标 `/js_web/demos/inventory/` 不是已上线演示的保证，实际启动与部署以课程步骤为准。

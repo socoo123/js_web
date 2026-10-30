@@ -6,11 +6,11 @@ description: 一次下载，在同一个库存工作区按课程持续修改，�
 import LabOverview from '../../../components/LabOverview.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
-一个工作区，从商品卡片到静态交付。每课接续你自己的修改；五个 Lab 是阶段产出，共用数据、规则和依赖。
+**48 课、5 个 Lab、一个长期工作区。** 从商品卡片到静态交付，每课接续自己的修改，共用数据、规则和依赖。先准备工程，再从 [C01](/js_web/01-history-web/c01-story-ecosystem/)开始；每日安排见[学习路线](/js_web/roadmap/)。
 
 ## 第一次开始
 
-使用 Node 24。在新目录下载并解压 <WorkspaceDownload label="C00 初始工程" />，或使用仓库的 `labs/inventory/`。解压文件位于当前目录，不要解压到已有作业里。
+先准备 [Node 24](https://nodejs.org/en/download)。下载 <WorkspaceDownload label="C00 初始工程" />，在新的空目录 `inventory/` 中解压；压缩包中的文件直接位于该目录，不要解压到已有作业里。已克隆仓库也可使用 `labs/inventory/`，不用安装课程网站。
 
 在库存工作区执行一次：
 
@@ -34,7 +34,19 @@ npm run lab -- check C03
 
 `start` 选择本课并显示文件、验收和启动入口，不替换代码。`check` 检查实际文件，不替你修复，也不修改当前页面的库存。暂停时把当前课、已改文件、观察结果、下一步写到 `notes/next.md`。
 
-课程网页的“标记完成”保存在浏览器，与本地检查分别管理。
+课程网页的“标记完成”保存在当前浏览器，与 `.lab/` 中的任务位置和本地检查分别管理。换浏览器前到[学习路线](/js_web/roadmap/)导出阅读进度；网站不会自动同步工作区源码或商品数据。
+
+## 五个 Lab 与固定起点
+
+| Lab / 课程 | 补课或恢复起点 | 同一工程的阶段交付 |
+| --- | --- | --- |
+| [L1 库存规则与数据](/js_web/labs/l1/) · C01–C10 | <WorkspaceDownload checkpoint="C00" label="C00 起点" /> | 校验、草稿、筛选统计、集合与撤销 |
+| [L2 可用的原生库存页](/js_web/labs/l2/) · C11–C20 | <WorkspaceDownload checkpoint="C10" label="C10 起点" /> | 列表、异步、存储、布局、模块、Node 报表与 UT |
+| [L3 React 库存应用](/js_web/labs/l3/) · C21–C36 | <WorkspaceDownload checkpoint="C20" label="C20 起点" /> | 从 JSX 到状态、表单、路由、缓存、测试与恢复 |
+| [L4 组件库与 UI5 适配](/js_web/labs/l4/) · C37–C44 | <WorkspaceDownload checkpoint="C36" label="C36 起点" /> | 四种并列界面适配，复用公共规则 |
+| [L5 调试与静态交付](/js_web/labs/l5/) · C45–C48 | <WorkspaceDownload checkpoint="C44" label="C44 起点" /> | 回到保留的 React 主应用，排错、风险回归、生产交付与复盘 |
+
+五次收尾包含在 48 课里，不另加一套作业。正常跟做不用下载这些起点；先用自己的上一课完成态继续。
 
 ## 补课或恢复
 
@@ -50,16 +62,24 @@ npm run lab -- restore C02 ../inventory-recovery
 npm run lab -- compare C03
 ```
 
-只读显示差异。完整答案默认在课内折叠。下载绑定一个发行版；<WorkspaceDownload manifest />列出源码与包的 SHA-256。包中含练习锁文件，不含依赖、缓存、个人数据或教师参考目录。
+只读显示当前代码与 C03 完成参考解的差异，不会应用补丁。完整答案默认在课内折叠。下载绑定一个发行版；<WorkspaceDownload manifest />列出 C00 和各课完成快照的源码与包 SHA-256。包中含练习锁文件，不含依赖、缓存、个人数据或教师参考目录。
+
+需要核对下载时，把本地 `.tar.gz` 的 SHA-256 与清单中对应课的 `archiveSha256` 比较；`sha256` 对应同名 `.json.gz`，两者不要混用。旧发行包仍保留在原版本地址，不能用它的校验值核对新版包。
 
 ## 从较早发行版继续
 
 已用上一发行版时，先保留旧目录和自己导出的数据。把新的 C00 另存到新目录，保留新版 tools、依赖清单/锁和 adapter 机械外壳；迁入自己的 src、notes、tests 与 vite.config.js，自增的 package.json scripts 和已有 adapter 改动逐项合并。新目录执行一次 npm ci 后继续当前课；不搬旧 node_modules。先比较文件再搬移，正常升级不从完成参考解开始。
 
-本版连续路线已接到 C44：C23、C41 分别从正式 C22、C40 继续，L3 从 C20 开始，L4 从 C36 开始。阶段 A 旧版工作区先按 [L4 升级说明](/js_web/labs/l4/#从阶段-a-的旧发行版继续)迁入自己的源码；旧发行包继续可下载。
+C23、C41 分别从正式 C22、C40 继续；恢复时按上表选择前置完成态，不用历史试做起点。来自较早版本的 L4 工程也要保留已完成的 adapter；迁入源码时先比较再合并，不用新的占位外壳覆盖自己的答案。
 
 ## 阶段路线
 
-本次按依赖逐批改版；未接入的课保留旧版阅读和示例链接。试做起点会单独标明前置，不冒充已经连续完成前面的课程。
+下列列表连接每一课，工作区接入状态与[学习路线](/js_web/roadmap/)一致。`examples/cNN` 是机制参考和验证记录，旧 `examples/inventory/` 七阶段工程也保留为参考；日常必做任务不在那里另开项目。
 
 <LabOverview />
+
+## 本地练习与在线阅读
+
+课程网站部署在 `/js_web/`，学习包从带发行版的下载目录获取。Lab 应用在本地启动、构建和静态预览；默认生产演示路径 `/js_web/demos/inventory/` 是构建目标，不等于该地址已经部署在线应用。
+
+库存使用静态数据、浏览器存储或浏览器内 mock。UI5 的四个名称、运行方式与资源要求见 [UI5 家族速查](/js_web/reference/ui5-family/)。

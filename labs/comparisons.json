@@ -385,29 +385,6 @@
     },
     "difference": "这里借 Java 的字符串容器理解值的边界。localStorage 也只存字符串，读取后需解析和校验；Java Map 没有浏览器的同源、配额与持久化机制。"
   },
-  "c15-layout-budget": {
-    "title": "先算卡片空间，再声明布局",
-    "input": "1280px 视口，main 上限 1216px、内边距各 16px，四列间隔 16px",
-    "left": {
-      "label": "Java 经验类比",
-      "lang": "java",
-      "source": "labs/reference/java/C15LayoutBudget.java",
-      "region": "compare",
-      "caption": "main 中的可运行片段",
-      "output": "284",
-      "verified": true
-    },
-    "right": {
-      "label": "CSS",
-      "lang": "css",
-      "checkpoint": "C15",
-      "file": "src/vanilla/styles.css",
-      "caption": "",
-      "output": "1280px 四列；768px 两列；360px 单列",
-      "verified": true
-    },
-    "difference": "Java 片段只算几何预算。CSS 让浏览器随容器尺寸重算布局；Grid/Flex 的轨道、内在尺寸和媒体查询没有 Java 语法的一一对应。"
-  },
   "c16-module-export": {
     "title": "模块入口组织可复用规则",
     "input": "P001 库存价值 478800 分",

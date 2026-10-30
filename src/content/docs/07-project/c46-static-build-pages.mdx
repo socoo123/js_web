@@ -1,0 +1,209 @@
+---
+title: C46 静态构建与 GitHub Pages
+description: 给同一个 React 工作区设置真实部署前缀，用无回退的文件服务检查资源、hash刷新和生产交付。
+sidebar:
+  order: 46
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 4 周 · 第 23 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C20、C31、C45 · 运行：Node 24、本地 React · 部分示例未运行，已在对应位置标注
+
+## 这一课解决什么问题
+
+开发服务能打开页面，不表示部署地址能找到所有文件。入口JS、按需报表、静态JSON与source map需要使用同一个公开前缀，详情刷新也必须落在实际存在的HTML上。
+
+本课接自己的C45完成态，只改工作区的 `vite.config.js`，新建 `notes/delivery.md`。生产目录是 `dist/src-react/`；本课默认公开地址是 `/js_web/demos/inventory/`，课程网站的 `/js_web/` 是另一个首页。
+
+<LessonTask lessonId="C46" />
+
+本课不需要换工程或重装依赖。先完成配置，再停旧服务、选择C46并build；严格预览用下面的专用命令，而不是dev。你将交出能在真实文件边界下运行的产物、路径证据和恢复说明。
+
+固定数值验收前，先按上一课的方法保管个人快照，再导入自己的baseline.json；每个独立流程都从同一份初始数据开始。
+
+## Java 程序员先看这里
+
+Java打包和静态前端构建都先生成可交付物，但运行位置不同：Node在开发机或Actions上构建，Pages返回文件，浏览器执行React。Pages没有你的Java Controller，不会把任意详情路径自动交给应用。
+
+## 1. 构建结束以后，Node已经完成了工作
+
+<a id="1-构建结束以后node-已经完成了工作"></a>
+
+构建可以读取本地文件，浏览器按钮不能直接访问你的工程磁盘。用户加载的是这一批HTML、JS、CSS和数据，修改源码后必须重新构建。
+
+![静态交付关系图：Node在构建环境生成文件，Actions上传完整产物，Pages按路径返回HTML与资源；浏览器取得首页后解析React hash路由。](../../../assets/diagrams/c46-static-build-pages.svg)
+
+顺着实线读一次构建与发布，再沿虚线读一次访问。课程HTML与库存hash详情走不同入口，库存演示使用更深的公开前缀。
+
+在 `inventory/vite.config.js` 的配置对象内，紧接 `defineConfig({` 增加base，保留原来的build与test配置。完整文件是：
+
+```js
+import { defineConfig } from "vitest/config";
+export default defineConfig({
+  base: "/js_web/demos/inventory/",
+  build: { sourcemap: true },
+  test: { environment: "node", include: ["tests/**/*.test.{js,jsx}"] },
+});
+```
+
+在工作区执行：
+
+```sh
+npm run lab -- start C46
+npm run lab -- build
+LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs
+```
+
+预期：build生成 `dist/src-react/index.html`、assets和products.json；服务器打印 `http://127.0.0.1:8068/js_web/demos/inventory/`。它**只读已有产物，不重新build，也不覆盖base**。改源码后要先重新build，预览才会变化。类似Java重新打包后再部署，不能把旧产物当成新源码。
+
+<a id="哪些配置会进入产物"></a>
+
+[`import.meta.env.BASE_URL`](https://vite.dev/guide/build.html#public-base-path)由构建写入产物。动态拼公开资源时用它；`VITE_`环境值也会进入客户端，不能放密钥。repository仍是浏览器内mock与本地存储，不会因为用了Actions就变成服务器API。
+
+## 2. base是URL的前缀，dist是磁盘上的目录
+
+<a id="2-base-是-url-的前缀dist-是磁盘上的目录"></a>
+<a id="路径开头的一条斜线会改变请求位置"></a>
+
+本地预览把 `/js_web/demos/inventory/` 之后的路径映射到 `dist/src-react/`：
+
+| 浏览器请求 | 本地产物 |
+| --- | --- |
+| `/js_web/demos/inventory/` | `dist/src-react/index.html` |
+| `/js_web/demos/inventory/assets/index-哈希.js` | `dist/src-react/assets/index-哈希.js` |
+| `/js_web/demos/inventory/products.json` | `dist/src-react/products.json` |
+
+产物根不需要再套一层js_web。发布时究竟放在哪一层，则由上传目录与托管前缀共同决定。Java的context path也是公开路径，不等于源码目录。
+
+**先猜一猜：** 当前页面在演示目录，哪条路径跳出了应用？
+
+```js
+const pageURL = "https://socoo123.github.io/js_web/demos/inventory/";
+console.log(new URL("/products.json", pageURL).pathname);
+console.log(new URL("products.json", pageURL).pathname);
+// → /products.json
+// → /js_web/demos/inventory/products.json
+```
+
+前导斜线从域名根开始。Vite会重写HTML引用、JS导入的资源和CSS url；运行时手工拼字符串，要自己使用BASE_URL。构建后打开 `dist/src-react/index.html`，入口资源应以 `/js_web/demos/inventory/assets/` 开头。
+
+课程站由Astro构建到**仓库根dist**，base为 `/js_web/`；当前库存由Vite构建到**工作区dist/src-react**，base更深。改其中一份不会自动修改另一份，工作区的 `labs/inventory` 磁盘路径也不是浏览器URL。
+
+## 3. 真实静态页面与hash路由，刷新走两条路
+
+<a id="3-真实静态页面与-hash-路由刷新走两条路"></a>
+
+文章有真正生成的深层HTML；库存应用只有一个HTML首页，React在浏览器解释hash。
+
+**先猜一猜：** 下列地址显示P004时，服务器收到详情编号了吗？
+
+```js
+const hashDetail = new URL("https://socoo123.github.io/js_web/demos/inventory/#/products/P004");
+console.log(hashDetail.pathname); // → /js_web/demos/inventory/
+console.log(hashDetail.hash); // → #/products/P004
+const pathDetail = new URL("products/P004/", hashDetail);
+console.log(pathDetail.pathname); // → /js_web/demos/inventory/products/P004/
+```
+
+hash不随HTTP请求发给服务器。第一条先取已有首页，HashRouter再显示P004，直接粘贴和刷新都走同一个文件。第二条要求服务器找到products/P004/，当前产物没有这个文件，应返回404。Java Controller的任意路径分发在这里不存在。
+
+HashRouter内部的路由从hash开始，不再添加 `/js_web/demos/inventory` basename。公开文件前缀和浏览器路由分别管理。
+
+## 4. Actions构建的是文件，Pages发布的是产物
+
+<a id="4-actions-构建的是文件pages-发布的是产物"></a>
+
+这份课程仓库的Pages工作流发布教程与学习包。本地运行成功的Lab没有因此成为线上演示。个人若想发布库存，可把完整工作区放在自己的Git仓库根目录，保留package与锁、data、src、tools和adapters；不用复制node_modules、个人快照或 `.lab`。
+
+> 未运行验证：下列个人仓库的GitHub Actions上传、Pages发布及线上检查，请在自己的仓库执行。
+
+个人仓库若也叫 `js_web`，要继续使用本课的嵌套URL，可以把产物放进上传目录的demos/inventory：
+
+```yaml
+# 个人工作流的build job中；前面先checkout、配置Node和npm ci
+- run: npm run lab -- start C46
+- run: npm run lab -- build
+- run: mkdir -p site/demos/inventory
+- run: cp -R dist/src-react/. site/demos/inventory/
+# upload-pages-artifact的with.path指向site，而不是源码目录
+```
+
+预期公开映射为 `site/demos/inventory/index.html` → `/js_web/demos/inventory/`。若仓库改名，修改base并重建，预览服务器的固定课程前缀也要相应调整。完整个人模板在[examples/c46/deploy-react.yml](https://github.com/socoo123/js_web/blob/main/examples/c46/deploy-react.yml)，只用于你自己的工作区仓库，不替换课程仓库的发布工作流。
+
+在个人仓库Settings → Pages → Build and deployment，把Source设为GitHub Actions；提交后打开**对应提交**的run，检查安装、构建、上传与deploy。deploy依赖build，使用github-pages环境和 `pages: write`、`id-token: write` 权限。上传完整文件集合；`defaults.run.working-directory`只影响run，不改变action输入路径的起点。
+
+成功后仍要打开输出URL：检查首页、hash详情刷新、静态资源与缺文件404，记录提交号与run。Actions成功和页面真正可用是两个观察结果。
+
+## 5. 用真正的文件边界验收
+
+严格预览没有SPA fallback。Network勾选Disable cache，打开预览地址，确认入口JS/CSS成功，再执行：
+
+| 操作 | 预期 |
+| --- | --- |
+| 打开首页 | 六商品、52件、2634800分；个人数据起点另记 |
+| 直接打开 `#/products/P004` 并刷新 | Document仍请求演示首页，显示P004/库存3 |
+| 展开分类报表 | 按需模块成功，配件2种/28件/587200分 |
+| 打开 `products.json` | 六件固定数据的JSON，不是HTML |
+| 打开 `products/P004/` 或 `assets/missing.js` | 真正404，不返回首页HTML |
+
+前三项用浏览器观察行为，后两项也可直接看响应正文。课程深层URL则在课程站预览中检查：它应找到真实HTML，禁用JS仍有正文。两种页面的无JS结果不同，是渲染方式不同。
+
+结束手工预览后，在工作区执行 `npm run lab -- check C46`。检查会根据**当前配置与源码**build，再验证文件和独立浏览器；不会修复错误base。预览与检查默认共用8068端口，先Ctrl+C结束旧预览。
+
+## 常见错误与调试
+
+<a id="构建成功线上首页却是空白"></a>
+
+**现象**：把 `vite.config.js` 的base暂时改为 `"/"`，build后严格预览首页空白。**工具**：Network查看失败JS的Request URL；打开dist/src-react/index.html核对src。
+
+**证据**：产物引用 `/assets/…js`，服务只在 `/js_web/demos/inventory/` 下提供文件，实际请求404。**原因**：构建前缀与部署前缀不一致，build成功只证明能生成文件。**修复**：恢复本课base，重新build，不是只改配置后刷新旧产物。**确认**：相同预览中资源200、商品出现，check C46通过；hash刷新成功，干净详情路径仍404。业务函数UT看不到入口URL，这个回归放产物和真实浏览器层。
+
+## 练习
+
+<a id="练习-1预测文件请求与浏览器路由"></a>
+<a id="练习-2修好个人部署的上传目录"></a>
+
+:::tip[自己尝试 · 本地 React]
+完成base改动，走一次错误base→路径证据→恢复正确base的实验。新建 `notes/delivery.md`，写出构建命令、输出目录、公开前缀、严格预览地址、hash与缺文件的实际响应，以及库存备份/导入恢复方式。
+
+验收：无需dev服务器也能打开产物，入口和按需资源没有404；直接hash刷新成功，缺失JS和干净详情路径返回404。个人发布若尚未执行，就在笔记留待办。
+:::
+
+<details>
+<summary>提示</summary>
+
+先画出“URL去掉公开前缀后，剩余部分落在哪个上传文件”。区分工作区dist/src-react、课程站根dist和个人模板site三个目录的用途。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+工作区base是/js_web/demos/inventory/，构建根是dist/src-react，严格预览只把二者映射。hash详情请求现有index.html；products/P004/没有对应文件。个人模板为了保留嵌套URL，将产物复制到site/demos/inventory并上传site；课程仓库则继续上传它自己的根dist。恢复使用repository备份或自己导出的有效快照，保留损坏原文。
+
+</details>
+
+## 项目进度
+
+- 原React源码、公共规则和四个适配器保留，生产配置明确了嵌套路径。
+- `notes/delivery.md`写清运行、路径验收和恢复，不把本地预览记作线上部署。
+- 暂停先结束预览，把当前产物与下一步写进 `notes/next.md`；源码变化后重新build。
+
+## 小结
+
+- Node构建、静态托管、浏览器运行各有边界。
+- base决定公开资源前缀，不等于磁盘目录或hash路由。
+- 严格文件服务暴露缺文件，不能靠dev回退验收。
+- 发布完整产物，并把Actions结果与线上结果分别记录。
+
+自测：修改base后为什么必须重建？hash详情的Document请求是什么？哪个目录包含当前库存的首页？为什么Action的path不能只照抄run的工作目录？下一课按失败风险选择少量有价值的回归。
+
+## 延伸阅读
+
+- [Vite：public base与资源处理](https://vite.dev/guide/build.html#public-base-path)
+- [Vite：静态部署与preview定位](https://vite.dev/guide/static-deploy.html)
+- [GitHub：自定义Pages工作流](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+- [Astro：GitHub Pages与base](https://docs.astro.build/en/guides/deploy/github/)
+- [React Router：HashRouter](https://reactrouter.com/api/declarative-routers/HashRouter)
+- [MDN：URL的hash](https://developer.mozilla.org/en-US/docs/Web/API/URL/hash)

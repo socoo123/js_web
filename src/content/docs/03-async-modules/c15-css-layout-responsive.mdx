@@ -5,7 +5,6 @@ sidebar:
   order: 15
 ---
 
-import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
@@ -20,22 +19,21 @@ import LessonTask from '../../../components/LessonTask.astro';
 
 ## Java 程序员先看这里
 
-<CodeCompare pairId="c15-layout-budget" />
+如果你用过 Swing 或 JavaFX 的布局管理器，可以沿用“由布局规则分配空间”的经验。网页中，HTML 提供结构，CSS 声明布局规则，浏览器根据视口与内容计算尺寸；Flex、Grid 和媒体查询是这一课要学的新机制。
 
 <a id="1-先算盒子width-到底包括什么"></a>
 
 ## 1. 盒模型决定实际占用的空间
 
-把 styles.css 换成上方对照卡中的 CSS。星号规则统一 border-box，width 包含内容、内边距和边框，外边距仍另算；main 的 max-width 限制大屏阅读区，padding 给窄屏留边。
+在当前工作区，把 `src/vanilla/styles.css` 全文替换为下面的 CSS。星号规则统一 border-box，width 包含内容、内边距和边框，外边距仍另算；main 的 max-width 限制大屏阅读区，padding 给窄屏留边。
+
+<CodeExcerpt snippetId="c15-css" />
+
+页面结果：360px 单列、768px 两列、1280px 四列，工具栏可以换行。
 
 **先猜一猜：** content-box 下 width 为 300px、两侧 padding 各 16px、border 各 1px，实际外框多宽？
 
 是 334px；换成 border-box 外框为 300px，内容区缩为 266px。Java 布局管理器也有尺寸预算，但 CSS 还会处理内容内在尺寸与层叠。
-
-```css
-* { box-sizing: border-box; }
-main { max-width: 76rem; margin: auto; padding: 1rem; }
-```
 
 在 Elements → Computed 看盒模型数字，选中 main 和 article 比较外框与内容区；同时检查 viewport meta，否则手机可能使用放大的布局视口。
 

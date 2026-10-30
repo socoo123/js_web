@@ -1,5 +1,17 @@
 # C47 综合项目与测试选择 · 示例
 
+## 当前 Lab 主线
+
+- 发行版 `2026.10-v2.5`，C46→C47，保留当前 `src/react`。新增regression.test.jsx与notes/test-plan.md，App设置HashRouter useTransitions=false。主独立跟做、最终补验与发布状态见 [阶段C](../../labs/records/C.md)。
+- 工作区 `npm run lab -- check C47`：两条新增回归+已有inventory/review共9条Vitest，6组严格浏览器场景；四项风险计入已有失败重试，不重复同一用例。
+- 作者入口：根 `LAB_DELIVERY_PORT=19102 node scripts/verify-delivery-lab.mjs`；从真实C44连续装配，不是独立正文跟做。
+- 2026-10-29 · Node 24.22.0/npm 11.19.1/macOS arm64/Chromium 156.0.8078.4：9/9、6组通过；非法快照先setItem再校验时throw仍绿、旧原文比较红，恢复顺序后绿。
+- 生产真实键盘逐字P004，在默认HashRouter下多轮实测出现4/P4/04；同步更新后完整P004并可清空/刷新。未用延迟或整串fill代替。
+- 禁用真实ProductDetail重试按钮的refetch，既有RTL在P002恢复断言红；还原后绿。Map/独立repository/独立浏览器隔离数据，不触碰个人localStorage。
+- `npm run examples -- c47` 3/3（旧固定输出仍有效参考）。未运行：真机、输入法、屏幕阅读器、Firefox/Safari、Windows；最终整合视觉和发布由主 agent 负责。
+
+## 第一版参考（非 Lab 主线）
+
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
 | snapshot-boundary.js | `node snapshot-boundary.js` | 非法库存拒绝写入，旧快照保留 |
@@ -17,7 +29,7 @@
 - 原始数据：6 种、52 件、2634800 分。P002 改为库存 3、价格 0.29 元后：55 件、2634887 分；本地详情与模拟远端副本继续分开管理。
 - 五项风险计划见正文第 1 节及阶段 4 README 的 C47 节；两个核心用例、两个 RTL 用例、一个新增 E2E，复用现有工具与锁，不增加依赖或 D2。
 
-## 验证记录
+## 第一版验证记录（历史，非本轮源码证据）
 
 - 2026-10-19 · macOS arm64 · Node 24.21.0 / npm 11.7.0：三个固定输出 3/3；阶段 4 Hooks lint 与全部 199/199 回归通过（原 195 + 新增 4）。
 - Chromium 156.0.8078.4：严格静态产物两条 E2E 2/2（原 1 + 新增 1）及原生产冒烟 2/2 通过。新增流程只用键盘完成搜索、表单、保存快照、刷新、详情与返回；保持“鼠标”、3 件/0.29 元、55 件/26348.87 元，mock 仍为 0 件/129.00 元。

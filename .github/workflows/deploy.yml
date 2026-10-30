@@ -38,12 +38,6 @@ jobs:
       - name: Install Chromium for workspace rehearsals
         working-directory: labs/inventory
         run: npx playwright install --with-deps chromium
-      - name: Rehearse lessons from their actual starting points
-        run: npm run test:lab-walkthrough
-      - name: Check the continuous React lesson snapshots
-        run: npm run test:lab-react
-      - name: Check the continuous component and UI5 lesson snapshots
-        run: npm run test:lab-ui5
       - name: Install locked React example dependencies
         run: npm ci --prefix examples/inventory/04-react
       - name: Check React reference project
@@ -58,6 +52,15 @@ jobs:
         run: npm run check
       - name: Build and verify the static site
         run: npm run build
+      # build owns build:labs. The behavior commands below do not repack it.
+      - name: Rehearse lessons from their actual starting points
+        run: npm run test:lab-walkthrough
+      - name: Check the continuous React lesson snapshots
+        run: npm run test:lab-react
+      - name: Check the continuous component and UI5 lesson snapshots
+        run: npm run test:lab-ui5
+      - name: Check the C44 to C48 delivery learning chain
+        run: npm run test:lab-delivery
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - name: Upload static output

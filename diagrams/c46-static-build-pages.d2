@@ -6,18 +6,18 @@ direction: down
 build: 构建环境 · Node {
   style.fill: "#f4f8ff"
   source: 源码与锁文件\nMD · JSX · CSS · JSON
-  command: Actions\nnpm ci → 检查 → build
+  command: 本地或 Actions\nnpm ci → 检查 → build
   source -> command
 }
-artifact: dist · 静态产物\nHTML / JS / CSS / JSON / SVG {
+artifact: 各项目的 dist · 静态产物\nHTML / JS / CSS / JSON / SVG {
   style.fill: "#f6ffed"
   style.stroke: "#389e0d"
 }
-pages: GitHub Pages\n按 URL 返回文件\n入口 /js_web/
+pages: 静态托管 · 如 GitHub Pages\n按 URL 返回文件
 browser: 浏览器 · 用户设备 {
   style.fill: "#fffbe6"
-  document: 课程深层地址\n读取对应 index.html\n直接得到正文
-  react: "/js_web/#/products/P002\n读取首页 + JS\nReact 解析 hash"
+  document: 课程 /js_web/ 下的深层地址\n读取对应 index.html\n直接得到正文
+  react: "库存应用的独立路径\n/js_web/demos/inventory/\n#/products/P004\n读取入口与 JS，React 解析 hash"
 }
 build.command -> artifact: 构建输出
 artifact -> pages: 上传并部署同一份产物

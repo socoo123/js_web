@@ -1,0 +1,4 @@
+{
+  "previous": "C46",
+  "files": ["src/react/App.jsx", "tests/react/regression.test.jsx", "notes/test-plan.md"]
+}

@@ -53,7 +53,7 @@ export async function followL2(work) {
   html = html.replace('  <p id="summary"', '  <button type="button" id="export">导出快照</button><label>导入快照 <input type="file" id="import" accept="application/json"></label>\n  <button type="button" id="recover" hidden>恢复备份</button>\n  <p id="summary"');
   await put('src/vanilla/app.js', app); await put('src/vanilla/index.html', html); check('C14');
   await fault('C14', 'src/services/storage.js', (text) => text.replace('  const text = encodeSnapshot(products);','  storage.setItem(storageKey, JSON.stringify({ version: 1, products }));\n  const text = encodeSnapshot(products);'), /有效原文保留/);
-  await put('src/vanilla/styles.css', comparison('c15-layout-budget').right.code); check('C15');
+  await put('src/vanilla/styles.css', snippet('c15-css').code); check('C15');
   await fault('C15','src/vanilla/styles.css',(text)=>text+'\narticle { min-width: 600px; }\n', /false == true|AssertionError/);
   // Move the learner's functions, following the chapter's table; do not load C16 answers.
   const source = await get('src/core/inventory.js');

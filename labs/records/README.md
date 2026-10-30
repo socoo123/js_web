@@ -1,6 +1,6 @@
 # V2 实际验证记录
 
-最新已发布：[A · C21–C36 / L3 React](A.md)，发行版2026.10-v2.3，[Pages 40814920092](https://github.com/socoo123/js_web/actions/runs/40814920092)与16课/6个Lab入口/全部144包SHA线上核验通过；四路与返修已结束，下一阶段B。L1/L2基线沿用 [R5](R5.md)。下面保留 R1–R4 历史证据，其中“从正文组装”只证明自动组装与行为，不等同独立读者跟做。
+最新已发布：[B · C37–C44 / L4](B.md)，发行版2026.10-v2.4；[C · 交付收尾](C.md)正在最终验收。[A · React](A.md)及L1/L2基线 [R5](R5.md)保留。下面是 R1–R4 历史证据，其中“从正文组装”只证明自动组装与行为，不等同独立读者跟做。
 
 发行版：2026.10-v2.1。2026-10-28 · macOS arm64 · Node 24.22.0 / npm 11.19.1 / Java 21.0.2 / Chromium 156.0.8078.4。旧 examples 通过不代表新工作区通过。
 
@@ -35,4 +35,4 @@ C23/P22→P23 与 C41/P40→P41 是 R4 的前置试做，不代表其余课程�
 
 提交 `11259e9`；[Pages run 40684581291](https://github.com/socoo123/js_web/actions/runs/40684581291) build/deploy 成功。线上 C03/C23/C41 与 Lab 入口 HTTP 200，8 个快照双格式下载及 SHA-256 全部通过。实际发布字节冻结于 labs/releases/2026.10-v2.1；后续 R5 使用新发行版，不覆盖旧包。
 
-本机线上核验使用 npm 已配置的可信 CA 文件（NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem），保持 TLS 验证。各阶段范围见上方记录；下一步以 STATUS 的阶段 B 为准。
+本机线上核验使用 npm 已配置的可信 CA 文件（NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem），保持 TLS 验证。各阶段范围见上方记录；下一步以当前 STATUS 为准。

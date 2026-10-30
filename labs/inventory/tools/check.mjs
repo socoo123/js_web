@@ -211,5 +211,6 @@ try {
     await run(process.execPath, ['tools/ui5-react-repository.mjs']);
     await run(process.execPath, ['tools/ui5-react-check.mjs']);
   }
+  if (n >= 45 && n <= 48) await run(process.execPath, ['tools/delivery-check.mjs', id]);
   console.log(`${id}：${count} 条当前工作文件检查通过；没有修改商品数据或源码。`);
 } catch (error) { console.error(error.stack); process.exitCode = 1; }

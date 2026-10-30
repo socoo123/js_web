@@ -56,14 +56,15 @@ async function main() {
   if (command === 'experiment') {
     const { experiment } = await import('./experiments.mjs'); await experiment(rawId); return;
   }
-  const state = await readState();
-  const id = (rawId ?? state.lessonId).toUpperCase();
-  const lesson = catalog.lessons.find((lesson) => lesson.lessonId === id);
   if (command === 'restore') {
     if (!rawId || !target) throw new Error('用法：npm run lab -- restore C02 ../新的空目录');
     const { restore } = await import('./reference.mjs');
-    await restore(id, path.resolve(workspace, target)); return;
+    // 恢复不依赖当前任务状态，损坏的暂停记录也不应阻断另存恢复。
+    await restore(rawId.toUpperCase(), path.resolve(workspace, target)); return;
   }
+  const state = await readState();
+  const id = (rawId ?? state.lessonId).toUpperCase();
+  const lesson = catalog.lessons.find((lesson) => lesson.lessonId === id);
   if (!lesson) throw new Error(`未知课程：${id}`);
   if (command === 'status' || command === 'start') {
     if (command === 'start') {

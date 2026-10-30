@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import LabOverview from '../../../components/LabOverview.astro';
+import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
 在本发行版的工作区，从 C36 的自己的代码继续，依次完成 C37–C44。React 主应用保留；新增四个并列的小范围界面，不把库一层层套起来，也不各写一遍完整 CRUD。正常学习持续改同一个目录，不每天换快照。
 
@@ -13,13 +14,13 @@ import LabOverview from '../../../components/LabOverview.astro';
 
 旧目录完整保留。工具与锁不会随课程网页更新，阶段 A 的工程需要做一次升级：
 
-1. 下载 [2026.10-v2.4 的 C00 骨架](/js_web/downloads/inventory/2026.10-v2.4/C00.tar.gz)，解压到新的空目录，例如 `inventory-components/`。
+1. 下载 <WorkspaceDownload checkpoint="C00" label="本发行版的 C00 骨架" />，解压到新的空目录，例如 `inventory-components/`。
 2. 保留新版的 `tools/`、依赖清单与锁、固定 `data/` 和 `adapters/` 机械外壳。迁入自己完成的 `src/`、`notes/`、`tests/` 与 `vite.config.js`；把自己新增的 package.json scripts（如 report/test）逐项合并进新清单，已有 adapter 改动也先比较再合并。不要用旧依赖清单覆盖新版，node_modules 与 .lab 留在旧目录。
 3. 在新目录执行一次 `npm ci`，接着 `npm run lab -- start C37`。以后沿用这个工作区，四个适配器外壳不会靠后续 step 自动补进自己的工程。
 
 新版 C00 的 adapter 外壳只提供入口、资源、布局与占位页面。列表、草稿、事件取值和保存仍由对应课程完成，**不包含 C44 表单答案**。
 
-如果 React 前置尚未完成，需要补课或对照，再下载 [2026.10-v2.4 的 C36 起点包](/js_web/downloads/inventory/2026.10-v2.4/C36.tar.gz)到另一新目录，执行 `npm ci` 后从 C37 开始。也可在本版工作区运行 `npm run lab -- restore C36 ../inventory-components`；非空目录会被拒绝。安装与下载校验见[工作区入口](/js_web/labs/)。
+如果 React 前置尚未完成，需要补课或对照，再将 <WorkspaceDownload checkpoint="C36" label="本发行版的 C36 起点包" />解压到另一新目录，执行 `npm ci` 后从 C37 开始。也可在本版工作区运行 `npm run lab -- restore C36 ../inventory-components`；非空目录会被拒绝。安装与下载校验见[工作区入口](/js_web/labs/)。
 
 <LabOverview labId="L4" />
 
@@ -55,4 +56,6 @@ OpenUI5 另外检查 P004 详情刷新/返回、未知 id、有限 V2 过滤/排
 
 ## 完成后去哪里
 
-下一阶段使用这里保留的 `src/react/` 主应用与适配成果，做全链路排错和静态交付。UI5 React 不是后续所有课程的强制入口。当前 Lab 的应用在本地构建和预览；课程网站与学习包由各自入口访问。
+从自己的 C44 继续 [L5](/js_web/labs/l5/)，回到这里保留的 `src/react/` 主应用做全链路排错和静态交付；`start C45` 选择 React 主入口，四个 adapter 保留。UI5 React 不是后续所有课程的强制入口。
+
+需要恢复时，将 <WorkspaceDownload checkpoint="C44" label="C44 完成参考解" />另存到新目录。当前 Lab 的应用在本地构建和预览；课程网站与学习包由各自入口访问。

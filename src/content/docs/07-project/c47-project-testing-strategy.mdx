@@ -1,0 +1,207 @@
+---
+title: C47 综合项目与测试选择
+description: 为当前库存项目保留四项风险回归，让坏快照、连续输入和失败重试真正能被测试发现。
+sidebar:
+  order: 47
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 4 周 · 第 24 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C35、C36、C45、C46 · 运行：Node 24、本地 React · 示例已运行验证
+
+## 这一课解决什么问题
+
+测试都绿了，仍可能丢掉上一次好快照，或在连续打字时只剩最后一个字符。你需要先说清失败会造成什么后果，再选择能观察这个后果的断言。
+
+继续自己的C46工作区。本课新增 `tests/react/regression.test.jsx` 和 `notes/test-plan.md`，在 `src/react/App.jsx` 修复连续输入的更新时机。已有表单、请求重试和静态路径回归继续使用，不为了凑数量重复写。
+
+<LessonTask lessonId="C47" />
+
+本课只选四项交付风险。检查由Vitest、RTL和真实浏览器分工完成；测试文件数、截图数、快照断言数都不是“理解了多少”的分数。
+
+## Java 程序员先看这里
+
+JUnit的Arrange/Act/Assert与分层经验可以直接迁移。Vitest是运行器，RTL帮助渲染和查询界面，user-event驱动交互，Playwright运行真实浏览器；由谁启动测试，不决定测试范围。既有项目也常用Jest，本项目不维护两套重复运行器。
+
+## 1. 从失败后果开始写测试计划
+
+在新建的 `notes/test-plan.md` 先写下这四行，补上你自己的执行结果：
+
+| 风险与后果 | 输入、操作、期望 | 最小合适层级与位置 |
+| --- | --- | --- |
+| 非法库存覆盖好快照 | 两次合法保存后传库存字符串，抛错且主键/备份原文都不变 | 新增函数UT：regression.test.jsx |
+| 连续输入丢字 | 逐字输入P004、清空，保留完整文本、一项P004、恢复6/52/2634800 | 新增RTL；严格浏览器补生产入口 |
+| 失败后不能重试 | 详情首次失败后人工重试；保存失败保留草稿，重试成功才改库存 | 沿用inventory.test.jsx已有两条RTL |
+| 文件路径、键盘或刷新断链 | 嵌套base、hash刷新、缺文件404；P004取消与Enter保存 | 沿用C46严格浏览器 |
+
+**先猜一猜：** 错误保存抛了异常，是不是就证明旧快照没被覆盖？不是。异常只停止后续语句，前面已经执行的setItem不会自动回滚。
+
+Java里也不能用“Service抛错”代替持久化副作用断言；Web Storage同样需要比较写入前后的记录。
+
+## 2. 核心规则先在Node测，断言业务结果
+
+<a id="2-核心规则先在-node-测断言业务结果"></a>
+
+新建 `tests/react/regression.test.jsx`。下面三段按顺序组成完整文件。第一段是导入；沿用C35的support，它提供DOM清理、断言扩展和独立内存repository。
+
+```jsx
+// @vitest-environment happy-dom
+import React from "react";
+import { expect, test } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { freshRepository } from "./support.jsx";
+import { saveProducts, storageKey } from "../../src/services/storage.js";
+import App from "../../src/react/App.jsx";
+import seed from "../../data/products.json";
+```
+
+紧接导入，加入第一条测试。这个Map只替代存储介质，实际执行项目的saveProducts、编码和业务校验：
+
+```jsx
+test("非法保存抛错以后，主快照与备份原文都不变", () => {
+  const records = new Map();
+  const storage = { getItem: (key) => records.get(key) ?? null, setItem: (key, raw) => records.set(key, raw) };
+  saveProducts(storage, seed);
+  saveProducts(storage, seed);
+  const before = new Map(records);
+  const invalid = seed.map((product) => product.id === "P004" ? { ...product, stock: "8" } : product);
+  expect(() => saveProducts(storage, invalid)).toThrow();
+  expect(records.get(storageKey)).toBe(before.get(storageKey));
+  expect(records).toEqual(before);
+});
+```
+
+预期：通过。两次合法保存建立主键与backup，再写入字符串库存。既检查异常，也检查完整副作用；只验证throw会遗漏“先覆盖再报错”。期望值来自保存前的原文，不调用被测函数重新计算expected。Java单测也是检查契约，而不是复制实现。
+
+这条测试虽然放在React测试目录，测的仍是函数边界；happy-dom不是它的核心依赖。保存/恢复涉及repository的完整流程，已有 `review.test.jsx` 继续覆盖。
+
+## 3. RTL测用户操作，保留真实表单与请求校验
+
+<a id="3-rtl-测用户操作保留真实表单与请求校验"></a>
+
+在同一文件末尾加入第二条测试。从真实App和可访问名称开始，逐字输入而不是直接设置一整串值：
+
+```jsx
+test("连续输入保留完整条件，清空后回到原库存", async () => {
+  const user = userEvent.setup();
+  render(<App inventoryRepository={freshRepository()} />);
+  await screen.findByRole("heading", { name: "P001 机械键盘", exact: true });
+  const search = screen.getByRole("textbox", { name: "搜索", exact: true });
+  await user.type(search, "P004");
+  expect(search).toHaveValue("P004");
+  expect(screen.getAllByRole("article")).toHaveLength(1);
+  expect(screen.getByRole("heading", { name: "P004 USB-C 扩展坞", exact: true })).toBeInTheDocument();
+  await user.clear(search);
+  await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(6));
+  expect(screen.getByText("库存 52 / 价值 2634800 分")).toBeInTheDocument();
+});
+```
+
+预期：完整文本P004，只有扩展坞；清空后恢复六件与原始汇总。`await user...` 等待一次交互，`findBy` 等待异步元素，`waitFor`等待条件；不靠固定sleep让错误“消失”。Java对象集成测试的经验仍能用，但这里的结果是DOM和用户能读到的内容。
+
+<a id="请求替身放在哪里决定测到了什么"></a>
+
+第三项风险不新增重复测试。打开已有 `tests/react/inventory.test.jsx`，找到“详情失败后点击重试恢复”：它只让repository.get首次拒绝，真实App、ProductDetail、Query以及后续repository读取都保留。第一次看到错误，点重试后读到P002/库存0；不能把两次读取都改成直接成功。
+
+同文件的“提交失败后草稿保留，重试成功才更新列表和统计”要求草稿8保留、全量仍52，解除失败后才57。它测的是浏览器内异步mock；如果要检查HTTP状态与JSON响应，应测C30那层fetch边界，不能把两者混成一条“网络测试”。
+
+## 4. 浏览器冒烟串起最重要的一条交付路径
+
+<a id="4-浏览器冒烟串起最重要的一条交付路径"></a>
+
+RTL能等待每次事件完成，真实浏览器却可能在路由尚未提交时已经处理下一个按键。因此保留严格产物上的逐字键盘回归，不用整串fill代替它。
+
+**先猜一猜：** 搜索框value直接来自URL，路由更新默认进入transition，逐字打P004一定完整吗？不一定；旧URL值可能把受控输入还原，变成 `4` 或 `P4` 等不完整文本。一次性填入P004反而可能通过。
+
+在 `src/react/App.jsx` 顶部的App返回值里，只修改HashRouter开始标签，闭合标签不变：
+
+```jsx
+<HashRouter useTransitions={false}>
+```
+
+预期：路由位置同步提交，受控搜索值及时更新；刷新后仍从hash查询参数恢复。React的[transition不能控制文本输入](https://react.dev/reference/react/startTransition)，本项目六条商品选择同步导航；大型页面也可把输入草稿与延后结果拆开，当前不再增加第二份状态。Java顺序赋值直觉不等于React/路由更新的调度时机。
+
+工作区运行 `npm run lab -- check C47`。它运行两条新增回归、已有必要行为和严格浏览器；包括逐字输入、P004取消/空白/Enter保存、刷新、详情失败重试及缺文件404。默认8068端口，先结束手工预览。
+
+## 5. 键盘、窄屏、恢复还要自己走一遍
+
+<a id="5-键盘窄屏恢复还要自己走一遍"></a>
+
+happy-dom不计算真实布局。自动焦点断言也不替你判断焦点轮廓是否看得清。build后启动 `LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs`，用Tab、Shift+Tab、Enter完成编辑、报错、纠正与保存，在360/768/1280px检查。
+
+repository会**自动持久化确认成功的修改**，“保存本地快照”是额外明确保存，不是唯一写入时机。P004保存8后刷新应保留8；取消草稿则仍3。损坏恢复先备份、只操作库存键，检查坏原文保留、有效备份回来。记录真实结果和未做环境，真机软键盘不能由桌面尺寸模拟替代。
+
+## 常见错误与调试
+
+<a id="错误-1快照报错了好数据却已经没了"></a>
+
+**现象**：非法库存被拒绝，旧快照却已经变坏。为复现，在 `src/services/storage.js` 的saveProducts函数内，**在 `const text = encodeSnapshot(products);` 之前**暂时插入：
+
+```js
+// 有问题的写法：校验之前已经写入外部存储
+storage.setItem(key, JSON.stringify({ version: 1, products }));
+```
+
+**工具**：在工作区运行下面的最小回归；Sources也可在新增setItem和encodeSnapshot两行设断点：
+
+```sh
+node node_modules/vitest/vitest.mjs run --config tools/delivery.config.mjs tests/react/regression.test.jsx -t 非法保存
+```
+
+**证据**：throw断言仍通过，下一条原文比较失败；实际P004.stock是字符串 `"8"`，期望是旧记录中的数字3。**原因**：异常不会撤销刚才的setItem。**修复**：删掉新插入的行，恢复“encodeSnapshot先完成校验，之后才有任何存储写入”。**确认**：相同测试变绿，主键与backup整个Map相等，再运行check C47。
+
+<a id="错误-2连续输入后搜索词少了一个字"></a>
+
+连续输入的另一条证据是：删除useTransitions=false，生产浏览器期望P004却得到不完整文本；恢复后文本完整，StrictMode保留。测试失败应来自真实行为，不通过改整串fill或增加输入延迟来绕开。
+
+## 练习
+
+<a id="练习-1json-能解析商品就有效吗"></a>
+<a id="练习-2修好总是成功的请求测试"></a>
+<a id="练习-3交出自己的风险计划"></a>
+
+:::tip[自己尝试 · 本地 React]
+完成两个文件与HashRouter改动，让非法保存测试经历红→绿，再运行check C47。把四项风险、输入操作、层级、具体测试位置和实际结果填入notes/test-plan.md；已有请求回归只引用，不抄一份相同测试。
+
+验收：坏数据拒绝且旧原文不变；逐字搜索完整并可清空；请求/保存失败都能恢复；严格产物中键盘编辑和刷新正常。手工检查只记录实际做过的项目。
+:::
+
+<details>
+<summary>提示</summary>
+
+替身放在外部边界：Map替代存储介质，不替代saveProducts；首次get失败，不替代真实表单与Query。断言可见结果和副作用，而不是只数mock调用。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+新增两条回归已给出完整导入与测试体。非法保存同时限制异常与主键/backup原文，连续输入限制完整字符串和派生列表；HashRouter同步位置保证受控值及时提交。已有C35失败重试与C46严格路径覆盖另外两类后果。一个风险可以由不同层互补，不需要为每个分支启动浏览器。
+
+</details>
+
+## 项目进度
+
+- 现在有四项明确风险与对应可执行检查，不用测试数量充当覆盖。
+- 正式写入、持久化和失败恢复保持同一repository；URL只管理筛选与导航。
+- `notes/test-plan.md`关联实际结果；暂停写notes/next.md，自己的工作区继续保留。
+
+## 小结
+
+- 先写失败后果，再选最小合适层级。
+- 抛异常之后还要验证外部副作用，快照必须保住旧原文。
+- RTL与真实键盘浏览器互补，等待条件而非固定时间。
+- 复用已有有效回归，手工补真实布局和操作可达性。
+
+自测：为什么throw不足以保护快照？Vitest运行的用例为什么也可能是集成测试？逐字type和整串fill能观察到什么差别？repository失败与HTTP失败各在哪一层？下一课用现场小增量与故障定位检验自己的理解。
+
+## 延伸阅读
+
+- [Vitest：测试运行与断言](https://vitest.dev/guide/)
+- [Testing Library：React行为测试](https://testing-library.com/docs/react-testing-library/intro/)
+- [user-event：完整交互与setup](https://testing-library.com/docs/user-event/intro/)
+- [Playwright：面向可见行为的实践](https://playwright.dev/docs/best-practices)
+- [React：startTransition与受控输入](https://react.dev/reference/react/startTransition)
+- [React Router：HashRouter的useTransitions](https://reactrouter.com/api/declarative-routers/HashRouter)

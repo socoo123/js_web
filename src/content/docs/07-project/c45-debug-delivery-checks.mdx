@@ -1,0 +1,212 @@
+---
+title: C45 全链路 Debug 与交付前检查
+description: 在自己的 React 库存应用按资源、状态、存储和布局定位故障，留下可重复的修复证据。
+sidebar:
+  order: 45
+---
+
+import LessonTask from '../../../components/LessonTask.astro';
+
+> **第 4 周 · 第 23 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
+> 前置：C30、C35、C36、C44 · 运行：Node 24、本地 React · 部分示例未运行，已在对应位置标注
+
+## 这一课解决什么问题
+
+“页面能打开”还不够。补货按钮执行了，数字可能不变；资源路径拼错，业务组件可能根本没加载；手机上能看到表单，也可能够不到保存按钮。
+
+L5 回到 **C44 中保留的 `src/react/` 主应用**，不是 `adapters/ui5-react/`。四种适配器继续保留，本课只在当前应用里做排错实验，把证据写入 `notes/debug.md`。每次只改一个故障，修复后再做下一个。
+
+<LessonTask lessonId="C45" />
+
+继续自己的 `inventory/`。需要补课时，从 [L5 起点说明](/js_web/labs/l5/)把 C44 恢复到**新目录**，在那里执行一次 `npm ci`。停止 C44 的适配器服务，再选择本课并启动；打开终端地址，入口应是“React 库存工作台”。先导出自己的快照，再在专用本地页面做实验。
+
+固定数据应为六种、52 件、2634800 分。已有个人快照时先记下它，不能把自己的改动误判成初始数据错误。学完你能按层选择工具、解释更新链，并让别人根据笔记重现和复验。
+
+为让下面各次数字可比，先准备一份 `baseline.json`：当前已经是固定数据就直接导出；否则先导出并保管个人数据，在这个专用本地页面的Application中**只删除 `js_web:inventory:react:v2` 主键**，刷新读到固定数据后导出为baseline.json。保留backup和其他键。**每次独立实验开始前导入baseline.json**，避免上一轮补货影响下一轮的52；实验结束可导入个人快照恢复。
+
+## Java 程序员先看这里
+
+Java 的堆栈、断点、请求链和 GC 经验仍能用。浏览器多了 HTML、模块、CSS、DOM、存储和 React 缓存这些边界：先判断哪一层失败，再挑面板。这里没有与 DevTools 一一对应的 Java API，不需要另写一套界面来类比。
+
+## 1. 先确认失败的是哪一种资源
+
+<a id="url-从域名根还是应用目录开始"></a>
+
+Network 里的真实 URL 比“应该加载这个文件”更有用。在 `src/react/index.html` 找到加载 `main.jsx` 的 script，把文件名暂时拼成 `mian.jsx`，保存并刷新。
+
+预期：页面不再出现商品，Network 有失败的模块请求。F12 → Network，勾选 Disable cache，刷新后点失败项，依次看 **Headers → Request URL、Response、Initiator**。修复是把源码里的文件名改回去，而不是清缓存。
+
+**先猜一猜：** 页面位于嵌套演示目录时，两个路径会请求同一个地方吗？在 Console 执行：
+
+```js
+const deliveryPage = "https://socoo123.github.io/js_web/demos/inventory/";
+console.log(new URL("/products.json", deliveryPage).pathname);
+console.log(new URL("products.json", deliveryPage).pathname);
+// → /products.json
+// → /js_web/demos/inventory/products.json
+```
+
+第一条从域名根解析，第二条从当前目录解析。构建时的 public base 和运行时拼接 URL 要分别检查。Java 的 context path 经验能帮助理解前缀，但浏览器仍按 [URL 规则](https://developer.mozilla.org/en-US/docs/Web/API/URL_API/Resolving_relative_references)解析每一个地址。
+
+<a id="404断网错误正文分别判断"></a>
+
+| 证据 | 已经知道什么 | 下一步 |
+| --- | --- | --- |
+| 模块请求 404 | 文件路径没有对应资源 | 查 HTML 引用和构建前缀 |
+| HTTP 200，但 Response 是 HTML | 返回的不是预期 JS/JSON | 查服务器是否回退到首页 |
+| `(failed)`、Failed to fetch | 没拿到可用 HTTP 响应 | 结合 Console 查断网、连接或浏览器策略 |
+| 没有 HTTP 请求，但界面显示模拟读取失败 | 可能走浏览器内 repository | 看 Sources 的调用链与 Query 状态 |
+
+C32 以后，主应用详情走浏览器内 mock repository，不发送商品 GET。点“模拟详情失败”再“重试详情”，应该先报错再恢复；Network 没有商品请求是这条链的正常表现。用 Offline 可以检查模块加载失败，不能用它证明内存 repository 的网络重试。
+
+## 2. 事件执行了，React 仍需要新的状态
+
+读取结果不是新的写入口。`InventoryView` 从 `useInventory()` 取得 Query 的商品投影；正式更新仍走 `dispatch → repository → 查询失效 → 重新读取`。
+
+在 `src/react/App.jsx` 找到 `async function restock(id, amount)`，暂时把整个函数换成下面的错误版本。保留其他函数：
+
+```js
+// 有问题的写法：只改读取结果，没有提交正式更新
+async function restock(id, amount) {
+  products.find((product) => product.id === id).stock += amount;
+}
+```
+
+刷新到初始 P001=12，点它的“立即补一件”。预期：界面仍为 12。对象字段可以在 Sources 里变成 13，但没有 repository 写入和缓存通知；后续无关渲染还可能把污染显露出来。
+
+修复时恢复原来的异步更新链：
+
+```js
+async function restock(id, amount) {
+  try { await dispatch({ type: "restocked", id, amount }); setOperationMessage(""); }
+  catch (error) { setOperationMessage(error.message); }
+}
+```
+
+预期：一次点击后 P001=13，总库存 53、价值 2674700 分；P004 仍为 3。repository 校验并持久化，Query 重新读取，列表与派生汇总一起变化。Java 字段赋值会改变对象；React 还需要约定好的更新与通知边界。
+
+**先猜一猜：** 新数组一定意味着商品也都是新对象吗？
+
+```js
+const originalRows = [{ id: "P004", stock: 3 }];
+const copiedRows = [...originalRows];
+console.log(originalRows === copiedRows); // → false
+console.log(originalRows[0] === copiedRows[0]); // → true
+```
+
+数组展开复制的是槽位，里面的引用仍共享。修复时应沿被修改路径创建新对象，而不是仅换容器。Java 的 `new ArrayList<>(rows)` 也不复制内部商品。
+
+## 3. 布局看尺寸，恢复看存储原文
+
+<a id="从溢出的元素反查-css"></a>
+
+`src/react/main.jsx` 已导入 `src/vanilla/styles.css`。在这份 CSS 末尾暂时加一条：
+
+```css
+/* 有问题的写法：窄屏无法满足最小宽度 */
+main { min-width: 44rem; }
+```
+
+把设备工具栏宽度设为 360。Elements 选中 main → Computed 看 min-width 和实际 width，回 Styles 找到这条规则。删除刚加的声明并保存源码，按钮应回到视口内；不要用 `body { overflow-x: hidden }` 把操作裁掉。Java 布局管理器的约束也影响尺寸，浏览器还要结合层叠、盒模型与最小内容宽度。
+
+<a id="存储损坏时先保留现场"></a>
+
+存储排错先保护原文。在当前页面点“保存本地快照”，再把下列内容保存为临时文件 `invalid.json`，用“导入快照”选择它：
+
+```json
+{"version":1,"products":[{"stock":""}]}
+```
+
+预期：显示“快照操作失败”，当前商品不变。Application → Storage → Local Storage 中比较导入前后的 `js_web:inventory:react:v2` 及 `:backup`，原文应逐字不变。JSON 语法合法，只说明可以解析；字段仍需业务校验。Java 读取外部 DTO 时同样要先验证再保存。
+
+要练习损坏恢复，先确认有有效备份并导出快照，再只把上述**库存主键**的值改为坏 JSON。点“恢复备份”，确认有效库存回来，坏原文保存在 `:damaged`。不要清空整个 origin；网站学习进度是另一组键。同协议、主机和端口下的不同路径共享 localStorage。
+
+## 4. 在生产产物里回到业务源码
+
+在工作区执行 `npm run lab -- build`。已有构建配置开启 `sourcemap`，生成目录是 `dist/src-react/`，不是课程站根目录的 dist。
+
+```sh
+npm run lab -- build
+LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs
+```
+
+> 未运行验证：下列Sources图形界面的断点点击步骤，请在自己的Chrome完成；同次构建的map文件由检查器核对。
+
+在第二条命令给出的 `/js_web/demos/inventory/` 地址打开应用。这个服务器只读本次产物，不会重建或修理 base。Sources 设置里启用 JavaScript source maps，搜索 `inventory-repository.js`，在 restock 的 commit 前设断点，再给 P001 补一件：应能看到目标 id、旧 stock 与 next stock；继续后页面与统计同步。
+
+浏览器运行的是打包后的 JS，map 让 DevTools 关联同次构建的源码，类似调试器把字节码位置关联到 Java 源码。map 404、映射关闭或 JS/map 版本错位时，去 Developer Resources 检查；不要拼接不同构建的文件。
+
+## 5. 最后检查性能、内存与操作可达性
+
+<a id="performance-看一段操作的时间花在哪里"></a>
+<a id="memory-找到谁还保留着对象"></a>
+
+> 未运行验证：下面的 DevTools 图形界面 Performance 录制与 Heap snapshot 人工分析，请在自己的 Chrome 按步骤完成。
+
+Performance 先录制首次展开“查看分类报表”，再录制收起后重新展开；保持视口和节流一致。Network 看首次按需模块请求，Performance 的 Main、Bottom-up 看脚本、布局和绘制；记录实际调用与时间分布，不规定跨机器的毫秒阈值。Java 性能分析也先找热点，而不是先加缓存。
+
+Memory 则看保留引用。在 `src/react/useInventoryShortcuts.js` 暂时注释掉移除 keydown 监听器的 return 行；切换分类数次，Effect 每次收到新的 onRestock 回调。对比修复前后相同次数的操作：Memory → Heap snapshot → Comparison，沿 Retainers 检查 window 监听器是否仍保留旧回调。恢复那一行后重新加载、按相同次数重做。
+
+预期：正确实现每次清理旧监听器，只保留当前订阅。单张堆快照或堆大小上升不等于泄漏；调试工具自己也可能保留对象。自动行为检查与监听器观察是证据，最终解释要对应真实保留链。
+
+<a id="键盘和手机检查落到真实任务"></a>
+
+:::tip[自己尝试 · 本地 React]
+修复全部故障后，结束手工静态预览，在工作区运行 `npm run lab -- check C45`。再启动 dev，在 360/768/1280px 用键盘完成：搜索 P004 → 编辑8 → 取消 → 再编辑 → 空白提交 → 改8 → Enter保存 → 清空搜索。
+
+预期：取消仍3/52；空白阻止提交并聚焦库存；保存后P004=8、P001=12、全量57。筛选P004时摘要是当前可见结果，不是全量统计。把断点值、失败URL、存储原文、尺寸和实际复验结果写入新建的 `notes/debug.md`。
+:::
+
+## 常见错误与调试
+
+<a id="补货点了数字一直停在-12"></a>
+
+**现象**：使用第2节故障版本，点击补货后数字仍12，Console无异常。**工具**：Sources 在直接改 stock 的行设断点；Components 查看 InventoryView 与 Provider 的数据，沿 Call Stack 回到按钮事件。
+
+**证据**：事件命中、字段已13，但 dispatch没有执行、repository未保存；页面仍12。**原因**：把只读投影当成另一份可写数据源。**修复**：恢复第2节的 dispatch函数。**确认**：从相同起点点击得到13/53，再运行本课检查；只断言字段变13会漏掉这个故障，必须断言用户看到的结果。
+
+## 练习
+
+<a id="练习-1请求之前发生了什么"></a>
+<a id="练习-2修复一次更新留下一份证据"></a>
+<a id="练习-3完成一份交付检查记录"></a>
+
+完成同一份 `notes/debug.md`：每个实验写“起点与操作 → 面板/命令 → 原始证据 → 根因 → 源码修复 → 同操作复验”。主错误必须走完；性能与内存写自己的采样结果，未完成的明确留待办。
+
+<details>
+<summary>提示</summary>
+
+先看最早的失败边界：模块没加载，不先查React state；对象已变，不代表正确提交；导入抛错，还要比较旧原文。DevTools里临时改样式之后，记得真正修改源文件。
+
+</details>
+
+<details>
+<summary>参考答案</summary>
+
+状态故障的关键证据是“处理函数执行，未走dispatch，页面不更新”；恢复统一写链后得到13/53。资源故障记录拼错模块URL和404，存储故障记录拒绝前后相同原文，布局故障记录44rem规则和360px尺寸。性能记录区分首次模块下载与再次交互，内存记录订阅清理前后的保留关系；“刷新好了”不能替代根因。
+
+</details>
+
+## 项目进度
+
+- 仍是同一个 React 应用和四个保留的适配器，最终源码已恢复正确实现。
+- `notes/debug.md` 有复现与修复证据；检查器使用独立浏览器，不清空你的实际存储。
+- 在 `notes/next.md` 留下当前课、已修文件与下一件事。暂停后继续自己的代码，不覆盖为参考解。
+
+## 小结
+
+- 资源、状态、存储和布局分别收证，再串起调用链。
+- repository是正式写入口，Query读取结果不能原地修改。
+- 生产断点需要同次JS与map；性能看操作，内存看引用链。
+- 自动检查、手工采样与自己的解释各有职责。
+
+自测：模块404先查哪里？没有商品GET为什么详情还能读取？字段13而页面12说明哪段没完成？怎样证明坏导入保住旧快照？下一课把这份应用按严格静态路径交付。
+
+## 延伸阅读
+
+- [Chrome：Network请求与发起来源](https://developer.chrome.com/docs/devtools/network)
+- [React：更新对象与只读快照](https://react.dev/learn/updating-objects-in-state)
+- [Chrome：source maps调试](https://developer.chrome.com/docs/devtools/javascript/source-maps)
+- [Chrome：Performance分析](https://developer.chrome.com/docs/devtools/performance)
+- [Chrome：内存问题与保留关系](https://developer.chrome.com/docs/devtools/memory-problems)
+- [MDN：localStorage的同源边界](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)

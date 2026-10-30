@@ -1,12 +1,44 @@
 ---
 title: L1 库存规则与数据
-description: 在持续修改的库存工作区完成这一阶段的业务交付。
+description: 从 C00 商品卡片出发，在同一个工作区建立校验、统计、筛选、集合与撤销规则。
 sidebar:
   order: 1
 ---
 
 import LabOverview from '../../../components/LabOverview.astro';
+import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
-从[工作区入口](/js_web/labs/)安装一次，按课程顺序修改自己的代码。阶段收尾使用同一工程验收；不需要再安装一个 Lab。
+## 从哪里开始
+
+第一次学习先按[工作区入口](/js_web/labs/)下载 <WorkspaceDownload checkpoint="C00" label="C00 初始工程" />，解压到新的空目录并执行一次 `npm ci`。在这个 `inventory/` 中执行 `npm run lab -- start C01`、`npm run lab -- dev`，打开终端地址，应看到 P001 机械键盘、库存 12。
+
+C00 只提供可启动的商品卡片、固定数据和工具入口。HTML/CSS 与浏览器从 C02 讲起；你不用先学 npm、React 或 TypeScript 才能开始。
+
+## 在同一个工作区推进
+
+| 学习段 | 本课任务的落点 | 看得到的结果 |
+| --- | --- | --- |
+| C01–C03 | `src/core/inventory.js` 与单商品卡片 | 分清语言、宿主和工具；输入“3”把 P001 从 12 补到 15 |
+| C04–C07 | 同一规则文件中的统计、草稿、函数和类 | 统计 52；取消草稿不污染 tags；筛选工厂和回调独立工作 |
+| C08–C10 | 数组查询、Map/Set、历史栈、队列与分类树 | 数值排序不改原顺序；按 id 查询；补货可以撤销 |
+
+Java 对照集中在值、引用、集合与调用机制的差异。C07 的可变类实例用于理解语言，不作为后续 React state。
+
+## 收尾：规则可靠，再接界面
+
+按 [C10](/js_web/02-language-data/c10-stacks-queues-trees/)在独立固定数据中检查：
+
+1. 初始 6 种商品、总库存 52、总价值 2634800 分。
+2. P001 补 3 得 15，撤销回 12；连续操作按相反顺序撤销。
+3. 库存 0 合法；空白、负数、小数、“3件”拒绝；草稿取消不改原商品 tags。
+4. 库存升序为 P002/P004/P006/P003/P001/P005，原数组顺序保留；树节点各访问一次。
+
+在当前目录运行 `npm run lab -- check C10`。检查读取自己的文件，不安装参考解；不会替你标记课程完成。
+
+## 暂停、恢复与下一步
+
+把当前课、已改文件、观察结果、下一步写到 `notes/next.md`。卡住先读提示，再用 `npm run lab -- compare C10` 只读对照；参考解不覆盖自己的作业。
+
+完成后直接继续 [L2](/js_web/labs/l2/)。补课时可把 <WorkspaceDownload checkpoint="C10" label="C10 完成参考解" />解压到另一空目录，或执行 `npm run lab -- restore C10 ../inventory-web`；目标非空会拒绝。不要用恢复代替正常跟做。
 
 <LabOverview labId="L1" />
