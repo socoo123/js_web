@@ -8,6 +8,16 @@ sidebar:
 import LabOverview from '../../../components/LabOverview.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
+## 本 Lab 的任务与规则
+
+你要把“库存怎么算、输入是否合法、操作能否撤销”写成可调用的 JavaScript 规则。先读[共用规则](/js_web/labs/rules/)，本阶段完成：
+
+1. **补货与校验**：输入是文本，转成合法整数后再增加库存；P001 的 12 件加 3 得到 15，错误输入保留原值。
+2. **草稿与查询**：编辑草稿的标签再取消，原商品不变；分类筛选、数值排序、汇总和按编号查询得到规则页列出的结果。
+3. **数据结构与撤销**：用集合处理分类与标签，用历史栈撤销补货，用队列与树完成课程中的任务顺序和分类遍历。
+
+主要修改 `src/core/inventory.js`，并按前几课接通已有单商品卡片。完成标准在本页收尾清单，具体修改步骤见下方课程。
+
 ## 从哪里开始
 
 第一次学习先按[工作区入口](/js_web/labs/)下载 <WorkspaceDownload checkpoint="C00" label="C00 初始工程" />，解压到新的空目录并执行一次 `npm ci`。在这个 `inventory/` 中执行 `npm run lab -- start C01`、`npm run lab -- dev`，打开终端地址，应看到 P001 机械键盘、库存 12。

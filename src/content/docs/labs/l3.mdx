@@ -8,6 +8,17 @@ sidebar:
 import LabOverview from '../../../components/LabOverview.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
+## 本 Lab 的任务与规则
+
+你要把同一个库存业务做成 React 应用。继续遵守[字段、草稿与保存规则](/js_web/labs/rules/)，本阶段完成：
+
+1. **增删改与统计**：渲染六件商品，支持补货、新建、编辑、删除；编号保持稳定，列表和统计随已提交数据一起更新。
+2. **独立编辑草稿**：P001 的修改取消后不影响原数据，再打开 P002 显示库存 0；排序或删除其他行时，编辑身份不串行。
+3. **异步详情与提交**：快速切换商品时只保留当前详情；提交中防重复，失败保留草稿并能重试，乐观预览能回滚。
+4. **路由与恢复**：P004 详情可刷新、返回，筛选条件可保留；商品能导出、导入和从有效备份恢复，非法数据被拒绝。
+
+你在 `src/react/` 逐步加入组件，复用已有库存规则；后续课程再接 repository 与 Query。课内测试检查这些用户操作，本页收尾清单给出具体数据和预期结果。
+
 ## 从哪里开始
 
 继续你在 L2 完成的 `inventory/`；不用再新建 React 工程。需要补课时，下载 <WorkspaceDownload checkpoint="C20" label="本发行版的 C20 起点包" />，解压到**新的空目录**，在其中执行一次 `npm ci`，然后 `npm run lab -- start C21`、`npm run lab -- dev`。

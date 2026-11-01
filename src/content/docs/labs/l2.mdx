@@ -8,6 +8,17 @@ sidebar:
 import LabOverview from '../../../components/LabOverview.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
+## 本 Lab 的任务与规则
+
+你要让店员通过网页使用 L1 的库存规则。字段与数字沿用[共用规则](/js_web/labs/rules/)，本阶段完成：
+
+1. **列表与编辑**：显示六件商品，筛选后仍按编号编辑；P004 库存填 8 后取消仍是 3，保存后变成 8，总库存为 57。
+2. **加载与数据保护**：展示加载、空结果和错误；保存后刷新可恢复，非法导入保留现有好数据。
+3. **可用的页面**：用键盘完成编辑，焦点清楚；在 360/768/1280px 下分别排单、双、四列，整页没有横向滚动。
+4. **同一规则两端运行**：浏览器和 Node 报表用相同的统计逻辑；为正常、空集合和非法输入写单元测试。
+
+页面在 `src/vanilla/`，请求与存储在 `src/services/`，Node 报表在 `src/cli/report.js`。按课程逐步拆分，具体文件位置和操作写在每课正文。
+
 ## 从哪里开始
 
 继续 L1 自己完成的 `inventory/`。需要补课时，将 <WorkspaceDownload checkpoint="C10" label="C10 起点包" />解压到新的空目录，执行一次 `npm ci`；也可在已有工程运行 `npm run lab -- restore C10 ../inventory-web`，非空目标会被拒绝。安装、校验与升级说明见[工作区入口](/js_web/labs/)。

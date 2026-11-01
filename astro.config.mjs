@@ -31,7 +31,19 @@ export default defineConfig({
         ThemeSelect: './src/components/ThemeSelect.astro',
       },
       sidebar: [
-        { label: '库存工作区与 5 个 Lab', slug: 'labs' },
+        {
+          label: 'Lab 实验',
+          collapsed: false,
+          items: [
+            { label: '开始：工作区与学习包', slug: 'labs' },
+            { label: 'Lab 规则与验收', slug: 'labs/rules' },
+            { slug: 'labs/l1' },
+            { slug: 'labs/l2' },
+            { slug: 'labs/l3' },
+            { slug: 'labs/l4' },
+            { slug: 'labs/l5' },
+          ],
+        },
         { label: '学习路线与课程目录', slug: 'roadmap' },
         ...courseSections
           .filter(([directory]) => existsSync(new URL(`./src/content/docs/${directory}`, import.meta.url)))

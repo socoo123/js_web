@@ -6,7 +6,7 @@
 
 **本轮改版完成，下一阶段：无。** `2026.10-v2.5` 已发布，L1–L5 与 C00–C48 快照齐全；最终验收、Pages 和线上下载证据见 [C 记录](labs/records/C.md)。
 
-**[从 Lab 开始跟做](https://socoo123.github.io/js_web/labs/) · [48 课学习路线](https://socoo123.github.io/js_web/roadmap/) · [在线阅读](https://socoo123.github.io/js_web/) · [C48 自测与复盘](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/)**
+**[从 Lab 开始跟做](https://socoo123.github.io/js_web/labs/) · [Lab 规则与验收](https://socoo123.github.io/js_web/labs/rules/) · [48 课学习路线](https://socoo123.github.io/js_web/roadmap/) · [在线阅读](https://socoo123.github.io/js_web/) · [C48 自测与复盘](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/)**
 
 ## 学员从这里开始
 

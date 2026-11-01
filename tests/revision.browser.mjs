@@ -15,7 +15,7 @@ await mkdir(qa, { recursive: true });
 const requestedRoutes = process.env.REVISION_ROUTES?.split(',').filter(Boolean);
 const routes = globSync('**/*.html', { cwd: dist }).filter((route) => !route.startsWith('demos/')).map((route) => route.replace(/index\.html$/, '')).filter((route) => !requestedRoutes || requestedRoutes.includes(route)).sort();
 if (requestedRoutes) assert.deepEqual([...routes].sort(), [...requestedRoutes].sort(), '请求验收的页面必须全部存在');
-else assert.equal(routes.length, 61, '全站验收必须包含 61 个静态页面');
+else assert.equal(routes.length, 62, '全站验收必须包含 62 个静态页面（含 Lab 规则页）');
 // 固定第一版公开地址；不能随 catalog 改名而静默跳过旧 URL。
 const legacyGroups = {
   '01-history-web': ['c01-story-ecosystem', 'c02-web-debugging'],
