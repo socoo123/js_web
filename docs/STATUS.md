@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-11-01（A/B/C已完成；当前维护：Lab 导航与网页规则，待发布）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-11-01（A/B/C已完成；Lab 导航与网页规则维护已发布，下一阶段：无）。
 
 ## 续做时按这个顺序读
 
@@ -30,7 +30,7 @@
 
 | 项目 | 状态 |
 | --- | --- |
-| 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；推送 main 后由 Actions 自动部署 |
+| 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；L1–L5直达导航与[Lab规则页](https://socoo123.github.io/js_web/labs/rules/)已上线，见[维护记录](../labs/records/2026-11-01-lab-navigation.md) |
 | 工程 | Node 24.22.0、npm 11.19.1（本机默认已对齐）、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
 | 已发布 | 48 / 48（C01–C48）；全部接入Lab主线，任务卡/catalog/旧URL与线上核验通过 |
 | 贯穿项目 | V2 L1–L5全部发布，v2.5提供C00–C48；五起点C00/C10/C20/C36/C44，旧七阶段保留参考；独立抽验见[A](../labs/records/A.md)、[B](../labs/records/B.md)、[C](../labs/records/C.md) |
@@ -112,7 +112,7 @@
 ## 下一步
 
 1. **本轮改版完成，下一阶段：无。** A/B/C四路与返修均已结束，主验收发布通过；C内容提交`d1f2604`、[Pages 40983642651](https://github.com/socoo123/js_web/actions/runs/40983642651)，完整证据见[C](../labs/records/C.md)。
-2. 新窗口仅按用户提出的具体维护需求行动；不自动重做规划、重启四路或新增实施阶段。保留源码、锁、历史包和个人学习数据；选修/许可证/未测平台按具体需求另办。
+2. Lab 导航与网页规则维护已发布：`04fbb3c`、[Pages 41319590943](https://github.com/socoo123/js_web/actions/runs/41319590943)，[线上验收](../labs/records/2026-11-01-lab-navigation.md#发布)通过。新窗口仅按具体维护需求行动，不重启阶段；保留源码、锁、历史包和个人学习数据。
 
 ## 本文件的更新规则
 

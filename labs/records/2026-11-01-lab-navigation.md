@@ -22,4 +22,8 @@
 
 ## 发布
 
-待内容提交对应的 Pages Actions 和线上入口核验完成后更新。
+- 内容提交：[`04fbb3c6906521b16d5d649fbb6546b8eaf514f4`](https://github.com/socoo123/js_web/commit/04fbb3c6906521b16d5d649fbb6546b8eaf514f4)。提交前审阅差异，fetch 确认远端无新提交，在 main 正常提交推送。
+- 对应 [Pages 41319590943](https://github.com/socoo123/js_web/actions/runs/41319590943) 的 build/deploy 均成功；Linux 内容/构建及四条 Lab 行为门禁通过。Actions 的三条断言失败注解来自交付链有意修改源码的红测，脚本分别确认了预期失败并复测恢复态，不是最终门禁失败。
+- 线上核验 `.cache/qa/lab-rules/verify-online.mjs`：首页、7 个 Lab 页面、48 课共 **56 页 HTTP 200**；规则正文、侧栏和所有课程任务卡的新链接存在；v2.5 清单与冻结版本一致，五个阶段起点包 SHA-256 一致，5 项代表静态资源 HTTP 200。
+- Chromium 实际从线上 C03 的手机菜单进入规则页，并通过站内搜索找到规则页。证据为 `.cache/qa/lab-rules/online-results.json` 与 `online-rules-360.png`。核验脚本首次将首页合法相对链接误判为缺失，改为按页面 URL 解析后检查通过，网站无需修改。
+- 线上入口：[Lab 规则与验收](https://socoo123.github.io/js_web/labs/rules/)、[工作区与五个 Lab](https://socoo123.github.io/js_web/labs/)。本次维护完成；记录同步提交若触发部署，等待其完成后回复，不再循环追加记录自身 SHA。
