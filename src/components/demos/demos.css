@@ -34,12 +34,12 @@
 .jsd button {
   font: inherit; font-size: .9rem; cursor: pointer;
   padding: .35rem .85rem; border-radius: 8px;
-  border: 1px solid var(--js-color-primary, var(--sl-color-text-accent));
-  background: var(--js-color-primary, var(--sl-color-text-accent));
-  color: var(--sl-color-black, #fff);
+  border: 1px solid var(--js-color-primary-solid, var(--sl-color-text-accent));
+  background: var(--js-color-primary-solid, var(--sl-color-text-accent));
+  color: var(--js-color-on-primary, var(--sl-color-black));
   transition: transform var(--js-motion, 200ms), opacity var(--js-motion, 200ms);
 }
-.jsd button.jsd-secondary { background: transparent; color: var(--js-color-primary, var(--sl-color-text-accent)); }
+.jsd button.jsd-secondary { background: transparent; border-color: var(--js-color-primary, var(--sl-color-text-accent)); color: var(--js-color-primary, var(--sl-color-text-accent)); }
 .jsd button:active:not(:disabled) { transform: translateY(1px); }
 .jsd button:disabled { opacity: .55; cursor: not-allowed; }
 .jsd button:focus-visible, .jsd input:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 2px; }

@@ -21,7 +21,7 @@
 
 - macOS arm64；Node 24.22.0/npm 11.19.1；Astro 7.3.8、React/react-dom 19.3.1、Vitest 5.0.5；headless Chromium 156.0.8078.4（Playwright 1.64.1）。复用只读依赖，未安装。
 - 正文按「主张→代码→效果→原因→Java 对照」重写；课号、标题、URL、学习日、旧锚点、CodeCompare 与四个 CodeExcerpt、D2 图、Lab 数字不变。新增 2 个「先猜一猜」与 2 个交互演示（`c23-first-render`、`c23-update-queue`）。
-- `npm run examples -- c23` 4/4；`npm run lint:lessons` C23 4360/10000 字符、13 块，全站 0 error/0 warning；`npm run check` 0 error。
+- `npm run examples -- c23` 4/4；`npm run lint:lessons` C23 4498/10000 字符、14 块，V3 可读性规则 0 warning，全站 0 error/0 warning；`npm run check` 0 error。
 - 只按改写后正文从 C22 恢复目录组装（四个 CodeExcerpt、对照卡右侧、Predict 里的错误写法）：
   - 三次 `setStock(stock + 1)`：`lab check C23` 退出 1，`expected 'P001 当前库存 13 件' to contain '15 件'`。
   - 延迟回调写 `setStock(stock + 3)`：退出 1，`expected 'P001 当前库存 15 件' to contain '16 件'`。
@@ -29,7 +29,8 @@
 - 两个演示（Chromium，键盘操作）：首次渲染 12 → Enter 点 +1 得 13 → 方向键换 P002 仍 13；队列传值 13、updater 15；延迟 1 秒期间立即 +1，updater 得 16、旧值写法得 15。禁用 JS 时显示 12 的初始画面、禁用按钮和说明文字；减少动态效果时动画全部关闭；360/768/1280 亮暗主题无横向溢出。
 - 构建产物：只有 C23 页含交互岛，新增 JS 约 74.6 KB（gzip），其他页面不加载 React。
 - Java 21.0.2 执行 C23Queue.java 输出 15。
-- 页面截图 `c23/actions` 由截图流程生成；本记录时仍是占位。未运行：手动 DevTools UI、`lab dev` 交互、Firefox/Safari/Windows。
+- 集成后复验（同日）：页面截图 `c23/actions` 为截图流程生成的真实图，正文用 2 次（页首、第 5 节）；Console、终端、窗口外框改用站点配色变量，亮暗两套文字对比度均 ≥ 5:1；上面的红绿结果在集成结果上重做一致。
+- 未运行：手动 DevTools UI、`lab dev` 交互、Firefox/Safari/Windows。
 
 ## 历史
 
