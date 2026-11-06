@@ -2,7 +2,8 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
 import { comparison, snippet } from '../labs/sources.mjs';
-import { readExample } from '../src/lib/examples.mjs';
+import { readExample, readRunnable } from '../src/lib/examples.mjs';
+import { DEMOS } from '../src/components/demos/registry.mjs';
 import catalog from '../labs/catalog.json' with { type: 'json' };
 
 export function codeLimitIssues(blocks, maximum) {
@@ -22,6 +23,11 @@ const V3_COMPONENTS = {
 const COMPONENTS = [...Object.keys(ID_COMPONENTS), ...Object.keys(V3_COMPONENTS)];
 const EFFECT_KINDS = ['console', 'terminal', 'page', 'demo'];
 
+const isAnswer = (child) => child.type === 'mdxJsxFlowElement' && child.name === 'div'
+  && child.attributes.some((attr) => attr.name === 'slot' && attr.value === 'answer');
+const meaningful = (nodes = []) => nodes.filter((child) => !(child.type === 'text' && !child.value.trim()));
+const containsComponent = (node, name) => (node.children ?? []).some((child) => child.name === name || containsComponent(child, name));
+
 function v3Component(node, code, prose, components) {
   const name = node.name;
   const attrs = Object.fromEntries(node.attributes.map((attr) => [attr.name, attr.value]));
@@ -29,12 +35,16 @@ function v3Component(node, code, prose, components) {
     if (!V3_COMPONENTS[name].includes(key)) throw new Error(`${name} 不支持属性 ${key}`);
     if (typeof attrs[key] !== 'string' || !attrs[key].trim()) throw new Error(`${name} 的 ${key} 必须是非空静态字符串`);
   }
-  const children = (node.children ?? []).filter((child) => !(child.type === 'text' && !child.value.trim()));
+  const children = meaningful(node.children);
   if (name === 'Predict') {
     if (!attrs.question) throw new Error('Predict 需要 question');
-    const answers = children.filter((child) => child.type === 'mdxJsxFlowElement' && child.name === 'div' && child.attributes.some((attr) => attr.name === 'slot' && attr.value === 'answer'));
+    if (containsComponent(node, 'Predict')) throw new Error('Predict 不能嵌套 Predict');
+    const answers = children.filter(isAnswer);
     if (answers.length !== 1) throw new Error('Predict 需要且只能有一个 <div slot="answer"> 答案区');
-    if (children.length < 2) throw new Error('Predict 需要问题代码和答案区');
+    if (answers[0].attributes.length !== 1) throw new Error('Predict 答案区只写 slot="answer"');
+    if (!meaningful(answers[0].children).length) throw new Error('Predict 答案区不能为空');
+    if (!children.some((child) => child.type === 'code')) throw new Error('Predict 需要一个问题代码块（写在答案区之前）');
+    if (children.indexOf(answers[0]) !== children.length - 1) throw new Error('Predict 答案区必须放在最后');
     components.push({ component: name, id: attrs.question });
     prose.push(`先猜一猜：${attrs.question}`);
     return;
@@ -42,19 +52,22 @@ function v3Component(node, code, prose, components) {
   if (name === 'Effect') {
     if (!EFFECT_KINDS.includes(attrs.kind)) throw new Error(`Effect kind 必须是 ${EFFECT_KINDS.join('/')}`);
     if (attrs.kind === 'page' && (!attrs.preview || attrs.example || attrs.demo || children.length)) throw new Error('Effect page 只接受 preview，不接受子内容');
+    if (attrs.kind === 'page' && !/^[a-z0-9]+\/[a-z0-9-]+$/.test(attrs.preview)) throw new Error(`Effect preview 应形如 c15/layout：${attrs.preview}`);
     if (attrs.kind === 'demo' && (!attrs.demo || attrs.example || attrs.preview || children.length)) throw new Error('Effect demo 只接受 demo，不接受子内容');
+    if (attrs.kind === 'demo' && !Object.hasOwn(DEMOS, attrs.demo)) throw new Error(`未登记的交互演示：${attrs.demo}`);
     if ((attrs.kind === 'console' || attrs.kind === 'terminal') && (attrs.preview || attrs.demo || Boolean(attrs.example) === Boolean(children.length))) throw new Error('Effect console/terminal 需要 example 或子代码块二选一');
-    if (attrs.example) code.push({ code: readExample(attrs.example).expected });
-    components.push({ component: name, id: attrs.example ?? attrs.preview ?? attrs.demo ?? attrs.kind, kind: attrs.kind });
+    if (children.length && (children.length !== 1 || children[0].type !== 'code')) throw new Error('Effect 的子内容只能是一个代码块');
+    const output = attrs.example ? readExample(attrs.example).expected : null;
+    if (output !== null) code.push({ code: output });
+    components.push({ component: name, id: attrs.example ?? attrs.preview ?? attrs.demo ?? null, kind: attrs.kind, output });
     prose.push(attrs.title ?? '', attrs.caption ?? '');
     return;
   }
   if (name === 'RunSnippet') {
     if (!attrs.example || children.length) throw new Error('RunSnippet 只接受 example 与可选 title');
-    const item = readExample(attrs.example);
-    if (item.source === null) throw new Error(`RunSnippet 缺少源码：${attrs.example}`);
+    const item = readRunnable(attrs.example);
     code.push({ code: item.source }, { code: item.expected });
-    components.push({ component: name, id: attrs.example });
+    components.push({ component: name, id: attrs.example, output: item.expected });
     prose.push(attrs.title ?? '');
   }
 }

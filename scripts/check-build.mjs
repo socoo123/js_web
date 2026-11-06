@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, statSync, globSync, readdirSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { importedContent } from './lesson-sources.mjs';
@@ -76,7 +77,85 @@ for (const [id, slug, diagrams, source] of lessons) {
   for (const diagram of diagrams) {
     if (!lesson.includes(diagram)) errors.push(`${id} 缺少 D2 教学图 ${diagram}。`);
   }
+  checkInteractive(id, source, lesson);
 }
+
+// 先猜一猜、效果面板和可运行片段都必须先有不依赖 JavaScript 的静态结果。
+function checkInteractive(id, source, lesson) {
+  let components;
+  try { components = importedContent(source).components; } catch (error) { errors.push(`${id} 课程组件无法解析：${error.message}`); return; }
+  const used = (name) => components.filter((item) => item.component === name);
+  const predicts = used('Predict').length;
+  const answerBodies = [...lesson.matchAll(/<summary\b[^>]*>\s*<span\b[^>]*>揭晓答案<\/span>[\s\S]*?<div class="predict-answer-body\b[^"]*">([\s\S]*?)<\/details>/g)];
+  if (count(lesson, /\bdata-predict[\s>]/g) !== predicts || answerBodies.length !== predicts || answerBodies.some((match) => !/<(?:p|ol|ul|pre|figure)\b/.test(match[1]))) {
+    errors.push(`${id} 应静态渲染 ${predicts} 个带答案的「先猜一猜」`);
+  }
+  const effects = used('Effect');
+  if (count(lesson, /\bdata-effect="(?:console|terminal|page|demo)"/g) !== effects.length) errors.push(`${id} 应静态渲染 ${effects.length} 个效果面板`);
+  for (const effectId of new Set(effects.map((item) => item.id).filter(Boolean))) {
+    const effect = effects.find((item) => item.id === effectId);
+    const figures = [...lesson.matchAll(new RegExp(`<figure\\b[^>]*data-effect-id="${effectId}"[^>]*>([\\s\\S]*?)<figcaption\\b`, 'g'))].map((match) => match[1]);
+    if (figures.length !== effects.filter((item) => item.id === effectId).length) errors.push(`${id} 的效果面板 ${effectId} 数量与源码不符`);
+    for (const figure of figures) {
+      if (effect.kind === 'page' && !/<img\b/.test(figure) && !(allowPending && figure.includes(`data-missing-preview="${effectId}"`))) errors.push(`${id} 的页面效果 ${effectId} 没有截图`);
+      if (effect.kind === 'demo' && !new RegExp(`data-demo="${effectId}"[\\s\\S]*<astro-island\\b(?=[^>]*\\bclient="visible")(?=[^>]*\\bssr\\b)[^>]*>\\s*<div class="jsd\\b`).test(figure)) errors.push(`${id} 的交互演示 ${effectId} 缺少 client:visible 岛或服务端初始画面`);
+      if ((effect.kind === 'console' || effect.kind === 'terminal') && !figure.includes(escapeHtml(effect.output.split('\n')[0]))) errors.push(`${id} 的输出面板 ${effectId} 缺少已验证输出`);
+    }
+  }
+  const demos = new Set(effects.filter((item) => item.kind === 'demo').map((item) => item.id));
+  if (demos.size > 2) errors.push(`${id} 使用了 ${demos.size} 个交互演示，每课最多 2 个`);
+  for (const snippet of used('RunSnippet')) {
+    const root = lesson.match(new RegExp(`<section\\b[^>]*data-run-snippet="${snippet.id}"[^>]*>([\\s\\S]*?)<p\\b[^>]*data-run-status`))?.[1];
+    if (!root) errors.push(`${id} 缺少可运行片段 ${snippet.id}`);
+    else if (!root.includes(`>${escapeHtml(snippet.output)}</code></pre>`) || !/<pre\b[^>]*data-language="js"/.test(root)) errors.push(`${id} 的可运行片段 ${snippet.id} 没有静态代码和已验证输出`);
+  }
+  if (/<iframe\b/.test(lesson)) errors.push(`${id} 的静态页面不应包含 iframe；沙箱只在点击运行时创建`);
+}
+
+function count(text, pattern) { return (text.match(pattern) ?? []).length; }
+function escapeHtml(text) { return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
+
+// 只有含交互岛的页面才能加载 React；单页在全站共用脚本之外新增的 JS 不超过 80 KB（gzip）。
+const REACT_MARKERS = ['react.transitional.element', 'react.dev/errors'];
+const JS_BUDGET = 80 * 1024;
+const assets = new Map();
+function asset(file) {
+  if (!assets.has(file)) {
+    const text = existsSync(file) ? readFileSync(file, 'utf8') : '';
+    assets.set(file, { text, gzip: gzipSync(text).length, refs: [...text.matchAll(/\bimport\s*(?:[\w$*{},\s]+?from\s*)?["']([^"']+\.js)["']|\bimport\(\s*["']([^"']+\.js)["']\s*\)/g)].map((match) => path.resolve(path.dirname(file), match[1] ?? match[2])) });
+  }
+  return assets.get(file);
+}
+const scripts = new Map();
+for (const page of pages) {
+  const html = readFileSync(path.join(dist, page), 'utf8');
+  const entries = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"|\b(?:component|renderer|before-hydration)-url="([^"]+)"/g)]
+    .map((match) => match[1] ?? match[2]).filter((url) => url.startsWith(base) && url.endsWith('.js'))
+    .map((url) => path.join(dist, url.slice(base.length)));
+  const inline = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((match) => match[1]).filter((text) => text.trim() && !text.trimStart().startsWith('{'));
+  for (const text of inline) for (const match of text.matchAll(/\bimport\s*(?:[\w$*{},\s]+?from\s*)?["']([^"']+\.js)["']/g)) if (match[1].startsWith(base)) entries.push(path.join(dist, match[1].slice(base.length)));
+  const files = new Set();
+  const visit = (file) => { if (files.has(file)) return; files.add(file); asset(file).refs.forEach(visit); };
+  entries.forEach(visit);
+  scripts.set(page, { files, inline, island: /<astro-island\b/.test(html) });
+}
+const lessonPages = lessons.map(([, slug]) => `${slug}/index.html`).filter((page) => scripts.has(page));
+const shared = lessonPages.length ? lessonPages.map((page) => scripts.get(page)).reduce((common, page) => ({
+  files: new Set([...common.files].filter((file) => page.files.has(file))),
+  inline: common.inline.filter((text) => page.inline.includes(text)),
+})) : { files: new Set(), inline: [] };
+const budgets = [];
+for (const [page, { files, inline, island }] of scripts) {
+  const react = [...files].filter((file) => REACT_MARKERS.some((marker) => asset(file).text.includes(marker)));
+  if (!island && react.length) errors.push(`${page} 没有交互岛却加载了 React：${react.map((file) => path.relative(dist, file)).join('、')}`);
+  if (island && !react.length) errors.push(`${page} 有交互岛但找不到 React 运行时`);
+  const extra = [...files].filter((file) => !shared.files.has(file)).reduce((sum, file) => sum + asset(file).gzip, 0)
+    + inline.filter((text) => !shared.inline.includes(text)).reduce((sum, text) => sum + gzipSync(text).length, 0);
+  budgets.push([page, extra]);
+  if (extra > JS_BUDGET) errors.push(`${page} 新增 JS ${kb(extra)}（gzip），超过 80 KB`);
+}
+function kb(bytes) { return `${(bytes / 1024).toFixed(1)} KB`; }
+const islandPages = budgets.filter(([page]) => scripts.get(page).island).sort((a, b) => b[1] - a[1]);
 for (const lab of catalog.labs) if (!existsSync(path.join(dist, `labs/${lab.labId.toLowerCase()}/index.html`))) errors.push(`缺少 Lab 页：${lab.labId}`);
 const frozenRoot = path.join(repo, 'labs/releases');
 const frozenReleases = readdirSync(frozenRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
@@ -95,4 +174,5 @@ if ((roadmap.match(/data-progress\s/g) ?? []).length !== 1 || lessons.some(([id]
   errors.push('学习路线缺少进度管理或课程状态入口。');
 }
 if (errors.length) throw new Error(errors.join('\n'));
-console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口、${references.length} 张速查导航与 ${lessons.length} 课折叠区/D2 图；${new Set([...frozenReleases, catalog.release]).size} 版 ${archives} 个学习包/源码清单。`);
+console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口、${references.length} 张速查导航与 ${lessons.length} 课折叠区/D2 图/交互组件静态结果；${new Set([...frozenReleases, catalog.release]).size} 版 ${archives} 个学习包/源码清单。`);
+console.log(`页面 JS：${islandPages.length} 个页面含交互岛，其余页面不加载 React；单页新增 JS 最大 ${kb(Math.max(0, ...budgets.map(([, bytes]) => bytes)))}（gzip，上限 80 KB）${islandPages.map(([page, bytes]) => `；${page.replace(/\/index\.html$/, '')} ${kb(bytes)}`).join('')}。`);

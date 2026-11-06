@@ -1,14 +1,304 @@
 ---
-// 接口骨架：路 2 负责替换为可在沙箱 iframe 中运行的正式组件；禁用 JS 时显示已验证输出。
+// 可运行片段：只接受 examples/cNN/*.js 且有 .expected.txt 的浏览器可执行代码（npm run examples 已核对输出）。
+// 运行在 sandbox="allow-scripts" 的 srcdoc iframe 里，不加 allow-same-origin；禁用 JS 时显示源码与已验证输出。
 import { Code } from '@astrojs/starlight/components';
-import { readExample } from '../lib/examples.mjs';
+import { readRunnable } from '../lib/examples.mjs';
 interface Props { example: string; title?: string }
 const { example, title } = Astro.props;
-const item = readExample(example);
-if (item.source === null) throw new Error(`RunSnippet 需要可运行的源码：${example}`);
+const item = readRunnable(example);
+const source = item.source ?? '';
+const heading = title ?? item.file;
+const editorId = `run-${example.replace('/', '-')}-editor`;
+const rows = Math.min(Math.max(source.split('\n').length + 1, 4), 26);
 ---
-<section class="run-snippet" data-run-snippet={example}>
-  <Code code={item.source} lang="js" title={title ?? item.file} />
-  <p><strong>已验证输出：</strong></p>
-  <Code code={item.expected} lang="text" />
+<section class="run-snippet not-content" data-run-snippet={example} data-expected={item.expected} aria-label={`可运行片段：${heading}`}>
+  <div class="run-head">
+    <span class="run-badge">可运行</span>
+    <span class="run-name">{heading}</span>
+    <div class="run-actions" data-run-actions hidden>
+      <button type="button" class="run-primary" data-action="run">▶ 运行</button>
+      <button type="button" data-action="edit">编辑</button>
+      <button type="button" data-action="reset">重置</button>
+      <button type="button" data-action="copy">复制</button>
+    </div>
+  </div>
+  <div class="run-code" data-run-view>
+    <Code code={source} lang="js" title={item.file} />
+  </div>
+  <div class="run-editor" data-run-editor hidden>
+    <label for={editorId}>编辑代码（只在本页运行，刷新后恢复；Ctrl/⌘ + Enter 运行）</label>
+    <textarea id={editorId} rows={rows} spellcheck="false" autocomplete="off" autocapitalize="off" data-run-source>{source}</textarea>
+  </div>
+  <div class="run-panels">
+    <div class="run-panel">
+      <p class="run-panel-title">已验证输出</p>
+      <pre class="run-out not-content" tabindex="0" aria-label="已验证输出"><code>{item.expected}</code></pre>
+    </div>
+    <div class="run-panel" data-run-result hidden>
+      <p class="run-panel-title">本次运行与对比</p>
+      <ol class="run-lines not-content" data-run-lines></ol>
+    </div>
+  </div>
+  <p class="run-status" data-run-status role="status"></p>
 </section>
+
+<script>
+  import { sandboxRuntime } from '../lib/run-snippet-runtime.mjs';
+
+  const TIMEOUT_MS = 2000;
+  const WORKER = `const runtime = (${sandboxRuntime})((message) => self.postMessage(message), self);
+self.addEventListener('unhandledrejection', (event) => { event.preventDefault(); runtime.fail(event.reason); });
+self.onmessage = (event) => runtime.run(event.data.code);`;
+
+  // iframe 内：优先在 Worker 中执行（死循环不会卡住页面）；Worker 不可用时退回在 iframe 自身执行。
+  function frameMain(workerSource: string, runtimeFactory: typeof sandboxRuntime) {
+    window.addEventListener('message', (event) => {
+      if (event.source !== window.parent || event.data?.type !== 'run') return;
+      const relay = (message: unknown) => window.parent.postMessage(message, '*');
+      try {
+        const url = URL.createObjectURL(new Blob([workerSource], { type: 'text/javascript' }));
+        const worker = new Worker(url);
+        worker.onmessage = (message) => relay(message.data);
+        worker.onerror = (error) => {
+          error.preventDefault();
+          relay({ type: 'log', level: 'error', text: `Uncaught ${error.message || 'Error'}` });
+          relay({ type: 'done' });
+        };
+        worker.postMessage({ code: event.data.code });
+      } catch {
+        const runtime = runtimeFactory(relay, window);
+        window.addEventListener('unhandledrejection', (rejection) => { rejection.preventDefault(); runtime.fail(rejection.reason); });
+        window.addEventListener('error', (error) => { error.preventDefault(); runtime.fail(error.error ?? error.message); });
+        runtime.run(event.data.code);
+      }
+    });
+    window.parent.postMessage({ type: 'ready' }, '*');
+  }
+
+  const frameScript = `(${frameMain})(${JSON.stringify(WORKER)}, ${sandboxRuntime});`.replace(/<\/(script)/gi, '<\\/$1');
+  const SRCDOC = '<!doctype html><html><head><meta charset="utf-8">'
+    + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'unsafe-inline\' \'unsafe-eval\' blob:; worker-src blob:">'
+    + `</head><body><script>${frameScript}</` + 'script></body></html>';
+
+  type LogMessage = { type: 'log'; level: 'log' | 'warn' | 'error'; text: string };
+  type Message = LogMessage | { type: 'ready' } | { type: 'done' } | { type: 'truncated'; limit: number };
+
+  function normalize(text: string) {
+    return text.replace(/\r\n?/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n$/, '');
+  }
+
+  function setup(root: HTMLElement) {
+    const part = <T extends Element>(selector: string) => {
+      const element = root.querySelector<T>(selector);
+      if (!element) throw new Error(`RunSnippet 缺少 ${selector}`);
+      return element;
+    };
+    const actions = part<HTMLElement>('[data-run-actions]');
+    const view = part<HTMLElement>('[data-run-view]');
+    const editorBox = part<HTMLElement>('[data-run-editor]');
+    const editor = part<HTMLTextAreaElement>('[data-run-source]');
+    const result = part<HTMLElement>('[data-run-result]');
+    const list = part<HTMLOListElement>('[data-run-lines]');
+    const status = part<HTMLElement>('[data-run-status]');
+    const expected = normalize(root.dataset.expected ?? '').split('\n');
+    const button = (name: string) => actions.querySelector<HTMLButtonElement>(`[data-action="${name}"]`)!;
+    let frame: HTMLIFrameElement | null = null;
+    let timer = 0;
+
+    const say = (text: string) => { status.textContent = text; };
+    const stop = () => {
+      window.clearTimeout(timer);
+      frame?.remove();
+      frame = null;
+      button('run').disabled = false;
+      root.removeAttribute('data-running');
+    };
+
+    function render(logs: LogMessage[], note: string) {
+      list.replaceChildren();
+      const stdout = logs.filter((entry) => entry.level === 'log').flatMap((entry) => normalize(entry.text).split('\n'));
+      let mismatched = 0;
+      const total = Math.max(expected.length, stdout.length);
+      let index = 0;
+      for (const entry of logs) {
+        if (entry.level !== 'log') {
+          const item = document.createElement('li');
+          item.className = 'run-line run-line-stderr';
+          item.textContent = `${entry.level === 'warn' ? '⚠ warn' : '✖ error'}　${entry.text}　（不计入对比）`;
+          list.append(item);
+          continue;
+        }
+        for (const line of normalize(entry.text).split('\n')) {
+          list.append(line === expected[index] ? row(true, line) : row(false, line, expected[index]));
+          if (line !== expected[index]) mismatched++;
+          index++;
+        }
+      }
+      for (; index < expected.length; index++) {
+        list.append(row(false, null, expected[index]));
+        mismatched++;
+      }
+      result.hidden = false;
+      const summary = mismatched === 0 && stdout.length > 0
+        ? `${note}输出 ${total} 行，全部与已验证输出一致。`
+        : `${note}共 ${total} 行，其中 ${mismatched} 行与已验证输出不同。`;
+      say(summary);
+    }
+    function row(ok: boolean, actual: string | null, wanted?: string) {
+      const item = document.createElement('li');
+      item.className = `run-line ${ok ? 'run-line-ok' : 'run-line-diff'}`;
+      const mark = document.createElement('span');
+      mark.className = 'run-mark';
+      mark.textContent = ok ? '✓ 一致' : '✗ 不同';
+      const text = document.createElement('code');
+      text.textContent = actual ?? '（没有这一行）';
+      item.append(mark, text);
+      if (!ok) {
+        const hint = document.createElement('span');
+        hint.className = 'run-expected';
+        hint.textContent = wanted === undefined ? '预期：没有这一行' : `预期：${wanted}`;
+        item.append(hint);
+      }
+      return item;
+    }
+
+    function run() {
+      stop();
+      const code = editorBox.hidden ? editor.defaultValue : editor.value;
+      const logs: LogMessage[] = [];
+      let truncated = false;
+      button('run').disabled = true;
+      root.setAttribute('data-running', '');
+      say('运行中…');
+      const iframe = document.createElement('iframe');
+      iframe.setAttribute('sandbox', 'allow-scripts');
+      iframe.setAttribute('aria-hidden', 'true');
+      iframe.tabIndex = -1;
+      iframe.title = '代码运行沙箱';
+      iframe.className = 'run-sandbox';
+      const onMessage = (event: MessageEvent<Message>) => {
+        if (event.source !== iframe.contentWindow) return;
+        const message = event.data;
+        if (message.type === 'ready') iframe.contentWindow?.postMessage({ type: 'run', code }, '*');
+        else if (message.type === 'log') logs.push(message);
+        else if (message.type === 'truncated') truncated = true;
+        else if (message.type === 'done') {
+          window.removeEventListener('message', onMessage);
+          stop();
+          render(logs, truncated ? '输出过多，只保留前 500 行。' : '运行完成：');
+        }
+      };
+      window.addEventListener('message', onMessage);
+      timer = window.setTimeout(() => {
+        window.removeEventListener('message', onMessage);
+        stop();
+        render(logs, '超时：代码 2 秒内没有结束，已停止运行。');
+      }, TIMEOUT_MS);
+      iframe.srcdoc = SRCDOC;
+      frame = iframe;
+      root.append(iframe);
+    }
+
+    function edit() {
+      view.hidden = true;
+      editorBox.hidden = false;
+      button('edit').hidden = true;
+      editor.focus();
+    }
+    function reset() {
+      stop();
+      editor.value = editor.defaultValue;
+      view.hidden = false;
+      editorBox.hidden = true;
+      button('edit').hidden = false;
+      result.hidden = true;
+      list.replaceChildren();
+      say('已恢复原始代码。');
+    }
+    async function copy() {
+      const code = editorBox.hidden ? editor.defaultValue : editor.value;
+      try {
+        await navigator.clipboard.writeText(code);
+        say('代码已复制。');
+      } catch {
+        say('复制失败，请选中代码后手动复制。');
+      }
+    }
+
+    button('run').addEventListener('click', run);
+    button('edit').addEventListener('click', edit);
+    button('reset').addEventListener('click', reset);
+    button('copy').addEventListener('click', copy);
+    editor.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); run(); }
+    });
+    actions.hidden = false;
+    root.setAttribute('data-ready', '');
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-run-snippet]')) setup(root);
+</script>
+
+<style>
+  .run-snippet {
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
+    border-radius: var(--js-radius, 12px);
+    background: var(--js-surface-raised, var(--sl-color-bg-nav));
+    box-shadow: var(--js-shadow, none);
+    padding: .75rem .9rem .9rem;
+    margin-block: 1.5rem;
+    max-inline-size: var(--js-wide-width, 64rem);
+  }
+  .run-snippet > :global(* + *) { margin-top: .7rem; }
+  .run-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
+  .run-badge {
+    font-size: .75rem; font-weight: 700; padding: .1rem .55rem; border-radius: 999px;
+    background: var(--js-color-amber-soft, var(--sl-color-orange-low)); color: var(--js-color-amber, var(--sl-color-orange-high));
+  }
+  .run-name { font-family: var(--__sl-font-mono, monospace); font-size: .85rem; }
+  .run-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-inline-start: auto; }
+  .run-actions[hidden] { display: none; }
+  .run-actions button {
+    font: inherit; font-size: .85rem; cursor: pointer; padding: .25rem .75rem; border-radius: 8px;
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
+    background: var(--js-surface, var(--sl-color-bg)); color: var(--sl-color-white);
+  }
+  .run-actions button[hidden] { display: none; }
+  .run-actions .run-primary {
+    border-color: var(--js-color-primary, var(--sl-color-text-accent));
+    background: var(--js-color-primary, var(--sl-color-text-accent)); color: var(--sl-color-black, #fff); font-weight: 700;
+  }
+  .run-actions button:disabled { opacity: .6; cursor: progress; }
+  .run-actions button:focus-visible, .run-editor textarea:focus-visible, .run-out:focus-visible {
+    outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 2px;
+  }
+  .run-code :global(.expressive-code) { margin: 0; }
+  .run-editor[hidden] { display: none; }
+  .run-editor { display: grid; gap: .35rem; }
+  .run-editor label { font-size: .8rem; color: var(--sl-color-gray-2); }
+  .run-editor textarea {
+    inline-size: 100%; resize: vertical; tab-size: 2; padding: .75rem;
+    font-family: var(--__sl-font-mono, monospace); font-size: var(--js-code-size, 14px); line-height: 1.6;
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light)); border-radius: 8px;
+    background: var(--js-surface, var(--sl-color-bg)); color: var(--sl-color-white);
+  }
+  .run-panels { display: grid; gap: .7rem; }
+  @media (min-width: 50rem) { .run-panels:has([data-run-result]:not([hidden])) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } }
+  .run-panel { min-inline-size: 0; border: 1px solid var(--js-border, var(--sl-color-hairline-light)); border-radius: 8px; overflow: hidden; background: var(--js-surface, var(--sl-color-bg)); }
+  .run-panel[hidden] { display: none; }
+  .run-panel-title { margin: 0; padding: .3rem .75rem; font-size: .78rem; font-weight: 700; color: var(--sl-color-gray-2); border-bottom: 1px solid var(--js-border, var(--sl-color-hairline-light)); }
+  .run-out { margin: 0; padding: .55rem .75rem; border: 0; background: transparent; overflow-x: auto; font-size: var(--js-code-size, 14px); line-height: 1.6; }
+  .run-lines { margin: 0; padding: .3rem 0; list-style: none; font-size: .85rem; }
+  .run-lines :global(.run-line) { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .6rem; padding: .2rem .75rem; margin: 0; }
+  .run-lines :global(.run-line + .run-line) { border-top: 1px solid var(--js-border, var(--sl-color-hairline-light)); }
+  .run-lines :global(code) { white-space: pre-wrap; overflow-wrap: anywhere; background: none; padding: 0; }
+  .run-lines :global(.run-mark) { font-size: .75rem; font-weight: 700; white-space: nowrap; }
+  .run-lines :global(.run-line-ok .run-mark) { color: var(--js-color-ok, var(--sl-color-green)); }
+  .run-lines :global(.run-line-diff) { background: color-mix(in srgb, var(--js-color-err, #b91c1c) 8%, transparent); }
+  .run-lines :global(.run-line-diff .run-mark) { color: var(--js-color-err, var(--sl-color-red)); }
+  .run-lines :global(.run-expected) { font-size: .8rem; color: var(--sl-color-gray-2); inline-size: 100%; padding-inline-start: 3.6rem; }
+  .run-lines :global(.run-line-stderr) { color: var(--js-color-amber, var(--sl-color-orange-high)); font-family: var(--__sl-font-mono, monospace); }
+  .run-status { margin: 0; font-size: .85rem; min-block-size: 1.2em; color: var(--sl-color-gray-2); }
+  .run-status:empty { display: none; }
+  .run-snippet :global(.run-sandbox) { display: none; }
+</style>

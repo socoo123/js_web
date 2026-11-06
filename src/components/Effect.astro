@@ -1,8 +1,11 @@
 ---
-// 接口骨架：路 2 负责替换为正式效果面板。
-import { Code } from '@astrojs/starlight/components';
+// 效果面板：console/terminal 输出、page 截图（浏览器外框，可切宽度与亮暗）、demo 交互演示（React island）。
 import { readExample } from '../lib/examples.mjs';
 import { getShot } from '../lib/previews.mjs';
+import { DEMOS, demoInfo } from './demos/registry.mjs';
+import C23FirstRender from './demos/C23FirstRender.jsx';
+import C23UpdateQueue from './demos/C23UpdateQueue.jsx';
+
 interface Props {
   kind: 'console' | 'terminal' | 'page' | 'demo';
   example?: string;
@@ -12,15 +15,190 @@ interface Props {
   caption?: string;
 }
 const { kind, example, preview, demo, title, caption } = Astro.props;
-const output = example ? readExample(example).expected : null;
+if (!['console', 'terminal', 'page', 'demo'].includes(kind)) throw new Error(`Effect kind 无效：${kind}`);
+
+// client:* 指令不能用于动态标签，每个演示写一个显式分支；登记表与分支必须一一对应。
+const RENDERED = ['c23-first-render', 'c23-update-queue'];
+if (RENDERED.join() !== Object.keys(DEMOS).join()) throw new Error('Effect.astro 的演示分支与 demos/registry.mjs 不一致');
+const demoLabel = kind === 'demo' ? demoInfo(demo ?? '').label : undefined;
+
+const output = (kind === 'console' || kind === 'terminal') && example ? readExample(example).expected : null;
+const panelLabel = kind === 'terminal' ? '终端' : 'Console';
+
 const shot = kind === 'page' && preview ? getShot(preview) : undefined;
+const images = shot?.images ?? [];
+const widths = [...new Set(images.map((image) => image.width))].sort((a, b) => a - b);
+const themes = [...new Set(images.map((image) => image.theme))];
+const fallback = images.find((image) => image.width === widths.at(-1) && image.theme === 'light')
+  ?? images.find((image) => image.width === widths.at(-1)) ?? images[0];
+const themeName = { light: '亮色', dark: '暗色' };
+const figcaption = caption ?? shot?.caption;
 ---
-<figure class="effect" data-effect={kind}>
-  {title && <p class="effect-title">{title}</p>}
-  {(kind === 'console' || kind === 'terminal') && (output !== null ? <Code code={output} lang="text" /> : <slot />)}
-  {kind === 'page' && (shot
-    ? <img src={shot.images[0].src.src} width={shot.images[0].src.width} height={shot.images[0].src.height} alt={shot.alt} loading="lazy" />
-    : <p data-missing-preview={preview}>缺少效果截图：{preview}</p>)}
-  {kind === 'demo' && <p data-pending-demo={demo}>交互演示：{demo}</p>}
-  {caption && <figcaption>{caption}</figcaption>}
+<figure class:list={['effect', `effect-${kind}`, 'not-content']} data-effect={kind} data-effect-id={example ?? preview ?? demo ?? undefined}>
+  {(kind === 'console' || kind === 'terminal') && (
+    <div class="effect-panel">
+      <div class="effect-bar">
+        <span class="effect-tab">{panelLabel}</span>
+        {title && <span class="effect-title">{title}</span>}
+      </div>
+      {output !== null
+        ? <pre class="effect-output" tabindex="0" aria-label={`${title ?? panelLabel}输出`}><code>{output.split('\n').map((line) => <span class="effect-line">{line || ' '}</span>)}</code></pre>
+        : <div class="effect-slot"><slot /></div>}
+    </div>
+  )}
+  {kind === 'page' && (
+    <div class="effect-browser" data-shot={preview}>
+      <div class="effect-bar effect-browser-bar">
+        <span class="effect-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="effect-address">{title ?? '本地页面'}</span>
+      </div>
+      {fallback ? (
+        <>
+          {(widths.length > 1 || themes.length > 1) && (
+            <div class="effect-switch" data-shot-switch hidden>
+              {widths.length > 1 && (
+                <div class="effect-switch-group" role="group" aria-label="截图宽度">
+                  {widths.map((width) => <button type="button" data-width={width} aria-pressed={width === fallback.width ? 'true' : 'false'}>{width}px</button>)}
+                </div>
+              )}
+              {themes.length > 1 && (
+                <div class="effect-switch-group" role="group" aria-label="截图主题">
+                  {themes.map((theme) => <button type="button" data-theme={theme} aria-pressed={theme === fallback.theme ? 'true' : 'false'}>{themeName[theme]}</button>)}
+                </div>
+              )}
+            </div>
+          )}
+          <div class="effect-shot">
+            {images.map((image) => (
+              <img
+                src={image.src.src}
+                width={image.src.width}
+                height={image.src.height}
+                alt={shot!.alt}
+                loading="lazy"
+                decoding="async"
+                data-width={image.width}
+                data-theme={image.theme}
+                style={`max-inline-size: min(100%, ${image.width}px)`}
+                hidden={image !== fallback}
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <p class="effect-missing" data-missing-preview={preview}>效果截图待生成：{preview}</p>
+      )}
+    </div>
+  )}
+  {kind === 'demo' && (
+    <div class="effect-demo" data-demo={demo} aria-label={`交互演示：${demoLabel}`} role="group">
+      <noscript><p class="effect-noscript">启用 JavaScript 后可以操作这个演示；下面显示的是初始状态，结果见说明文字。</p></noscript>
+      {demo === 'c23-first-render' && <C23FirstRender client:visible />}
+      {demo === 'c23-update-queue' && <C23UpdateQueue client:visible />}
+    </div>
+  )}
+  {figcaption && <figcaption>{figcaption}</figcaption>}
 </figure>
+
+<script>
+  const prefersDark = () => document.documentElement.dataset.theme === 'dark';
+  for (const browser of document.querySelectorAll<HTMLElement>('.effect-browser')) {
+    const panel = browser.querySelector<HTMLElement>('[data-shot-switch]');
+    const images = [...browser.querySelectorAll<HTMLImageElement>('.effect-shot img')];
+    if (!panel || images.length < 2) continue;
+    const widths = [...new Set(images.map((image) => image.dataset.width))];
+    const themes = [...new Set(images.map((image) => image.dataset.theme))];
+    const current = images.find((image) => !image.hidden) ?? images[0];
+    const state = { width: current.dataset.width, theme: current.dataset.theme };
+    if (themes.includes(prefersDark() ? 'dark' : 'light')) state.theme = prefersDark() ? 'dark' : 'light';
+    if (window.innerWidth < 600 && widths.includes('360')) state.width = '360';
+    const show = () => {
+      const match = images.find((image) => image.dataset.width === state.width && image.dataset.theme === state.theme)
+        ?? images.find((image) => image.dataset.width === state.width) ?? images[0];
+      for (const image of images) image.hidden = image !== match;
+      for (const button of panel.querySelectorAll<HTMLButtonElement>('button')) {
+        const pressed = button.dataset.width ? button.dataset.width === match.dataset.width : button.dataset.theme === match.dataset.theme;
+        button.setAttribute('aria-pressed', String(pressed));
+      }
+    };
+    panel.addEventListener('click', (event) => {
+      const button = event.target instanceof Element ? event.target.closest('button') : null;
+      if (!button) return;
+      if (button.dataset.width) state.width = button.dataset.width;
+      if (button.dataset.theme) state.theme = button.dataset.theme;
+      show();
+    });
+    panel.hidden = false;
+    show();
+  }
+</script>
+
+<style>
+  .effect { margin-block: 1.25rem 1.5rem; max-inline-size: var(--js-wide-width, 64rem); }
+  .effect figcaption {
+    margin-top: .5rem; font-size: .9rem; color: var(--sl-color-gray-2);
+    padding-inline-start: .75rem; border-inline-start: 3px solid var(--js-color-primary, var(--sl-color-text-accent));
+  }
+  .effect-panel, .effect-browser, .effect-demo {
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
+    border-radius: var(--js-radius, 12px);
+    background: var(--js-surface-raised, var(--sl-color-bg-nav));
+    box-shadow: var(--js-shadow, none);
+    overflow: hidden;
+  }
+  .effect-bar {
+    display: flex; align-items: center; gap: .6rem; min-block-size: 2.1rem;
+    padding: .3rem .8rem; font-size: .8rem; color: var(--sl-color-gray-2);
+    border-bottom: 1px solid var(--js-border, var(--sl-color-hairline-light));
+    background: var(--js-surface, var(--sl-color-bg));
+  }
+  .effect-tab { font-weight: 700; color: var(--sl-color-white); }
+  .effect-tab::before { content: '›_ '; font-family: var(--__sl-font-mono, monospace); color: var(--js-color-primary, var(--sl-color-text-accent)); }
+  .effect-title { overflow-wrap: anywhere; }
+  .effect-output {
+    margin: 0; padding: .6rem 0; overflow-x: auto; background: transparent; border: 0;
+    font-family: var(--__sl-font-mono, monospace); font-size: var(--js-code-size, 14px); line-height: 1.6;
+  }
+  .effect-output:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: -2px; }
+  .effect-line { display: block; padding: .05rem .9rem; white-space: pre; }
+  .effect-console .effect-line + .effect-line { border-top: 1px solid var(--js-border, var(--sl-color-hairline-light)); }
+  .effect-terminal .effect-panel { background: #0f172a; border-color: #1e293b; }
+  .effect-terminal .effect-bar { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+  .effect-terminal .effect-tab { color: #f8fafc; }
+  .effect-terminal .effect-tab::before { content: '$ '; color: #4ade80; }
+  .effect-terminal .effect-output { color: #e2e8f0; }
+  .effect-slot :global(.expressive-code) { margin: 0; }
+  .effect-slot :global(.expressive-code .frame) { box-shadow: none; }
+  .effect-slot :global(.expressive-code pre) { border: 0; border-radius: 0; }
+
+  .effect-browser-bar { gap: .8rem; }
+  .effect-dots { display: inline-flex; gap: .35rem; }
+  .effect-dots i { inline-size: .65rem; block-size: .65rem; border-radius: 50%; background: var(--sl-color-gray-5); }
+  .effect-dots i:first-child { background: #f87171; }
+  .effect-dots i:nth-child(2) { background: #fbbf24; }
+  .effect-dots i:last-child { background: #4ade80; }
+  .effect-address {
+    flex: 1; min-inline-size: 0; padding: .15rem .7rem; border-radius: 999px; font-size: .78rem;
+    background: var(--js-surface-raised, var(--sl-color-bg-nav)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .effect-switch { display: flex; flex-wrap: wrap; gap: .5rem 1rem; padding: .5rem .8rem; border-bottom: 1px solid var(--js-border, var(--sl-color-hairline-light)); }
+  .effect-switch[hidden] { display: none; }
+  .effect-switch-group { display: inline-flex; border: 1px solid var(--js-border, var(--sl-color-hairline-light)); border-radius: 8px; overflow: hidden; }
+  .effect-switch button {
+    font: inherit; font-size: .8rem; padding: .2rem .65rem; border: 0; cursor: pointer;
+    background: transparent; color: var(--sl-color-gray-2);
+  }
+  .effect-switch button + button { border-inline-start: 1px solid var(--js-border, var(--sl-color-hairline-light)); }
+  .effect-switch button[aria-pressed='true'] { background: var(--js-color-primary-soft, var(--sl-color-accent-low)); color: var(--sl-color-white); font-weight: 700; }
+  .effect-switch button:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: -2px; }
+  .effect-shot { display: grid; place-items: center; padding: .75rem; background: var(--js-surface, var(--sl-color-bg)); }
+  .effect-shot img { display: block; block-size: auto; border-radius: 6px; box-shadow: 0 0 0 1px var(--js-border, var(--sl-color-hairline-light)); }
+  .effect-shot img[hidden] { display: none; }
+  .effect-missing {
+    margin: 0; padding: 2.5rem 1rem; text-align: center; color: var(--sl-color-gray-3);
+    background: repeating-linear-gradient(-45deg, transparent 0 12px, var(--js-color-primary-soft, var(--sl-color-accent-low)) 12px 24px);
+  }
+
+  .effect-demo { padding: 1rem; }
+  .effect-noscript { margin: 0 0 .75rem; font-size: .85rem; color: var(--sl-color-gray-2); }
+</style>
