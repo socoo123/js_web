@@ -51,6 +51,11 @@ const figcaption = caption ?? shot?.caption;
       <div class="effect-bar effect-browser-bar">
         <span class="effect-dots" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="effect-address">{title ?? '本地页面'}</span>
+        {fallback && (
+          <a class="effect-open" href={fallback.src.src} target="_blank" rel="noopener" data-shot-open>
+            <span aria-hidden="true">↗ </span>原图<span class="js-visually-hidden">：在新标签页打开截图</span>
+          </a>
+        )}
       </div>
       {fallback ? (
         <>
@@ -104,6 +109,7 @@ const figcaption = caption ?? shot?.caption;
   const prefersDark = () => document.documentElement.dataset.theme === 'dark';
   for (const browser of document.querySelectorAll<HTMLElement>('.effect-browser')) {
     const panel = browser.querySelector<HTMLElement>('[data-shot-switch]');
+    const open = browser.querySelector<HTMLAnchorElement>('[data-shot-open]');
     const images = [...browser.querySelectorAll<HTMLImageElement>('.effect-shot img')];
     if (!panel || images.length < 2) continue;
     const widths = [...new Set(images.map((image) => image.dataset.width))];
@@ -116,6 +122,7 @@ const figcaption = caption ?? shot?.caption;
       const match = images.find((image) => image.dataset.width === state.width && image.dataset.theme === state.theme)
         ?? images.find((image) => image.dataset.width === state.width) ?? images[0];
       for (const image of images) image.hidden = image !== match;
+      if (open) open.href = match.src;
       for (const button of panel.querySelectorAll<HTMLButtonElement>('button')) {
         const pressed = button.dataset.width ? button.dataset.width === match.dataset.width : button.dataset.theme === match.dataset.theme;
         button.setAttribute('aria-pressed', String(pressed));
@@ -152,7 +159,7 @@ const figcaption = caption ?? shot?.caption;
     border-bottom: 1px solid var(--js-border, var(--sl-color-hairline-light));
     background: var(--js-surface, var(--sl-color-bg));
   }
-  .effect-tab { font-weight: 700; color: var(--sl-color-white); }
+  .effect-tab { flex: none; white-space: nowrap; font-weight: 700; color: var(--sl-color-white); }
   .effect-tab::before { content: '›_ '; font-family: var(--__sl-font-mono, monospace); color: var(--js-color-primary, var(--sl-color-text-accent)); }
   .effect-title { overflow-wrap: anywhere; }
   .effect-output {
@@ -189,6 +196,12 @@ const figcaption = caption ?? shot?.caption;
     flex: 1; min-inline-size: 0; padding: .15rem .7rem; border-radius: 999px; font-size: .78rem;
     background: var(--js-frame-url-bg); color: var(--js-frame-url-fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
+  .effect-open {
+    flex: none; padding: .1rem .6rem; border-radius: 999px; font-size: .78rem; white-space: nowrap; text-decoration: none;
+    border: 1px solid var(--js-frame-border); background: var(--js-frame-url-bg); color: var(--js-frame-url-fg);
+  }
+  .effect-open:hover { color: var(--js-color-primary, var(--sl-color-text-accent)); border-color: currentColor; }
+  .effect-open:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 2px; }
   .effect-switch { display: flex; flex-wrap: wrap; gap: .5rem 1rem; padding: .5rem .8rem; background: var(--js-frame-bar); border-bottom: 1px solid var(--js-frame-border); }
   .effect-switch[hidden] { display: none; }
   .effect-switch-group { display: inline-flex; border: 1px solid var(--js-frame-border); border-radius: 8px; overflow: hidden; background: var(--js-frame-url-bg); }
