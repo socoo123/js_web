@@ -2,6 +2,7 @@
 import catalog from '../../labs/catalog.json';
 import { Code } from '@astrojs/starlight/components';
 import { stepsForLesson, labHref, stepAnchor } from '../lib/lab-steps.mjs';
+import './lab-ui.css';
 interface Props { lessonId: string }
 const lesson = catalog.lessons.find((row) => row.lessonId === Astro.props.lessonId);
 if (!lesson?.implemented) throw new Error(`工作区任务未发行：${Astro.props.lessonId}`);
@@ -16,34 +17,34 @@ const range = first && last ? (first === last ? `第 ${first.number} 步` : `第
 const labLink = first ? labHref(base, lesson.labId, stepAnchor(first.stepId)) : labHref(base, lesson.labId);
 const titleId = `lesson-task-${lesson.lessonId.toLowerCase()}`;
 ---
-<aside class="lesson-task" aria-labelledby={titleId} data-lesson-task={lesson.lessonId}>
+<aside class="lesson-task lab-ui not-content" aria-labelledby={titleId} data-lesson-task={lesson.lessonId}>
   <div class="task-head">
-    <p class="task-title" id={titleId}><strong>本课任务</strong></p>
+    <p class="task-title" id={titleId}>本课任务</p>
     <p class="task-links">
       <a href={labLink}>{lesson.labId} 阶段任务{range && ` · ${range}`}</a> · 本课只完成这一项 · <a href={`${base}labs/rules/`}>Lab 规则与验收</a>
     </p>
   </div>
   <dl class="task-facts">
     <div>
-      <dt>改动文件</dt>
-      <dd><ul class="files">{lesson.files.map((file) => <li><code>{file}</code></li>)}</ul></dd>
+      <dt class="lab-label">改动文件</dt>
+      <dd><ul class="lab-files">{lesson.files.map((file) => <li><code>{file}</code></li>)}</ul></dd>
     </div>
     <div>
-      <dt>命令</dt>
+      <dt class="lab-label">命令</dt>
       <dd><Code code={`${lesson.commands.start}\n${lesson.commands.dev}\n${lesson.commands.check}`} lang="sh" title="在库存工作区执行" /></dd>
     </div>
     <div>
-      <dt>本课完成标准</dt>
+      <dt class="lab-label">本课完成标准</dt>
       <dd><ul class="accept">{lesson.acceptance.map((item) => <li>{item}</li>)}</ul></dd>
     </div>
   </dl>
-  <details class="task-fold">
+  <details class="lab-fold">
     <summary>起点、恢复与服务说明</summary>
     <p>接续 {lesson.previousLesson === 'C00' ? '初始骨架' : lesson.previousLesson + ' 的自己的代码'}，在自己的 <code>inventory/</code> 工作区操作；克隆仓库时对应 <code>labs/inventory/</code>。</p>
     <p>跨课沿用正在运行的服务。首次运行或切换界面时启动 dev；切换前用 Ctrl+C 停止旧服务，改完源码再运行 check。</p>
     <p><a href={`${download}${start}.tar.gz`}>下载本课起点（仅补课/恢复）</a> · <a href={`${base}labs/`}>一次安装与恢复说明</a></p>
   </details>
-  <details class="task-fold">
+  <details class="lab-fold" data-disclosure="answer">
     <summary>完整参考解（答案）</summary>
     <p>先保存自己的修改。<a href={`${download}${end}.tar.gz`}>下载本课终点参考解</a>；可运行 <code>{`npm run lab -- compare ${lesson.lessonId}`}</code> 只读比较，不会替换文件。</p>
   </details>
@@ -51,29 +52,27 @@ const titleId = `lesson-task-${lesson.lessonId.toLowerCase()}`;
 
 <style>
   .lesson-task {
+    max-width: var(--js-prose-width);
     margin-block: 1.5rem; padding: 1rem 1.25rem;
-    border: 1px solid var(--js-color-primary, var(--sl-color-text-accent));
-    border-inline-start-width: 4px;
-    border-radius: var(--js-radius, 0.75rem);
-    background: var(--js-surface-raised, var(--sl-color-bg-nav));
-    overflow-wrap: anywhere;
+    border: 1px solid color-mix(in srgb, var(--js-color-primary) 35%, var(--js-border));
+    border-radius: var(--js-radius);
+    background: var(--js-surface-raised); box-shadow: var(--js-shadow);
   }
   .task-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.85rem; }
-  .task-head p { margin: 0; }
-  .task-title { font-size: var(--sl-text-lg); }
-  .task-links { font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); }
-  .task-facts { display: grid; gap: 0.85rem; margin: 0.85rem 0 0; }
+  .task-title {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    color: var(--js-color-heading); font-size: var(--sl-text-lg); font-weight: 700;
+  }
+  .task-title::before {
+    content: ''; flex: none; width: 1.2rem; height: 1.2rem; background: var(--js-color-primary);
+    -webkit-mask: var(--task-icon) center / contain no-repeat; mask: var(--task-icon) center / contain no-repeat;
+    --task-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='4' width='14' height='17' rx='2.5'/%3E%3Cpath d='M9 4V3h6v1M9 11l2 2 4-4M9 17h6'/%3E%3C/svg%3E");
+  }
+  .task-links { font-size: var(--sl-text-sm); color: var(--js-color-muted); }
+  .task-facts { display: grid; gap: 0.85rem; margin-top: 0.85rem; }
   .task-facts > div { min-width: 0; }
-  dt { margin: 0 0 0.3rem; font-size: var(--sl-text-xs); font-weight: 700; letter-spacing: 0.04em; color: var(--js-color-primary, var(--sl-color-text-accent)); }
-  dd { margin: 0; }
-  dd :global(.expressive-code) { margin: 0; }
-  ul { margin: 0; padding-inline-start: 1.25rem; }
-  li + li { margin-top: 0.25rem; }
-  .files { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
-  .files li { margin: 0; min-width: 0; max-width: 100%; }
-  code { overflow-wrap: anywhere; }
-  .task-fold { margin-top: 0.75rem; padding-top: 0.6rem; border-top: 1px solid var(--js-border, var(--sl-color-hairline-light)); }
-  .task-fold summary { cursor: pointer; font-weight: 600; font-size: var(--sl-text-sm); }
-  .task-fold p { margin-block: 0.5rem; font-size: var(--sl-text-sm); }
-  a:focus-visible, summary:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
+  .accept { margin: 0; }
+  .lab-fold { margin-top: 0.75rem; }
+  .lab-fold + .lab-fold { margin-top: 0.6rem; }
+  .lab-fold p { font-size: var(--sl-text-sm); }
 </style>

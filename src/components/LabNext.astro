@@ -2,6 +2,7 @@
 import catalog from '../../labs/catalog.json';
 import LearningProgress from './LearningProgress.astro';
 import { stepsForLesson, nextAfterLesson, labHref, stepAnchor, finishAnchor } from '../lib/lab-steps.mjs';
+import './lab-ui.css';
 interface Props { lessonId: string }
 const { lessonId } = Astro.props;
 const row = catalog.lessons.find((lesson) => lesson.lessonId === lessonId);
@@ -14,7 +15,7 @@ const first = own?.steps[0];
 const last = own?.steps.at(-1);
 const range = first && last ? (first === last ? `第 ${first.number} 步` : `第 ${first.number}–${last.number} 步`) : '';
 ---
-<nav class="lab-next" data-lab-next={lessonId} aria-label="回到 Lab">
+<nav class="lab-next lab-ui not-content js-card" data-lab-next-step={lessonId} aria-label="回到 Lab">
   {own && first && next ? (
     <>
       <p class="where">
@@ -36,26 +37,19 @@ const range = first && last ? (first === last ? `第 ${first.number} 步` : `第
 </script>
 
 <style>
-  [hidden] { display: none !important; }
-  .lab-next {
-    margin-block: 2.5rem 0; padding: 1rem 1.25rem;
-    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
-    border-radius: var(--js-radius, 0.75rem);
-    background: var(--js-surface-raised, var(--sl-color-bg-nav));
-  }
-  .where { margin: 0 0 0.75rem; font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); font-variant-numeric: tabular-nums; }
-  .go {
+  .lab-next { margin-block: 2.5rem 0; padding: 1rem 1.25rem; }
+  .where { margin: 0 0 0.75rem; font-size: var(--sl-text-sm); color: var(--js-color-muted); font-variant-numeric: tabular-nums; }
+  .where a, .where a:visited, .where a:hover { color: var(--js-color-primary); font-weight: 650; }
+  .go, .go:visited {
     display: grid; gap: 0.15rem; padding: 0.75rem 1rem;
-    border-radius: calc(var(--js-radius, 0.75rem) - 4px);
-    background: var(--js-color-primary-soft, var(--sl-color-accent-low));
-    border: 1px solid var(--js-color-primary, var(--sl-color-text-accent));
-    color: var(--sl-color-white); text-decoration: none;
-    transition: box-shadow var(--js-motion, 200ms);
+    border: 1px solid color-mix(in srgb, var(--js-color-primary) 45%, var(--js-border)); border-radius: 10px;
+    background: var(--js-color-primary-soft); color: var(--js-color-heading); text-decoration: none;
+    transition: border-color var(--js-motion) var(--js-ease), box-shadow var(--js-motion) var(--js-ease);
   }
-  .go:hover { box-shadow: 0 0 0 3px var(--js-color-primary-soft, var(--sl-color-accent-low)); }
-  .go:focus-visible, .where a:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
-  .go-label { font-size: var(--sl-text-sm); font-weight: 700; color: var(--js-color-primary, var(--sl-color-text-accent)); }
-  .go-label::after { content: ' →'; }
-  .go-title { font-weight: 600; }
+  .go:hover { border-color: var(--js-color-primary); box-shadow: var(--js-shadow); color: var(--js-color-heading); }
+  .go-label { font-size: var(--sl-text-sm); font-weight: 700; color: var(--js-color-primary); }
+  .go-label::after { content: '→'; display: inline-block; margin-inline-start: 0.3em; transition: transform var(--js-motion) var(--js-ease); }
+  .go:hover .go-label::after { transform: translateX(0.2rem); }
+  .go-title { font-weight: 650; }
   .lab-next + :global(.learning-progress) { margin-top: 1rem; }
 </style>

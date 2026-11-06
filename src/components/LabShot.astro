@@ -33,17 +33,17 @@ const text = caption ?? shot?.caption;
 
 <style>
   .lab-shot { margin: 0; }
-  img { display: block; width: 100%; height: auto; border: 1px solid var(--js-border, var(--sl-color-hairline-light)); border-radius: var(--js-radius, 0.75rem); }
+  img { display: block; width: 100%; height: auto; border: 1px solid var(--js-border); border-radius: 10px; background: var(--js-surface); }
+  .shot-goal img { box-shadow: var(--js-shadow); }
+  .shot-step img, .shot-step .placeholder { max-width: 30rem; }
   :global(:root[data-theme='light']) [data-shot-theme='dark'],
   :global(:root:not([data-theme='light'])) [data-shot-theme='light'] { display: none; }
   .placeholder {
     display: grid; place-content: center; gap: 0.35rem; text-align: center;
     aspect-ratio: 16 / 9; padding: 1rem;
-    border: 1px dashed var(--js-border, var(--sl-color-hairline-light));
-    border-radius: var(--js-radius, 0.75rem);
-    background: var(--js-surface, var(--sl-color-bg));
-    color: var(--sl-color-gray-3);
+    border: 1px dashed var(--js-border); border-radius: 10px;
+    background: var(--js-surface); color: var(--js-color-muted);
   }
   .shot-step .placeholder { aspect-ratio: 3 / 1; }
-  figcaption { margin-top: 0.5rem; font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); }
+  figcaption { margin-top: 0.5rem; font-size: var(--sl-text-sm); color: var(--js-color-muted); }
 </style>

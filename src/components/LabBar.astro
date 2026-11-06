@@ -1,6 +1,7 @@
 ---
 import catalog from '../../labs/catalog.json';
 import { stepsForLesson, returnsForLesson, labHref, stepAnchor } from '../lib/lab-steps.mjs';
+import './lab-ui.css';
 interface Props { lessonId: string }
 const row = catalog.lessons.find((lesson) => lesson.lessonId === Astro.props.lessonId);
 if (!row) throw new Error(`catalog 中没有 ${Astro.props.lessonId}`);
@@ -13,8 +14,8 @@ const range = own && first && last ? (first === last ? `第 ${first.number} 步`
 const href = first ? labHref(base, lab.labId, stepAnchor(first.stepId)) : labHref(base, lab.labId);
 const returns = returnsForLesson(row.lessonId, base);
 ---
-<nav class="lab-bar" data-lab-bar={row.lessonId} aria-label="所属 Lab">
-  <a href={href}>
+<nav class="lab-bar lab-ui not-content" data-lab-bar={row.lessonId} aria-label="所属 Lab">
+  <a class="lab-chip" href={href}>
     <span class="lab-id">{lab.labId}</span>
     {own ? <span class="lab-where">{range} / 共 {own.lab.steps.length} 步</span> : <span class="lab-where">{lab.title}</span>}
     <span class="lab-back">返回 Lab</span>
@@ -22,7 +23,7 @@ const returns = returnsForLesson(row.lessonId, base);
   {own && <span class="lab-status" data-lab-progress data-ids={own.steps.map((step) => step.stepId).join(' ')} data-unit="步" data-lab-js hidden>本课<span data-lab-progress-count></span></span>}
 </nav>
 {Object.keys(returns).length > 0 && (
-  <aside class="lab-return" data-lab-return data-returns={JSON.stringify(returns)} aria-label="回到 Lab 步骤" hidden>
+  <aside class="lab-return lab-ui not-content" data-lab-return data-returns={JSON.stringify(returns)} aria-label="回到 Lab 步骤" hidden>
     <a data-lab-return-link href={href}>
       <span aria-hidden="true">←</span>
       <span class="return-text"><strong data-lab-return-text>返回 Lab</strong><span data-lab-return-title></span></span>
@@ -36,52 +37,59 @@ const returns = returnsForLesson(row.lessonId, base);
 </script>
 
 <style>
-  [hidden] { display: none !important; }
   .lab-bar {
     display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.85rem;
-    margin-block: 0 1rem; font-size: var(--sl-text-sm);
+    margin-block: 0 1rem; font-size: var(--sl-text-sm); line-height: 1.5;
   }
-  .lab-bar a {
+  .lab-chip, .lab-chip:visited {
     display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem;
     min-height: 2.5rem; padding: 0.3rem 0.9rem 0.3rem 0.35rem;
-    border: 1px solid var(--js-border, var(--sl-color-hairline-light)); border-radius: 999px;
-    background: var(--js-surface-raised, var(--sl-color-bg-nav));
-    color: var(--sl-color-white); text-decoration: none;
-    transition: border-color var(--js-motion, 200ms);
+    border: 1px solid color-mix(in srgb, var(--js-color-amber-stroke) 45%, var(--js-border)); border-radius: 999px;
+    background: var(--js-surface-raised); color: var(--js-color-heading); text-decoration: none;
+    transition: border-color var(--js-motion) var(--js-ease), background-color var(--js-motion) var(--js-ease);
   }
-  .lab-bar a:hover { border-color: var(--js-color-primary, var(--sl-color-text-accent)); }
+  .lab-chip:hover {
+    border-color: var(--js-color-amber-stroke); background: var(--js-color-amber-soft); color: var(--js-color-heading);
+  }
   .lab-id {
-    padding: 0.1rem 0.55rem; border-radius: 999px; font-weight: 700;
-    background: var(--js-color-primary-soft, var(--sl-color-accent-low)); color: var(--js-color-primary, var(--sl-color-text-accent));
+    padding: 0 0.45rem; border-radius: 999px;
+    background: var(--js-color-amber-stroke); color: #1c1300;
+    font-size: 0.75rem; font-weight: 800; line-height: 1.5rem;
   }
   .lab-where { font-variant-numeric: tabular-nums; }
-  .lab-back { color: var(--js-color-primary, var(--sl-color-text-accent)); font-weight: 600; }
-  .lab-back::before { content: '· '; color: var(--sl-color-gray-3); font-weight: 400; }
-  .lab-status { color: var(--sl-color-gray-2); font-variant-numeric: tabular-nums; }
-  a:focus-visible, button:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
+  .lab-back { color: var(--js-color-primary); font-weight: 650; text-underline-offset: 0.22em; }
+  .lab-back::before { content: '· '; color: var(--js-color-muted); font-weight: 400; }
+  .lab-chip:hover .lab-back { text-decoration: underline; }
+  .lab-status { color: var(--js-color-muted); font-variant-numeric: tabular-nums; }
 
   .lab-return {
     position: fixed; z-index: calc(var(--sl-z-index-menu, 5) - 1);
     inset-inline: 0.75rem; inset-block-end: max(0.75rem, env(safe-area-inset-bottom));
     display: flex; align-items: stretch; gap: 0.25rem;
     max-width: 26rem; margin-inline: auto; padding: 0.3rem;
-    border: 1px solid var(--js-color-primary, var(--sl-color-text-accent)); border-radius: 999px;
-    background: var(--js-surface-raised, var(--sl-color-bg-nav)); box-shadow: var(--js-shadow, 0 4px 12px rgb(0 0 0 / 0.25));
+    border: 1px solid color-mix(in srgb, var(--js-color-primary) 45%, var(--js-border)); border-radius: var(--js-radius);
+    background: var(--js-surface-raised); box-shadow: var(--js-shadow);
+    animation: lab-return-in var(--js-motion) var(--js-ease);
   }
+  @keyframes lab-return-in { from { opacity: 0; transform: translateY(0.5rem); } }
   @media (min-width: 72rem) {
     .lab-return { inset-inline: auto 1.5rem; margin-inline: 0; }
   }
-  .lab-return a {
+  .lab-return a, .lab-return a:visited {
     flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.6rem;
-    min-height: 2.75rem; padding: 0.25rem 0.9rem; border-radius: 999px;
-    background: var(--js-color-primary, var(--sl-color-text-accent)); color: var(--js-surface, var(--sl-color-black)); text-decoration: none;
+    min-height: 2.75rem; padding: 0.25rem 0.9rem; border-radius: 10px;
+    background: var(--js-color-primary-solid); color: var(--js-color-on-primary); text-decoration: none;
+    transition: background-color var(--js-motion) var(--js-ease);
   }
-  .return-text { display: grid; min-width: 0; line-height: 1.25; }
+  .lab-return a:hover { background: color-mix(in srgb, var(--js-color-primary-solid) 86%, #000); color: var(--js-color-on-primary); }
+  .return-text { display: grid; min-width: 0; line-height: 1.3; }
+  .return-text strong { color: inherit; }
   .return-text span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--sl-text-xs); }
   .lab-return button {
-    flex: none; width: 2.75rem; border: 0; border-radius: 999px; background: transparent;
-    color: var(--sl-color-white); font-size: 1.25rem; cursor: pointer;
+    flex: none; width: 2.75rem; border: 0; border-radius: 10px; background: transparent;
+    color: var(--js-color-muted); font-size: 1.25rem; cursor: pointer;
+    transition: background-color var(--js-motion) var(--js-ease), color var(--js-motion) var(--js-ease);
   }
-  .lab-return button:hover { background: var(--js-color-primary-soft, var(--sl-color-accent-low)); }
+  .lab-return button:hover { background: var(--js-color-primary-soft); color: var(--js-color-heading); }
   :global(html.has-lab-return) :global(.main-frame) { padding-bottom: 5rem; }
 </style>

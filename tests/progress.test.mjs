@@ -100,6 +100,17 @@ test('每次写入成功都派发 js_web:progress 事件，失败时不派发', 
   }
 });
 
+test('Node 中没有 window 时照常写入，可用来生成存储原文', () => {
+  assert.equal(typeof globalThis.window, 'undefined');
+  const memory = new Map();
+  const storage = { getItem: (key) => memory.get(key) ?? null, setItem: (key, value) => memory.set(key, String(value)), removeItem: (key) => memory.delete(key) };
+  writeProgress(storage, ['C01', 'C02'].reduce((current, id) => markLesson(current, id, true), emptyProgress()));
+  const state = readProgress(storage);
+  assert.equal(state.status, 'ready');
+  assert.deepEqual(state.progress.completed, ['C01', 'C02']);
+  assert.deepEqual(JSON.parse(memory.get(PROGRESS_KEY)), progress(['C01', 'C02']));
+});
+
 test('损坏主记录不自动覆盖，恢复备份时保留原始文本与已勾选步骤', () => {
   const storage = storageFor({ [PROGRESS_KEY]: '{broken', [BACKUP_KEY]: JSON.stringify(progress(['C04'], [STEP_B])) });
   const state = readProgress(storage);
