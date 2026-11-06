@@ -1,0 +1,99 @@
+{
+  "group": "c15",
+  "shots": [
+    {
+      "name": "layout",
+      "checkpoint": "C15",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "src/services", "data"],
+      "actions": [
+        { "do": "waitCount", "selector": "#list article", "count": 6 },
+        { "do": "waitText", "selector": "#summary", "text": "库存 52" },
+        { "do": "assertColumns", "selector": "#list", "columns": { "360": 1, "768": 2, "1280": 4 } },
+        { "do": "assertNoOverflow" }
+      ],
+      "viewports": [
+        { "width": 360, "height": 760, "scale": 2 },
+        { "width": 768, "height": 960 },
+        { "width": 1280, "height": 800 }
+      ],
+      "themes": ["light"],
+      "alt": "C15 完成后的库存页在三种宽度下的样子：360px 商品卡片单列，768px 两列，1280px 四列；工具栏控件换行，页面没有横向滚动条。",
+      "caption": "同一份 CSS：360px 单列、768px 两列、1280px 四列"
+    },
+    {
+      "name": "narrow",
+      "checkpoint": "C15",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "src/services", "data"],
+      "actions": [
+        { "do": "waitCount", "selector": "#list article", "count": 6 },
+        { "do": "assertColumns", "selector": "#list", "columns": { "360": 1 } },
+        { "do": "assertNoOverflow" }
+      ],
+      "viewports": [{ "width": 360, "height": 560, "scale": 2 }],
+      "themes": ["light"],
+      "alt": "C15 库存页在 360px 宽度的顶部：搜索框和分类下拉框放不下时换到下一行，按钮也跟着换行，第一张商品卡片占满整行。",
+      "caption": "360px：工具栏放不下就换行，卡片占满一列"
+    },
+    {
+      "name": "single",
+      "checkpoint": "C15",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "src/services", "data"],
+      "actions": [
+        { "do": "waitCount", "selector": "#list article", "count": 6 },
+        { "do": "fill", "placeholder": "名称或编号", "value": "P004" },
+        { "do": "waitCount", "selector": "#list article", "count": 1 },
+        { "do": "assertColumns", "selector": "#list", "columns": { "1280": 4 } },
+        { "do": "mouseAway" }
+      ],
+      "viewports": [{ "width": 1280, "height": 600 }],
+      "themes": ["light"],
+      "alt": "1280px 宽的库存页搜索 P004 后只剩一张卡片，卡片停在第一列，右边三列留空，没有横跨整行。",
+      "caption": "搜索 P004：四列轨道还在，卡片只占第一列"
+    },
+    {
+      "name": "overflow",
+      "checkpoint": "C15",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "src/services", "data"],
+      "actions": [
+        { "do": "waitCount", "selector": "#list article", "count": 6 },
+        { "do": "addStyle", "css": "article { min-width: 600px; }" },
+        { "do": "assertScrollWidth", "width": { "360": 616 } }
+      ],
+      "viewports": [{ "width": 360, "height": 640, "scale": 2 }],
+      "themes": ["light"],
+      "alt": "360px 宽的库存页给卡片加上 min-width: 600px 后，卡片右侧被屏幕边缘切掉，页面可以向右拖动。",
+      "caption": "故障现象：卡片最小宽 600px，360px 的页面被撑到 616px"
+    },
+    {
+      "name": "focus",
+      "checkpoint": "C15",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "src/services", "data"],
+      "actions": [
+        { "do": "waitCount", "selector": "#list article", "count": 6 },
+        { "do": "fill", "placeholder": "名称或编号", "value": "P004" },
+        { "do": "waitCount", "selector": "#list article", "count": 1 },
+        { "do": "focus", "role": "button", "name": "编辑" },
+        { "do": "press", "key": "Enter" },
+        { "do": "fill", "label": "库存", "value": " " },
+        { "do": "press", "label": "库存", "key": "Enter" },
+        { "do": "waitText", "selector": "#stock-error", "text": "请输入库存，空白无效" },
+        { "do": "mouseAway" }
+      ],
+      "viewports": [{ "width": 768, "height": 1000 }],
+      "themes": ["light"],
+      "target": "main",
+      "alt": "768px 宽的库存页只显示 P004，编辑区里的库存输入框带有 3px 蓝色焦点外框，下方显示「请输入库存，空白无效」。",
+      "caption": "键盘保存空白：焦点回到库存输入框，错误显示在预留的位置"
+    }
+  ]
+}

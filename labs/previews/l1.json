@@ -1,0 +1,22 @@
+{
+  "group": "l1",
+  "shots": [
+    {
+      "name": "goal",
+      "checkpoint": "C10",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "data"],
+      "actions": [
+        { "do": "waitText", "selector": "#product", "text": "库存 12 件" },
+        { "do": "click", "role": "button", "name": "补货" },
+        { "do": "waitText", "selector": "#product", "text": "库存 15 件" },
+        { "do": "waitText", "selector": "#feedback", "text": "已更新当前页面" }
+      ],
+      "viewports": [{ "width": 1280, "height": 720 }],
+      "themes": ["light"],
+      "alt": "L1 完成时的库存卡片：P001 机械键盘补货 3 件后显示库存 15 件、库存价值 598500 分，反馈行写着「已更新当前页面」。",
+      "caption": "L1 终点：同一张卡片背后是可靠的库存规则，补 3 件得到 15"
+    }
+  ]
+}

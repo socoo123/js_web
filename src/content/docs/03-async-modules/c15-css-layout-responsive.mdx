@@ -3,45 +3,95 @@ title: C15 CSS 布局与响应式：排版库存页
 description: 用 Flex 排工具栏、Grid 排商品卡片，做出手机单列到桌面四列的库存页，并在 DevTools 定位溢出。
 sidebar:
   order: 15
+lesson:
+  time: 阅读跟做约 45 分钟 · 实作约 40 分钟
+  prereq: C14 的工作区
+  env: 本地网页、Node 24
+  verified: all
 ---
 
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Effect from '../../../components/Effect.astro';
 import LessonTask from '../../../components/LessonTask.astro';
-
-> **第 2 周 · 第 8 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
-> 前置：C14 的工作区 · 运行：本地网页，Node 24 · 示例已运行验证
+import Predict from '../../../components/Predict.astro';
 
 ## 这一课解决什么问题
 
-库存页能保存了，接着让它在手机、平板和桌面都能操作。本课只改样式：360px 单列、768px 两列、1280px 四列，工具栏可换行，长名称不撑破页面。你会用浏览器计算后的尺寸解释问题，而不是凭感觉调宽度。
+库存页能保存了，接着让它在手机、平板和桌面上都好用。这一课只改样式：窄屏单列、平板两列、桌面四列，工具栏能换行，长名称不撑破页面。出了问题，你会用浏览器算出的尺寸找原因，而不是凭感觉调宽度。
+
+<Effect kind="page" preview="c15/layout" caption="完成后的效果：同一份 CSS，360px 单列、768px 两列、1280px 四列" />
+
+学完你能：
+
+- 用 box-sizing 算清一个盒子在页面上实际占多宽。
+- 用 Flex 排工具栏、用 Grid 排卡片，再用媒体查询从单列加到四列。
+- 用 Computed 和 Console 找出横向溢出的来源，同时保住键盘焦点。
 
 <LessonTask lessonId="C15" />
 
 ## Java 程序员先看这里
 
-如果你用过 Swing 或 JavaFX 的布局管理器，可以沿用“由布局规则分配空间”的经验。网页中，HTML 提供结构，CSS 声明布局规则，浏览器根据视口与内容计算尺寸；Flex、Grid 和媒体查询是这一课要学的新机制。
+用过 Swing 或 JavaFX 的布局管理器，可以沿用「由布局规则分配空间」的经验。网页里 HTML 给结构，CSS 写布局规则，浏览器按视口（显示网页的那块区域）和内容算出尺寸。Flex、Grid 和媒体查询是这一课要学的新机制。
 
 <a id="1-先算盒子width-到底包括什么"></a>
 
 ## 1. 盒模型决定实际占用的空间
 
-在当前工作区，把 `src/vanilla/styles.css` 全文替换为下面的 CSS。星号规则统一 border-box，width 包含内容、内边距和边框，外边距仍另算；main 的 max-width 限制大屏阅读区，padding 给窄屏留边。
+每个元素都是一个盒子：内容区、内边距 padding、边框 border，外面还有外边距 margin。width 量的是哪一层，由 box-sizing 决定。
+
+<Predict question="这张卡片在页面上实际占多宽？把 box-sizing 换成 border-box 呢？">
+
+```css
+.card {
+  box-sizing: content-box;
+  width: 300px;
+  padding: 0 16px;
+  border: 1px solid;
+}
+```
+
+<div slot="answer">
+
+```text
+content-box：外框 334px = 300 + 16 × 2 + 1 × 2
+border-box：外框 300px，内容区缩成 266px
+```
+
+content-box 的 width 只量内容区，padding 和 border 另加。border-box 把它们算进 width，内容区跟着变窄。
+
+</div>
+</Predict>
+
+border-box 让 width 就等于外框，排版时不用心算，所以本课样式的第一行把所有元素统一成 border-box。margin 始终在外框之外。
+
+在当前工作区把 `src/vanilla/styles.css` 全文替换为下面的 CSS，后面几节逐段解释。
 
 <CodeExcerpt snippetId="c15-css" />
 
-页面结果：360px 单列、768px 两列、1280px 四列，工具栏可以换行。
+<Effect kind="console" title="360px 宽，在 Elements 选中第一张卡片后输入">
 
-**先猜一猜：** content-box 下 width 为 300px、两侧 padding 各 16px、border 各 1px，实际外框多宽？
+```text
+> getComputedStyle($0).boxSizing
+'border-box'
+> $0.offsetWidth
+328
+```
 
-是 334px；换成 border-box 外框为 300px，内容区缩为 266px。Java 布局管理器也有尺寸预算，但 CSS 还会处理内容内在尺寸与层叠。
+</Effect>
 
-在 Elements → Computed 看盒模型数字，选中 main 和 article 比较外框与内容区；同时检查 viewport meta，否则手机可能使用放大的布局视口。
+`$0` 是 Elements 面板当前选中的元素。360px 减去 main 两侧各 16px 的 padding，卡片外框正好 328px；Computed 的盒模型图里，内容区是 294px。
+
+main 的 padding 给窄屏留边，max-width 限制大屏上的阅读宽度。手机浏览器要有 viewport meta 才按真实宽度排版，本课页面的 HTML 已经写好。
+
+**记住：** 先看 box-sizing 再算宽度：border-box 下 width 就是外框。
+
+**Java 对照：** Java 布局管理器也按尺寸预算分配空间；CSS 还要考虑内容自身的最小尺寸和层叠规则。
 
 <a id="2-flex让工具栏沿一个方向分配空间"></a>
 
 ## 2. Flex 排工具栏，Grid 排卡片
 
-工具栏沿一个主轴分配空间，开启 flex-wrap 后放不下的控件换行；align-items 调整交叉轴对齐，gap 设置项目间距。
+Flex 沿一条主轴排一行控件，放不下就换行。Grid 先声明列轨道（网格里的一列），再把卡片依次放进去。
 
 ```css
 #filters { display: flex; flex-wrap: wrap; gap: .6rem; align-items: end; }
@@ -49,17 +99,25 @@ import LessonTask from '../../../components/LessonTask.astro';
 #list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
 ```
 
-Grid 声明列轨道。minmax(0, 1fr) 把最小轨道设为 0，让长内容可以收缩；卡片本身也要 min-width:0，文本再由 overflow-wrap 换行。只给父容器 width:100% 不会消除子元素的最小尺寸。
+<Effect kind="page" preview="c15/narrow" />
 
-**先猜一猜：** 已声明四列时只筛到 P004，它会自动横跨四列吗？
+`flex-wrap` 让放不下的控件换到下一行。gap 管间距，align-items 管交叉轴（与主轴垂直的方向）上的对齐。
 
-不会。卡片仍占一列，其他轨道为空；显式轨道数量没有随商品数量改变。auto-fit 与 auto-fill 会处理自动轨道和空轨道，适合另一种按可用空间自动排布的需求，本课用固定断点得到确定的单、双、四列。
+`minmax(0, 1fr)` 把列的最小宽度设成 0，长内容才能收缩。卡片自己也要 `min-width: 0`，文字再靠 overflow-wrap 换行。只给父容器写 width: 100%，消除不了子元素的最小尺寸。
+
+列轨道的数量由 CSS 决定，不随卡片数量变化。桌面是四列时，只剩一张卡片也不会横跨整行：
+
+<Effect kind="page" preview="c15/single" />
+
+auto-fit 和 auto-fill 会按可用空间自动生成轨道，适合另一种需求。本课用固定断点，得到确定的单、双、四列。
+
+**Java 对照：** 用过 FlowLayout 的话，换行的思路可以借用；但这只是经验相通，CSS 属性和 Swing API 并不一一对应。
 
 <a id="3-grid用列轨道排商品卡片"></a>
 
 ## 3. 移动优先，媒体查询逐步增加列数
 
-基础样式先满足窄屏；宽度超过 42rem 增两列，超过 70rem 增四列。
+移动优先指基础样式先让窄屏成立，屏幕变宽再增加列数。媒体查询（`@media`）只在条件成立时让里面的规则生效。
 
 ```css
 @media (min-width: 42rem) {
@@ -70,20 +128,63 @@ Grid 声明列轨道。minmax(0, 1fr) 把最小轨道设为 0，让长内容可�
 }
 ```
 
-桌面同时满足两条查询，后面的同优先级声明胜出。媒体查询不增加选择器权重，仍沿用 C02 的层叠规则。用 DevTools 设备模式设 360、768、1280px，查看 Grid overlay 的轨道，不只看窗口大致尺寸。
+<Effect kind="console" title="设备模式切到三种宽度，选中 #list 后输入 getComputedStyle($0).gridTemplateColumns">
+
+```text
+360px  → '328px'
+768px  → '360px 360px'
+1280px → '284px 284px 284px 284px'
+```
+
+</Effect>
+
+rem 是相对根字号的单位，这里 1rem 是 16px，所以两个断点是 672px 和 1120px。1280px 同时满足两条查询，后写的同优先级声明胜出。媒体查询不增加选择器权重，仍按 C02 的层叠规则比较。
+
+<Predict question="把两条媒体查询的先后顺序对调，1280px 下是几列？">
+
+```css
+@media (min-width: 70rem) {
+  #list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 42rem) {
+  #list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+```
+
+<div slot="answer">
+
+```text
+'584px 584px'
+```
+
+两列。两条查询都成立，后写的两列声明覆盖了四列，这就是「明明写了四列，桌面还是两列」。
+
+</div>
+</Predict>
+
+**记住：** 移动优先时，min-width 查询按从小到大的顺序写。
+
+**Java 对照：** Swing 窗口缩放时，布局管理器按同一套规则重排；媒体查询则按视口宽度换用另一组声明。
 
 <a id="4-移动优先先保证窄屏成立再增加列数"></a>
 
 ## 4. 焦点与反馈也属于可用布局
 
-保留 :focus-visible 的清楚外框，控件可通过 Tab 到达；隐藏编辑区使用 hidden，展开后聚焦库存。feedback 和 stock-error 预留一行，错误出现时减少页面跳动。
+能用键盘操作、能看到错误，布局才算可用。焦点（当前接收键盘输入的元素）要看得见，提示出现时页面不要跳动。
 
 ```css
 :focus-visible { outline: 3px solid #1266bb; outline-offset: 3px; }
 #feedback, #stock-error { min-height: 1.8em; }
 ```
 
-可以用 CSS 自定义属性把文字、背景和边框色集中管理，通过 prefers-color-scheme 或主题属性替换变量值。颜色不能独自承担错误含义，仍需保留文字与 aria-invalid。
+<Effect kind="page" preview="c15/focus" />
+
+`:focus-visible` 在键盘操作和文本输入框上显示外框，鼠标点按钮时一般不显示。错误区预先留出一行高度，错误出现时下面的按钮不会被推开。编辑区用 hidden 隐藏，展开后焦点移到库存输入框。
+
+- 自定义属性（CSS 变量，如 --text）可以集中管理文字、背景和边框色，再用 prefers-color-scheme 换一套值。
+- 颜色不能单独表达错误，要保留错误文字和 aria-invalid。
+
+**记住：** 不要去掉焦点外框，要给反馈预留位置。
 
 <a id="容器随屏幕缩放同时限制阅读宽度"></a>
 
@@ -107,52 +208,84 @@ Grid 声明列轨道。minmax(0, 1fr) 把最小轨道设为 0，让长内容可�
 
 ## 常见错误与调试
 
-1. **现象与触发**：在当前 styles.css 临时给 article 加 min-width:600px，360px 下页面能向右滚。
-2. **工具**：Elements 选卡片 → Computed，开启 Grid overlay；Console 比较 document.documentElement.scrollWidth 与 innerWidth。
-3. **证据**：视口 360，卡片最小宽度 600，页面宽度超过视口；父容器宽度本身正常。
-4. **原因**：子元素最小尺寸挡住了轨道收缩。
-5. **修复**：恢复 min-width:0、minmax(0,1fr) 与文本换行；不靠隐藏整页 overflow 裁掉内容。
-6. **确认**：三种视口无整页横滚，列数为 1/2/4。Tab 能看到每个控件的焦点，搜索和编辑仍可完成。
+1. **现象**：在 styles.css 末尾临时加一行 `article { min-width: 600px; }`，360px 下页面可以向右拖。
+
+<Effect kind="page" preview="c15/overflow" />
+
+2. **工具**：Elements 选中卡片看 Computed，打开 Grid overlay（显示网格线的叠加层）。再在 Console 比较页面宽度和视口宽度：
+
+<Effect kind="console" title="360px 下的 Console">
+
+```text
+> document.documentElement.scrollWidth
+616
+> innerWidth
+360
+```
+
+</Effect>
+
+3. **证据**：Computed 里卡片的 min-width 是 600px，列表本身只有 328px。页面被卡片撑宽，父容器的宽度没有错。
+4. **原因**：子元素的最小尺寸挡住了列轨道收缩。
+5. **修复**：删掉这一行，保留 `min-width: 0`、`minmax(0, 1fr)` 和文字换行。不要靠整页 `overflow: hidden` 把内容裁掉。
+6. **确认**：三种宽度都没有横向滚动，列数为 1、2、4。按 Tab 能看到每个控件的焦点。
 
 ## 练习
 
 :::tip[自己尝试 · 本地网页]
-完成响应式 CSS，演练一次 600px 卡片故障再修复。三种宽度下都用键盘筛选 P004、保存 8，并检查错误反馈没有被裁掉。运行 check C15。
+1. 用第 1 节的完整 CSS 替换 `src/vanilla/styles.css`。
+2. 按调试节加上 600px 的故障，用 Computed 和 Console 找到来源，再删掉它。
+3. 在 360、768、1280px 下只用键盘：搜索 P004，打开编辑，保存库存 8；再保存一次空白，看错误提示是否完整。
+4. 运行任务卡里的检查命令。
+
+预期：三种宽度为 1、2、4 列，没有横向滚动。P004 保存后为 8 件，总库存 57；空白被拒绝，焦点回到库存输入框。
 :::
 
 <details>
 <summary>提示</summary>
 
-从 Computed 找真正生效的 min-width；来源面板可以看到覆盖它的声明。
+在 Computed 里找真正生效的 min-width，展开它能看到是哪条声明设置的。
 
 </details>
 
 <details>
 <summary>参考答案</summary>
 
-卡片、轨道、文本三个层级都允许收缩后，窄屏内容会在本列换行。桌面仍按媒体查询建立四列，清楚的 focus-visible 让键盘操作有位置反馈。
+卡片、列轨道、文字三层都允许收缩，窄屏内容就会在本列里换行。桌面仍按媒体查询排成四列，清楚的焦点外框让键盘用户知道自己在哪。
 
 </details>
 
 ## 项目进度
 
-- 三档宽度分别为单、双、四列。
-- 无整页横滚，长文本和表单可用。
-- 本课只改 styles.css，业务与存储结果保持。
+完成本课后，L2 的「C15–C16」这一段里，布局部分可以检查了。
 
-暂停时保存当前文件，在 notes/next.md 写下当前课 C15、观察结果与下一步；下次继续同一个目录。
+<Effect kind="page" preview="c15/layout" caption="L2 · C15 完成：360px 单列、768px 两列、1280px 四列，没有横向滚动" />
+
+勾选前逐项确认：
+
+- 360、768、1280px 分别为 1、2、4 列，没有整页横向滚动。
+- 只用键盘能把 P004 改成 8 件，总库存变成 57。
+- 本课只改了 styles.css，业务和存储结果不变，任务卡里的检查命令通过。
+
+下一步：回到 [L2 Lab 页](/js_web/labs/l2/) 记下这一段，再进入 C16 拆分模块。
 
 ## 小结
 
-- border-box 明确外框预算，margin 仍在外面。
-- Flex 组织一维工具栏，Grid 组织二维卡片。
-- 允许收缩与清楚焦点共同保证窄屏操作。
+- border-box 让 width 等于外框，margin 仍在外面。
+- Flex 排一维的工具栏，Grid 排二维的卡片，轨道数量由 CSS 决定。
+- 移动优先：基础样式管窄屏，媒体查询从小到大加列。
+- 允许收缩、清楚的焦点和预留的反馈位置，共同保证窄屏可用。
 
-自测：四列只有一项时占几列？媒体查询是否增加权重？为什么不能靠 overflow:hidden 修溢出？
+自测：
+
+- 四列布局只剩一张卡片时，它占几列？
+- 媒体查询会增加选择器权重吗？
+- 为什么不能靠 overflow: hidden 修溢出？
 
 ## 延伸阅读
 
 - [MDN：盒模型](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Styling_basics/Box_model)
 - [MDN：Grid](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_grid_layout)
 - [MDN：Flexbox](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_flexible_box_layout)
+- [MDN：媒体查询](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_media_queries/Using_media_queries)
 - [旧版机制例子与验证记录](https://github.com/socoo123/js_web/tree/main/examples/c15)（按需参考）

@@ -1,0 +1,22 @@
+{
+  "group": "c23",
+  "shots": [
+    {
+      "name": "actions",
+      "checkpoint": "C23",
+      "entry": "src/react",
+      "path": "/",
+      "sources": ["src/react", "src/core", "src/vanilla/styles.css", "data"],
+      "actions": [
+        { "do": "waitText", "selector": "article[data-id=\"P001\"] [role=status]", "text": "P001 当前库存 12 件" },
+        { "do": "click", "role": "button", "name": "连续补三件" },
+        { "do": "waitText", "selector": "article[data-id=\"P001\"] [role=status]", "text": "P001 当前库存 15 件" }
+      ],
+      "viewports": [{ "width": 768, "height": 900 }],
+      "themes": ["light"],
+      "target": "article[data-id=\"P001\"]",
+      "alt": "C23 完成后的 P001 卡片：点一次「连续补三件」后，状态行显示「P001 当前库存 15 件」，下方是连续补三件、立即补一件、延迟补三件三个按钮。",
+      "caption": "点一次「连续补三件」：12 → 15"
+    }
+  ]
+}

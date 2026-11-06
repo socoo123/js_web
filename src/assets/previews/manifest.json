@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "shots": {
+    "c03/after": {
+      "checkpoint": "C03",
+      "digest": "22aa1db88c54b1d67f7003bd793f35d5f2cd54261f7ca14d1937c1f06f3c7776",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "c03/after-768-light.webp",
+          "width": 768,
+          "theme": "light",
+          "pixels": [
+            768,
+            426
+          ],
+          "bytes": 8244,
+          "sha256": "68c80fc714235a1898206f145be67833b460da5854c22e6bb936b94cd19e2630"
+        }
+      ]
+    },
+    "c03/before": {
+      "checkpoint": "C02",
+      "digest": "54a348a246ec2686129b16d32415c66305b9d43bc0073f4b93f531eb1812b8fc",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "c03/before-768-light.webp",
+          "width": 768,
+          "theme": "light",
+          "pixels": [
+            768,
+            426
+          ],
+          "bytes": 8070,
+          "sha256": "39de021c14329e119ab455d7ceeb4b2ee2cdad9798fafe63c8c5c1fde5013b2b"
+        }
+      ]
+    },
+    "c15/focus": {
+      "checkpoint": "C15",
+      "digest": "1beb4798555b0a4a7a7216fbcce0a2c1707189cc378407bf5589c3a4e43e479f",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "c15/focus-768-light.webp",
+          "width": 768,
+          "theme": "light",
+          "pixels": [
+            768,
+            866
+          ],
+          "bytes": 18428,
+          "sha256": "3503cce5652173232e7e6e336958984a4d796bd71b24a4a73c8d9db01547ecf9"
+        }
+      ]
+    },
+    "c15/layout": {
+      "checkpoint": "C15",
+      "digest": "58fec751c384ffc9082f04c0fead162a76487a31587a539d125759c586f8bf39",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "c15/layout-360-light.webp",
+          "width": 360,
+          "theme": "light",
+          "pixels": [
+            720,
+            1520
+          ],
+          "bytes": 30766,
+          "sha256": "9f21990dc470c347eec5d0a32bff5e4a3d6890b424d355a92018305e3e53472f"
+        },
+        {
+          "file": "c15/layout-768-light.webp",
+          "width": 768,
+          "theme": "light",
+          "pixels": [
+            768,
+            960
+          ],
+          "bytes": 22010,
+          "sha256": "9fb9a8e0d098df8b84b2e4f492a18d9b129e318316d17567eed62cc30f3d8202"
+        },
+        {
+          "file": "c15/layout-1280-light.webp",
+          "width": 1280,
+          "theme": "light",
+          "pixels": [
+            1280,
+            800
+          ],
+          "bytes": 22480,
+          "sha256": "6f4474be453bb356af3a72418af0ea800c85473802aaa9b1384db0799bf81ba1"
+        }
+      ]
+    },
+    "c15/narrow": {
+      "checkpoint": "C15",
+      "digest": "4916a5b383c5818b4f73a0972e62413d434dc5aebad906dbc4ddf05fa0812097",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "c15/narrow-360-light.webp",
+          "width": 360,
+          "theme": "light",
+          "pixels": [
+            720,
+            1120
+          ],
+          "bytes": 25042,
+          "sha256": "25e1738e1c64667d8bd2315dfb6df702a7a4bc1a9459632dd9ad0b07ed34a0f4"
+        }
+      ]
+    },
+    "c15/overflow": {
+      "checkpoint": "C15",
+      "digest": "3c6a328a8f27fe00927ef64f96d40699ff302b0f85362a0386b4d516fd3e3d39",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "c15/overflow-360-light.webp",
+          "width": 360,
+          "theme": "light",
+          "pixels": [
+            720,
+            1280
+          ],
+          "bytes": 27554,
+          "sha256": "39aa4a65236e0e28780c00cd1b25f49777ddc4ca0104110530d36000d46c9b16"
+        }
+      ]
+    },
+    "c15/single": {
+      "checkpoint": "C15",
+      "digest": "c237ecb9686d614909ebe37ea54bc8d6f5bf818d4fac2a4c3e26bc6b2d5e6666",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "c15/single-1280-light.webp",
+          "width": 1280,
+          "theme": "light",
+          "pixels": [
+            1280,
+            600
+          ],
+          "bytes": 14732,
+          "sha256": "2fff35e89f30a5599e62a86c94acf1ff5b5212523f2d39b0949177be1f061999"
+        }
+      ]
+    },
+    "c23/actions": {
+      "checkpoint": "C23",
+      "digest": "8c837d2f11e12f08d9fcbf7d662e63ff12b27f1bf02b95b2a248b2a949ecd23f",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "c23/actions-768-light.webp",
+          "width": 768,
+          "theme": "light",
+          "pixels": [
+            360,
+            319
+          ],
+          "bytes": 6418,
+          "sha256": "5c28b084d45b690f787a05c8a63665abdd6dd153eba75ef292001235975340aa"
+        }
+      ]
+    },
+    "l1/goal": {
+      "checkpoint": "C10",
+      "digest": "c9c43e01de270d7673b247bf961d1e2095d6e3b559537a2380c809ab872bebec",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "l1/goal-1280-light.webp",
+          "width": 1280,
+          "theme": "light",
+          "pixels": [
+            1280,
+            720
+          ],
+          "bytes": 8230,
+          "sha256": "63f70d04a53256334a726d725b9f3c626698db37ea816e1ef3b579408141b2a3"
+        }
+      ]
+    },
+    "l2/goal": {
+      "checkpoint": "C20",
+      "digest": "a11c479c5fc353df936afc49a15573579ebf49302a04b66b6ed1936ea77d4397",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "l2/goal-1280-light.webp",
+          "width": 1280,
+          "theme": "light",
+          "pixels": [
+            1280,
+            720
+          ],
+          "bytes": 21862,
+          "sha256": "4d70698a61ac1dfe3496d521bc29d45c3f0b70efa3cd7aa08deff4bdfd1c4ad4"
+        }
+      ]
+    },
+    "l3/goal": {
+      "checkpoint": "C36",
+      "digest": "6d593c555873fd55144ec8a4a4fe0b1082bc1d645b1883a8c864bd5a7ae0c379",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "l3/goal-360-light.webp",
+          "width": 360,
+          "theme": "light",
+          "pixels": [
+            720,
+            1520
+          ],
+          "bytes": 28262,
+          "sha256": "8861f93320e8f2763cecd9861e59015f8fe16bb047162ca0f4cd343343db42c1"
+        },
+        {
+          "file": "l3/goal-1280-light.webp",
+          "width": 1280,
+          "theme": "light",
+          "pixels": [
+            1280,
+            720
+          ],
+          "bytes": 24266,
+          "sha256": "005ef609afbd63bb85acfeec00a3a00a2ce0bf8502c2a3189f71a9d5c4640f3d"
+        }
+      ]
+    },
+    "l4/goal": {
+      "checkpoint": "C44",
+      "digest": "e84e9e3bb24f9f1c7fea9280fe9fa6fba54b0f69111d80a63332dbc2a5e8095f",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "l4/goal-1280-light.webp",
+          "width": 1280,
+          "theme": "light",
+          "pixels": [
+            1280,
+            720
+          ],
+          "bytes": 23280,
+          "sha256": "0e13d7a17c20d3d79ad9338faabc0d2373dd66dd7d7b12570a5323e2d49b1cad"
+        }
+      ]
+    },
+    "l5/goal": {
+      "checkpoint": "C48",
+      "digest": "2fb462e8d13f1b4da772ce2e584ab71d0a2e0d332551e34eaa25f7da6256697d",
+      "capturedAt": "2026-11-06",
+      "environment": {
+        "playwright": "1.64.1",
+        "node": "24.22.0",
+        "platform": "darwin-arm64",
+        "browser": "Chromium 156.0.8078.4"
+      },
+      "images": [
+        {
+          "file": "l5/goal-1280-light.webp",
+          "width": 1280,
+          "theme": "light",
+          "pixels": [
+            1280,
+            720
+          ],
+          "bytes": 19242,
+          "sha256": "ea602382ce1a1916e98abb47fe16827c45ec287023abc5bf48312129fc651137"
+        }
+      ]
+    }
+  }
+}

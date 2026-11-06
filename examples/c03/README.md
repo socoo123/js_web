@@ -1,10 +1,27 @@
 # C03 值、类型、转换与比较 · 示例
 
-配套正文：[C03](../../src/content/docs/02-language-data/c03-values-types.md)。纯 JS 文件既可以粘贴到浏览器 Console，也可以用 Node 运行；没有第三方依赖。
+配套正文：[C03](../../src/content/docs/02-language-data/c03-values-types.mdx)。纯 JS 文件既可以粘贴到浏览器 Console，也可以用 Node 运行；没有第三方依赖。
+
+V3 正文直接使用的文件：
+
+| 文件 | 正文位置 | 说明 |
+| --- | --- | --- |
+| types.js | 第 1 节可运行片段 | 浏览器内可运行，输出同 `.expected.txt` |
+| number-predict.js | 第 2 节「先猜一猜」 | 代码块与文件逐字一致，答案面板读取 `.expected.txt` |
+| convert-predict.js | 第 3 节「先猜一猜」 | 同上 |
+| parse-stock.js | 第 3 节 Console 面板 | 直接导入 C03 参考解的 `parseStock`，七种输入的结果；含 `import`，只用 Node 运行 |
+| defaults.js | 第 4 节可运行片段 | 浏览器内可运行 |
+| compare.js | 第 5 节代码块与 Console 面板 | 代码块与文件逐字一致 |
+
+全部示例：
 
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
 | types.js | `node types.js` | 动态类型、typeof 的特例、拼错属性名 |
+| number-predict.js | `node number-predict.js` | 除法、浮点误差、整数分、安全整数、BigInt 除法 |
+| convert-predict.js | `node convert-predict.js` | `+` 拼接、`-` 转换、Number 与 parseInt |
+| parse-stock.js | `node parse-stock.js` | C03 参考解 `parseStock` 的有效与无效输入 |
+| compare.js | `node compare.js` | 严格相等、宽松相等、NaN、对象身份 |
 | numbers.js | `node numbers.js` | Number 的除法、浮点、Infinity、NaN |
 | money.js | `node money.js` | 金额用整数分，折扣取整，toFixed 返回字符串 |
 | bigint.js | `node bigint.js` | 安全整数、long 型 ID 经过 JSON.parse 失真、BigInt |
@@ -59,3 +76,18 @@
 ## V2 连续工作区
 
 2026-10-28 · 发行版 2026.10-v2.2：本课在 `labs/inventory/` 持续修改，`npm run lab -- check C03` 检查实际文件。C00→C20 的单目录正文跟做、错误证据与修复见 [R5 验证](../../labs/records/R5.md)。Java 完整源文件在 labs/reference/java，已用 Java 21.0.2 执行；旧例子保留为可选参考。网站使用原 URL 与 F1 课号。
+
+## V3 范例课改写
+
+2026-11-06 · V3 第 1 阶段（路 4 改写，待主验收）。正文改为「主张 → 代码 → 效果 → 原因 → Java 对照」，课号、URL、全部锚点、知识点、Java 对照主题、主错误、练习和验收数字不变。旧页首引用块改为 frontmatter `lesson`，下载、恢复等操作细节交给任务卡。
+
+- 环境：macOS arm64、Node 24.22.0、Playwright 1.64.1 / Chromium 156.0.8078.4（headless）。
+- `npm run examples -- c03`：16/16 通过，含新增 4 个文件。正文 3 个 js 代码块与 number-predict、convert-predict、compare 逐字一致；两个可运行片段 types、defaults 不含 Node API。
+- 课程 lint（V3 规则）：0 error、0 warning；正文 4672/8000 字符、16 个代码块，段落最长 99 字。
+- 正文跟做：从 C02 参考快照恢复到临时目录，只按正文加入第 3 节 `parseStock`、用参考答案两个函数替换旧 `restockProduct`。
+  - 改前 `node tools/lab.mjs check C03` 失败（exit 1），页面 12 补 3 显示「库存 123 件」。
+  - 按调试第 2 步在 `restockProduct` 的 return 行（第 8 行）设断点：`typeof text` 为 string、`text` 为 "3"、`product.stock` 为数字 12，与正文一致。
+  - 改后检查通过（21 条）；页面 12 补 3 得 15，库存价值 478800 → 598500 分；空白、3件、-1、3.5 分别显示两种 RangeError 原因，库存保持 15，无页面异常。
+- 效果截图 `c03/before`、`c03/after` 由 `npm run capture:previews`（建议脚本）从 C02、C03 参考快照拍摄，定义见 `labs/previews/c03.json`。
+- Java 对照核对（Java 21.0.2 实际执行临时文件）：`5 / 2` 得 2；`Objects.requireNonNullElse(0, 12)` 得 0、传 null 得 12；`Integer.parseInt("3件")` 抛 NumberFormatException；两个内容相同的对象 `==` 为 false；字符串 `equals` 比内容为 true。
+- 未运行：DevTools 界面手动点击（断点与 Scope 经 DevTools 协议读取）、Firefox、Safari、Windows。

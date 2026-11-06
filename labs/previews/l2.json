@@ -1,0 +1,26 @@
+{
+  "group": "l2",
+  "shots": [
+    {
+      "name": "goal",
+      "checkpoint": "C20",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "src/services", "data"],
+      "actions": [
+        { "do": "waitCount", "selector": "#list article", "count": 6 },
+        { "do": "click", "selector": "article[data-id=\"P004\"] >> role=button[name=\"编辑\"]" },
+        { "do": "fill", "label": "库存", "value": "8" },
+        { "do": "click", "role": "button", "name": "保存" },
+        { "do": "waitText", "selector": "article[data-id=\"P004\"]", "text": "库存 8 件" },
+        { "do": "waitText", "selector": "#summary", "text": "库存 57" },
+        { "do": "assertColumns", "selector": "#list", "columns": { "1280": 4 } },
+        { "do": "scrollTop" }
+      ],
+      "viewports": [{ "width": 1280, "height": 720 }],
+      "themes": ["light"],
+      "alt": "L2 完成时的原生库存页：顶部是搜索、分类和快照按钮，汇总显示 6 件商品、库存 57；下方商品卡片四列排列，P004 已保存为库存 8 件。",
+      "caption": "L2 终点：P004 改为 8 后总库存 57，桌面四列"
+    }
+  ]
+}

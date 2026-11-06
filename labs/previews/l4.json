@@ -1,0 +1,21 @@
+{
+  "group": "l4",
+  "shots": [
+    {
+      "name": "goal",
+      "checkpoint": "C44",
+      "entry": "adapters/ui5-react",
+      "path": "/",
+      "sources": ["adapters/ui5-react", "src/core", "src/services", "data"],
+      "actions": [
+        { "do": "waitText", "selector": "#summary", "text": "总库存 52" },
+        { "do": "click", "selector": "#product-P004" },
+        { "do": "waitText", "selector": "section[aria-label=\"编辑区\"]", "text": "P004" }
+      ],
+      "viewports": [{ "width": 1280, "height": 720 }],
+      "themes": ["light"],
+      "alt": "L4 完成时的 UI5 Web Components for React 适配界面：左侧是 UI5 列表显示六种商品，右侧编辑区已打开 P004 USB-C 扩展坞，汇总为 6 种、总库存 52。",
+      "caption": "L4 终点：同一套规则接到 UI5 组件，选中 P004 打开编辑区"
+    }
+  ]
+}

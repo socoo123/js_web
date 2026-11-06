@@ -1,0 +1,42 @@
+{
+  "group": "c03",
+  "shots": [
+    {
+      "name": "before",
+      "checkpoint": "C02",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "data"],
+      "actions": [
+        { "do": "waitText", "selector": "#product", "text": "库存 12 件" },
+        { "do": "click", "role": "button", "name": "补货" },
+        { "do": "waitText", "selector": "#product", "text": "库存 123 件" }
+      ],
+      "viewports": [{ "width": 768, "height": 600 }],
+      "themes": ["light"],
+      "target": "main",
+      "alt": "C03 起点的商品卡片：输入框是 3，点补货后标题显示「P001 机械键盘 · 库存 123 件」，库存价值变成 4907700 分。",
+      "caption": "C03 起点：12 补 3，卡片显示 123"
+    },
+    {
+      "name": "after",
+      "checkpoint": "C03",
+      "entry": "src/vanilla",
+      "path": "/",
+      "sources": ["src/vanilla", "src/core", "data"],
+      "actions": [
+        { "do": "click", "role": "button", "name": "补货" },
+        { "do": "waitText", "selector": "#product", "text": "库存 15 件" },
+        { "do": "fill", "label": "补货数量", "value": " " },
+        { "do": "click", "role": "button", "name": "补货" },
+        { "do": "waitText", "selector": "#feedback", "text": "空白无效" },
+        { "do": "waitText", "selector": "#product", "text": "库存 15 件" }
+      ],
+      "viewports": [{ "width": 768, "height": 600 }],
+      "themes": ["light"],
+      "target": "main",
+      "alt": "修好后的商品卡片：先补 3 件得到「库存 15 件」、价值 598500 分；再提交空白，下方提示「请输入库存，空白无效」，库存仍是 15。",
+      "caption": "完成后：12 补 3 得 15；空白被拒绝，库存不变"
+    }
+  ]
+}
