@@ -289,7 +289,7 @@ Java 中可写 `mapToInt(Product::getStock).sum()`；JS 靠回调选择字段。
 2. 添加 summarize(products)，返回 count、stock、valueCents、soldOut、lowStock；空数组各项为 0，低库存只算 1–5 件，超安全整数范围报错。
 3. 添加 selectProducts，按 query 匹配 id/名称并按 category 筛选；添加 updateStock(products,id,stock)，返回新数组与目标新对象。
 4. 把排序器临时改为默认 sort，比较实际 id 次序与原数组，再恢复数值比较器。
-5. 在同一工作区运行 npm run lab -- check C08；把当前课、观察结果和下一步写进 notes/next.md。
+5. 在同一工作区运行 `npm run lab -- check C08`；把当前课、观察结果和下一步写进 notes/next.md。
 
 预期：6 件商品、52 总库存、2634800 分、1 件售罄、2 件低库存；排序与更新不修改输入。
 :::

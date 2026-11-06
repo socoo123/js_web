@@ -279,7 +279,7 @@ Java 也能返回 `Predicate<Product>`，JS 则直接使用函数值。这个工
 2. 添加 createCounter()：返回一个无参函数，每次调用将自己的计数加一并返回。两个工厂调用应得到独立计数。
 3. 添加 createProductSelectors(products)：返回一组函数，每个函数之后调用时仍返回对应商品的 id。
 4. 按调试节换成共享的 var 绑定，观察全部返回最后一个 id，再修复。
-5. 在同一工作区运行 npm run lab -- check C06；把当前课、观察结果和下一步写进 notes/next.md。
+5. 在同一工作区运行 `npm run lab -- check C06`；把当前课、观察结果和下一步写进 notes/next.md。
 
 预期：外设筛选为 P001/P002，两个计数器为 1、2 与独立的 1，每个选择函数保留自己的商品。
 :::

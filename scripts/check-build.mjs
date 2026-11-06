@@ -52,6 +52,8 @@ for (const page of pages) {
     }
   }
   if (!allowPending && /data-missing-preview=/.test(html)) errors.push(`${page} 引用了不存在的效果截图`);
+  // 代码外的 `--` 会被排版成 en dash，学员照抄的命令就坏了。
+  for (const match of html.matchAll(/npm (?:run|ci|exec)[^<\n]{0,40}? – /g)) errors.push(`${page} 的命令被排版成破折号，放进反引号：${match[0]}`);
 }
 for (const [id, slug, diagrams, source] of lessons) {
   const lessonFile = path.join(dist, `${slug}/index.html`);

@@ -307,7 +307,7 @@ Java 的受检异常需要在方法签名中声明或处理；JS 没有这道编
 1. 把并排卡右侧的 totalStock 加入 src/core/inventory.js；它接收商品数组，返回库存之和。
 2. 刷新库存页，在 Console 调用 window.inventory.totalStock(window.products)，应为 52；传 [] 应为 0。
 3. 按调试节临时换成有越界的计数循环，收集证据，再恢复 for-of。
-4. 在同一工作区运行 npm run lab -- check C04；把当前课、观察结果和下一步写进 notes/next.md。
+4. 在同一工作区运行 `npm run lab -- check C04`；把当前课、观察结果和下一步写进 notes/next.md。
 
 预期：六件商品得到 52，空数组得到 0，固定数据保持原值。
 :::

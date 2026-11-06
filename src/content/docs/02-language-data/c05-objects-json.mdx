@@ -308,7 +308,7 @@ console.log(Number.isNaN(new Date("not-a-date").getTime())); // → true
 2. 按第 4 节加入 validateProduct、validateProducts、importProducts。导入接收商品数组的 JSON 文本，清洗名称并返回约定字段。
 3. 在库存页 Console 建立 P001 草稿，给草稿 tags 加“仅草稿”，再确认原商品仍只有“热销”。
 4. 试导入空数组、固定数据、坏 JSON 和字符串库存；失败时保留之前的有效商品。
-5. 在同一工作区运行 npm run lab -- check C05；把当前课、观察结果和下一步写进 notes/next.md。
+5. 在同一工作区运行 `npm run lab -- check C05`；把当前课、观察结果和下一步写进 notes/next.md。
 
 预期：取消草稿不改原 tags，非法 JSON 或字段被拒绝，合法列表能还原成业务数据。
 :::
