@@ -115,7 +115,7 @@ export function importedContent(source, mdx = true) {
             const row = catalog.lessons.find((lesson) => lesson.lessonId === id);
             if (!row?.implemented) throw new Error(`任务尚未发行：${id}`);
             code.push({ code: Object.values(row.commands).join('\n') });
-            prose.push(row.title, ...row.acceptance, ...row.files, row.trial?.description ?? '', '完整参考解（答案）下载本课起点，仅补课/恢复，在同一工作区持续修改。跨课沿用正在运行的服务。首次运行或切换界面时启动 dev；切换前用 Ctrl+C 停止旧服务，改完源码再运行 check。');
+            prose.push(row.title, ...row.acceptance, ...row.files, row.trial?.description ?? '', '本课任务 阶段任务 本课只完成这一项 Lab 规则与验收 改动文件 命令 本课完成标准 起点、恢复与服务说明 接续上一课自己的代码，在自己的 inventory/ 工作区操作；克隆仓库时对应 labs/inventory/。跨课沿用正在运行的服务。首次运行或切换界面时启动 dev；切换前用 Ctrl+C 停止旧服务，改完源码再运行 check。下载本课起点（仅补课/恢复） 一次安装与恢复说明 完整参考解（答案） 先保存自己的修改。下载本课终点参考解；可运行只读比较，不会替换文件。');
           }
         }
       }

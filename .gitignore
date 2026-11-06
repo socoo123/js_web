@@ -1,5 +1,5 @@
 .DS_Store
-node_modules/
+node_modules
 dist/
 .astro/
 .cache/
@@ -14,3 +14,4 @@ labs/inventory/.lab/
 labs/inventory/checkpoint.json
 labs/inventory/adapters/openui5/webapp/model/rules.js
 public/downloads/inventory/
+public/demos/

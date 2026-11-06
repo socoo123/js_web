@@ -28,7 +28,7 @@ for (const page of pages) {
   const html = readFileSync(path.join(dist, page), 'utf8');
   const pageUrl = new URL(base + page.replace(/index\.html$/, ''), origin);
   if (!html.includes('lang="zh-CN"')) errors.push(`页面未设为中文：${page}`);
-  if (page !== 'index.html' && page !== '404.html') {
+  if (page !== 'index.html' && page !== '404.html' && !page.startsWith('demos/')) {
     const sidebar = html.match(/<nav\b[^>]*class="[^"]*\bsidebar\b[^"]*"[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
     for (const slug of references) {
       if (!sidebar.includes(`href="${base}${slug}/"`)) errors.push(`${page} 的侧栏缺少速查入口：${slug}`);
@@ -116,6 +116,7 @@ function count(text, pattern) { return (text.match(pattern) ?? []).length; }
 function escapeHtml(text) { return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
 
 // 只有含交互岛的页面才能加载 React；单页在全站共用脚本之外新增的 JS 不超过 80 KB（gzip）。
+// demos/ 下是独立构建的 Lab 目标演示应用，由 build-demos 自行校验，不计入课程页预算。
 const REACT_MARKERS = ['react.transitional.element', 'react.dev/errors'];
 const JS_BUDGET = 80 * 1024;
 const assets = new Map();
@@ -127,7 +128,7 @@ function asset(file) {
   return assets.get(file);
 }
 const scripts = new Map();
-for (const page of pages) {
+for (const page of pages.filter((page) => !page.startsWith('demos/'))) {
   const html = readFileSync(path.join(dist, page), 'utf8');
   const entries = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"|\b(?:component|renderer|before-hydration)-url="([^"]+)"/g)]
     .map((match) => match[1] ?? match[2]).filter((url) => url.startsWith(base) && url.endsWith('.js'))
