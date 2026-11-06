@@ -26,7 +26,7 @@ const lastOf = (lessonId: string) => lab.steps.filter((step) => step.lessonId ==
     <div class="steps-head-text">
       <p class="steps-total"><strong>{lab.steps.length} 步</strong> · {lab.lessons.length} 课（{lab.lessons[0]}–{lab.lessons.at(-1)}） · 每课 1–3 步</p>
       <p data-lab-js hidden>
-        <span data-lab-progress-count></span> ·
+        <span data-lab-progress-count></span> ·{' '}
         <a data-lab-progress-next data-targets={JSON.stringify(targets)} data-done-href={`#${finishAnchor(lab.labId)}`} data-done-text="步骤都已勾选，去收尾清单" href={`#${stepAnchor(ids[0])}`}>从第 1 步开始</a>
       </p>
       <p class="lab-note">勾选「我已完成这一步」只记录你自己的确认，保存在当前浏览器，不代表本地检查已通过；检查是否通过以终端输出为准。</p>

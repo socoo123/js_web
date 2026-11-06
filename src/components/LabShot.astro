@@ -35,7 +35,8 @@ const text = caption ?? shot?.caption;
   .lab-shot { margin: 0; }
   img { display: block; width: 100%; height: auto; border: 1px solid var(--js-border); border-radius: 10px; background: var(--js-surface); }
   .shot-goal img { box-shadow: var(--js-shadow); }
-  .shot-step img, .shot-step .placeholder { max-width: 30rem; }
+  .shot-step img { width: auto; max-width: min(100%, 30rem); }
+  .shot-step .placeholder { max-width: 30rem; }
   :global(:root[data-theme='light']) [data-shot-theme='dark'],
   :global(:root:not([data-theme='light'])) [data-shot-theme='light'] { display: none; }
   .placeholder {
