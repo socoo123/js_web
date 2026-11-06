@@ -46,13 +46,19 @@ const cards = catalog.labs.map((lab, index) => {
   {cards.map((card) => (
     <li class="lab-card" data-lab-card={card.lab.labId} data-lab-lessons={card.ids.join(' ')}>
       <div class="lab-card__thumb" data-art={card.lab.labId}>
+        <div class="lab-card__bar" aria-hidden="true">
+          <span class="lab-card__step">{card.step}</span>
+          <i></i><i></i><i></i>
+          <span class="lab-card__url">{card.lab.labId.toLowerCase()} · inventory</span>
+        </div>
         {card.shot && card.images.length > 0 ? (
-          card.images.map(({ image, className }) => (
-            <Image src={image.src} alt={card.shot!.alt} widths={[480, 960]} sizes={sizes} class={className} loading="lazy" decoding="async" />
-          ))
+          <div class="lab-card__shot">
+            {card.images.map(({ image, className }) => (
+              <Image src={image.src} alt={card.shot!.alt} widths={[480, 960]} sizes={sizes} class={className} loading="lazy" decoding="async" />
+            ))}
+          </div>
         ) : (
           <div class="lab-art" aria-hidden="true">
-            <div class="lab-art__bar"><i></i><i></i><i></i><span>{card.lab.labId.toLowerCase()} · inventory</span></div>
             <div class="lab-art__body">
               {card.lab.labId === 'L1' && <svg viewBox="0 0 48 48"><path d="M17 8c-5 0-6 3-6 7v4c0 3-2 5-5 5 3 0 5 2 5 5v4c0 4 1 7 6 7M31 8c5 0 6 3 6 7v4c0 3 2 5 5 5-3 0-5 2-5 5v4c0 4-1 7-6 7" /><path d="M20 24h8" /></svg>}
               {card.lab.labId === 'L2' && <svg viewBox="0 0 48 48"><rect x="6" y="9" width="16" height="13" rx="3" /><rect x="26" y="9" width="16" height="13" rx="3" /><rect x="6" y="26" width="16" height="13" rx="3" /><rect x="26" y="26" width="16" height="13" rx="3" /></svg>}
@@ -63,7 +69,6 @@ const cards = catalog.labs.map((lab, index) => {
             </div>
           </div>
         )}
-        <span class="lab-card__step" aria-hidden="true">{card.step}</span>
       </div>
       <div class="lab-card__body">
         <p class="lab-card__meta">
@@ -82,7 +87,7 @@ const cards = catalog.labs.map((lab, index) => {
             <span class="lab-ring__text" data-lab-ring-text aria-hidden="true"></span>
           </span>
         </div>
-        <p class="lab-card__next" data-lab-next hidden>下一课：<a href={`${base}${card.first.slug}/`}>{card.first.lessonId} {card.first.title}</a></p>
+        <p class="lab-card__next" data-card-next hidden>下一课：<a href={`${base}${card.first.slug}/`}>{card.first.lessonId} {card.first.title}</a></p>
       </div>
     </li>
   ))}
@@ -156,8 +161,10 @@ const cards = catalog.labs.map((lab, index) => {
     border-color: color-mix(in srgb, var(--js-color-amber-stroke) 60%, var(--js-border));
   }
 
+  /* 缩略图是一个小浏览器窗口：外框栏放步骤号，截图或示意图在栏下，徽标不压住截图 */
   .lab-card__thumb {
-    position: relative;
+    display: flex;
+    flex-direction: column;
     aspect-ratio: 16 / 10;
     overflow: hidden;
     border-radius: calc(var(--js-radius) - 1px) calc(var(--js-radius) - 1px) 0 0;
@@ -165,66 +172,47 @@ const cards = catalog.labs.map((lab, index) => {
     background: var(--js-surface);
   }
 
-  .lab-card__thumb :global(img) {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top left;
-  }
-
-  .lab-card__step {
-    position: absolute;
-    top: 0.6rem;
-    inset-inline-start: 0.6rem;
-    display: grid;
-    place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 50%;
-    background: var(--js-color-primary-solid);
-    color: var(--js-color-on-primary);
-    font-size: 0.875rem;
-    font-weight: 800;
-    box-shadow: 0 0 0 3px var(--js-surface-raised);
-  }
-
-  /* 无截图时的示意图：浏览器外框 + 每个 Lab 的图标 */
-  .lab-art {
+  .lab-card__bar {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    background:
-      radial-gradient(90% 80% at 85% 100%, var(--js-color-primary-soft), transparent 70%),
-      radial-gradient(70% 60% at 0% 0%, var(--js-color-amber-soft), transparent 70%),
-      var(--js-surface);
-  }
-
-  .lab-art__bar {
-    display: flex;
+    flex: none;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.45rem 0.6rem 0.45rem 2.9rem;
+    padding: 0.35rem 0.6rem 0.35rem 0.4rem;
     background: var(--js-frame-bar);
     border-bottom: 1px solid var(--js-frame-border);
   }
 
-  .lab-art__bar i {
+  .lab-card__step {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-inline-end: 0.3rem;
+    border-radius: 50%;
+    background: var(--js-color-primary-solid);
+    color: var(--js-color-on-primary);
+    font-size: 0.8125rem;
+    font-weight: 800;
+  }
+
+  .lab-card__bar i {
+    flex: none;
     width: 0.45rem;
     height: 0.45rem;
     border-radius: 50%;
-    background: var(--js-dot-close);
+    background: var(--js-frame-dot-close);
   }
 
-  .lab-art__bar i:nth-child(2) {
-    background: var(--js-dot-min);
+  .lab-card__bar i:nth-of-type(2) {
+    background: var(--js-frame-dot-min);
   }
 
-  .lab-art__bar i:nth-child(3) {
-    background: var(--js-dot-max);
+  .lab-card__bar i:nth-of-type(3) {
+    background: var(--js-frame-dot-max);
   }
 
-  .lab-art__bar span {
+  .lab-card__url {
     flex: 1;
     min-width: 0;
     margin-inline-start: 0.4rem;
@@ -237,6 +225,42 @@ const cards = catalog.labs.map((lab, index) => {
     font-size: 0.6875rem;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+
+  .lab-card__shot {
+    flex: 1;
+    min-height: 0;
+    background: #fff;
+  }
+
+  .lab-card__shot :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+    transition: filter var(--js-motion) var(--js-ease);
+  }
+
+  /* 截图只有亮色：深色主题下压低亮度，悬停或聚焦卡片时恢复原样 */
+  :global([data-theme='dark']) .lab-card__shot :global(img) {
+    filter: brightness(0.82) saturate(0.9);
+  }
+
+  :global([data-theme='dark']) .lab-card:is(:hover, :focus-within) .lab-card__shot :global(img) {
+    filter: none;
+  }
+
+  /* 无截图时的示意图：每个 Lab 的图标 */
+  .lab-art {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    background:
+      radial-gradient(90% 80% at 85% 100%, var(--js-color-primary-soft), transparent 70%),
+      radial-gradient(70% 60% at 0% 0%, var(--js-color-amber-soft), transparent 70%),
+      var(--js-surface);
   }
 
   .lab-art__body {

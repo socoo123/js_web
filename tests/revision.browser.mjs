@@ -7,7 +7,7 @@ import { chromium, expect } from '../labs/inventory/node_modules/@playwright/tes
 import { comparison } from '../labs/sources.mjs';
 import catalog from '../labs/catalog.json' with { type: 'json' };
 import { importedContent } from '../scripts/lesson-sources.mjs';
-import { emptyProgress, markLesson, writeProgress } from '../src/lib/progress.mjs';
+import { emptyProgress, markLabStep, markLesson, writeProgress } from '../src/lib/progress.mjs';
 
 const base = process.env.REVISION_BASE_URL ?? 'http://127.0.0.1:8874/js_web/';
 const qa = path.resolve(process.env.REVISION_QA_DIR ?? '.cache/qa/v2/site-review');
@@ -69,7 +69,7 @@ const screenshot = async (target, name, options = {}) => {
 const progressSeed = (ids) => {
   const memory = new Map();
   const storage = { getItem: (key) => memory.get(key) ?? null, setItem: (key, value) => memory.set(key, String(value)), removeItem: (key) => memory.delete(key) };
-  writeProgress(storage, ids.reduce((progress, id) => markLesson(progress, id, true), emptyProgress()));
+  writeProgress(storage, ids.reduce((progress, id) => markLesson(progress, id, true), markLabStep(emptyProgress(), 'l3-c21-1', true)));
   return [...memory];
 };
 const reactChunks = new Map();
@@ -126,7 +126,7 @@ try {
         assert(name, `D2 资源命名 ${src}`);
         diagrams.set(name, { route, src, alt: await image.getAttribute('alt') });
         // 长图的元素截图会跨过固定页头；仅在特写截图中隐藏页头，整页截图保留原样。
-        if (width === 1280) await screenshot(image, `${name}-${theme}.png`, { style: '.header, .mobile-preferences { visibility: hidden !important; }' });
+        if (width === 1280) await screenshot(image, `${name}-${theme}.png`, { style: 'header.header, .mobile-preferences { visibility: hidden !important; }' });
       }
       if (trials.includes(route)) {
         await expect(page.locator('[data-lesson-task]')).toBeVisible();
@@ -138,7 +138,7 @@ try {
           assert(width === 1280 ? Math.abs(left.y - right.y) < 2 : right.y > left.y + left.height - 2, `双栏响应式 ${route} ${width}`);
           if (sampleRoutes.has(route)) {
             await target.scrollIntoViewIfNeeded();
-            await screenshot(target, `${slug}-compare-${index}-${width}-${theme}.png`, { style: '.header, .mobile-preferences { visibility: hidden !important; }' });
+            await screenshot(target, `${slug}-compare-${index}-${width}-${theme}.png`, { style: 'header.header, .mobile-preferences { visibility: hidden !important; }' });
           }
         }
       }
@@ -226,6 +226,9 @@ try {
     await lesson.goto(base + 'roadmap/');
     await expect(lesson.locator('[data-done-count]').first()).toHaveText('已完成 4 / 12 课');
     await expect(lesson.locator('.lesson-completed')).toHaveCount(4);
+    const stored = JSON.parse(await lesson.evaluate(() => localStorage.getItem('js_web:progress:v1')));
+    assert.equal(stored.version, 2);
+    assert.deepEqual(stored.labSteps, ['l3-c21-1']);
     await marks.close();
     evidence.checks.push('progress marks: home continue/Lab rings, sidebar same-tab event and cross-tab storage, roadmap week count');
   }
@@ -236,7 +239,11 @@ try {
     await expect(plain.locator('h1').first()).toBeVisible();
     assert(await plain.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `无 JS 整页溢出 ${route}`);
     for (const button of await plain.locator('.expressive-code .copy button, [data-progress-controls]').all()) await expect(button).toBeHidden();
-    for (const mark of await plain.locator('[data-continue], [data-lab-ring], [data-lab-next], [data-done-count]').all()) await expect(mark).toBeHidden();
+    for (const mark of await plain.locator('[data-continue], [data-lab-ring], [data-card-next], [data-lab-js], [data-done-count]').all()) await expect(mark).toBeHidden();
+    for (const back of await plain.locator('nav[data-lab-next]').all()) {
+      await expect(back).toBeVisible();
+      await expect(back.locator('a[href^="/js_web/labs/l"]').first()).toBeVisible();
+    }
     if (route === '') await expect(plain.locator('[data-lab-card] a[href^="/js_web/labs/l"]')).toHaveCount(5);
     if (trials.includes(route)) {
       await expect(plain.locator('[data-lesson-task]')).toBeVisible();

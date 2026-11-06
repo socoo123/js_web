@@ -1,8 +1,6 @@
 // 只读本地进度，给侧栏、Lab 卡片、「继续上次学习」和路线周进度加标记；不写入存储。
 // 禁用 JS 或存储不可用时，这些位置保持静态链接与文字。
-import { readProgress } from '../lib/progress.mjs';
-
-const PROGRESS_EVENT = 'js_web:progress';
+import { PROGRESS_EVENT, readProgress } from '../lib/progress.mjs';
 
 function readCompleted() {
   let storage;
@@ -52,7 +50,7 @@ function markLabCards(done, lessons) {
   for (const card of document.querySelectorAll('[data-lab-card]')) {
     const ids = idsOf(card, 'labLessons');
     const ring = card.querySelector('[data-lab-ring]');
-    const next = card.querySelector('[data-lab-next]');
+    const next = card.querySelector('[data-card-next]');
     const action = card.querySelector('[data-lab-action]');
     if (!done) {
       if (ring) ring.hidden = true;
