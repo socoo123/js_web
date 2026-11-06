@@ -1,0 +1,14 @@
+---
+// 接口骨架：路 2 负责替换为可在沙箱 iframe 中运行的正式组件；禁用 JS 时显示已验证输出。
+import { Code } from '@astrojs/starlight/components';
+import { readExample } from '../lib/examples.mjs';
+interface Props { example: string; title?: string }
+const { example, title } = Astro.props;
+const item = readExample(example);
+if (item.source === null) throw new Error(`RunSnippet 需要可运行的源码：${example}`);
+---
+<section class="run-snippet" data-run-snippet={example}>
+  <Code code={item.source} lang="js" title={title ?? item.file} />
+  <p><strong>已验证输出：</strong></p>
+  <Code code={item.expected} lang="text" />
+</section>

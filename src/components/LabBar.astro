@@ -1,0 +1,12 @@
+---
+// 接口骨架：路 3 负责替换为正式 LabBar 与返回浮标。
+import catalog from '../../labs/catalog.json';
+interface Props { lessonId: string }
+const row = catalog.lessons.find((item) => item.lessonId === Astro.props.lessonId);
+if (!row) throw new Error(`未知课号：${Astro.props.lessonId}`);
+const lab = catalog.labs.find((item) => item.labId === row.labId);
+const href = `${import.meta.env.BASE_URL}labs/${row.labId.toLowerCase()}/`;
+---
+<nav class="lab-bar" data-lab-bar={row.lessonId} aria-label="所属 Lab">
+  <a href={href}>{row.labId} {lab?.title} · 返回 Lab</a>
+</nav>

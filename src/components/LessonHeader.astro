@@ -1,0 +1,17 @@
+---
+// 接口骨架：路 1 负责替换为正式页首。
+import catalog from '../../labs/catalog.json';
+interface Props {
+  lessonId: string;
+  lesson: { time: string; prereq: string; env: string; verified: 'all' | 'partial' };
+}
+const { lessonId, lesson } = Astro.props;
+const row = catalog.lessons.find((item) => item.lessonId === lessonId);
+if (!row) throw new Error(`未知课号：${lessonId}`);
+const week = Math.ceil(row.day / 6);
+const status = lesson.verified === 'all' ? '示例已运行验证' : '部分示例未运行，已在对应位置标注';
+---
+<div class="lesson-header" data-lesson-header={lessonId}>
+  <p>第 {week} 周 · 第 {row.day} 天 · {lesson.time}</p>
+  <p>前置：{lesson.prereq} · 运行：{lesson.env} · {status}</p>
+</div>

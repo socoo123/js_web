@@ -9,6 +9,8 @@ const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const origin = 'https://socoo123.github.io';
 const base = '/js_web/';
 const errors = [];
+// 只供并行开发的隔离副本使用；集成与发布构建不设置，缺截图或演示即失败。
+const allowPending = process.env.JS_WEB_ALLOW_PENDING_ASSETS === '1';
 const pages = globSync('**/*.html', { cwd: dist });
 const docsRoot = fileURLToPath(new URL('../src/content/docs/', import.meta.url));
 const references = globSync('reference/*.{md,mdx}', { cwd: docsRoot })
@@ -45,9 +47,10 @@ for (const page of pages) {
       }
       const local = path.join(dist, decodeURIComponent(url.pathname.slice(base.length)));
       const target = existsSync(local) && statSync(local).isDirectory() ? path.join(local, 'index.html') : local;
-      if (!existsSync(target)) errors.push(`${page} 的链接没有输出文件：${value}`);
+      if (!existsSync(target) && !(allowPending && url.pathname.startsWith(`${base}demos/`))) errors.push(`${page} 的链接没有输出文件：${value}`);
     }
   }
+  if (!allowPending && /data-missing-preview=/.test(html)) errors.push(`${page} 引用了不存在的效果截图`);
 }
 for (const [id, slug, diagrams, source] of lessons) {
   const lessonFile = path.join(dist, `${slug}/index.html`);

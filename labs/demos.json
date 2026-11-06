@@ -1,0 +1,11 @@
+{
+  "demos": [
+    {
+      "id": "l3",
+      "labId": "L3",
+      "checkpoint": "C36",
+      "path": "demos/l3/",
+      "title": "L3 目标演示：React 库存应用"
+    }
+  ]
+}

@@ -3,6 +3,41 @@
   --sl-content-width: 52rem;
 }
 
+/* V3 设计变量（接口骨架）：名称固定，路 1 负责调值；其他组件只通过这些变量取色和尺寸。默认深色，亮色覆盖。 */
+:root {
+  --js-color-primary: #a5b4fc;
+  --js-color-primary-soft: rgb(99 102 241 / 0.18);
+  --js-color-amber: #fbbf24;
+  --js-color-amber-soft: rgb(245 158 11 / 0.16);
+  --js-color-java: #fdba74;
+  --js-color-java-soft: rgb(194 65 12 / 0.18);
+  --js-color-ok: #4ade80;
+  --js-color-err: #f87171;
+  --js-surface: var(--sl-color-bg);
+  --js-surface-raised: var(--sl-color-bg-nav);
+  --js-border: var(--sl-color-hairline-light);
+  --js-radius: 12px;
+  --js-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px rgb(0 0 0 / 0.2);
+  --js-motion: 200ms;
+  --js-prose-width: 46rem;
+  --js-wide-width: 64rem;
+  --js-code-size: 14px;
+}
+:root[data-theme='light'] {
+  --js-color-primary: #4338ca;
+  --js-color-primary-soft: rgb(79 70 229 / 0.1);
+  --js-color-amber: #b45309;
+  --js-color-amber-soft: rgb(245 158 11 / 0.14);
+  --js-color-java: #9a3412;
+  --js-color-java-soft: rgb(234 88 12 / 0.1);
+  --js-color-ok: #15803d;
+  --js-color-err: #b91c1c;
+  --js-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 4px 12px rgb(15 23 42 / 0.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --js-motion: 0ms; }
+}
+
 .sl-markdown-content {
   line-height: 1.85;
   overflow-wrap: anywhere;

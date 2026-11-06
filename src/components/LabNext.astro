@@ -1,0 +1,6 @@
+---
+// 接口骨架：路 3 负责替换为「回到 Lab 下一步」与完成按钮；必须保留唯一的 LearningProgress。
+import LearningProgress from './LearningProgress.astro';
+interface Props { lessonId: string }
+---
+<LearningProgress lessonId={Astro.props.lessonId} />

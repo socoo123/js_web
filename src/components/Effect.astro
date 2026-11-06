@@ -1,0 +1,26 @@
+---
+// 接口骨架：路 2 负责替换为正式效果面板。
+import { Code } from '@astrojs/starlight/components';
+import { readExample } from '../lib/examples.mjs';
+import { getShot } from '../lib/previews.mjs';
+interface Props {
+  kind: 'console' | 'terminal' | 'page' | 'demo';
+  example?: string;
+  preview?: string;
+  demo?: string;
+  title?: string;
+  caption?: string;
+}
+const { kind, example, preview, demo, title, caption } = Astro.props;
+const output = example ? readExample(example).expected : null;
+const shot = kind === 'page' && preview ? getShot(preview) : undefined;
+---
+<figure class="effect" data-effect={kind}>
+  {title && <p class="effect-title">{title}</p>}
+  {(kind === 'console' || kind === 'terminal') && (output !== null ? <Code code={output} lang="text" /> : <slot />)}
+  {kind === 'page' && (shot
+    ? <img src={shot.images[0].src.src} width={shot.images[0].src.width} height={shot.images[0].src.height} alt={shot.alt} loading="lazy" />
+    : <p data-missing-preview={preview}>缺少效果截图：{preview}</p>)}
+  {kind === 'demo' && <p data-pending-demo={demo}>交互演示：{demo}</p>}
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

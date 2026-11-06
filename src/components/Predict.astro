@@ -1,0 +1,10 @@
+---
+// 接口骨架：路 2 负责替换为正式「先猜一猜」组件。答案折叠区的 summary 不能是「提示」或「参考答案」。
+interface Props { question: string }
+const { question } = Astro.props;
+---
+<section class="predict" data-predict>
+  <p class="predict-question"><strong>先猜一猜：</strong>{question}</p>
+  <slot />
+  <details class="predict-answer"><summary>揭晓答案</summary><slot name="answer" /></details>
+</section>
