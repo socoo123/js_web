@@ -4,6 +4,8 @@
 
 **范例**：[C03 值、类型、转换与比较](../src/content/docs/02-language-data/c03-values-types.mdx) 已按本规范整篇重写，配套 [examples/c03](../examples/c03/README.md) 和 [D2 源码](../diagrams/c03-value-boundary.d2)。本文件的规则说「写什么」，C03 示范「写成什么样」：开头场景、Java 对照表、一段代码一个概念、「先猜一猜」、按六步写的调试、带验收条件的练习、只在 examples README 留验证记录。两者冲突时以本文件为准，并修正 C03。
 
+**V3 改版（2026-11-06）**：阶段 1 将在本文件新增第 16 节「可读性与效果」；写入之前，改写课文以 [PLAN §4](PLAN.md#4-课文改写规则阶段-1-写入-content_guide-第-16-节) 为准，核心内容边界见 PLAN §2.1。
+
 标 **[lint]** 的条目由 `npm run lint:lessons` 自动检查；其余条目由作者按第 14 节自查。lint 报错时删减内容，不放宽规则。改版遵循 [第 15 节](#revision-v2-writing)；受控片段与双栏计数已实现，直接复用。
 
 ## 1. 读者与语气

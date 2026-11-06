@@ -212,7 +212,7 @@ docs/                   计划、规范、架构、来源与状态
 | 文档 | 用途 |
 | --- | --- |
 | [STATUS](docs/STATUS.md) | 实际完成状态、发布记录、已知问题与下一步 |
-| [PLAN](docs/PLAN.md) | 三阶段收尾、固定数据、验收、主/子 agent 协作与接续提示词 |
+| [PLAN](docs/PLAN.md) | V3 改版五阶段、固定数据、课文与界面规则、L5 后端、验收、主/子 agent 协作与接续提示词 |
 | [Lab 设计](labs/README.md) | 五个 Lab 的固定起点、任务边界、共同场景与恢复契约 |
 | [CURRICULUM](docs/CURRICULUM.md) | 48 课范围、学习节奏与选修方向 |
 | [CONTENT_GUIDE](docs/CONTENT_GUIDE.md) | 写课规范；修改课程前必读 |
@@ -224,7 +224,7 @@ docs/                   计划、规范、架构、来源与状态
 
 推送 `main` 或手动触发[工作流](.github/workflows/deploy.yml)后，Actions 安装锁定依赖、执行相应门禁并发布 `dist/`；具体命令以工作流与 [DEPLOYMENT](docs/DEPLOYMENT.md)为准。发布地址为 `https://socoo123.github.io/js_web/`，资源和链接必须保留 `/js_web/` 子路径。对应提交的 Pages 成功后还要核验课程、Lab 与下载校验值，实际结果见 [Actions](https://github.com/socoo123/js_web/actions)和阶段记录。当前工作流未配置 PR 自动触发。
 
-恢复工作时发送 **`JS_WEB_START`**，先读 STATUS 的真实下一步；若已写“本轮改版完成，下一阶段：无”，只按用户提出的具体维护需求行动，不自动开启另一轮。阶段实施和主/子 agent 验收协议保留在 PLAN §7–8。
+恢复工作时发送 **`JS_WEB_START`**，先读 STATUS 的真实下一步。当前队列是 V3 改版五阶段，阶段实施和主/子 agent 验收协议见 PLAN §7–8；STATUS 写明“V3 改版完成，下一阶段：无”之后，只按用户提出的具体维护需求行动。
 
 ## 当前范围与待办
 
