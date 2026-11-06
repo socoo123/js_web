@@ -214,11 +214,11 @@ html:has([data-page-kind]) {
   background: var(--js-color-amber-soft);
 }
 
-/* 课页上标出本课所属的 Lab（Lab 页本身已是当前页高亮） */
+/* 课页上标出本课所属的 Lab（Lab 页本身已是当前页高亮）：只用色条，不和当前课的底色抢 */
 .sidebar-content a[data-sidebar-lab][data-active-lab]:not([aria-current='page']) {
-  background-color: var(--js-color-amber-soft);
-  box-shadow: inset 3px 0 0 var(--js-color-amber-stroke);
+  box-shadow: inset 2px 0 0 var(--js-color-amber-stroke);
   color: var(--js-color-heading);
+  font-weight: 600;
 }
 
 .sidebar-content a[data-lab-complete] .sidebar-lab-progress {

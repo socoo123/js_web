@@ -161,7 +161,11 @@ const lastOf = (lessonId: string) => lab.steps.filter((step) => step.lessonId ==
   h3 { margin: 0.25rem 0 0.5rem; color: var(--js-color-heading); font-size: var(--sl-text-h4); font-weight: 650; line-height: 1.35; }
   .block { margin-top: 0.9rem; }
   .read { list-style: none; padding: 0; display: grid; gap: 0.35rem; }
-  .read li { display: grid; gap: 0.1rem; margin: 0; padding: 0.5rem 0.75rem; border-radius: 10px; background: var(--js-color-primary-soft); }
+  .read li {
+    display: grid; gap: 0.1rem; margin: 0; padding: 0.5rem 0.85rem 0.55rem 0.95rem;
+    border: 1px solid var(--js-border); border-radius: 10px;
+    background: var(--js-surface); box-shadow: inset 2px 0 0 var(--js-color-primary);
+  }
   .read a { font-weight: 650; }
   .read-lesson { font-variant-numeric: tabular-nums; }
   .why { font-size: var(--sl-text-sm); color: var(--js-color-muted); }

@@ -50,12 +50,12 @@
 }
 
 :where(.lab-ui) :not(pre) > code {
-  padding: 0.1em 0.38em;
-  border: 1px solid var(--js-border);
-  border-radius: 6px;
-  background-color: var(--sl-color-bg-inline-code);
-  color: var(--js-color-heading);
-  font-size: 0.875em;
+  padding: 0.12em 0.4em;
+  border: 0;
+  border-radius: 5px;
+  background-color: var(--js-inline-code-bg);
+  color: var(--js-inline-code-fg);
+  font-size: 0.86em;
   overflow-wrap: anywhere;
 }
 

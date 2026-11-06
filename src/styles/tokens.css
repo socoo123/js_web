@@ -15,9 +15,9 @@
   --js-color-err: #f87171;
   --js-surface: #12141c;
   --js-surface-raised: #1a1d29;
-  --js-border: #2e3244;
+  --js-border: #2a2e3e;
   --js-radius: 12px;
-  --js-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.22);
+  --js-shadow: 0 1px 2px rgb(0 0 0 / 0.28);
   --js-motion: 200ms;
   --js-prose-width: 46rem;
   --js-wide-width: 64rem;
@@ -38,11 +38,17 @@
   --js-focus-ring: 2px solid var(--js-color-primary);
   --js-ease: cubic-bezier(0.2, 0, 0, 1);
 
+  /* 补充：代码。块级代码的底色与框线和 ec.config.mjs 的 palette 保持一致 */
+  --js-code-bg: #151821;
+  --js-code-border: #272b3a;
+  --js-inline-code-bg: rgb(148 158 190 / 0.14);
+  --js-inline-code-fg: #e4e7f0;
+
   /* 补充：Console、终端与浏览器窗口外框（路 2 的 Effect 使用） */
-  --js-console-bg: #0f1119;
+  --js-console-bg: #11141b;
   --js-console-fg: #d6dae6;
   --js-console-muted: #8b91a7;
-  --js-console-border: #2a2f42;
+  --js-console-border: #272b3a;
   --js-console-row: rgb(255 255 255 / 0.04);
   --js-terminal-bg: #0b0d13;
   --js-terminal-fg: #e2e8f0;
@@ -72,7 +78,7 @@
   --sl-color-bg-nav: #161925;
   --sl-color-bg-sidebar: #141721;
   --sl-color-bg-inline-code: #262a3a;
-  --sl-color-hairline-light: #2e3244;
+  --sl-color-hairline-light: #2a2e3e;
   --sl-color-hairline: #222636;
   --sl-color-hairline-shade: #0b0c12;
   --sl-color-backdrop-overlay: rgb(10 11 18 / 0.7);
@@ -106,8 +112,8 @@
   --js-color-err: #b91c1c;
   --js-surface: #ffffff;
   --js-surface-raised: #f6f7fb;
-  --js-border: #dfe2ea;
-  --js-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 6px 18px rgb(15 23 42 / 0.07);
+  --js-border: #e1e4eb;
+  --js-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 2px 8px rgb(15 23 42 / 0.04);
 
   --js-color-heading: #11131a;
   --js-color-text: #2f3341;
@@ -121,10 +127,15 @@
   --js-color-ok-soft: rgb(22 163 74 / 0.1);
   --js-color-err-soft: rgb(220 38 38 / 0.08);
 
+  --js-code-bg: #f7f8fa;
+  --js-code-border: #e1e4eb;
+  --js-inline-code-bg: rgb(99 110 140 / 0.1);
+  --js-inline-code-fg: #1f2230;
+
   --js-console-bg: #ffffff;
   --js-console-fg: #1f2230;
   --js-console-muted: #5b6072;
-  --js-console-border: #dfe2ea;
+  --js-console-border: #e1e4eb;
   --js-console-row: rgb(15 23 42 / 0.035);
   --js-terminal-bg: #161925;
   --js-terminal-fg: #e2e5ef;

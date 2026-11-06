@@ -96,10 +96,16 @@ const figcaption = caption ?? shot?.caption;
     </div>
   )}
   {kind === 'demo' && (
-    <div class="effect-demo" data-demo={demo} aria-label={`交互演示：${demoLabel}`} role="group">
-      <noscript><p class="effect-noscript">启用 JavaScript 后可以操作这个演示；下面显示的是初始状态，结果见说明文字。</p></noscript>
-      {demo === 'c23-first-render' && <C23FirstRender client:visible />}
-      {demo === 'c23-update-queue' && <C23UpdateQueue client:visible />}
+    <div class="effect-demo-frame" data-demo={demo} aria-label={`交互演示：${demoLabel}`} role="group">
+      <div class="effect-bar" aria-hidden="true">
+        <span class="effect-tab">交互演示</span>
+        <span class="effect-title">{demoLabel}</span>
+      </div>
+      <div class="effect-demo-body">
+        <noscript><p class="effect-noscript">启用 JavaScript 后可以操作这个演示；下面显示的是初始状态，结果见说明文字。</p></noscript>
+        {demo === 'c23-first-render' && <C23FirstRender client:visible />}
+        {demo === 'c23-update-queue' && <C23UpdateQueue client:visible />}
+      </div>
     </div>
   )}
   {figcaption && <figcaption>{figcaption}</figcaption>}
@@ -146,7 +152,7 @@ const figcaption = caption ?? shot?.caption;
     margin-top: .5rem; font-size: .9rem; color: var(--sl-color-gray-2);
     padding-inline-start: .75rem; border-inline-start: 3px solid var(--js-color-primary, var(--sl-color-text-accent));
   }
-  .effect-panel, .effect-browser, .effect-demo {
+  .effect-panel, .effect-browser, .effect-demo-frame {
     border: 1px solid var(--js-border, var(--sl-color-hairline-light));
     border-radius: var(--js-radius, 12px);
     background: var(--js-surface-raised, var(--sl-color-bg-nav));
@@ -220,6 +226,7 @@ const figcaption = caption ?? shot?.caption;
     background: repeating-linear-gradient(-45deg, transparent 0 12px, var(--js-color-primary-soft, var(--sl-color-accent-low)) 12px 24px);
   }
 
-  .effect-demo { padding: 1rem; }
+  .effect-demo-frame .effect-tab::before { content: '▸ '; color: var(--js-color-amber, var(--sl-color-orange-high)); }
+  .effect-demo-body { padding: 1rem 1.1rem 1.1rem; }
   .effect-noscript { margin: 0 0 .75rem; font-size: .85rem; color: var(--sl-color-gray-2); }
 </style>

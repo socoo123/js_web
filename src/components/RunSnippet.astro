@@ -23,7 +23,7 @@ const rows = Math.min(Math.max(source.split('\n').length + 1, 4), 26);
     </div>
   </div>
   <div class="run-code" data-run-view>
-    <Code code={source} lang="js" title={item.file} />
+    <Code code={source} lang="js" />
   </div>
   <div class="run-editor" data-run-editor hidden>
     <label for={editorId}>编辑代码（只在本页运行，刷新后恢复；Ctrl/⌘ + Enter 运行）</label>
@@ -244,25 +244,26 @@ self.onmessage = (event) => runtime.run(event.data.code);`;
     border: 1px solid var(--js-border, var(--sl-color-hairline-light));
     border-radius: var(--js-radius, 12px);
     background: var(--js-surface-raised, var(--sl-color-bg-nav));
-    box-shadow: var(--js-shadow, none);
-    padding: .75rem .9rem .9rem;
+    padding: .6rem .7rem .7rem;
     margin-block: 1.5rem;
-    max-inline-size: var(--js-wide-width, 64rem);
+    max-inline-size: var(--js-prose-width, 46rem);
   }
-  .run-snippet > :global(* + *) { margin-top: .7rem; }
-  .run-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
+  .run-snippet > :global(* + *) { margin-top: .6rem; }
+  .run-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; padding-inline-start: .3rem; }
   .run-badge {
     font-size: .75rem; font-weight: 700; padding: .1rem .55rem; border-radius: 999px;
     background: var(--js-color-amber-soft, var(--sl-color-orange-low)); color: var(--js-color-amber, var(--sl-color-orange-high));
   }
-  .run-name { font-family: var(--__sl-font-mono, monospace); font-size: .85rem; }
-  .run-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-inline-start: auto; }
+  .run-name { font-family: var(--__sl-font-mono, monospace); font-size: .82rem; color: var(--js-color-muted); }
+  .run-actions { display: flex; flex-wrap: wrap; gap: .35rem; margin-inline-start: auto; }
   .run-actions[hidden] { display: none; }
   .run-actions button {
-    font: inherit; font-size: .85rem; cursor: pointer; padding: .25rem .75rem; border-radius: 8px;
+    font: inherit; font-size: .82rem; cursor: pointer; padding: .2rem .7rem; border-radius: 999px;
     border: 1px solid var(--js-border, var(--sl-color-hairline-light));
-    background: var(--js-surface, var(--sl-color-bg)); color: var(--sl-color-white);
+    background: transparent; color: var(--js-color-text, var(--sl-color-white));
+    transition: background-color var(--js-motion, 200ms), border-color var(--js-motion, 200ms);
   }
+  .run-actions button:not(.run-primary):hover { border-color: color-mix(in srgb, var(--js-color-primary) 50%, var(--js-border)); background: var(--js-color-primary-soft); }
   .run-actions button[hidden] { display: none; }
   .run-actions .run-primary {
     border-color: var(--js-color-primary-solid, var(--sl-color-text-accent));
@@ -284,10 +285,11 @@ self.onmessage = (event) => runtime.run(event.data.code);`;
   }
   .run-panels { display: grid; gap: .7rem; }
   @media (min-width: 50rem) { .run-panels:has([data-run-result]:not([hidden])) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } }
-  .run-panel { min-inline-size: 0; border: 1px solid var(--js-console-border); border-radius: 8px; overflow: hidden; background: var(--js-console-bg); color: var(--js-console-fg); }
+  .run-panel { min-inline-size: 0; border: 1px solid var(--js-console-border); border-radius: 10px; overflow: hidden; background: var(--js-console-bg); color: var(--js-console-fg); }
   .run-panel[hidden] { display: none; }
-  .run-panel-title { margin: 0; padding: .3rem .75rem; font-size: .78rem; font-weight: 700; color: var(--js-console-muted); background: var(--js-console-row); border-bottom: 1px solid var(--js-console-border); }
-  .run-out { margin: 0; padding: .55rem .75rem; border: 0; background: transparent; color: inherit; overflow-x: auto; font-size: var(--js-code-size, 14px); line-height: 1.6; }
+  .run-panel-title { display: flex; align-items: center; gap: .45rem; margin: 0; padding: .35rem 1.1rem; font-size: .78rem; font-weight: 600; color: var(--js-console-muted); background: var(--js-console-row); border-bottom: 1px solid var(--js-console-border); }
+  .run-panel-title::before { content: '›'; color: var(--js-color-ok); font-family: var(--__sl-font-mono, monospace); font-weight: 800; }
+  .run-out { margin: 0; padding: .7rem 1.1rem; border: 0; background: transparent; color: inherit; overflow-x: auto; font-size: var(--js-code-size, 14px); line-height: 1.7; }
   .run-lines { margin: 0; padding: .3rem 0; list-style: none; font-size: .85rem; }
   .run-lines :global(.run-line) { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .6rem; padding: .2rem .75rem; margin: 0; }
   .run-lines :global(.run-line + .run-line) { border-top: 1px solid var(--js-console-border); }

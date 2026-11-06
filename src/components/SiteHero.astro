@@ -1,7 +1,13 @@
 ---
 // 首页 Hero：标题、行动按钮、课程规模、「继续上次学习」，右侧是 Java 与 JS 表示同一件商品的对照图。
+import { Code } from '@astrojs/starlight/components';
 import catalog from '../../labs/catalog.json';
 import ContinueLearning from './ContinueLearning.astro';
+
+const javaCode = `record Product(String id, String name, int stock) {}
+var p = new Product("P001", "机械键盘", 12);
+System.out.println(p.name() + " · 库存 " + p.stock() + " 件");`;
+const jsCode = 'const p = { id: "P001", name: "机械键盘", stock: 12 };\nconsole.log(`${p.name} · 库存 ${p.stock} 件`);';
 
 const { data } = Astro.locals.starlightRoute.entry;
 const { title = data.title, tagline, actions = [] } = data.hero || {};
@@ -33,21 +39,12 @@ const facts = [
     <ContinueLearning />
   </div>
   <figure class="site-hero__visual" data-pagefind-ignore>
-    <div class="hero-code" data-lang="java">
-      <p class="hero-code__label">Java</p>
-      <pre tabindex="0" aria-label="Java 写法"><code>record Product(String id, String name, int stock) {'{}'}
-var p = new Product("P001", "机械键盘", 12);
-System.out.println(p.name() + " · 库存 " + p.stock() + " 件");</code></pre>
-    </div>
+    <div class="hero-code"><Code code={javaCode} lang="java" title="Java" /></div>
     <div class="hero-code__bridge" aria-hidden="true">
       <svg viewBox="0 0 24 24"><path d="M12 4v16M6 14l6 6 6-6" /></svg>
       同一件商品，换一种写法
     </div>
-    <div class="hero-code" data-lang="js">
-      <p class="hero-code__label">JavaScript</p>
-      <pre tabindex="0" aria-label="JavaScript 写法"><code>const p = {'{'} id: "P001", name: "机械键盘", stock: 12 {'}'};
-console.log(`${'{'}p.name{'}'} · 库存 ${'{'}p.stock{'}'} 件`);</code></pre>
-    </div>
+    <div class="hero-code"><Code code={jsCode} lang="js" title="JavaScript" /></div>
     <figcaption class="hero-code__output"><span aria-hidden="true">›</span> 两边都输出：机械键盘 · 库存 12 件</figcaption>
   </figure>
 </div>
@@ -145,50 +142,13 @@ console.log(`${'{'}p.name{'}'} · 库存 ${'{'}p.stock{'}'} 件`);</code></pre>
   }
 
   .hero-code {
-    overflow: hidden;
-    border: 1px solid var(--js-border);
-    border-radius: var(--js-radius);
-    background: var(--js-console-bg);
+    min-width: 0;
   }
 
-  .hero-code__label {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
+  .hero-code :global(.expressive-code) {
+    --ec-codeFontSize: 0.8125rem;
+    --ec-codePadInl: 0.9rem;
     margin: 0;
-    padding: 0.4rem 0.8rem;
-    border-bottom: 1px solid var(--js-border);
-    font-size: 0.8125rem;
-    font-weight: 700;
-  }
-
-  .hero-code__label::before {
-    content: '';
-    width: 0.6rem;
-    height: 0.6rem;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
-  .hero-code[data-lang='java'] .hero-code__label {
-    color: var(--js-color-java);
-    background: var(--js-color-java-soft);
-  }
-
-  .hero-code[data-lang='js'] .hero-code__label {
-    color: var(--js-color-amber);
-    background: var(--js-color-amber-soft);
-  }
-
-  .hero-code pre {
-    margin: 0;
-    padding: 0.75rem 0.9rem;
-    overflow-x: auto;
-    color: var(--js-console-fg);
-    font-family: var(--sl-font-mono);
-    font-size: 0.8125rem;
-    line-height: 1.7;
-    white-space: pre;
   }
 
   .hero-code__bridge {

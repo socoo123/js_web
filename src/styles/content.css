@@ -8,13 +8,17 @@
 .sl-markdown-content :is(h2, h3, h4, h5, h6):not(:where(.not-content *)) {
   color: var(--js-color-heading);
   font-weight: 700;
-  letter-spacing: 0.005em;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
 }
 
+/* 节与节之间靠留白分隔，不画横线：横线只有正文宽，会和外扩的宽组件错开 */
 .sl-markdown-content .sl-heading-wrapper.level-h2 {
-  margin-top: 2.75rem;
-  padding-bottom: 0.45rem;
-  border-bottom: 1px solid var(--js-border);
+  margin-top: 3.25rem;
+}
+
+.sl-markdown-content .sl-heading-wrapper.level-h2 + * {
+  margin-top: 0.85rem;
 }
 
 .sl-markdown-content > .sl-heading-wrapper.level-h2:first-child {
@@ -22,11 +26,20 @@
 }
 
 .sl-markdown-content .sl-heading-wrapper.level-h3 {
-  margin-top: 2rem;
+  margin-top: 2.25rem;
 }
 
 .sl-markdown-content h3:not(:where(.not-content *)) {
   font-weight: 650;
+}
+
+:where(.sl-markdown-content) :is(p, li) {
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+:where(.sl-markdown-content) li + li:not(:where(.not-content *)) {
+  margin-top: 0.35rem;
 }
 
 .sl-markdown-content strong {
@@ -50,12 +63,18 @@
 }
 
 .sl-markdown-content code:not(:where(.not-content *)) {
-  padding: 0.1em 0.38em;
-  border: 1px solid var(--js-border);
-  border-radius: 6px;
-  background-color: var(--sl-color-bg-inline-code);
-  color: var(--js-color-heading);
-  font-size: 0.875em;
+  padding: 0.12em 0.4em;
+  border: 0;
+  border-radius: 5px;
+  background-color: var(--js-inline-code-bg);
+  color: var(--js-inline-code-fg);
+  font-size: 0.86em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.sl-markdown-content a code:not(:where(.not-content *)) {
+  color: inherit;
 }
 
 .sl-markdown-content :is(ul, ol) li::marker {
@@ -228,60 +247,41 @@ main:has([data-lesson-header]) .sl-markdown-content blockquote.lesson-meta-legac
   outline-offset: 3px;
 }
 
-/* ---------- 代码块（Expressive Code） ---------- */
+/* ---------- 代码块（Expressive Code，配色在 ec.config.mjs） ---------- */
 
-.expressive-code {
-  --ec-brdRad: 10px;
-  --ec-codeLineHt: 1.65;
-  --ec-codeFontSize: var(--js-code-size);
-  --ec-uiFontSize: 0.8125rem;
+/* 标签栏上的文件名用等宽字，和正文里的路径写法一致 */
+.expressive-code .frame.has-title .header .title,
+.expressive-code .frame.is-terminal .header .title {
+  font-family: var(--__sl-font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
-:root:not([data-theme='light']) .expressive-code:not([data-theme='light']) {
-  --ec-codeBg: #171a25;
-  --ec-brdCol: #2b2f40;
-  --ec-frm-edBg: #171a25;
-  --ec-frm-trmBg: #171a25;
-  --ec-frm-edTabBarBg: #1d2030;
-  --ec-frm-edActTabBg: #171a25;
-  --ec-frm-edTabBarBrdBtmCol: #2b2f40;
-  --ec-frm-trmTtbBg: #1d2030;
-  --ec-frm-trmTtbBrdBtmCol: #2b2f40;
+.expressive-code .frame.has-title:not(.is-terminal) .header .title {
+  padding-inline: 1.1rem;
 }
 
-:root[data-theme='light'] .expressive-code:not([data-theme='dark']) {
-  --ec-codeBg: #f7f8fb;
-  --ec-brdCol: #dfe2ea;
-  --ec-frm-edBg: #f7f8fb;
-  --ec-frm-trmBg: #f7f8fb;
-  --ec-frm-edTabBarBg: #eef0f6;
-  --ec-frm-edActTabBg: #f7f8fb;
-  --ec-frm-edTabBarBrdBtmCol: #dfe2ea;
-  --ec-frm-trmTtbBg: #eef0f6;
-  --ec-frm-trmTtbBrdBtmCol: #dfe2ea;
+.expressive-code .frame.has-title:not(.is-terminal) .header .title::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-inline-end: 0.55rem;
+  border-radius: 2px;
+  background: var(--js-color-muted);
+  vertical-align: 0.06em;
 }
 
-.expressive-code .frame {
-  box-shadow: none;
+/* 文件名前的色块标出语言：JS 系琥珀，Java 咖啡橙，其余灰 */
+.expressive-code .frame.has-title:not(.is-terminal):has(> pre:is([data-language='js'], [data-language='jsx'], [data-language='ts'], [data-language='tsx'], [data-language='mjs'])) .header .title::before {
+  background: var(--js-color-amber-stroke);
 }
 
-.expressive-code .frame .header .title {
-  font-weight: 600;
+.expressive-code .frame.has-title:not(.is-terminal):has(> pre[data-language='java']) .header .title::before {
+  background: var(--js-color-java-stroke);
 }
 
-/* night-owl 亮色主题里有 3 个语法色在浅底上低于 4.5:1，改成同色相的深色 */
-:root[data-theme='light'] .expressive-code .ec-line span[style*='--1:#0C969B'] {
-  color: #08767a;
-}
-
-:root[data-theme='light'] .expressive-code .ec-line span[style*='--1:#4876D6'] {
-  color: #2f5bbd;
-}
-
-:root[data-theme='light'] .expressive-code .ec-line span[style*='--1:#C96765'] {
-  color: #a8433f;
-}
-
-:root[data-theme='light'] .expressive-code .ec-line span[style*='--1:#994CC3'] {
-  color: #8540ad;
+.expressive-code .copy button {
+  border-radius: 6px;
 }
