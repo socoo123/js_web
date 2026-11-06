@@ -10,18 +10,77 @@ const { id, entry } = Astro.locals.starlightRoute;
 const lessonId = entry.data.title.match(/^(C\d{2})\s/)?.[1];
 const revised = catalog.lessons.find((lesson) => lesson.lessonId === lessonId)?.migrated;
 const toc = Astro.locals.starlightRoute.toc;
+const labPage = /^labs(?:\/l[1-5])?$/.test(id);
+// 课页、Lab 页和速查页放宽到 --js-wide-width；base.css 通过 html:has([data-page-kind]) 读取。
+const pageKind = lessonId ? 'lesson' : labPage ? 'lab' : id.startsWith('reference/') ? 'reference' : id === '404' ? 'not-found' : undefined;
+const outline = (revised || labPage) && toc ? toc.items.filter((item) => item.depth === 2) : [];
 ---
 
+{pageKind && <span class="page-kind" data-page-kind={pageKind} hidden></span>}
+{id === '404' && (
+  <p class="not-found-art not-content" aria-hidden="true">
+    4<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z" /><path d="m3 8 9 5 9-5M12 13v8" /></svg>4
+  </p>
+)}
 {id === 'roadmap' && <LearningProgress />}
 {lessonId && entry.data.lesson && <LessonHeader lessonId={lessonId} lesson={entry.data.lesson} />}
 {lessonId && <LabBar lessonId={lessonId} />}
-{revised && toc && <details class="lesson-outline"><summary>本页导航</summary><nav aria-label="本页导航">{toc.items.filter((item) => item.depth === 2).map((item) => <a href={'#' + item.slug}>{item.text}</a>)}</nav></details>}
+{outline.length > 0 && (
+  <nav class="lesson-outline not-content" aria-labelledby="lesson-outline-title">
+    <p class="lesson-outline__title" id="lesson-outline-title">本页导航</p>
+    <ol>{outline.map((item) => <li><a href={'#' + item.slug}>{item.text}</a></li>)}</ol>
+  </nav>
+)}
 <Default><slot /></Default>
 {lessonId && <LabNext lessonId={lessonId} />}
 
 <style>
-  .lesson-outline { font-size: .85rem; padding-block: .5rem; border-bottom: 1px solid var(--sl-color-hairline-light); margin-bottom: 1.25rem; }
-  summary { cursor: pointer; }
-  nav { display: flex; flex-wrap: wrap; gap: .4rem .8rem; padding-block: .5rem; }
-  a:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }
+  /* 只在 72–90rem 显示：这一档收起了右侧目录（见 base.css），更窄时 Starlight 有顶部目录。 */
+  .lesson-outline {
+    display: none;
+    margin-block: 0 1.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--js-border);
+    border-radius: var(--js-radius);
+    background: var(--js-surface-raised);
+    font-size: 0.875rem;
+  }
+
+  @media (min-width: 72rem) and (max-width: 89.9375rem) {
+    .lesson-outline {
+      display: block;
+    }
+  }
+
+  .lesson-outline__title {
+    margin: 0 0 0.4rem;
+    color: var(--js-color-muted);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--js-color-primary) 8%, transparent);
+    color: var(--js-color-primary);
+    line-height: 1.6;
+    text-decoration: none;
+    transition: background-color var(--js-motion) var(--js-ease);
+  }
+
+  a:hover {
+    background: var(--js-color-primary-soft);
+  }
 </style>

@@ -1,0 +1,42 @@
+---
+// 在 Starlight 默认侧栏上加课号、Lab 标记与「本课所属」徽标；完成标记由 progress-marks.mjs 在浏览器里补上。
+import Default from '@astrojs/starlight/components/Sidebar.astro';
+import catalog from '../../labs/catalog.json';
+
+type SidebarEntry = (typeof Astro.locals.starlightRoute.sidebar)[number];
+
+const route = Astro.locals.starlightRoute;
+const lessonLab = new Map(catalog.lessons.map((row) => [row.lessonId, row.labId]));
+const labLessons = new Map(catalog.labs.map((lab) => [lab.labId, catalog.lessons.filter((row) => row.labId === lab.labId).map((row) => row.lessonId)]));
+const pageLesson = /^(C\d{2})\s/.exec(route.entry.data.title)?.[1];
+const pageLab = pageLesson ? lessonLab.get(pageLesson) : /^labs\/(l[1-5])$/.exec(route.id)?.[1]?.toUpperCase();
+
+function decorate(entries: SidebarEntry[]): SidebarEntry[] {
+  return entries.map((entry) => {
+    if (entry.type === 'group') return { ...entry, entries: decorate(entry.entries) };
+    const attrs: Record<string, string> = { ...entry.attrs } as Record<string, string>;
+    let { badge } = entry;
+    const lessonId = /^(C\d{2})\s/.exec(entry.label)?.[1];
+    if (lessonId && lessonLab.has(lessonId)) attrs['data-sidebar-lesson'] = lessonId;
+    const labId = /\/labs\/(l[1-5])\/$/.exec(entry.href)?.[1]?.toUpperCase();
+    if (labId && labLessons.has(labId)) {
+      attrs['data-sidebar-lab'] = labId;
+      attrs['data-lab-lessons'] = labLessons.get(labId)!.join(' ');
+      if (labId === pageLab) {
+        attrs['data-active-lab'] = '';
+        // 视觉上用琥珀色高亮这一项，徽标文字只给读屏器。
+        if (pageLesson) badge = { text: '本课所属', variant: 'note', class: 'js-visually-hidden' };
+      }
+    }
+    return { ...entry, attrs, badge };
+  });
+}
+
+route.sidebar = decorate(route.sidebar);
+---
+
+<Default />
+
+<script>
+  import '../scripts/progress-marks.mjs';
+</script>

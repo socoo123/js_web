@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
+import markdownCallouts from './src/lib/markdown-callouts.mjs';
 import { existsSync } from 'node:fs';
 
 const courseSections = [
@@ -27,7 +28,10 @@ export default defineConfig({
       editLink: { baseUrl: 'https://github.com/socoo123/js_web/edit/main/' },
       customCss: ['./src/styles/custom.css'],
       components: {
+        Hero: './src/components/SiteHero.astro',
         MarkdownContent: './src/components/CourseContent.astro',
+        PageTitle: './src/components/SitePageTitle.astro',
+        Sidebar: './src/components/SiteSidebar.astro',
         ThemeProvider: './src/components/ThemeProvider.astro',
         ThemeSelect: './src/components/ThemeSelect.astro',
       },
@@ -52,6 +56,7 @@ export default defineConfig({
         { label: '速查手册', items: [{ autogenerate: { directory: 'reference' } }] },
       ],
     }),
+    markdownCallouts(),
     react(),
   ],
 });

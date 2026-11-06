@@ -1,0 +1,17 @@
+---
+// 给 progress-marks.mjs 的 48 课索引（课号、标题、地址、所属 Lab）；同页出现多次时脚本只读第一份。
+import catalog from '../../labs/catalog.json';
+const base = import.meta.env.BASE_URL;
+const labs = new Map(catalog.labs.map((lab) => [lab.labId, lab]));
+const index = catalog.lessons.map((row) => ({
+  id: row.lessonId,
+  title: row.title,
+  href: `${base}${row.slug}/`,
+  labId: row.labId,
+  labTitle: labs.get(row.labId)?.title ?? '',
+  labHref: `${base}labs/${row.labId.toLowerCase()}/`,
+}));
+const json = JSON.stringify(index).replaceAll('<', '\\u003c');
+---
+
+<script type="application/json" data-lesson-index set:html={json} />

@@ -1,5 +1,5 @@
 ---
-// 接口骨架：路 1 负责替换为正式页首。
+// 课页头：静态渲染，禁用 JS 时同样完整可读。
 import catalog from '../../labs/catalog.json';
 interface Props {
   lessonId: string;
@@ -8,10 +8,136 @@ interface Props {
 const { lessonId, lesson } = Astro.props;
 const row = catalog.lessons.find((item) => item.lessonId === lessonId);
 if (!row) throw new Error(`未知课号：${lessonId}`);
+const lab = catalog.labs.find((item) => item.labId === row.labId);
+if (!lab) throw new Error(`${lessonId} 的 Lab 不存在：${row.labId}`);
 const week = Math.ceil(row.day / 6);
-const status = lesson.verified === 'all' ? '示例已运行验证' : '部分示例未运行，已在对应位置标注';
+const verified = lesson.verified === 'all';
+const status = verified ? '示例已运行验证' : '部分示例未运行，已在对应位置标注';
+const labHref = `${import.meta.env.BASE_URL}labs/${lab.labId.toLowerCase()}/`;
 ---
-<div class="lesson-header" data-lesson-header={lessonId}>
-  <p>第 {week} 周 · 第 {row.day} 天 · {lesson.time}</p>
-  <p>前置：{lesson.prereq} · 运行：{lesson.env} · {status}</p>
-</div>
+<section class="lesson-header not-content" data-lesson-header={lessonId} aria-label={`${lessonId} 课程信息`}>
+  <div class="lesson-header__top">
+    <p class="lesson-header__when">第 {week} 周 · 第 {row.day} 天</p>
+    <a class="lesson-header__lab" href={labHref}>
+      <span class="lesson-header__lab-id">{lab.labId}</span>
+      <span>所属 Lab：{lab.title}</span>
+    </a>
+  </div>
+  <dl class="lesson-header__facts">
+    <div>
+      <dt><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>时长</dt>
+      <dd>{lesson.time}</dd>
+    </div>
+    <div>
+      <dt><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>前置</dt>
+      <dd>{lesson.prereq}</dd>
+    </div>
+    <div>
+      <dt><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" /><path d="m7 9 3 3-3 3M12.5 15H17" /></svg>运行环境</dt>
+      <dd>{lesson.env}</dd>
+    </div>
+    <div>
+      <dt><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z" /></svg>验证状态</dt>
+      <dd><span class="js-status" data-tone={verified ? 'ok' : 'warn'}>{status}</span></dd>
+    </div>
+  </dl>
+</section>
+
+<style>
+  .lesson-header {
+    margin-block: 0 1.5rem;
+    padding: 1rem 1.15rem 1.1rem;
+    border: 1px solid var(--js-border);
+    border-radius: var(--js-radius);
+    background: var(--js-surface-raised);
+  }
+
+  .lesson-header__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .lesson-header__when {
+    margin: 0;
+    padding: 0.1rem 0.65rem;
+    border-radius: 999px;
+    background: var(--js-color-primary-soft);
+    color: var(--js-color-primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lesson-header__lab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2rem;
+    padding: 0.15rem 0.7rem 0.15rem 0.2rem;
+    border: 1px solid color-mix(in srgb, var(--js-color-amber-stroke) 45%, var(--js-border));
+    border-radius: 999px;
+    color: var(--js-color-heading);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color var(--js-motion) var(--js-ease), background-color var(--js-motion) var(--js-ease);
+  }
+
+  .lesson-header__lab:hover {
+    border-color: var(--js-color-amber-stroke);
+    background: var(--js-color-amber-soft);
+  }
+
+  .lesson-header__lab-id {
+    padding: 0 0.45rem;
+    border-radius: 999px;
+    background: var(--js-color-amber-stroke);
+    color: #1c1300;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1.5rem;
+  }
+
+  .lesson-header__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: 0.75rem 1.25rem;
+    margin: 0.9rem 0 0;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--js-border);
+  }
+
+  .lesson-header__facts div {
+    min-width: 0;
+  }
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--js-color-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  dt svg {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    color: var(--js-color-heading);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+</style>

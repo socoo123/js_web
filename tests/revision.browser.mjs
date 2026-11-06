@@ -7,6 +7,7 @@ import { chromium, expect } from '../labs/inventory/node_modules/@playwright/tes
 import { comparison } from '../labs/sources.mjs';
 import catalog from '../labs/catalog.json' with { type: 'json' };
 import { importedContent } from '../scripts/lesson-sources.mjs';
+import { emptyProgress, markLesson, writeProgress } from '../src/lib/progress.mjs';
 
 const base = process.env.REVISION_BASE_URL ?? 'http://127.0.0.1:8874/js_web/';
 const qa = path.resolve(process.env.REVISION_QA_DIR ?? '.cache/qa/v2/site-review');
@@ -64,6 +65,18 @@ const screenshot = async (target, name, options = {}) => {
   await target.screenshot({ path: path.join(qa, name), ...options });
   evidence.screenshots.push(name);
 };
+// 用站点自己的写入函数生成存储原文，进度格式升级时测试不需要跟着改。
+const progressSeed = (ids) => {
+  const memory = new Map();
+  const storage = { getItem: (key) => memory.get(key) ?? null, setItem: (key, value) => memory.set(key, String(value)), removeItem: (key) => memory.delete(key) };
+  writeProgress(storage, ids.reduce((progress, id) => markLesson(progress, id, true), emptyProgress()));
+  return [...memory];
+};
+const reactChunks = new Map();
+const loadsReact = async (request, url) => {
+  if (!reactChunks.has(url)) reactChunks.set(url, /react\.(?:transitional\.)?element|__CLIENT_INTERNALS_DO_NOT_USE|react-dom/.test(await (await request.get(url)).text()));
+  return reactChunks.get(url);
+};
 const focusVisible = async (target) => {
   await target.page().keyboard.press('Tab');
   await target.focus();
@@ -97,11 +110,18 @@ try {
       evidence.geometry.push({ route, width, theme, status: response.status() });
       const slug = route ? route.replace(/\/$/, '').replaceAll('/', '--') : 'home';
       await screenshot(page, `${slug}-page-${width}-${theme}.png`);
+      if (width === 1280 && theme === 'light' && !(await page.locator('astro-island').count())) {
+        const scripts = await page.evaluate(() => performance.getEntriesByType('resource').map((entry) => entry.name).filter((name) => /\.m?js(?:$|\?)/.test(name)));
+        for (const url of scripts) assert(!(await loadsReact(context.request, url)), `没有 island 的页面不得加载 React ${route} ${url}`);
+      }
+      // 亮/暗成对的截图只有一张可见；正文截图不是 D2，只核对加载、alt 与子路径。
       for (const image of await page.locator('.sl-markdown-content img').all()) {
+        if (!(await image.isVisible())) continue;
         await image.scrollIntoViewIfNeeded();
         await expect.poll(() => image.evaluate((img) => Boolean(img.alt) && img.complete && img.naturalWidth > 0), { message: `正文图片 ${route}` }).toBe(true);
         const src = await image.getAttribute('src');
         assert(src.startsWith('/js_web/'), `图片必须保留 Pages 子路径 ${route}`);
+        if (!/\.svg(?:$|\?)/.test(src)) continue;
         const name = /\/(c\d{2}-[^.]+)\./.exec(src)?.[1];
         assert(name, `D2 资源命名 ${src}`);
         diagrams.set(name, { route, src, alt: await image.getAttribute('alt') });
@@ -147,7 +167,7 @@ try {
   await screenshot(page, 'keyboard-copy-answer.png');
   evidence.checks.push('copy rejection feedback, keyboard code focus and native answer');
   const images = page.locator('article img');
-  for (const image of await images.all()) assert(await image.evaluate((img) => Boolean(img.alt) && img.complete && img.naturalWidth > 0), 'D2 加载/alt');
+  for (const image of await images.all()) if (await image.isVisible()) assert(await image.evaluate((img) => Boolean(img.alt) && img.complete && img.naturalWidth > 0), 'D2 加载/alt');
   for (const query of ['闭包', '状态快照', '断点', '单元测试', 'UI5', 'useEffect', 'npm ci']) {
     const search = page.getByRole('button', { name: '搜索' }).first();
     await focusVisible(search); await page.keyboard.press('Enter');
@@ -175,6 +195,40 @@ try {
   await focusVisible(skip); await page.keyboard.press('Enter');
   assert.equal(new URL(page.url()).hash, '#_top');
   evidence.checks.push('keyboard skip link');
+  if (!requestedRoutes) {
+    const marks = await browser.newContext({ viewport: { width: 1280, height: 950 } });
+    const seed = (target, ids) => target.evaluate((entries) => {
+      for (const [key, value] of entries) localStorage.setItem(key, value);
+      window.dispatchEvent(new Event('js_web:progress'));
+    }, progressSeed(ids));
+    const home = await marks.newPage();
+    home.on('pageerror', (error) => errors.push(error.message));
+    await home.goto(base);
+    await expect(home.locator('[data-lab-card]')).toHaveCount(5);
+    await expect(home.locator('[data-missing-preview]')).toHaveCount(0);
+    await expect(home.locator('[data-continue]')).toBeVisible();
+    await expect(home.locator('[data-continue-lesson]')).toHaveAttribute('href', /\/c01-story-ecosystem\/$/);
+    await seed(home, ['C01', 'C02', 'C03']);
+    await expect(home.locator('[data-continue-lesson]')).toHaveAttribute('href', /\/c04-scope-control\/$/);
+    await expect(home.locator('[data-lab-card="L1"]')).toHaveAttribute('data-lab-state', 'active');
+    await expect(home.locator('[data-lab-card="L2"]')).toHaveAttribute('data-lab-state', 'new');
+    await expect(home.locator('[data-lab-card="L1"] [data-lab-ring-text]')).toHaveText('3/10');
+    await screenshot(home, 'home-progress-1280.png');
+    const lesson = await marks.newPage();
+    lesson.on('pageerror', (error) => errors.push(error.message));
+    await lesson.goto(base + '02-language-data/c08-arrays-processing/');
+    await expect(lesson.locator('a[data-sidebar-lesson="C03"][data-done]')).toHaveCount(1);
+    await expect(lesson.locator('a[data-sidebar-lesson="C04"][data-done]')).toHaveCount(0);
+    await expect(lesson.locator('a[data-sidebar-lab="L1"][data-active-lab] .sidebar-lab-progress')).toHaveText('3/10');
+    await seed(home, ['C01', 'C02', 'C03', 'C04']);
+    await expect(lesson.locator('a[data-sidebar-lesson="C04"][data-done]')).toHaveCount(1);
+    await expect(lesson.locator('a[data-sidebar-lab="L1"] .sidebar-lab-progress')).toHaveText('4/10');
+    await lesson.goto(base + 'roadmap/');
+    await expect(lesson.locator('[data-done-count]').first()).toHaveText('已完成 4 / 12 课');
+    await expect(lesson.locator('.lesson-completed')).toHaveCount(4);
+    await marks.close();
+    evidence.checks.push('progress marks: home continue/Lab rings, sidebar same-tab event and cross-tab storage, roadmap week count');
+  }
   const nojs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 360, height: 950 } });
   const plain = await nojs.newPage();
   for (const route of routes) {
@@ -182,6 +236,8 @@ try {
     await expect(plain.locator('h1').first()).toBeVisible();
     assert(await plain.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `无 JS 整页溢出 ${route}`);
     for (const button of await plain.locator('.expressive-code .copy button, [data-progress-controls]').all()) await expect(button).toBeHidden();
+    for (const mark of await plain.locator('[data-continue], [data-lab-ring], [data-lab-next], [data-done-count]').all()) await expect(mark).toBeHidden();
+    if (route === '') await expect(plain.locator('[data-lab-card] a[href^="/js_web/labs/l"]')).toHaveCount(5);
     if (trials.includes(route)) {
       await expect(plain.locator('[data-lesson-task]')).toBeVisible();
       await expect(plain.locator('.compare-side')).toHaveCount(cardCounts.get(route) * 2);

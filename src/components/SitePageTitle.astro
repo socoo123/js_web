@@ -1,0 +1,34 @@
+---
+// 课号与 Lab 号做成标号；h1 的文字内容和 id 与 Starlight 默认一致。
+const { title } = Astro.locals.starlightRoute.entry.data;
+const match = /^([CL]\d{1,2})\s+(.+)$/.exec(title);
+---
+
+<h1 id="_top" class:list={['page-title', { 'page-title--coded': match }]}>
+  {match ? <><span class="page-title__code">{match[1]}</span>{' '}{match[2]}</> : title}
+</h1>
+
+<style>
+  .page-title {
+    margin-top: 1rem;
+    font-size: var(--sl-text-h1);
+    line-height: var(--sl-line-height-headings);
+    font-weight: 700;
+    color: var(--js-color-heading);
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+
+  .page-title__code {
+    display: inline-block;
+    margin-inline-end: 0.1em;
+    padding: 0.05em 0.4em;
+    border-radius: 0.4em;
+    background: var(--js-color-primary-soft);
+    color: var(--js-color-primary);
+    font-size: 0.72em;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    vertical-align: 0.14em;
+  }
+</style>

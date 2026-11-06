@@ -3,10 +3,13 @@ title: 库存工作区与 5 个 Lab
 description: 一次下载，在同一个库存工作区按课程持续修改，按需对照参考快照。
 ---
 
+import LabCards from '../../../components/LabCards.astro';
 import LabOverview from '../../../components/LabOverview.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
 **48 课、5 个 Lab、一个长期工作区。** 从商品卡片到静态交付，每课接续自己的修改，共用数据、规则和依赖。先准备工程，再从 [C01](/js_web/01-history-web/c01-story-ecosystem/)开始；每日安排见[学习路线](/js_web/roadmap/)。
+
+<LabCards variant="grid" headingLevel={2} />
 
 ## 先看任务与规则
 
@@ -20,6 +23,9 @@ import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
 先准备 [Node 24](https://nodejs.org/en/download)。下载 <WorkspaceDownload label="C00 初始工程" />，在新的空目录 `inventory/` 中解压；压缩包中的文件直接位于该目录，不要解压到已有作业里。已克隆仓库也可使用 `labs/inventory/`，不用安装课程网站。
 
+<details class="install-steps">
+<summary>安装依赖并第一次启动（只做一次）</summary>
+
 在库存工作区执行一次：
 
 ```sh
@@ -31,6 +37,8 @@ npm run lab -- dev
 打开终端打印的地址，应看到「P001 机械键盘 · 库存 12 件」。启动脚本是提供好的骨架，工具原理在运行时与工程课解释。网站本身无需本地安装。
 
 安装会下载 React、组件库与检查工具，用时取决于网络和缓存。首次使用 OpenUI5 时，UI5 CLI 还会下载对应框架资源。其余课继续在同一目录修改，日常不用重装。
+
+</details>
 
 ## 下一次学习与暂停
 

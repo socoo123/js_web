@@ -1,0 +1,287 @@
+/* 正文排版：标题、段落、链接、行内代码、列表、表格、折叠区、图片与代码块。 */
+
+.sl-markdown-content {
+  overflow-wrap: anywhere;
+  color: var(--js-color-text);
+}
+
+.sl-markdown-content :is(h2, h3, h4, h5, h6):not(:where(.not-content *)) {
+  color: var(--js-color-heading);
+  font-weight: 700;
+  letter-spacing: 0.005em;
+}
+
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
+  margin-top: 2.75rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--js-border);
+}
+
+.sl-markdown-content > .sl-heading-wrapper.level-h2:first-child {
+  margin-top: 0.5rem;
+}
+
+.sl-markdown-content .sl-heading-wrapper.level-h3 {
+  margin-top: 2rem;
+}
+
+.sl-markdown-content h3:not(:where(.not-content *)) {
+  font-weight: 650;
+}
+
+.sl-markdown-content strong {
+  color: var(--js-color-heading);
+  font-weight: 650;
+}
+
+.sl-markdown-content a:not(:where(.not-content *)) {
+  color: var(--js-color-primary);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--js-color-primary) 45%, transparent);
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color var(--js-motion) var(--js-ease);
+}
+
+.sl-markdown-content a:hover:not(:where(.not-content *)) {
+  color: var(--js-color-primary);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+}
+
+.sl-markdown-content code:not(:where(.not-content *)) {
+  padding: 0.1em 0.38em;
+  border: 1px solid var(--js-border);
+  border-radius: 6px;
+  background-color: var(--sl-color-bg-inline-code);
+  color: var(--js-color-heading);
+  font-size: 0.875em;
+}
+
+.sl-markdown-content :is(ul, ol) li::marker {
+  color: var(--js-color-muted);
+}
+
+.sl-markdown-content ol li::marker {
+  font-weight: 650;
+}
+
+.sl-markdown-content hr:not(:where(.not-content *)) {
+  border-bottom-color: var(--js-border);
+}
+
+.sl-markdown-content blockquote:not(:where(.not-content *)) {
+  border-inline-start: 3px solid color-mix(in srgb, var(--js-color-primary) 40%, var(--js-border));
+  padding: 0.15rem 0 0.15rem 1rem;
+  color: var(--js-color-text);
+}
+
+/* 旧版课首行引用块（第 N 周 · 第 D 天 …）：改写前先与新页头保持一致的信息条样式 */
+.sl-markdown-content blockquote.lesson-meta-legacy {
+  max-width: none;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--js-color-muted);
+}
+
+.sl-markdown-content blockquote.lesson-meta-legacy strong {
+  color: var(--js-color-primary);
+}
+
+/* 已有正式页头的课，旧引用块与页头重复；正文迁移时应删除，删除前先不显示。 */
+main:has([data-lesson-header]) .sl-markdown-content blockquote.lesson-meta-legacy {
+  display: none;
+}
+
+/* 表格：圆角边框 + 表头底色，窄屏在表格内部横向滚动 */
+.sl-markdown-content table:not(:where(.not-content *)) {
+  width: max-content;
+  max-width: 100%;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  border-collapse: separate;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+/* anywhere 会把列的最小宽度压到单个字符；单元格内按词断行，过宽时由表格自身横向滚动。 */
+.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--js-border);
+  overflow-wrap: break-word;
+}
+
+.sl-markdown-content :is(th:first-child, td:first-child):not(:where(.not-content *)) {
+  padding-inline-start: 0.9rem;
+}
+
+.sl-markdown-content :is(th:last-child, td:last-child):not(:where(.not-content *)) {
+  padding-inline-end: 0.9rem;
+}
+
+.sl-markdown-content tr:last-child > td:not(:where(.not-content *)) {
+  border-bottom: 0;
+}
+
+.sl-markdown-content th:not(:where(.not-content *)) {
+  background: var(--js-surface-raised);
+  color: var(--js-color-heading);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.sl-markdown-content th:first-child {
+  border-start-start-radius: calc(var(--js-radius) - 1px);
+}
+
+.sl-markdown-content th:last-child {
+  border-start-end-radius: calc(var(--js-radius) - 1px);
+}
+
+.sl-markdown-content tbody tr:hover > td {
+  background: color-mix(in srgb, var(--js-color-primary) 4%, transparent);
+}
+
+.sl-markdown-content table:focus-visible {
+  outline: var(--js-focus-ring);
+  outline-offset: 2px;
+}
+
+/* 折叠区：练习的「提示」「参考答案」及其他 details 用卡片样式；原生 details，无 JS 照常展开 */
+.sl-markdown-content details:not(:where(.not-content *)) {
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  padding: 0.7rem 1rem;
+  background: var(--js-surface-raised);
+  transition: border-color var(--js-motion) var(--js-ease);
+}
+
+.sl-markdown-content details:not([open]):hover:not(:where(.not-content *)),
+.sl-markdown-content details:has(> summary:hover):not(:where(.not-content *)) {
+  border-color: color-mix(in srgb, var(--js-color-primary) 55%, var(--js-border));
+}
+
+.sl-markdown-content details + details {
+  margin-top: 0.75rem;
+}
+
+.sl-markdown-content summary:not(:where(.not-content *)) {
+  color: var(--js-color-heading);
+  border-radius: 6px;
+}
+
+.sl-markdown-content details[open] > summary:not(:where(.not-content *)) {
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--js-border);
+}
+
+.sl-markdown-content details[data-disclosure='hint'] > summary {
+  color: var(--js-color-amber);
+}
+
+.sl-markdown-content details[data-disclosure='answer'] > summary {
+  color: var(--js-color-primary);
+}
+
+.sl-markdown-content details[data-disclosure='answer'][open] {
+  border-color: color-mix(in srgb, var(--js-color-primary) 40%, var(--js-border));
+}
+
+/* 图片与 D2 机制图 */
+.sl-markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.sl-markdown-content p > img:only-child,
+.sl-markdown-content > img {
+  padding: 0.75rem;
+  border: 1px solid var(--js-border);
+  background: #fff;
+}
+
+.diagram-scroll {
+  max-width: 100%;
+  margin-inline: 0;
+  overflow-x: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: #fff;
+}
+
+.diagram-scroll img {
+  min-width: 48rem;
+  padding: 0;
+  border: 0;
+}
+
+.diagram-scroll:focus-visible {
+  outline: var(--js-focus-ring);
+  outline-offset: 3px;
+}
+
+/* ---------- 代码块（Expressive Code） ---------- */
+
+.expressive-code {
+  --ec-brdRad: 10px;
+  --ec-codeLineHt: 1.65;
+  --ec-codeFontSize: var(--js-code-size);
+  --ec-uiFontSize: 0.8125rem;
+}
+
+:root:not([data-theme='light']) .expressive-code:not([data-theme='light']) {
+  --ec-codeBg: #171a25;
+  --ec-brdCol: #2b2f40;
+  --ec-frm-edBg: #171a25;
+  --ec-frm-trmBg: #171a25;
+  --ec-frm-edTabBarBg: #1d2030;
+  --ec-frm-edActTabBg: #171a25;
+  --ec-frm-edTabBarBrdBtmCol: #2b2f40;
+  --ec-frm-trmTtbBg: #1d2030;
+  --ec-frm-trmTtbBrdBtmCol: #2b2f40;
+}
+
+:root[data-theme='light'] .expressive-code:not([data-theme='dark']) {
+  --ec-codeBg: #f7f8fb;
+  --ec-brdCol: #dfe2ea;
+  --ec-frm-edBg: #f7f8fb;
+  --ec-frm-trmBg: #f7f8fb;
+  --ec-frm-edTabBarBg: #eef0f6;
+  --ec-frm-edActTabBg: #f7f8fb;
+  --ec-frm-edTabBarBrdBtmCol: #dfe2ea;
+  --ec-frm-trmTtbBg: #eef0f6;
+  --ec-frm-trmTtbBrdBtmCol: #dfe2ea;
+}
+
+.expressive-code .frame {
+  box-shadow: none;
+}
+
+.expressive-code .frame .header .title {
+  font-weight: 600;
+}
+
+/* night-owl 亮色主题里有 3 个语法色在浅底上低于 4.5:1，改成同色相的深色 */
+:root[data-theme='light'] .expressive-code .ec-line span[style*='--1:#0C969B'] {
+  color: #08767a;
+}
+
+:root[data-theme='light'] .expressive-code .ec-line span[style*='--1:#4876D6'] {
+  color: #2f5bbd;
+}
+
+:root[data-theme='light'] .expressive-code .ec-line span[style*='--1:#C96765'] {
+  color: #a8433f;
+}
+
+:root[data-theme='light'] .expressive-code .ec-line span[style*='--1:#994CC3'] {
+  color: #8540ad;
+}

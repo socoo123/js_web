@@ -1,0 +1,229 @@
+---
+// 首页 Hero：标题、行动按钮、课程规模、「继续上次学习」，右侧是 Java 与 JS 表示同一件商品的对照图。
+import catalog from '../../labs/catalog.json';
+import ContinueLearning from './ContinueLearning.astro';
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline, actions = [] } = data.hero || {};
+const facts = [
+  [String(catalog.lessons.length), '课主线'],
+  [String(catalog.labs.length), '个 Lab，同一个工作区'],
+  ['4 / 8', '周两种节奏'],
+];
+---
+
+<div class="site-hero">
+  <div class="site-hero__copy">
+    <p class="site-hero__eyebrow">写给会 Java、刚接触前端的你</p>
+    <h1 id="_top" data-page-title set:html={title} />
+    {tagline && <p class="site-hero__tagline" set:html={tagline} />}
+    {actions.length > 0 && (
+      <div class="site-hero__actions">
+        {actions.map(({ text, link, variant, icon, attrs: { class: _className, ...attrs } = {} }) => (
+          <a class="js-button" data-variant={variant === 'primary' ? 'primary' : 'secondary'} href={link} {...attrs}>
+            {text}
+            {icon && <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>}
+          </a>
+        ))}
+      </div>
+    )}
+    <ul class="site-hero__facts">
+      {facts.map(([value, label]) => <li><strong>{value}</strong> {label}</li>)}
+    </ul>
+    <ContinueLearning />
+  </div>
+  <figure class="site-hero__visual" data-pagefind-ignore>
+    <div class="hero-code" data-lang="java">
+      <p class="hero-code__label">Java</p>
+      <pre tabindex="0" aria-label="Java 写法"><code>record Product(String id, String name, int stock) {'{}'}
+var p = new Product("P001", "机械键盘", 12);
+System.out.println(p.name() + " · 库存 " + p.stock() + " 件");</code></pre>
+    </div>
+    <div class="hero-code__bridge" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 4v16M6 14l6 6 6-6" /></svg>
+      同一件商品，换一种写法
+    </div>
+    <div class="hero-code" data-lang="js">
+      <p class="hero-code__label">JavaScript</p>
+      <pre tabindex="0" aria-label="JavaScript 写法"><code>const p = {'{'} id: "P001", name: "机械键盘", stock: 12 {'}'};
+console.log(`${'{'}p.name{'}'} · 库存 ${'{'}p.stock{'}'} 件`);</code></pre>
+    </div>
+    <figcaption class="hero-code__output"><span aria-hidden="true">›</span> 两边都输出：机械键盘 · 库存 12 件</figcaption>
+  </figure>
+</div>
+
+<style>
+  .site-hero {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    padding-block: 1.5rem 2.5rem;
+  }
+
+  @media (min-width: 56rem) {
+    .site-hero {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: 3rem;
+      padding-block: clamp(2.5rem, 1rem + 6vmin, 5rem);
+    }
+  }
+
+  .site-hero__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.1rem;
+  }
+
+  .site-hero__eyebrow {
+    margin: 0;
+    padding: 0.15rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--js-color-amber-stroke) 50%, var(--js-border));
+    border-radius: 999px;
+    background: var(--js-color-amber-soft);
+    color: var(--js-color-amber);
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--js-color-heading);
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .site-hero__tagline {
+    margin: 0;
+    max-width: 34rem;
+    color: var(--js-color-text);
+    font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
+    line-height: 1.75;
+  }
+
+  .site-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .site-hero__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--js-color-muted);
+    font-size: 0.9375rem;
+  }
+
+  .site-hero__facts strong {
+    color: var(--js-color-heading);
+    font-size: 1.125rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .site-hero__visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid var(--js-border);
+    border-radius: calc(var(--js-radius) + 4px);
+    background:
+      radial-gradient(120% 90% at 100% 0%, var(--js-color-primary-soft), transparent 60%),
+      var(--js-surface-raised);
+    box-shadow: var(--js-shadow);
+  }
+
+  .hero-code {
+    overflow: hidden;
+    border: 1px solid var(--js-border);
+    border-radius: var(--js-radius);
+    background: var(--js-console-bg);
+  }
+
+  .hero-code__label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0.4rem 0.8rem;
+    border-bottom: 1px solid var(--js-border);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+
+  .hero-code__label::before {
+    content: '';
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .hero-code[data-lang='java'] .hero-code__label {
+    color: var(--js-color-java);
+    background: var(--js-color-java-soft);
+  }
+
+  .hero-code[data-lang='js'] .hero-code__label {
+    color: var(--js-color-amber);
+    background: var(--js-color-amber-soft);
+  }
+
+  .hero-code pre {
+    margin: 0;
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+    color: var(--js-console-fg);
+    font-family: var(--sl-font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    white-space: pre;
+  }
+
+  .hero-code__bridge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: var(--js-color-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .hero-code__bridge svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: var(--js-color-primary);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hero-code__output {
+    margin: 0;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--js-color-ok) 35%, var(--js-border));
+    border-radius: 10px;
+    background: var(--js-color-ok-soft);
+    color: var(--js-color-heading);
+    font-family: var(--sl-font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .hero-code__output span {
+    color: var(--js-color-ok);
+    font-weight: 800;
+  }
+</style>

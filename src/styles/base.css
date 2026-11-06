@@ -1,0 +1,397 @@
+/* 全站外壳：版式、宽度、页头、侧栏、本页目录、分页与通用小部件。 */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  color: var(--js-color-text);
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(99 102 241 / 0.32);
+}
+
+/* 组件给根元素设了 display 时，hidden 仍要生效（进度、继续学习等由脚本切换） */
+[hidden]:not([hidden='until-found']) {
+  display: none !important;
+}
+
+:where(a, button, summary, select, input, textarea, [tabindex]):focus-visible {
+  outline: var(--js-focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- 宽度：课页与 Lab 页放宽到 64rem，正文段落仍是 46rem ---------- */
+
+html:has([data-page-kind]) {
+  --sl-content-width: var(--js-wide-width);
+}
+
+/* 72–90rem 之间放不下右侧目录和 64rem 正文：收起右栏，改用页内导航。 */
+@media (min-width: 72rem) and (max-width: 89.9375rem) {
+  html:has([data-page-kind]) {
+    --__toc-width: 0rem;
+  }
+  html:has([data-page-kind]) .right-sidebar-container {
+    display: none;
+  }
+  html[data-has-sidebar][data-has-toc]:has([data-page-kind]) .main-pane {
+    width: 100%;
+    --sl-content-margin-inline: auto;
+  }
+}
+
+.sl-markdown-content > :is(
+    p, ul, ol, dl, blockquote, details, hr, h2, h3, h4, h5, h6,
+    .sl-heading-wrapper, .expressive-code, .starlight-aside, .js-callout,
+    [data-effect='console'], [data-effect='terminal']
+  ):not(.lab-cards) {
+  max-width: var(--js-prose-width);
+}
+
+/* 首页（无侧栏）用更宽的画布；:root 提高优先级以覆盖 Starlight 页面内联样式。 */
+:root:not([data-has-sidebar]) {
+  --sl-content-width: 72rem;
+}
+
+/* ---------- 页头 ---------- */
+
+.header {
+  background-color: color-mix(in srgb, var(--sl-color-bg-nav) 92%, transparent);
+  border-bottom-color: var(--sl-color-hairline-light);
+}
+
+@supports (backdrop-filter: blur(8px)) {
+  .header {
+    backdrop-filter: saturate(1.4) blur(10px);
+  }
+}
+
+.site-title {
+  gap: 0.6rem;
+  color: var(--js-color-heading);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.site-title::before {
+  content: '';
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 8px;
+  background: #f7df1e
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='29' y='27' text-anchor='end' font-family='Arial,Helvetica,sans-serif' font-weight='700' font-size='15' fill='%2312141c'%3EJS%3C/text%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+}
+
+.site-title:hover {
+  color: var(--js-color-primary);
+}
+
+/* ---------- 侧栏 ---------- */
+
+.sidebar-content {
+  --sl-sidebar-item-padding-inline: 0.6rem;
+  padding-top: 1.25rem;
+}
+
+.sidebar-content a {
+  border-radius: 8px;
+  color: var(--js-color-text);
+  transition: background-color var(--js-motion) var(--js-ease), color var(--js-motion) var(--js-ease);
+}
+
+.sidebar-content a:hover {
+  background-color: color-mix(in srgb, var(--js-color-primary) 9%, transparent);
+  color: var(--js-color-heading);
+}
+
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+  background-color: var(--js-color-primary-soft);
+  color: var(--js-color-primary);
+  box-shadow: inset 3px 0 0 var(--js-color-primary);
+  font-weight: 650;
+}
+
+.sidebar-content summary {
+  border-radius: 8px;
+}
+
+.sidebar-content summary .large,
+.sidebar-content .top-level > li > a.large {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--js-color-muted);
+}
+
+.sidebar-content .top-level > li > a.large {
+  font-size: var(--sl-text-sm);
+  letter-spacing: 0;
+  color: var(--js-color-text);
+}
+
+.sidebar-content ul ul li {
+  border-inline-start-color: var(--js-border);
+}
+
+/* 已完成的课：图标 + 隐藏文字，不只靠颜色 */
+.sidebar-content a[data-sidebar-lesson] {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.sidebar-content a[data-sidebar-lesson] > span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-content a[data-done]::after {
+  content: '';
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15rem;
+  border-radius: 50%;
+  background: var(--js-color-ok)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center / 70% no-repeat;
+}
+
+:root:not([data-theme='light']) .sidebar-content a[data-done]::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2312141c' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+}
+
+.sidebar-content a[data-done] > span:first-child {
+  color: var(--js-color-muted);
+}
+
+.sidebar-content a[data-done][aria-current='page'] > span:first-child {
+  color: inherit;
+}
+
+.sidebar-content .sidebar-lab-progress {
+  flex: none;
+  margin-inline-start: auto;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--js-color-muted);
+  background: color-mix(in srgb, var(--js-color-muted) 14%, transparent);
+}
+
+.sidebar-content a[data-sidebar-lab] {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sidebar-content a[data-sidebar-lab][data-active-lab] .sidebar-lab-progress {
+  color: var(--js-color-amber);
+  background: var(--js-color-amber-soft);
+}
+
+/* 课页上标出本课所属的 Lab（Lab 页本身已是当前页高亮） */
+.sidebar-content a[data-sidebar-lab][data-active-lab]:not([aria-current='page']) {
+  background-color: var(--js-color-amber-soft);
+  box-shadow: inset 3px 0 0 var(--js-color-amber-stroke);
+  color: var(--js-color-heading);
+}
+
+.sidebar-content a[data-lab-complete] .sidebar-lab-progress {
+  color: var(--js-color-ok);
+  background: var(--js-color-ok-soft);
+}
+
+.sidebar-content .sl-badge {
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 650;
+}
+
+/* ---------- 右侧本页目录 ---------- */
+
+.right-sidebar-panel h2 {
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  color: var(--js-color-muted);
+}
+
+.right-sidebar-panel :where(a) {
+  border-inline-start: 2px solid transparent;
+  padding-inline-start: 0.6rem;
+  margin-inline-start: -0.6rem;
+  line-height: 1.55;
+}
+
+.right-sidebar-panel a[aria-current='true'] {
+  border-inline-start-color: var(--js-color-primary);
+  color: var(--js-color-primary);
+  font-weight: 600;
+}
+
+/* ---------- 页底：编辑链接与上一页/下一页 ---------- */
+
+.pagination-links a {
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+  box-shadow: none;
+  color: var(--js-color-muted);
+  transition: border-color var(--js-motion) var(--js-ease), box-shadow var(--js-motion) var(--js-ease);
+}
+
+.pagination-links a:hover {
+  border-color: color-mix(in srgb, var(--js-color-primary) 55%, var(--js-border));
+  box-shadow: var(--js-shadow);
+}
+
+.pagination-links .link-title {
+  color: var(--js-color-heading);
+  font-size: 1.0625rem;
+  font-weight: 650;
+}
+
+/* ---------- 通用小部件（各页面与其他路可复用） ---------- */
+
+.js-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9875rem;
+  font-weight: 650;
+  line-height: 1.3;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--js-motion) var(--js-ease), border-color var(--js-motion) var(--js-ease),
+    color var(--js-motion) var(--js-ease), transform var(--js-motion) var(--js-ease);
+}
+
+.js-button[data-variant='primary'] {
+  background: var(--js-color-primary-solid);
+  color: var(--js-color-on-primary);
+}
+
+.js-button[data-variant='primary']:hover {
+  background: color-mix(in srgb, var(--js-color-primary-solid) 86%, #000);
+}
+
+.js-button[data-variant='secondary'] {
+  border-color: color-mix(in srgb, var(--js-color-primary) 45%, var(--js-border));
+  background: transparent;
+  color: var(--js-color-primary);
+}
+
+.js-button[data-variant='secondary']:hover {
+  background: var(--js-color-primary-soft);
+}
+
+.js-button[data-variant='amber'] {
+  background: var(--js-color-amber-stroke);
+  color: #1c1300;
+}
+
+.js-button[data-variant='amber']:hover {
+  background: color-mix(in srgb, var(--js-color-amber-stroke) 85%, #000);
+}
+
+.js-button svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
+.js-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.05rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--js-border);
+  background: var(--js-surface-raised);
+  color: var(--js-color-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+/* 对错状态：图标 + 文字 + 颜色。用法：<span class="js-status" data-tone="ok">已完成</span> */
+.js-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+.js-status::before {
+  content: '';
+  flex: none;
+  width: 1.05em;
+  height: 1.05em;
+  background: currentColor;
+  -webkit-mask: var(--js-status-icon) center / contain no-repeat;
+  mask: var(--js-status-icon) center / contain no-repeat;
+}
+
+.js-status[data-tone='ok'] {
+  color: var(--js-color-ok);
+  --js-status-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m8 12.5 2.8 2.8L16.5 9.5'/%3E%3C/svg%3E");
+}
+
+.js-status[data-tone='err'] {
+  color: var(--js-color-err);
+  --js-status-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m15 9-6 6M9 9l6 6'/%3E%3C/svg%3E");
+}
+
+.js-status[data-tone='warn'] {
+  color: var(--js-color-amber);
+  --js-status-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E");
+}
+
+.js-card {
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+  box-shadow: var(--js-shadow);
+}
+
+.js-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
