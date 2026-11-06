@@ -3,6 +3,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  accent-color: var(--js-color-primary-solid);
 }
 
 body {
@@ -284,7 +285,7 @@ html:has([data-page-kind]) {
   min-height: 2.75rem;
   padding: 0.55rem 1.1rem;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 999px;
   font: inherit;
   font-size: 0.9875rem;
   font-weight: 650;

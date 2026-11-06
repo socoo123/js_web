@@ -23,12 +23,12 @@
   --js-wide-width: 64rem;
   --js-code-size: 14px;
 
-  /* 补充：文字层级与实心按钮 */
+  /* 补充：文字层级与实心按钮。深色下实心按钮用浅靛蓝 + 深色字，与 Starlight 和各组件填充 --js-color-primary 的写法一致 */
   --js-color-heading: #f3f4f9;
   --js-color-text: #c9cdd9;
   --js-color-muted: #9aa0b4;
-  --js-color-primary-solid: #5558ea;
-  --js-color-on-primary: #ffffff;
+  --js-color-primary-solid: #a5b4fc;
+  --js-color-on-primary: #12141c;
   --js-color-amber-stroke: #fbbf24;
   --js-color-java-stroke: #e8894a;
   --js-color-remember: #5eead4;
