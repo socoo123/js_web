@@ -1,6 +1,61 @@
 ---
-// 接口骨架：路 3 负责替换为「回到 Lab 下一步」与完成按钮；必须保留唯一的 LearningProgress。
+import catalog from '../../labs/catalog.json';
 import LearningProgress from './LearningProgress.astro';
+import { stepsForLesson, nextAfterLesson, labHref, stepAnchor, finishAnchor } from '../lib/lab-steps.mjs';
 interface Props { lessonId: string }
+const { lessonId } = Astro.props;
+const row = catalog.lessons.find((lesson) => lesson.lessonId === lessonId);
+if (!row) throw new Error(`catalog 中没有 ${lessonId}`);
+const lab = catalog.labs.find((item) => item.labId === row.labId)!;
+const base = import.meta.env.BASE_URL;
+const own = stepsForLesson(lessonId);
+const next = nextAfterLesson(lessonId);
+const first = own?.steps[0];
+const last = own?.steps.at(-1);
+const range = first && last ? (first === last ? `第 ${first.number} 步` : `第 ${first.number}–${last.number} 步`) : '';
 ---
-<LearningProgress lessonId={Astro.props.lessonId} />
+<nav class="lab-next" data-lab-next={lessonId} aria-label="回到 Lab">
+  {own && first && next ? (
+    <>
+      <p class="where">
+        本课是 <a href={labHref(base, lab.labId, stepAnchor(first.stepId))}>{lab.labId} {range}</a>
+        <span data-lab-progress data-ids={own.steps.map((step) => step.stepId).join(' ')} data-unit="步" data-lab-js hidden> · 本课<span data-lab-progress-count></span></span>
+      </p>
+      {next.step
+        ? <a class="go" href={labHref(base, lab.labId, stepAnchor(next.step.stepId))}><span class="go-label">回到 Lab 下一步</span><span class="go-title">第 {next.step.number} 步 · {next.step.lessonId} {next.step.title}</span></a>
+        : <a class="go" href={labHref(base, lab.labId, finishAnchor(lab.labId))}><span class="go-label">回到 Lab 收尾</span><span class="go-title">{lab.labId} 收尾清单 · 逐项核对后勾选</span></a>}
+    </>
+  ) : (
+    <a class="go" href={labHref(base, lab.labId)}><span class="go-label">回到 Lab</span><span class="go-title">{lab.labId} {lab.title}</span></a>
+  )}
+</nav>
+<LearningProgress lessonId={lessonId} />
+
+<script>
+  import '../scripts/lab-progress.mjs';
+</script>
+
+<style>
+  [hidden] { display: none !important; }
+  .lab-next {
+    margin-block: 2.5rem 0; padding: 1rem 1.25rem;
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
+    border-radius: var(--js-radius, 0.75rem);
+    background: var(--js-surface-raised, var(--sl-color-bg-nav));
+  }
+  .where { margin: 0 0 0.75rem; font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); font-variant-numeric: tabular-nums; }
+  .go {
+    display: grid; gap: 0.15rem; padding: 0.75rem 1rem;
+    border-radius: calc(var(--js-radius, 0.75rem) - 4px);
+    background: var(--js-color-primary-soft, var(--sl-color-accent-low));
+    border: 1px solid var(--js-color-primary, var(--sl-color-text-accent));
+    color: var(--sl-color-white); text-decoration: none;
+    transition: box-shadow var(--js-motion, 200ms);
+  }
+  .go:hover { box-shadow: 0 0 0 3px var(--js-color-primary-soft, var(--sl-color-accent-low)); }
+  .go:focus-visible, .where a:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
+  .go-label { font-size: var(--sl-text-sm); font-weight: 700; color: var(--js-color-primary, var(--sl-color-text-accent)); }
+  .go-label::after { content: ' →'; }
+  .go-title { font-weight: 600; }
+  .lab-next + :global(.learning-progress) { margin-top: 1rem; }
+</style>

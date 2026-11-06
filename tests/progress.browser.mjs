@@ -3,12 +3,16 @@ import { chromium, expect } from '../labs/inventory/node_modules/@playwright/tes
 import assert from 'node:assert/strict';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
-import { PROGRESS_KEY, BACKUP_KEY, DAMAGED_KEY, LESSON_IDS } from '../src/lib/progress.mjs';
+import { PROGRESS_KEY, BACKUP_KEY, DAMAGED_KEY, LESSON_IDS, LAB_STEPS } from '../src/lib/progress.mjs';
 
 const base = process.env.PROGRESS_BASE_URL ?? 'http://127.0.0.1:8751/js_web/';
 const lesson1 = '01-history-web/c01-story-ecosystem/';
 const lesson2 = '01-history-web/c02-web-debugging/';
 const lesson48 = '07-project/c48-review-next-steps/';
+const lab3 = 'labs/l3/';
+const STEPS = Object.values(LAB_STEPS).flat();
+const v2 = (completed, labSteps = []) => ({ version: 2, completed, labSteps });
+const roadmapText = (lessons, steps = 0) => `已完成 ${lessons} / 48 课 · Lab 步骤已勾选 ${steps} / ${STEPS.length}`;
 const qa = path.resolve(process.env.PROGRESS_QA_DIR ?? '.cache/qa/f1');
 await mkdir(qa, { recursive: true });
 const browser = await chromium.launch();
@@ -37,40 +41,44 @@ try {
   await expect(page.getByRole('button', { name: '撤销完成', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await page.reload();
   await expect(summary(page)).toHaveText('C01 已完成 · 已完成 1 / 48 课');
-  assert.deepEqual(JSON.parse(await raw(page, BACKUP_KEY)), { version: 1, completed: ['C01'] });
+  assert.deepEqual(JSON.parse(await raw(page, BACKUP_KEY)), v2(['C01']));
   for (const route of [lesson2, lesson48]) {
     await page.goto(base + route);
     await page.getByRole('button', { name: '标记完成', exact: true }).click();
   }
-  assert.deepEqual(JSON.parse(await raw(page, BACKUP_KEY)), { version: 1, completed: ['C01', 'C02'] });
+  assert.deepEqual(JSON.parse(await raw(page, BACKUP_KEY)), v2(['C01', 'C02']));
   evidence.checks.push('keyboard mark, undo, refresh, previous-valid backup');
   await page.getByRole('link', { name: '查看学习路线', exact: true }).click();
-  await expect(summary(page)).toHaveText('已完成 3 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(3));
   await expect(page.locator('[data-lesson-status]')).toHaveCount(48);
   await expect(page.locator('.lesson-completed')).toHaveCount(3);
 
   const other = await context.newPage(); track(other);
   await other.goto(base + lesson1);
   await other.getByRole('button', { name: '撤销完成', exact: true }).click();
-  await expect(summary(page)).toHaveText('已完成 2 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(2));
   await expect(page.locator('[data-lesson-status="C01"]')).toHaveText(' · 未完成');
   const downloadEvent = page.waitForEvent('download');
   await page.getByRole('button', { name: '导出进度', exact: true }).click();
   const download = await downloadEvent;
   assert.equal(download.suggestedFilename(), 'js-web-progress.json');
-  assert.deepEqual(JSON.parse(await readFile(await download.path(), 'utf8')), { version: 1, completed: ['C02', 'C48'] });
+  assert.deepEqual(JSON.parse(await readFile(await download.path(), 'utf8')), v2(['C02', 'C48']));
   evidence.checks.push('cross-tab undo and real downloaded JSON export');
 
   const imported = JSON.stringify({ version: 1, completed: ['C03', 'C01', 'C03'] });
   await upload(page, imported);
-  await expect(summary(page)).toHaveText('已完成 4 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(4));
   await expect(summary(other)).toHaveText('C01 已完成 · 已完成 4 / 48 课');
   await upload(page, imported);
   await expect(page.locator('[data-progress-message]')).toHaveText('已导入并合并进度。');
-  assert.deepEqual(JSON.parse(await raw(page)).completed, ['C01', 'C02', 'C03', 'C48']);
+  assert.deepEqual(JSON.parse(await raw(page)), v2(['C01', 'C02', 'C03', 'C48']));
+  await upload(page, JSON.stringify(v2(['C03'], ['l3-c23-2', 'l3-finish-1', 'l3-c23-2'])));
+  await expect(summary(page)).toHaveText(roadmapText(4, 2));
+  assert.deepEqual(JSON.parse(await raw(page)), v2(['C01', 'C02', 'C03', 'C48'], ['l3-c23-2', 'l3-finish-1']));
+  evidence.checks.push('v1 file import upgrades to v2; v2 import merges and dedupes lab steps');
   const saved = await raw(page);
   const savedBackup = await raw(page, BACKUP_KEY);
-  for (const content of ['{', 'null', '{"version":2,"completed":[]}', '{"version":1,"completed":["C49"]}', ' '.repeat(65537)]) {
+  for (const content of ['{', 'null', '{"version":3,"completed":[],"labSteps":[]}', '{"version":2,"completed":[]}', '{"version":2,"completed":[],"labSteps":["l3-c99-1"]}', '{"version":1,"completed":["C49"]}', ' '.repeat(65537)]) {
     await upload(page, content);
     await expect(page.locator('[data-progress-message]')).toHaveAttribute('data-error', '');
     assert.equal(await raw(page), saved);
@@ -84,20 +92,21 @@ try {
   await capture(page, 'progress-damaged-with-backup.png');
   await page.getByRole('button', { name: '从本地备份恢复', exact: true }).focus();
   await page.keyboard.press('Enter');
-  await expect(summary(page)).toHaveText('已完成 4 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(4));
+  assert.deepEqual(JSON.parse(await raw(page)), JSON.parse(savedBackup));
   assert.equal(await raw(page, DAMAGED_KEY), '{broken');
   await expect(page.getByRole('button', { name: '导入进度', exact: true })).toBeFocused();
   evidence.checks.push('cross-tab damaged record, keyboard backup restore, raw damage preserved, focus returned');
   await other.evaluate((key) => localStorage.removeItem(key), PROGRESS_KEY);
-  await expect(summary(page)).toHaveText('已完成 0 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(0));
   await other.evaluate(() => localStorage.clear());
-  await expect(summary(page)).toHaveText('已完成 0 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(0));
   evidence.checks.push('cross-tab remove and clear events');
   await page.evaluate(({ key, backup }) => { localStorage.setItem(key, 'bad'); localStorage.setItem(backup, 'bad backup'); }, { key: PROGRESS_KEY, backup: BACKUP_KEY });
   await page.reload();
   await expect(page.getByRole('button', { name: '从本地备份恢复', exact: true })).toBeHidden();
   await upload(page, '{"version":1,"completed":["C05"]}');
-  await expect(summary(page)).toHaveText('已完成 1 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(1));
   assert.equal(await raw(page, DAMAGED_KEY), 'bad');
   await page.evaluate((key) => localStorage.setItem(key, 'broken again'), PROGRESS_KEY);
   await page.reload();
@@ -106,15 +115,56 @@ try {
   assert.equal(await raw(page), 'broken again');
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: '重新开始', exact: true }).click();
-  await expect(summary(page)).toHaveText('已完成 0 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(0));
   assert.equal(await raw(page, DAMAGED_KEY), 'broken again');
   evidence.checks.push('no valid backup: import recovery, canceled restart preserves raw, confirmed restart archives raw');
   await upload(page, JSON.stringify({ version: 1, completed: LESSON_IDS }));
-  await expect(summary(page)).toHaveText('已完成 48 / 48 课');
+  await expect(summary(page)).toHaveText(roadmapText(48));
   await expect(page.locator('.lesson-completed')).toHaveCount(48);
-  await upload(page, '{"version":1,"completed":[]}');
-  await expect(summary(page)).toHaveText('已完成 48 / 48 课');
+  await upload(page, '{"version":2,"completed":[],"labSteps":[]}');
+  await expect(summary(page)).toHaveText(roadmapText(48));
   await expect(page.locator('[data-progress-meter]')).toHaveJSProperty('value', 48);
+
+  const labs = await context.newPage(); track(labs);
+  await page.evaluate((key) => localStorage.setItem(key, JSON.stringify({ version: 1, completed: ['C21'] })), PROGRESS_KEY);
+  await labs.goto(base + lab3);
+  const step = (target, id) => target.locator(`[data-lab-step-toggle="${id}"]`);
+  await expect(step(labs, 'l3-c23-1')).not.toBeChecked();
+  await expect(labs.locator('[data-lab-steps] [data-lab-progress-count]')).toHaveText(`已勾选 0 / ${LAB_STEPS.L3.length - 5} 步`);
+  await step(labs, 'l3-c23-1').focus();
+  await labs.keyboard.press('Space');
+  await expect(step(labs, 'l3-c23-1')).toBeChecked();
+  await expect(labs.locator('#step-l3-c23-1 [data-lab-message]')).toContainText('已记录你确认完成第 5 步');
+  assert.deepEqual(JSON.parse(await raw(labs)), v2(['C21'], ['l3-c23-1']));
+  evidence.checks.push('v1 record upgraded on first lab-step write without losing lessons');
+  await expect(summary(page)).toHaveText(roadmapText(1, 1));
+  await step(labs, 'l3-finish-2').check();
+  await labs.reload();
+  await expect(step(labs, 'l3-c23-1')).toBeChecked();
+  await expect(step(labs, 'l3-finish-2')).toBeChecked();
+  await expect(labs.locator('#step-l3-c23-1')).toHaveClass(/is-done/);
+  await expect(labs.locator('[data-lab-progress-next]').first()).toHaveText(/^继续第 1 步/);
+  const labsOther = await context.newPage(); track(labsOther);
+  await labsOther.goto(base + lab3);
+  await step(labsOther, 'l3-c23-1').uncheck();
+  await expect(step(labs, 'l3-c23-1')).not.toBeChecked();
+  await expect(summary(page)).toHaveText(roadmapText(1, 1));
+  evidence.checks.push('lab step check/uncheck by keyboard, refresh persistence, cross-tab sync to lab page and roadmap');
+  await labsOther.evaluate((key) => localStorage.setItem(key, '{broken lab'), PROGRESS_KEY);
+  await expect(step(labs, 'l3-finish-2')).toBeDisabled();
+  await expect(labs.locator('[data-lab-steps] [data-lab-progress-state]')).toContainText('记录损坏');
+  await page.getByRole('button', { name: '从本地备份恢复', exact: true }).click();
+  await expect(step(labs, 'l3-finish-2')).toBeEnabled();
+  await expect(step(labs, 'l3-c23-1')).toBeChecked();
+  assert.equal(await raw(page, DAMAGED_KEY), '{broken lab');
+  await step(labs, 'l3-c23-1').uncheck();
+  await step(labs, 'l3-finish-2').uncheck();
+  await expect(summary(page)).toHaveText(roadmapText(1));
+  evidence.checks.push('damaged primary disables lab checkboxes; backup restore brings back previous lab steps');
+  await labs.close(); await labsOther.close();
+  await page.evaluate(({ key, ids }) => localStorage.setItem(key, JSON.stringify({ version: 1, completed: ids })), { key: PROGRESS_KEY, ids: LESSON_IDS });
+  await page.reload();
+  await expect(summary(page)).toHaveText(roadmapText(48));
 
   for (const route of ['roadmap/', lesson48]) {
     await page.goto(base + route);
@@ -204,7 +254,7 @@ try {
   evidence.checks.push('no JavaScript: lesson 1/48 and roadmap readable, controls hidden, native details expand');
   assert.deepEqual(errors, []);
   evidence.status = 'passed';
-  console.log(`F1 浏览器自动回归通过（${evidence.phase}，Chromium ${browser.version()}）：标记/撤销/刷新/48 课状态、跨标签同步/移除/清空、导出/合并/拒绝坏文件、备份/损坏恢复/重开、权限/主记录/备份/损坏留档写满、12 组宽度主题、禁用 JS 阅读。证据：${qa}。待主 agent 在最终集成版本验收。`);
+  console.log(`F1 浏览器自动回归通过（${evidence.phase}，Chromium ${browser.version()}）：标记/撤销/刷新/48 课状态、v1→v2 升级与 v1/v2 导入、Lab 步骤勾选/取消/刷新/跨标签/损坏恢复、跨标签同步/移除/清空、导出/合并/拒绝坏文件、备份/损坏恢复/重开、权限/主记录/备份/损坏留档写满、12 组宽度主题、禁用 JS 阅读。证据：${qa}。待主 agent 在最终集成版本验收。`);
 } catch (error) {
   evidence.status = 'failed'; evidence.failure = error.stack; throw error;
 } finally {

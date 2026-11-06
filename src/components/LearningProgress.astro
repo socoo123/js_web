@@ -21,7 +21,7 @@ const roadmap = `${import.meta.env.BASE_URL}roadmap/`;
       <button type="button" data-progress-restore hidden>从本地备份恢复</button>
       <button type="button" data-progress-restart hidden>重新开始</button>
     </div>
-    {!lessonId && <p class="progress-note">导入会合并已完成的课程。需要重新学习时，可在对应课页撤销完成标记。</p>}
+    {!lessonId && <p class="progress-note">导入会合并已完成的课程和已勾选的 Lab 步骤。需要重新学习时，可在对应课页撤销完成标记、在 Lab 页取消勾选。</p>}
     <p data-progress-message role="status" aria-live="polite"></p>
   </div>
   <noscript><p>启用 JavaScript 后可记录学习进度；课程正文和练习可以继续阅读。</p></noscript>
@@ -35,31 +35,47 @@ const roadmap = `${import.meta.env.BASE_URL}roadmap/`;
   .learning-progress {
     margin-block: 2rem;
     padding: 1.25rem;
-    border: 1px solid var(--sl-color-hairline-light);
-    border-radius: 0.75rem;
-    background: var(--sl-color-bg-nav);
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
+    border-radius: var(--js-radius, 0.75rem);
+    background: var(--js-surface-raised, var(--sl-color-bg-nav));
+    box-shadow: var(--js-shadow, none);
     overflow-wrap: anywhere;
   }
-  h2 { margin: 0; font-size: var(--sl-text-h3); line-height: 1.4; }
+  h2 { margin: 0; font-size: var(--sl-text-h4); line-height: 1.4; }
   p { margin-block: 0.75rem; }
   [hidden] { display: none !important; }
-  progress { width: 100%; height: 0.75rem; accent-color: var(--sl-color-text-accent); }
+  [data-progress-summary] { font-weight: 600; font-variant-numeric: tabular-nums; }
+  progress {
+    width: 100%; height: 0.6rem; border: 0; border-radius: 999px; overflow: hidden;
+    background: var(--js-border, var(--sl-color-hairline-light));
+    accent-color: var(--js-color-primary, var(--sl-color-text-accent));
+  }
+  progress::-webkit-progress-bar { background: var(--js-border, var(--sl-color-hairline-light)); border-radius: 999px; }
+  progress::-webkit-progress-value { background: var(--js-color-primary, var(--sl-color-text-accent)); border-radius: 999px; transition: width var(--js-motion, 200ms); }
+  progress::-moz-progress-bar { background: var(--js-color-primary, var(--sl-color-text-accent)); border-radius: 999px; }
   .progress-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1rem; }
   button, a { font: inherit; }
   button {
-    border: 1px solid var(--sl-color-gray-3);
-    border-radius: 0.4rem;
+    border: 1px solid var(--js-border, var(--sl-color-gray-3));
+    border-radius: 999px;
     min-height: 2.75rem;
-    padding: 0.5rem 0.85rem;
-    background: var(--sl-color-bg);
+    padding: 0.5rem 1rem;
+    background: var(--js-surface, var(--sl-color-bg));
     color: var(--sl-color-white);
+    font-weight: 600;
     cursor: pointer;
+    transition: border-color var(--js-motion, 200ms), background-color var(--js-motion, 200ms);
   }
-  button:hover { border-color: var(--sl-color-text-accent); }
-  button:focus-visible, a:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 3px; }
+  button:hover { border-color: var(--js-color-primary, var(--sl-color-text-accent)); }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
   button:disabled { opacity: 0.6; cursor: not-allowed; }
-  [data-progress-toggle][aria-pressed='true'] { border-color: var(--sl-color-text-accent); background: var(--sl-color-accent-low); }
-  .progress-note { font-size: var(--sl-text-sm); }
+  [data-progress-toggle] { border-color: var(--js-color-primary, var(--sl-color-text-accent)); }
+  [data-progress-toggle][aria-pressed='true'] {
+    border-color: var(--js-color-ok, var(--sl-color-green));
+    background: var(--js-color-primary-soft, var(--sl-color-accent-low));
+  }
+  .progress-note { font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); }
   [data-progress-message]:empty { display: none; }
-  [data-progress-message][data-error] { color: var(--sl-color-orange-high); }
+  [data-progress-message] { font-size: var(--sl-text-sm); }
+  [data-progress-message][data-error] { color: var(--js-color-err, var(--sl-color-orange-high)); }
 </style>

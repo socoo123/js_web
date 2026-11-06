@@ -1,7 +1,9 @@
 import {
-  PROGRESS_KEY, BACKUP_KEY, MAX_IMPORT_SIZE, LESSON_IDS,
+  PROGRESS_KEY, BACKUP_KEY, PROGRESS_EVENT, MAX_IMPORT_SIZE, LESSON_IDS, LAB_STEPS,
   emptyProgress, parseProgress, readProgress, writeProgress, markLesson, mergeProgress,
 } from '../lib/progress.mjs';
+
+const ACTIVE_STEPS = Object.values(LAB_STEPS).flat();
 
 function initializeProgress(panel) {
   if (panel.dataset.initialized) return;
@@ -21,8 +23,10 @@ function initializeProgress(panel) {
     state = readProgress(storage);
     const ready = state.status === 'ready';
     const count = state.progress.completed.length;
+    const steps = state.progress.labSteps.filter((id) => ACTIVE_STEPS.includes(id)).length;
     find('summary').textContent = ready
       ? `${lessonId ? `${lessonId} ${state.progress.completed.includes(lessonId) ? '已完成' : '未完成'} · ` : ''}已完成 ${count} / ${LESSON_IDS.length} 课`
+        + (lessonId ? '' : ` · Lab 步骤已勾选 ${steps} / ${ACTIVE_STEPS.length}`)
       : '学习进度暂不可用';
     find('meter').value = count;
     find('meter').hidden = !ready;
@@ -117,6 +121,7 @@ function initializeProgress(panel) {
   window.addEventListener('storage', (event) => {
     if (event.key === null || event.key === PROGRESS_KEY || event.key === BACKUP_KEY) render();
   });
+  window.addEventListener(PROGRESS_EVENT, () => render());
   render();
   find('controls').hidden = false;
 }

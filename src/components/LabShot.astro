@@ -1,0 +1,49 @@
+---
+import { getShot } from '../lib/previews.mjs';
+interface Props { id: string; caption?: string; variant?: 'goal' | 'step' }
+const { id, caption, variant = 'step' } = Astro.props;
+const shot = getShot(id);
+const groups = shot
+  ? (['dark', 'light'] as const)
+    .map((theme) => ({ theme, images: shot.images.filter((image) => image.theme === theme).sort((a, b) => a.width - b.width) }))
+    .filter((group) => group.images.length)
+  : [];
+const text = caption ?? shot?.caption;
+---
+{shot ? (
+  <figure class:list={['lab-shot', `shot-${variant}`]} data-shot={id}>
+    {groups.map(({ theme, images }) => {
+      const wide = images.at(-1)!;
+      const narrow = images.length > 1 ? images[0] : undefined;
+      return (
+        <picture data-shot-theme={groups.length > 1 ? theme : undefined}>
+          {narrow && <source media="(max-width: 40rem)" srcset={narrow.src.src} width={narrow.src.width} height={narrow.src.height} />}
+          <img src={wide.src.src} width={wide.src.width} height={wide.src.height} alt={shot.alt} loading={variant === 'goal' ? 'eager' : 'lazy'} decoding="async" />
+        </picture>
+      );
+    })}
+    {text && <figcaption>{text}</figcaption>}
+  </figure>
+) : (
+  <figure class:list={['lab-shot', 'missing', `shot-${variant}`]} data-missing-preview={id}>
+    <div class="placeholder" role="img" aria-label={`效果截图暂缺：${text ?? id}`}><span>效果截图暂缺</span><code>{id}</code></div>
+    {text && <figcaption>{text}</figcaption>}
+  </figure>
+)}
+
+<style>
+  .lab-shot { margin: 0; }
+  img { display: block; width: 100%; height: auto; border: 1px solid var(--js-border, var(--sl-color-hairline-light)); border-radius: var(--js-radius, 0.75rem); }
+  :global(:root[data-theme='light']) [data-shot-theme='dark'],
+  :global(:root:not([data-theme='light'])) [data-shot-theme='light'] { display: none; }
+  .placeholder {
+    display: grid; place-content: center; gap: 0.35rem; text-align: center;
+    aspect-ratio: 16 / 9; padding: 1rem;
+    border: 1px dashed var(--js-border, var(--sl-color-hairline-light));
+    border-radius: var(--js-radius, 0.75rem);
+    background: var(--js-surface, var(--sl-color-bg));
+    color: var(--sl-color-gray-3);
+  }
+  .shot-step .placeholder { aspect-ratio: 3 / 1; }
+  figcaption { margin-top: 0.5rem; font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); }
+</style>

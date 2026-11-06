@@ -1,12 +1,55 @@
 ---
 import catalog from '../../labs/catalog.json';
+import { stepsForLesson, labHref, stepAnchor } from '../lib/lab-steps.mjs';
 interface Props { labId?: string }
 const { labId } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
-{catalog.labs.filter((lab) => !labId || lab.labId === labId).map((lab) => <section class="lab-overview">
-  <h2 id={lab.labId.toLowerCase()}>{labId ? `${lab.labId} ${lab.title}` : <a href={`${base}labs/${lab.labId.toLowerCase()}/`}>{lab.labId} {lab.title}</a>}</h2>
-  <p>{lab.description}</p>
-  <p>在同一工作区持续修改。下列「已改版」表示课程已接入工作区；阅读完成标记不代表本地检查已通过。</p>
-  <ul>{catalog.lessons.filter((lesson) => lesson.labId === lab.labId).map((lesson) => <li><a href={`${base}${lesson.slug}/`}>{lesson.lessonId} {lesson.title}</a> · {lesson.migrated ? '已改版' : '旧版可读'}{lesson.trial && '（工作区试做）'}</li>)}</ul>
-</section>)}
+{catalog.labs.filter((lab) => !labId || lab.labId === labId).map((lab) => {
+  const lessons = catalog.lessons.filter((lesson) => lesson.labId === lab.labId);
+  return (
+    <section class="lab-overview" data-lab-overview={lab.labId}>
+      <h2 id={lab.labId.toLowerCase()}>{labId ? `${lab.labId} 的 ${lessons.length} 课` : <a href={labHref(base, lab.labId)}>{lab.labId} {lab.title}</a>}</h2>
+      <p>{lab.description}</p>
+      <p class="note">在同一工作区持续修改。课程的完成标记由你自己确认，不代表本地检查已通过。</p>
+      <ol class="lessons">
+        {lessons.map((lesson) => {
+          const own = stepsForLesson(lesson.lessonId);
+          const first = own?.steps[0];
+          const last = own?.steps.at(-1);
+          return (
+            <li>
+              <a href={`${base}${lesson.slug}/`}><span class="id">{lesson.lessonId}</span> {lesson.title}</a>
+              <span class="meta">
+                第 {lesson.day} 天
+                {first && last && <> · <a href={labHref(base, lab.labId, stepAnchor(first.stepId))}>{first === last ? `第 ${first.number} 步` : `第 ${first.number}–${last.number} 步`}</a></>}
+                {!lesson.migrated && ' · 旧版可读'}
+                {lesson.trial && ' · 工作区试做'}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+})}
+
+<style>
+  .lab-overview { margin-block: 2rem; }
+  .note { font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); }
+  .lessons {
+    list-style: none; padding: 0; margin: 0.75rem 0 0;
+    display: grid; gap: 0.4rem;
+  }
+  @media (min-width: 50rem) { .lessons { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .lessons li {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.15rem 0.75rem;
+    margin: 0; padding: 0.55rem 0.8rem;
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
+    border-radius: calc(var(--js-radius, 0.75rem) - 4px);
+    background: var(--js-surface-raised, var(--sl-color-bg-nav));
+  }
+  .id { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .meta { font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); font-variant-numeric: tabular-nums; }
+  a:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
+</style>

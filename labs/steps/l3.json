@@ -1,0 +1,928 @@
+{
+  "labId": "L3",
+  "goal": {
+    "summary": "从 C20 的原生库存页出发，在同一个 `inventory/` 里把库存做成 React 应用：列表、编辑、详情、地址、保存和测试连成一条完整的业务流程。",
+    "outcomes": [
+      "列表、筛选、排序和汇总来自同一份商品；新建 P007 后为 7 种、55 件、2634887 分",
+      "编辑表单空白拒绝、0 合法；提交中不能重复提交，失败保留草稿并能重试",
+      "P001 慢、P002 快时只显示 P002；P004 的详情地址可以刷新、返回和分享",
+      "repository 管商品与持久化，Query 管缓存；坏导入不覆盖好数据",
+      "RTL 行为测试和一条严格静态的浏览器冒烟都通过"
+    ],
+    "shot": "l3/goal",
+    "demo": "l3"
+  },
+  "steps": [
+    {
+      "stepId": "l3-c21-1",
+      "lessonId": "C21",
+      "title": "给工作区加上 React 入口",
+      "goal": "在同一个 `inventory/` 里新增 `src/react/` 入口，让 React 接管一个空容器；原生页面、core 和固定数据都不动。",
+      "read": [
+        { "lessonId": "C21", "anchor": "2-html-容器与-createroot接上浏览器", "why": "入口只建一次根，`root.render` 接收的是界面描述。" },
+        { "lessonId": "C11", "anchor": "2-显示文字用-textcontent", "why": "回忆原生页怎样逐个改节点，再对比 React 只描述结果。" },
+        { "lessonId": "C16", "anchor": "1-具名导出与默认导出是不同接口", "why": "main 默认导入 App，App 具名导入 ProductCard，花括号不能写反。" }
+      ],
+      "files": ["src/react/index.html", "src/react/main.jsx"],
+      "actions": [
+        "继续你在 L2 完成的 `inventory/`；没有自己的 C20 工程时，先按本页[从哪里开始](#从哪里开始)准备起点。",
+        "新建 `src/react/index.html`：只放 `<div id=\"root\">` 和指向 `./main.jsx` 的 module 脚本，不改 `src/vanilla/index.html`。",
+        "新建 `src/react/main.jsx`：默认导入 App、导入原生页的 `styles.css`，用 `createRoot` 建一个根，在 `React.StrictMode` 里渲染 `<App />`。",
+        "写完下一步的两个组件后执行 `npm run lab -- start C21` 和 `npm run lab -- dev`，打开终端给出的地址。"
+      ],
+      "preview": {
+        "output": "Elements 面板\ndiv#root\n└─ main\n   ├─ h1：React 库存工作台\n   └─ section#list：六个 article",
+        "caption": "StrictMode 在 Elements 里没有对应标签。"
+      },
+      "acceptance": [
+        "`src/vanilla/index.html`、`src/core/` 和 `data/products.json` 都没有改动。",
+        "整个工程只在 `main.jsx` 调用一次 `createRoot`。"
+      ]
+    },
+    {
+      "stepId": "l3-c21-2",
+      "lessonId": "C21",
+      "title": "用 JSX 渲染六张商品卡片",
+      "goal": "App 读取固定数据，用 map 为每件商品生成一张 ProductCard；P002 的 0 件要原样显示。",
+      "read": [
+        { "lessonId": "C21", "anchor": "3-jsx大写组件表达式与分组", "why": "大写名才会调用组件函数，只有花括号里的内容按 JS 求值。" },
+        { "lessonId": "C08", "anchor": "2-筛选变换和查询各自返回什么", "why": "卡片列表就是对商品数组做一次 map。" },
+        { "lessonId": "C03", "anchor": "4-默认值库存-0-必须保留", "why": "库存 0 表示售罄，不能被默认值换掉。" }
+      ],
+      "files": ["src/react/App.jsx", "src/react/ProductCard.jsx"],
+      "actions": [
+        "新建 `ProductCard.jsx`，具名导出 `ProductCard({ product, children })`：显示编号名称、库存和单价，单价复用 core 的 `formatPriceCents`，最后留出 `{children}`。",
+        "新建 `App.jsx` 并默认导出：导入 `data/products.json`，在 `section#list` 里用 map 生成六张卡片，key 用 `product.id`。",
+        "把 map 里的组件名临时改成小写 `productCard`，在 Elements 看到 `productcard` 标签、卡片内容消失，然后改回。"
+      ],
+      "preview": {
+        "output": "P001 机械键盘 · 库存 12 件 · 单价 399.00 元\nP002 无线鼠标 · 库存 0 件 · 单价 129.00 元\nP003–P006 · 库存依次为 7、3、25、5 件",
+        "caption": "六张卡片按编号排列。"
+      },
+      "acceptance": [
+        "六个编号各出现一次，库存依次为 12、0、7、3、25、5。",
+        "P001、P002 的单价分别是 399.00 元和 129.00 元，原始 JSON 不变。"
+      ],
+      "hint": "卡片全部不见时，先看组件名是不是大写，再看 map 的箭头函数有没有返回 JSX，最后才查数据。",
+      "answer": "App 只负责循环和数据来源，卡片只显示一件商品；价格仍以整数分保存，显示时才格式化。P002 的 0 直接显示，不需要 `||` 或默认值。"
+    },
+    {
+      "stepId": "l3-c22-1",
+      "lessonId": "C22",
+      "title": "拆出列表和工具栏",
+      "goal": "App 持有数据，ProductList 负责遍历，Toolbar 显示数量并用 children 放说明；数据只从父组件向下传。",
+      "read": [
+        { "lessonId": "C22", "anchor": "1-props名字是契约值由父组件决定", "why": "props 按名字传值，传错了要回父组件修。" },
+        { "lessonId": "C22", "anchor": "2-组合容器安排位置调用方提供内容", "why": "Toolbar 不需要知道说明的业务含义，children 由 App 决定。" },
+        { "lessonId": "C05", "anchor": "3-别名与浅复制新的外层可能仍共享内层", "why": "props 里的商品与父组件是同一个对象，子组件改字段就改到了父组件的数据。" }
+      ],
+      "files": ["src/react/Toolbar.jsx", "src/react/ProductList.jsx", "src/react/App.jsx"],
+      "actions": [
+        "新建 `Toolbar.jsx`：count 大于 0 时显示“显示 N 件商品”，否则显示“没有商品”，后面放 `{children}`。",
+        "新建 `ProductList.jsx`：把 App 里的循环搬过来；空数组时显示“没有匹配的商品。”，每张卡片的 children 来自可选的 `renderActions?.(product)`。",
+        "整份替换 `App.jsx`：删除 ProductCard 导入和循环，改成 `<Toolbar count={products.length}>` 加一段说明，再放 `<ProductList products={products} />`。"
+      ],
+      "preview": {
+        "output": "显示 6 件商品\n同一固定数据，组件只负责显示。\n（下方仍是六张商品卡片）"
+      },
+      "acceptance": [
+        "页面仍是六件商品，库存不变；工具栏显示“显示 6 件商品”和 App 传入的说明。",
+        "ProductCard、main.jsx 和 HTML 保持上一课的内容。"
+      ]
+    },
+    {
+      "stepId": "l3-c22-2",
+      "lessonId": "C22",
+      "title": "证明显示不会改库存",
+      "goal": "用空列表和一次故意的 props 写入，确认渲染只读输入，补货只能来自用户操作。",
+      "read": [
+        { "lessonId": "C22", "anchor": "4-纯渲染显示不是一次补货", "why": "组件被调用几次都应得到同样结果，不能写传进来的商品。" },
+        { "lessonId": "C22", "anchor": "3-条件渲染先算-js再看哪些值显示", "why": "空提示用布尔判断；`&&` 左边是数字 0 时会把 0 显示出来。" },
+        { "lessonId": "C22", "anchor": "没点补货键盘库存就不再是-12", "why": "按现象、工具、证据、原因、修复、确认六步取证。" }
+      ],
+      "files": ["src/react/ProductList.jsx", "src/react/App.jsx"],
+      "actions": [
+        "把 App 里列表的 `products={products}` 临时改成 `products={[]}`，确认空提示出现，再改回。",
+        "把 Toolbar 的说明换成 `<strong>优先盘点售罄商品</strong>`，count 保留。",
+        "在 ProductList 的 return 前临时加 `products[0].stock += 1;`，在 Sources 断点里看到 P001 不再是 12；删掉这一行，不关闭 StrictMode。"
+      ],
+      "preview": {
+        "output": "products={[]}  →  没有匹配的商品。\n恢复后         →  六张卡片，P001 库存 12 件（重复渲染也不变）"
+      },
+      "acceptance": [
+        "空列表只显示提示；恢复后六件商品回来，P001 仍是 12。",
+        "渲染代码里没有任何对 props 的写入。"
+      ],
+      "hint": "count 和列表的 products 是两个 prop，实验时只把列表传空，工具栏仍可能显示 6。加粗属于 App 传入的内容，不需要给 Toolbar 加开关。",
+      "answer": "Toolbar 原样返回 children，ProductList 只读本轮的 product。删掉渲染期的写入，而不是在别处多减一次去抵消。"
+    },
+    {
+      "stepId": "l3-c23-1",
+      "lessonId": "C23",
+      "title": "P001 连续补三件：12 → 15",
+      "goal": "新建 StockActions，用 state 保存 P001 的库存；连续补货改用函数式更新，一次点击得到 15。",
+      "read": [
+        { "lessonId": "C23", "anchor": "1-用-state-记住界面需要的值", "why": "useState 返回本次渲染的快照和请求更新的 setter。" },
+        { "lessonId": "C23", "anchor": "3-批处理与更新队列", "why": "三次 `setStock(stock + 1)` 只得到 13，传函数才会依次累计。" },
+        { "lessonId": "C06", "anchor": "4-闭包函数返回以后绑定仍然可用", "why": "事件处理函数闭包里的 stock 是本次渲染的值，调用 setter 不会改它。" }
+      ],
+      "files": ["src/react/StockActions.jsx", "src/react/App.jsx"],
+      "actions": [
+        "新建 `src/react/StockActions.jsx` 并默认导出：`useState(product.stock)` 保存库存，`add` 复用 core 的 `updateStock`。",
+        "先写三次 `setStock(stock + 1)` 的“连续补三件”；点一次只到 13。在第一句 setter 设断点，记下 stock 一直是 12。",
+        "改成三次 `setStock((previous) => add(previous, 1))`。",
+        "整份替换 `App.jsx`：Toolbar 与 ProductList 保留，`renderActions` 只给 P001 返回 `<StockActions product={product} />`。"
+      ],
+      "preview": {
+        "shot": "c23/actions",
+        "caption": "刷新后点一次「连续补三件」：P001 当前库存从 12 变成 15。"
+      },
+      "acceptance": [
+        "刷新后操作区显示 12，点一次「连续补三件」得到 15。",
+        "错误写法只到 13 的断点证据已记录：同一次回调里 stock 一直是 12。"
+      ]
+    },
+    {
+      "stepId": "l3-c23-2",
+      "lessonId": "C23",
+      "title": "延迟 +3 期间立即 +1：最终 16",
+      "goal": "加上三秒后补货的按钮，回调同样用函数式更新，中途的立即补货不会被覆盖。",
+      "read": [
+        { "lessonId": "C23", "anchor": "4-延迟补货要基于执行时的待更新值", "why": "定时回调保留点击时的渲染，updater 才拿得到执行时的待更新值。" },
+        { "lessonId": "C23", "anchor": "5-完成事件入口保持-hooks-顺序", "why": "onClick 传函数而不是调用结果，Hook 只在组件顶层调用。" },
+        { "lessonId": "C12", "anchor": "2-主线程任务与微任务各在什么时候执行", "why": "setTimeout 的回调排在以后的任务里，那时界面可能已经变了。" }
+      ],
+      "files": ["src/react/StockActions.jsx"],
+      "actions": [
+        "在 StockActions 里加入 `restockLater`：`setTimeout` 三秒后执行 `setStock((previous) => add(previous, 3))`。",
+        "返回操作区：`P001 当前库存 N 件` 状态文字，加上「连续补三件」「立即补一件」「延迟补三件」三个按钮，onClick 都传函数。",
+        "刷新到 12，先点「延迟补三件」，再马上点「立即补一件」，等三秒。"
+      ],
+      "preview": {
+        "output": "刷新                     P001 当前库存 12 件\n延迟补三件 → 立即补一件   13 件\n三秒后                   16 件"
+      },
+      "acceptance": [
+        "延迟期间立即补一件，先显示 13，三秒后显示 16；原始数据文件仍是 12。",
+        "能说明回调写成 `setStock(stock + 3)` 时为什么得到 15。"
+      ],
+      "hint": "把 stock 想成“这次组件调用的参数”。延迟回调保留自己的旧绑定，只有 updater 的 previous 来自更新队列。",
+      "answer": "StockActions 按导入与初始化、连续补货、延迟补货、控件四部分组成一个文件，三个 setter 都用函数式更新。外层卡片仍显示初始数据，下一课再把商品集合提升到 App。"
+    },
+    {
+      "stepId": "l3-c24-1",
+      "lessonId": "C24",
+      "title": "商品集合提升到 App",
+      "goal": "App 保存唯一可写的商品数组；筛选、排序和汇总在渲染时计算，补货按 id 回到 App。",
+      "read": [
+        { "lessonId": "C24", "anchor": "1-来源放-app结果随渲染计算", "why": "只保存来源和用户选择，可见列表与汇总每次重算。" },
+        { "lessonId": "C24", "anchor": "2-不可变更新复制到真正变化的那一层", "why": "只复制数组不够，被修改的商品对象也要换新。" },
+        { "lessonId": "C08", "anchor": "4-先分清方法是否修改输入", "why": "sort、splice 会改原数组，filter、map 不会。" }
+      ],
+      "files": ["src/core/collections.js", "src/react/App.jsx", "src/react/StockActions.jsx"],
+      "actions": [
+        "在 `src/core/collections.js` 末尾追加 `nextProductId`，已有函数都保留。",
+        "按三段整份替换 `App.jsx`：商品、搜索、分类、排序四个 state；补货和新增示例商品都用函数式更新；工具栏加搜索、分类、排序、新增按钮和 `#summary`。",
+        "整份替换 `StockActions.jsx`：删除 useState，只通过 `onRestock(product.id, amount)` 上报。",
+        "刷新后搜索“鼠标”，给 P002 补一件，再清空搜索。"
+      ],
+      "preview": {
+        "output": "初始                         库存 52 / 价值 2634800 分\n搜索“鼠标”并给 P002 补一件    库存 1 / 价值 12900 分\n清空搜索                     库存 53 / 价值 2647700 分"
+      },
+      "acceptance": [
+        "每件商品都能补货，卡片、操作区和汇总同时变化。",
+        "连续补三件仍是 12 → 15，延迟期间立即补一件仍得 16。",
+        "App 里没有第二份“筛选后的商品” state。"
+      ]
+    },
+    {
+      "stepId": "l3-c24-2",
+      "lessonId": "C24",
+      "title": "key 跟商品走，不跟行号",
+      "goal": "给每行加局部备注，用业务 id 作 key；删除或排序后，备注仍属于原来的商品。",
+      "read": [
+        { "lessonId": "C24", "anchor": "4-key备注跟商品不跟当前第几行", "why": "key 决定哪份组件 state 属于哪件商品。" },
+        { "lessonId": "C24", "anchor": "商品正确备注却属于另一行", "why": "用 index 作 key 的错位，按六步取证。" },
+        { "lessonId": "C09", "anchor": "按-id-建一次索引", "why": "按 id 建索引的思路与 key 相同：身份看编号，不看位置。" }
+      ],
+      "files": ["src/react/ProductList.jsx"],
+      "actions": [
+        "整份替换 `ProductList.jsx`：同一文件顶层新增带 note state 的 ProductRow，`key={product.id}` 放在 map 直接返回的 ProductRow 上。",
+        "给 P004 写备注，按库存升序排列，确认备注仍跟随 P004；再把 key 改成 index 复现错位，确认后改回。",
+        "重新刷新、不设筛选：给 P002 补一件，删除 P001，新增两次示例商品。",
+        "运行本课检查，在 `notes/next.md` 记下结果。"
+      ],
+      "preview": {
+        "output": "补 P002、删 P001、新增两次\n新增 P007、P008 · 共 7 种 · 库存 41 / 价值 2168900 分"
+      },
+      "acceptance": [
+        "删除或按库存排序后，备注仍跟随原商品。",
+        "第 3 项操作后得到 P007、P008，共 7 种商品，库存 41、价值 2168900 分。"
+      ],
+      "hint": "身份实验时保持全部商品可见：搜索会卸载被隐藏的行，那一行的备注也随之清空。",
+      "answer": "从刷新后的 52 件开始，补鼠标后为 53，删除键盘的 12 件后剩 41；两件 0 库存、0 分的新商品只增加种类。筛选、排序与汇总都由当前来源计算，没有第二份商品 state 需要同步。"
+    },
+    {
+      "stepId": "l3-c25-1",
+      "lessonId": "C25",
+      "title": "编辑表单：草稿是文本，提交才校验",
+      "goal": "新建 ProductEditor：输入期间只改字符串草稿，提交时交给 core 的 `parseDraft`；空库存拒绝、0 合法。",
+      "read": [
+        { "lessonId": "C25", "anchor": "2-草稿保存字符串提交时生成业务数字", "why": "空白和 0 只有在原始文本里才分得清。" },
+        { "lessonId": "C03", "anchor": "3-文本先转换再校验", "why": "`Number(\"\")` 是 0，校验必须看转换前的文本。" },
+        { "lessonId": "C25", "anchor": "3-提交入口原生约束与业务校验各做一层", "why": "Enter 和保存按钮都走 onSubmit，取消按钮必须写 `type=\"button\"`。" }
+      ],
+      "files": ["src/react/ProductEditor.jsx"],
+      "actions": [
+        "新建 `ProductEditor.jsx`：draft 用 `toDraft(product)` 初始化，`change(field, value)` 只更新草稿。",
+        "加入 `submit`：先 `preventDefault`，再调用 `parseDraft(draft)`；有错误时按名称、库存、价格、分类的顺序聚焦第一个错误，否则调用 `onSave`。",
+        "写 return：每个输入都有 label、`aria-invalid` 和指向错误文字的 `aria-describedby`。"
+      ],
+      "preview": {
+        "output": "Number(\"\")                    → 0\n空库存草稿 parseDraft(...)     → hasErrors: true\n库存 \"0\" 解析后               → 0\n0.29 * 100                    → 28.999999999999996\nparsePriceCents(\"0.29\")       → 29",
+        "caption": "在 `npm run lab -- console` 里运行第 2 节代码时的输出。"
+      },
+      "acceptance": [
+        "草稿里的库存、价格始终是字符串，保存前原商品不变。",
+        "0.29 元解析为 29 分，三位小数的价格被拒绝。"
+      ]
+    },
+    {
+      "stepId": "l3-c25-2",
+      "lessonId": "C25",
+      "title": "接到 App：用键盘走完编辑",
+      "goal": "App 用 selectedId 打开表单；保存前校验整份商品，成功才写回列表和统计。",
+      "read": [
+        { "lessonId": "C25", "anchor": "5-编辑草稿和商品列表各保存什么", "why": "App 存已确认的商品，表单只上报通过校验的值。" },
+        { "lessonId": "C25", "anchor": "4-可访问性名称原因和下一步都要找得到", "why": "label、错误关联和焦点让键盘用户也能完成编辑。" },
+        { "lessonId": "C11", "anchor": "4-表单提交焦点与重新渲染", "why": "原生页做过“提交、校验、聚焦、重新渲染”，这里换成 React 写法。" }
+      ],
+      "files": ["src/react/App.jsx"],
+      "actions": [
+        "App 导入 ProductEditor 和 core 的 `validateProducts`，在 products 之后加入 `selectedId` 与 `selected`。",
+        "用 `saveProduct` 替换 `addSample`：先用 `validateProducts` 和 `summarize` 检查整份数组，再 `setProducts` 并关闭表单。",
+        "工具栏按钮换成「新建商品」，每行加「编辑 Pxxx」，在 ProductList 之后条件渲染表单。",
+        "只用键盘编辑 P002：先提交纯空格名称、空库存、`129.999`，再改成 0 件、0.29 元保存；最后刷新，把 P002 保存为 3 件、129.90 元。"
+      ],
+      "preview": {
+        "output": "三项错误        → 表单不关闭，焦点回到名称，统计不变\n保存 P002 = 3 件、129.90 元\n                → 库存 55 / 价值 2673770 分"
+      },
+      "acceptance": [
+        "非法输入不关闭表单；明确填 0 可以保存；取消不保存。",
+        "最后全量库存 55、价值 2673770 分；新建商品同样经过校验。"
+      ],
+      "hint": "每次输入只调用 change，每次提交只走 submit。错误关联可以在 Elements 里选中输入框，看 ARIA 属性指向哪段文字。",
+      "answer": "P002 从 0 件改为 3 件，库存加 3，价值加 3 × 12990 = 38970 分，所以总价值是 2673770 分。取消只清空选择、卸载表单，已保存的数组不动。"
+    },
+    {
+      "stepId": "l3-c26-1",
+      "lessonId": "C26",
+      "title": "编辑区加 key：换商品就换草稿",
+      "goal": "只改一处 `<ProductEditor key={selectedId} … />`：直接切换商品时草稿与错误一起重置，筛选、排序时保留。",
+      "read": [
+        { "lessonId": "C26", "anchor": "3-状态保留看树中的位置和类型", "why": "同位置、同类型、同 key 的组件保留 state，props 变了也不会重新初始化。" },
+        { "lessonId": "C26", "anchor": "4-用-key-表达这次是另一件商品", "why": "用商品编号表达编辑会话的身份。" },
+        { "lessonId": "C24", "anchor": "4-key备注跟商品不跟当前第几行", "why": "列表里的 key 管卡片，管不到独立的编辑区。" }
+      ],
+      "actions": [
+        "先复现：打开 P001，名称改为“键盘待盘点”、清空库存后提交；不关闭，直接点「编辑 P002」，看到旧草稿和旧错误还在。",
+        "在 Components 选中 ProductEditor，对照 `props.product.id` 与 draft，记下证据。",
+        "给表单加上 `key={selectedId}`，其余 props 不变。",
+        "按课内练习走完：直接切换、同商品再点、排序、取消后重开、筛选时保留。"
+      ],
+      "preview": {
+        "output": "P001 草稿未保存，直接打开 P002\n→ 名称 无线鼠标 · 库存 0 · 价格 129.00 · 没有旧错误\n排序或再点「编辑 P002」 → 草稿保留\n取消后重开 P002          → 库存回到 0"
+      },
+      "acceptance": [
+        "直接切换会重置草稿与错误；筛选、排序和同商品再点会保留草稿。",
+        "最后把 P002 保存为 3 件、129.90 元，库存 55、价值 2673770 分。"
+      ],
+      "hint": "取消让表单卸载，直接切换靠 key 改变，这是两条不同的重置路径；只测取消会漏掉缺 key 的问题。",
+      "answer": "App 只保存 selectedId，从完整 products 找 selected，ProductEditor 保持局部草稿和错误。不要改成从可见列表查找，否则筛选会意外结束编辑。"
+    },
+    {
+      "stepId": "l3-c27-1",
+      "lessonId": "C27",
+      "title": "五种更新写成纯 reducer",
+      "goal": "新建 `inventory-reducer.js`，把补货、新建、保存、删除、整批替换写成“旧数组 + action → 新数组”。",
+      "read": [
+        { "lessonId": "C27", "anchor": "1-action-说发生了什么reducer-算下一份数据", "why": "action 只描述发生了什么，reducer 复用 core 算出下一份数据。" },
+        { "lessonId": "C24", "anchor": "2-不可变更新复制到真正变化的那一层", "why": "reducer 也不能原地修改旧商品，否则 React 可能跳过这次更新。" },
+        { "lessonId": "C20", "anchor": "2-第一批-ut正常空非法与不变性", "why": "冻结输入的回归测试能抓住原地修改。" }
+      ],
+      "files": ["src/react/inventory-reducer.js"],
+      "actions": [
+        "新建 `src/react/inventory-reducer.js`，按 restocked、created、saved、deleted、replaced 五种 type 计算，未知 type 直接抛错。",
+        "每个分支返回前调用 `validateProducts` 和 `summarize`；reducer 里不聚焦、不请求、不写存储、不生成编号。",
+        "先猜：给 P002 补一件再删除 P001，总库存是多少，旧数组里的 P002 会不会变。"
+      ],
+      "preview": {
+        "output": "restocked P002 +1 → deleted P001\n总库存 41 · 旧数组里的 P002 仍为 0\n未知 type restokced → Error: 未知 action：restokced"
+      },
+      "acceptance": [
+        "连续调用时把上一次返回的数组交给下一次，旧数组和旧商品都不变。",
+        "未知或缺失的 action 明确抛错，不会返回 undefined。"
+      ]
+    },
+    {
+      "stepId": "l3-c27-2",
+      "lessonId": "C27",
+      "title": "Provider 提供唯一的商品来源",
+      "goal": "用 useReducer 和 Context 提供 `{ products, dispatch }`；App 只派发 action，表单草稿仍留在 ProductEditor。",
+      "read": [
+        { "lessonId": "C27", "anchor": "2-usereducer-把纯计算接到-react-上", "why": "dispatch 请求下一次状态，当前事件里读到的仍是旧快照。" },
+        { "lessonId": "C27", "anchor": "4-context-让后代读取同一份库存", "why": "Context 只负责传值，持有 state 的是 Provider 里的 useReducer。" },
+        { "lessonId": "C27", "anchor": "3-复杂更新集中边界也集中", "why": "派发前先做同步预检，错误才能回到表单。" }
+      ],
+      "files": ["src/react/InventoryProvider.jsx", "src/react/App.jsx"],
+      "actions": [
+        "新建 `InventoryProvider.jsx`：`useReducer(inventoryReducer, seed, structuredClone)`，用 Context 提供 products 与 dispatch，并导出 `useInventory`。",
+        "App 删除 seed 导入和 products state，拆成只包一层 Provider 的 `App` 与读取 `useInventory()` 的 `InventoryView`。",
+        "补货、保存和删除都改为 dispatch；保存前先预检完整的候选数组。",
+        "把 restocked 分支临时改成原地 `product.stock += action.amount`，看到界面不动后恢复。"
+      ],
+      "preview": {
+        "output": "编辑 P001 名称不保存，给 P002 立即补一件\n→ P001 草稿仍在 · P002 = 1 · 全量库存 53\n取消后把 P002 保存为 3 件、129.90 元\n→ 库存 55 / 价值 2673770 分"
+      },
+      "acceptance": [
+        "App 里搜索不到 `setProducts`；商品只有 reducer 一条更新路径。",
+        "新建的零库存商品 P007 删除后回到六件；检查输出里五种 action 与未知 action 的回归都通过。"
+      ],
+      "hint": "统计不对时，先在 Components 里看是否意外套了第二个 InventoryProvider。"
+    },
+    {
+      "stepId": "l3-c28-1",
+      "lessonId": "C28",
+      "title": "可以取消的延迟补货",
+      "goal": "用 ref 保存定时器句柄，用 state 显示等待与取消按钮；取消、到期、卸载都结束自己的任务。",
+      "read": [
+        { "lessonId": "C28", "anchor": "1-ref-保存的是一个稳定容器", "why": "useRef 跨渲染返回同一个容器，改 current 不会触发渲染。" },
+        { "lessonId": "C28", "anchor": "4-可变句柄保存到-ref取消时读出来", "why": "清空 current 只是记账，撤销任务必须调用 clearTimeout。" },
+        { "lessonId": "C28", "anchor": "5-effect在提交后同步外部系统", "why": "商品行卸载时，用 cleanup 撤销仍在等待的任务。" }
+      ],
+      "files": ["src/react/StockActions.jsx"],
+      "actions": [
+        "StockActions 导入 useRef、useState、useEffect，开头加 timer ref 与 waiting state。",
+        "用 `cancelLater` 和新的 `restockLater` 替换旧延迟函数：等待两秒；重复安排时先取消旧任务。",
+        "在「延迟补三件」后加「取消盘点」与等待提示，再加一个只返回 cleanup 的 `useEffect`。",
+        "把 `useRef(null)` 临时换成普通对象 `let timer = { current: null }`，复现取消无效后改回。"
+      ],
+      "preview": {
+        "output": "P001：延迟补三件 → 立即补一件 → 取消盘点\n等两秒后  P001 = 13 · 全量库存 53"
+      },
+      "acceptance": [
+        "取消后不再补货；重复安排只在最后一次的两秒后补一次三件。",
+        "等待期间搜索 P002 让 P001 行卸载，两秒后清空搜索，P001 不会增加。"
+      ]
+    },
+    {
+      "stepId": "l3-c28-2",
+      "lessonId": "C28",
+      "title": "关闭编辑后焦点有去处",
+      "goal": "记住打开表单的按钮，保存或取消后把焦点送回去；按钮被筛掉时回到标题。",
+      "read": [
+        { "lessonId": "C28", "anchor": "3-dom-ref拿到节点再调用浏览器方法", "why": "只聚焦已经提交到页面上的节点，不在渲染时调用 focus。" },
+        { "lessonId": "C15", "anchor": "4-焦点与反馈也属于可用布局", "why": "键盘用户要一直看得到焦点在哪里。" },
+        { "lessonId": "C11", "anchor": "4-表单提交焦点与重新渲染", "why": "原生页已经处理过提交后的焦点，这里换成 ref。" }
+      ],
+      "files": ["src/react/ProductEditor.jsx", "src/react/App.jsx"],
+      "actions": [
+        "App 加 trigger、heading 两个 ref 和 `openEditor`、`closeEditor`；h1 加 `ref={heading}` 与 `tabIndex={-1}`。",
+        "新建、编辑按钮把 `event.currentTarget` 交给 openEditor；表单的 onCancel 写成 `() => closeEditor()`。",
+        "saveProduct 保留全量预检，再按新值是否仍匹配筛选，决定焦点回按钮还是回标题。",
+        "ProductEditor 用 fields ref 登记输入框，出错时 `fields.current[field]?.focus()`。"
+      ],
+      "preview": {
+        "output": "编辑 P004，空库存提交          → 焦点到库存\n保存为 8                     → 焦点回「编辑 P004」\n搜索“鼠标”，P002 改名为办公指针 → 卡片移出结果，焦点回标题"
+      },
+      "acceptance": [
+        "保存、取消后焦点不会落在已经消失的输入框或 body 上。",
+        "可见数据仍只通过 state 或 reducer 更新。"
+      ],
+      "hint": "焦点返回要考虑两件事：按钮是否还连在页面上，以及保存后它会不会被筛选移除。"
+    },
+    {
+      "stepId": "l3-c29-1",
+      "lessonId": "C29",
+      "title": "标题与快捷键的 setup 和 cleanup",
+      "goal": "新建 `useInventoryShortcuts`：标题显示全部商品种类数，Alt+↑ 给 P001 补一件，每段同步都有对称的清理。",
+      "read": [
+        { "lessonId": "C29", "anchor": "1-每次-setup-都有自己的-cleanup", "why": "cleanup 结束的是与它配对的那次 setup，必须注销同一个函数。" },
+        { "lessonId": "C29", "anchor": "2-依赖由读取的值决定", "why": "标题读 count，键盘读 onRestock，依赖按读取关系写。" },
+        { "lessonId": "C12", "anchor": "1-回调描述完成后要做什么", "why": "监听函数是交给浏览器以后调用的回调，注册了就要能注销。" }
+      ],
+      "files": ["src/react/useInventoryShortcuts.js", "src/react/App.jsx"],
+      "actions": [
+        "新建 `useInventoryShortcuts.js`：标题 Effect 依赖 `[count]`，键盘 Effect 依赖 `[onRestock]`，各自返回 cleanup。",
+        "App 只加一行导入，并在 InventoryView 顶层调用 `useInventoryShortcuts(products.length, restock)`；C28 的 ref、焦点和预检都保留。",
+        "先猜：只筛选出 P004 时，标题显示 1 件还是 6 件商品。"
+      ],
+      "preview": {
+        "output": "document.title  → 库存工作台 · 6 件商品\n只筛选 P004     → 标题仍是 6 件商品\nAlt+↑ 一次      → P001 从 12 到 13"
+      },
+      "acceptance": [
+        "标题按全部商品计数，新建商品后才变成 7。",
+        "`npm run lab -- lint` 没有 Hooks 依赖警告。"
+      ]
+    },
+    {
+      "stepId": "l3-c29-2",
+      "lessonId": "C29",
+      "title": "StrictMode 下按一次只补一件",
+      "goal": "故意删掉 removeEventListener，看清重复监听的证据，再恢复清理；StrictMode 保留。",
+      "read": [
+        { "lessonId": "C29", "anchor": "4-strictmode-检查的是能否清理后重新开始", "why": "开发时的 setup → cleanup → setup 在检查能否真正停止同步。" },
+        { "lessonId": "C29", "anchor": "3-监听和计时器都要成对释放", "why": "C28 的计时器清理直接沿用，不再加第二个 Effect。" },
+        { "lessonId": "C29", "anchor": "5-派生值直接算用户操作放在事件里", "why": "汇总直接计算，不用 Effect 存第二份。" }
+      ],
+      "files": ["src/react/useInventoryShortcuts.js"],
+      "actions": [
+        "在键盘 Effect 里加 setup、cleanup 日志，刷新后看到 setup、cleanup、setup。",
+        "删掉返回的 removeEventListener，按一次 Alt+↑，在 Sources 看到一次按键停进多个闭包。",
+        "恢复 cleanup、删掉日志；修改搜索后再按一次，确认只加 1。",
+        "等待补货期间筛掉对应行，两秒后清空筛选，确认没有晚到的补货；最后运行本课检查与 lint。"
+      ],
+      "preview": {
+        "output": "setup\ncleanup\nsetup\nAlt+↑ → 13；修改搜索后再按 Alt+↑ → 14"
+      },
+      "acceptance": [
+        "固定起点一次按键 12 → 13；卸载、重新挂载后监听不会累积。",
+        "卸载后再按键不会触发业务。"
+      ],
+      "hint": "要数的是活动的监听和业务结果，不要求 setup 只出现一次。"
+    },
+    {
+      "stepId": "l3-c30-1",
+      "lessonId": "C30",
+      "title": "详情读取：先判断 HTTP 再用数据",
+      "goal": "新建 `product-api.js` 的 `getProduct`：检查 `response.ok`、可取消地等待，未知编号明确报错。",
+      "read": [
+        { "lessonId": "C30", "anchor": "2-http-返回了不等于商品加载成功", "why": "404 也会兑现成 Response，要先看 ok 再读数据。" },
+        { "lessonId": "C13", "anchor": "2-fetch-的响应分两步处理", "why": "fetch 先拿到响应，再读正文，两步都可能失败。" },
+        { "lessonId": "C30", "anchor": "1-先画清请求状态再写-fetch", "why": "用一个对象描述加载、成功、失败，避免互相矛盾的标记。" }
+      ],
+      "files": ["src/services/product-api.js"],
+      "actions": [
+        "新建 `src/services/product-api.js`，先写可被 AbortSignal 取消的 `wait(ms, signal)`。",
+        "接上 `getProduct(id, { signal, fail, delay })`：地址用 `import.meta.env.BASE_URL` 拼出 `products.json`；P001 等 300 毫秒，其他商品 30 毫秒。",
+        "读取失败、模拟失败和未知编号都抛 Error；P002 的 0 件是合法结果。"
+      ],
+      "preview": {
+        "output": "getProduct(\"P001\")  约 300 ms 后 → P001 机械键盘\ngetProduct(\"P002\")  约 30 ms 后  → P002 无线鼠标，库存 0\ngetProduct(\"P999\")               → Error: HTTP 404：商品 P999 不存在"
+      },
+      "acceptance": [
+        "地址没有写死 `/products.json`，构建到子路径也能找到。",
+        "取消信号让等待立即以 AbortError 结束。"
+      ]
+    },
+    {
+      "stepId": "l3-c30-2",
+      "lessonId": "C30",
+      "title": "后发先到也只显示 P002",
+      "goal": "ProductDetail 每次 Effect 新建自己的 AbortController 和 ignore 标记；旧请求的成功和失败都不能写界面。",
+      "read": [
+        { "lessonId": "C30", "anchor": "3-后发先到旧结果为什么覆盖新选择", "why": "最后显示谁取决于最后完成的请求，不是最后点击的商品。" },
+        { "lessonId": "C30", "anchor": "4-abort-释放资源旧结果还要单独拦住", "why": "abort 负责停止工作，ignore 负责拦住写入，两者都要。" },
+        { "lessonId": "C13", "anchor": "3-取消前次请求清理当前请求", "why": "原生页已经用 AbortController 取消过上一次请求。" }
+      ],
+      "files": ["src/react/ProductDetail.jsx", "src/react/App.jsx"],
+      "actions": [
+        "新建 `ProductDetail.jsx`：一个 request 对象同时保存 id 与 status，attempt 用于重试。",
+        "加入 Effect：每次 setup 新建 controller 和 ignore；成功、失败分支都先检查 ignore；cleanup 先置 ignore 再 abort。",
+        "视图用 `request.id === productId` 守住切换那一帧；AbortError 不显示成业务失败。",
+        "App 加 detailId、failRead 两个 state，每行加「详情 Pxxx」；列表之后放「模拟读取失败」「关闭详情」和条件详情。"
+      ],
+      "preview": {
+        "output": "点「详情 P001」（慢）→ 立刻点「详情 P002」（快）\n正在加载 P002\nP002 无线鼠标：库存 0   ← 之后一直是 P002"
+      },
+      "acceptance": [
+        "P001 → P002 快速切换，最终只显示 P002。",
+        "加载 P001 时关闭详情，再打开 P002，晚到的旧结果不影响新详情。"
+      ]
+    },
+    {
+      "stepId": "l3-c30-3",
+      "lessonId": "C30",
+      "title": "失败、重试与旧请求的收尾",
+      "goal": "演练“取消没接上”的情况，确认守卫才是最后防线；失败能看到、能重试，旧请求不能结束新请求的加载状态。",
+      "read": [
+        { "lessonId": "C30", "anchor": "6-finally-也属于旧请求", "why": "旧请求结束不代表新请求结束，收尾写入同样要检查归属。" },
+        { "lessonId": "C30", "anchor": "5-每次-effect-独立拥有一次请求", "why": "重试让 attempt 加一，换新的 controller，不复用已取消的 signal。" },
+        { "lessonId": "C12", "anchor": "4-页面只在末端决定显示与收尾", "why": "原生 Promise 链里也是在末端决定显示与收尾。" }
+      ],
+      "files": ["src/services/product-api.js", "src/react/ProductDetail.jsx"],
+      "actions": [
+        "临时把 `await wait(delay, signal)` 改成 `await wait(delay)`，并删掉成功分支的 `if (!ignore)`。",
+        "点 P001，等 Network 里的文件读取完成后马上点 P002，看到旧写入把鼠标结果清掉；在 Sources 记下 productId 为 P001、ignore 为 true。",
+        "先恢复成功、失败两处守卫，再把 signal 接回 wait。",
+        "勾选「模拟读取失败」后重试仍失败，取消勾选再重试恢复；最后运行本课检查与 lint。"
+      ],
+      "preview": {
+        "output": "勾选模拟读取失败   → 显示失败原因\n保持勾选再重试     → 仍然失败\n取消勾选再重试     → P002 无线鼠标：库存 0"
+      },
+      "acceptance": [
+        "当前显示结果的编号始终与选中的商品一致；取消不报业务错误。",
+        "代码里没有不检查归属的 loading 写入或 finally 写入。"
+      ],
+      "hint": "“旧结果最后回来”和“旧结果回来时新请求还没完成”是两种情况，两种都要测。",
+      "answer": "request 对象同时保存 id 和 status；每轮 Effect 内新建 ignore 和 controller，成功和失败都检查 ignore。视图用 id 守住切换帧，不另设需要 finally 同步的 loading；重试只增加 attempt。"
+    },
+    {
+      "stepId": "l3-c31-1",
+      "lessonId": "C31",
+      "title": "请求逻辑搬进 useProductRequest",
+      "goal": "把 ProductDetail 的两个 state 和整个 Effect 原样搬进 Hook，详情组件只剩视图；行为与上一课完全相同。",
+      "read": [
+        { "lessonId": "C31", "anchor": "1-自定义-hook复用行为各自保存状态", "why": "两次调用同一个 Hook 各有自己的 state，重试 A 不会重试 B。" },
+        { "lessonId": "C31", "anchor": "2-把请求生命周期提取出来依赖仍要完整", "why": "搬代码不改依赖，少了 productId 详情就停在旧商品。" },
+        { "lessonId": "C16", "anchor": "2-按能力搬移依赖只往底层走", "why": "先保持行为不变再搬文件，导入方向只从视图指向 Hook。" }
+      ],
+      "files": ["src/react/useProductRequest.js", "src/react/ProductDetail.jsx"],
+      "actions": [
+        "新建 `src/react/useProductRequest.js`，把上一课的 request、attempt 和 Effect 原样搬入，返回 `{ request, retry }`。",
+        "整份替换 `ProductDetail.jsx` 为调用 Hook 的薄视图，删除旧 state、Effect 和 API 导入。",
+        "临时从依赖数组删掉 productId，看到详情停在旧商品、`npm run lab -- lint` 报缺依赖，然后恢复。"
+      ],
+      "preview": {
+        "output": "P001（慢）→ P002（快）   → 最终 P002 无线鼠标：库存 0\n依赖少了 productId       → 选择已是 P002，详情仍停在 P001"
+      },
+      "acceptance": [
+        "上一课的竞态、失败和关闭行为原样通过。",
+        "ProductDetail 里没有请求 state 和 Effect。"
+      ]
+    },
+    {
+      "stepId": "l3-c31-2",
+      "lessonId": "C31",
+      "title": "hash 路由与 URL 里的筛选",
+      "goal": "用 HashRouter 让 `#/products/P004` 能分享、刷新和返回；搜索、分类、排序只保存在 URL。",
+      "read": [
+        { "lessonId": "C31", "anchor": "4-路由把-url-映射成组件树", "why": "`#` 后面的部分不发给服务器，静态托管只需要一个入口文件。" },
+        { "lessonId": "C31", "anchor": "5-筛选放进-url只保留一个来源", "why": "三个筛选 state 换成查询参数，非法的排序值要归一化。" },
+        { "lessonId": "C02", "anchor": "4-url-与加载路径决定浏览器请求谁", "why": "浏览器按路径请求文件，hash 只在页面内解析。" }
+      ],
+      "files": ["src/react/App.jsx"],
+      "actions": [
+        "App 的返回值改为 InventoryProvider 包 HashRouter、HashRouter 包 InventoryView。",
+        "删除 detailId state，行内「详情」改成带当前查询参数的 Link；加入「返回列表」和列表、`/products/:id`、`*` 三条 Route。",
+        "删除 query、category、order 三个 state，改为从 `useSearchParams` 读取；控件通过 `changeFilter` 写回，搜索用 replace。",
+        "在文件末尾、组件外加入 DetailRoute；C28 的焦点逻辑与保存预检都保留。"
+      ],
+      "preview": {
+        "output": "#/products/P004?q=P004               → 列表只剩 P004，详情 USB-C 扩展坞\n#/products/P004?q=P004&order=unknown → 排序回到编号\n#/products/P999                      → HTTP 404：商品 P999 不存在\n#/unknown                            → 未找到页面"
+      },
+      "acceptance": [
+        "把 P004 的地址复制到新标签并刷新仍可用；「返回列表」与浏览器后退都保留筛选。",
+        "App 里没有 detailId 和三份筛选 state。"
+      ]
+    },
+    {
+      "stepId": "l3-c31-3",
+      "lessonId": "C31",
+      "title": "显式保存、导入和恢复快照",
+      "goal": "storage 支持独立的 React 存储键，Provider 提供保存、恢复、导入、导出；坏数据不覆盖好原文。",
+      "read": [
+        { "lessonId": "C31", "anchor": "3-存储-hook先约定范围再封装读写", "why": "reducer 变化不会自动写存储，只有显式操作才写。" },
+        { "lessonId": "C14", "anchor": "2-解析校验备份替换按顺序发生", "why": "先解析校验，再备份和替换；失败时好数据不动。" },
+        { "lessonId": "C14", "anchor": "3-恢复前保留坏原文启动失败仍有入口", "why": "主记录损坏时保留原文，再从有效备份恢复。" }
+      ],
+      "files": ["src/services/storage.js", "src/react/InventoryProvider.jsx", "src/react/App.jsx"],
+      "actions": [
+        "`storage.js` 的 `saveProducts`、`readProducts`、`recoverProducts` 各加 `key = storageKey` 参数；原生页不传 key，行为不变。",
+        "按三块替换 `InventoryProvider.jsx`：初始化只读不写，保存、恢复、导入只在事件里执行。",
+        "App 从 useInventory 取 snapshot，加入「保存本地快照」、恢复、「导出快照」、「导入快照」和状态文字。",
+        "编辑 P004 为 8，保存快照后刷新；再导入一个损坏的 JSON。"
+      ],
+      "preview": {
+        "output": "P004 保存为 8 → 保存本地快照 → 刷新\n→ P004 仍为 8，清空搜索后总库存 57\n→ 详情此时仍读静态起始数据，显示 3\n导入损坏的 JSON → 显示导入失败，库存和存储原文都不变"
+      },
+      "acceptance": [
+        "React 快照使用独立的 `js_web:inventory:react:v2`，原生页的存储键不变。",
+        "坏导入不覆盖好原文；保存过两次有效快照后能从备份恢复。"
+      ],
+      "hint": "先保存两次有效快照，才会有一份可以恢复的备份。",
+      "answer": "Hook 的输入与依赖一起搬；Provider 保存库存，URL 保存导航与筛选，表单保存草稿。快照只响应显式事件，校验失败时不派发 replaced。"
+    },
+    {
+      "stepId": "l3-c32-1",
+      "lessonId": "C32",
+      "title": "repository 持有商品与持久化",
+      "goal": "新建浏览器内的 mock repository：首次读取才初始化；先校验、持久化成功，才替换内存数据。",
+      "read": [
+        { "lessonId": "C32", "anchor": "1-手工-hook-已经解决什么还缺什么", "why": "手工 Hook 没有共享缓存，列表也不会跟着详情更新。" },
+        { "lessonId": "C26", "anchor": "1-状态提升让卡片和统计读同一份商品", "why": "一份业务事实只有一个所有者，这次所有者换成 repository。" },
+        { "lessonId": "C14", "anchor": "1-localstorage-保存字符串不保存引用", "why": "持久化的是字符串快照，交给界面的要是独立副本。" }
+      ],
+      "files": ["src/services/inventory-repository.js"],
+      "actions": [
+        "新建 `src/services/inventory-repository.js`，按课内五块拼成一个文件：懒读取与查找、可取消的延时与提交、读取与保存、删除与补货、快照方法。",
+        "所有方法都返回 Promise 和独立副本；`failNext(operation)` 让下一次指定操作失败。",
+        "模块导入或渲染时不读写存储；`storage: null` 时只用内存。"
+      ],
+      "preview": {
+        "output": "await repository.list()                 → 6 件商品（独立副本）\nawait repository.restock(\"P002\", 1)     → P002 库存 1\nrepository.failNext(\"get\") 后 get(\"P001\") → Error: 模拟 get 失败"
+      },
+      "acceptance": [
+        "写入先校验、再持久化，成功后才替换仓库内存。",
+        "组件不再直接写 localStorage，业务写入只经过 repository。"
+      ]
+    },
+    {
+      "stepId": "l3-c32-2",
+      "lessonId": "C32",
+      "title": "Query 管列表与详情缓存",
+      "goal": "用稳定的 QueryClient 和按 id 区分的 queryKey 读取列表和详情；详情不再运行手工请求。",
+      "read": [
+        { "lessonId": "C32", "anchor": "3-query-key-和缓存先问是不是同一份数据", "why": "影响数据的变量必须进入 key，否则 P002 会读到 P001 的缓存。" },
+        { "lessonId": "C32", "anchor": "2-用一个稳定的-queryclient-连接组件", "why": "QueryClient 在 Provider 里只创建一次。" },
+        { "lessonId": "C09", "anchor": "2-map键和值分开按键直接查询", "why": "queryKey 像按键查询的 Map，但 Query 还管新鲜度、失效和回收。" }
+      ],
+      "files": ["src/react/query-options.js", "src/react/InventoryProvider.jsx", "src/react/ProductDetail.jsx"],
+      "actions": [
+        "新建 `src/react/query-options.js`：`inventoryKeys` 与列表、详情两个选项，staleTime 一分钟、`retry: false`。",
+        "替换 `InventoryProvider.jsx`：外层 QueryClientProvider，内层用 useQuery 读列表、useMutation 处理五种操作，成功后精确失效。",
+        "替换 `ProductDetail.jsx`：用 `useQuery(detailOptions(repository, productId))`，加入「重试详情」和「模拟详情失败」。"
+      ],
+      "preview": {
+        "output": "打开 P001 → P002 → 再回 P001\n→ 每次都显示所选商品，P002 是无线鼠标：库存 0\n模拟详情失败 → 错误与旧结果同时显示 → 重试详情 → 恢复"
+      },
+      "acceptance": [
+        "P001、P002 的详情缓存互不串用。",
+        "Provider 里没有 useReducer 或 setProducts，products 直接来自列表查询。"
+      ]
+    },
+    {
+      "stepId": "l3-c32-3",
+      "lessonId": "C32",
+      "title": "写成功再刷新，删掉旧路径",
+      "goal": "App 的补货、保存、删除改为 `await dispatch(...)`，失败显示原因且不关闭表单；删除旧的请求 Hook、reducer 和 product-api。",
+      "read": [
+        { "lessonId": "C32", "anchor": "5-mutation-与失效先写成功再更新读结果", "why": "仓库写入成功后让对应查询失效，页面才会重新读取。" },
+        { "lessonId": "C32", "anchor": "4-重试与界面状态有旧结果时继续显示", "why": "浏览器 mock 不发 HTTP，缓存证据要看 Sources 和 queryKey。" },
+        { "lessonId": "C30", "anchor": "4-abort-释放资源旧结果还要单独拦住", "why": "手工请求的取消和守卫现在由 Query 接管，旧代码可以删除。" }
+      ],
+      "files": ["src/react/App.jsx"],
+      "actions": [
+        "App 删除 failRead 和失败复选框，DetailRoute 只传 productId；加入操作结果的提示文字。",
+        "用异步的 restock、saveProduct、removeProduct 替换旧函数：保存前先决定焦点目标，写入成功后再关闭表单。",
+        "导出改为等待 `snapshot.exportText()`，导入前加 await。",
+        "删除 `src/react/useProductRequest.js`、`src/react/inventory-reducer.js`、`src/services/product-api.js`。",
+        "临时从详情 key 里去掉 id，复现 P002 显示键盘后恢复，再运行本课检查。"
+      ],
+      "preview": {
+        "output": "保存 P004 = 8      → 详情 8，清空筛选后总库存 57\n刷新               → 仍为 57\n导入损坏的 JSON    → 显示失败原因，好数据不变"
+      },
+      "acceptance": [
+        "列表、详情和统计在写入成功后一起更新，刷新后保留。",
+        "导入关系里没有旧的手工请求、reducer 或第二份可写 products。"
+      ],
+      "hint": "按导入关系找旧路径，再搜索 useReducer、setProducts、useProductRequest 和 localStorage。",
+      "answer": "key 包含 id；dispatch 用 mutateAsync 返回 Promise，成功后等待列表和对应详情失效；恢复与导入让整个库存前缀失效。失败不改仓库数据、不关闭编辑器。"
+    },
+    {
+      "stepId": "l3-c33-1",
+      "lessonId": "C33",
+      "title": "编辑器接入 useActionState",
+      "goal": "表单 action 交给 useActionState：非法输入返回字段错误；合法输入先显示预计库存，再等待保存。",
+      "read": [
+        { "lessonId": "C33", "anchor": "1-操作结果的第一个参数不是表单", "why": "action 先收到上一次结果，FormData 是第二个参数。" },
+        { "lessonId": "C33", "anchor": "2-草稿等待和失败各有归属", "why": "pending 给界面看，同步的 ref 挡住同一次的重复提交。" },
+        { "lessonId": "C25", "anchor": "2-草稿保存字符串提交时生成业务数字", "why": "校验仍用受控草稿调用 parseDraft，不另写一套规则。" }
+      ],
+      "files": ["src/react/ProductEditor.jsx"],
+      "actions": [
+        "按三段替换 `ProductEditor.jsx`：draft、fields、submitting、`useOptimistic(product.stock)` 和 `useActionState(saveAction, …)`。",
+        "写 `saveAction(previousState, formData)`：核对隐藏的 productId；parseDraft 失败就返回 errors，成功先显示预计库存，再 `await onSave`。",
+        "提交期间 fieldset 整体禁用、按钮显示“正在保存…”，并阻止表单被自动重置。",
+        "先猜：第一次提交时 saveAction 的第一个参数是什么。"
+      ],
+      "preview": {
+        "output": "第一次提交   previousState = { errors: {}, message: \"\" }\n            formData.get(\"productId\") = \"P004\"\n签名写成 saveAction(formData) → formData.get is not a function"
+      },
+      "acceptance": [
+        "空白库存显示字段错误并在等待结束后聚焦；0 可以保存。",
+        "等待期间整个编辑区禁用，不能重复提交。"
+      ]
+    },
+    {
+      "stepId": "l3-c33-2",
+      "lessonId": "C33",
+      "title": "失败回滚预览，保留草稿再重试",
+      "goal": "保存支持“模拟保存失败”：失败时正式库存与预览都回到 3、草稿仍是 8，取消勾选后重试成功。",
+      "read": [
+        { "lessonId": "C33", "anchor": "3-连接表单与同一条-repository-写入路径", "why": "失败由 repository 在写入前拒绝，成功后才关闭编辑器。" },
+        { "lessonId": "C13", "anchor": "1-asyncawait-让依赖顺序回到代码顺序", "why": "await 让“保存成功后再关闭”按代码顺序发生。" },
+        { "lessonId": "C28", "anchor": "3-dom-ref拿到节点再调用浏览器方法", "why": "关闭前先选好焦点目标，按钮会被筛掉时就回到标题。" }
+      ],
+      "files": ["src/react/App.jsx"],
+      "actions": [
+        "App 保留 trigger、heading 与 closeEditor，加入 failSave state。",
+        "用新的 saveProduct 替换旧函数：去掉外层 try/catch，dispatch 时带上 `options: { fail: failSave, delay: 300 }`。",
+        "在表单前加「模拟保存失败」开关，onCancel 仍写 `() => closeEditor()`。",
+        "打开 P004，库存改为 8，勾选失败后保存；再取消勾选重试。"
+      ],
+      "preview": {
+        "output": "勾选模拟保存失败，保存 P004 = 8\n正在保存… → 保存失败：模拟 save 失败\n→ 预览回到 3 件 · 草稿仍为 8 · 总库存 52\n取消勾选再保存 → P004 = 8 · 总库存 57"
+      },
+      "acceptance": [
+        "失败后分类仍是配件、价格仍是 299.00、标签仍是热销和新品。",
+        "成功前编辑器不关闭；Network 里看不到写请求是浏览器 mock 的正常现象。"
+      ],
+      "hint": "只替换提交方式，不重建商品对象。失败不要关闭编辑器，也不要把 draft 重设成 product。",
+      "answer": "受控 draft 留在编辑器，乐观预览的来源是已保存的 `product.stock`。失败时两者可以不同，这是为了保留重试输入，不是缓存不一致。"
+    },
+    {
+      "stepId": "l3-c34-1",
+      "lessonId": "C34",
+      "title": "先测量一次筛选",
+      "goal": "用 Profiler 包住 InventoryView，记录一次真实筛选的提交；六件商品保持直接计算，不先加缓存。",
+      "read": [
+        { "lessonId": "C34", "anchor": "1-先录一次真实筛选", "why": "先有测量和具体交互，再决定要不要优化。" },
+        { "lessonId": "C34", "anchor": "2-缓存必须跟随它读取的输入", "why": "新数组、新函数的身份不同，依赖写空会留下旧统计。" },
+        { "lessonId": "C29", "anchor": "2-依赖由读取的值决定", "why": "useMemo 的依赖与 Effect 一样，按读取关系写。" }
+      ],
+      "files": ["src/react/App.jsx"],
+      "actions": [
+        "React 导入里加上 Profiler、lazy、Suspense，组件外加 `recordRender`。",
+        "用接受可选 `inventoryRepository` 的新 App 替换默认导出，Profiler 包住 InventoryView。",
+        "清空 Console，搜索 P004 再清空；装了 React DevTools 时，用 Profiler 面板录同一次操作。",
+        "在 `notes/next.md` 记下数据规模、操作、actualDuration 和看到的组件。"
+      ],
+      "preview": {
+        "output": "库存渲染 {\"id\":\"inventory-view\",\"phase\":\"mount\",…}\n库存渲染 {\"id\":\"inventory-view\",\"phase\":\"update\",…}",
+        "caption": "毫秒数因电脑而异，只记录你实际看到的值。"
+      },
+      "acceptance": [
+        "记录能对应你做的那次筛选，不按固定毫秒阈值下结论。",
+        "P002 从 0 补到 1 后，总库存 53、总价值 2647700 分。"
+      ]
+    },
+    {
+      "stepId": "l3-c34-2",
+      "lessonId": "C34",
+      "title": "按需加载报表与局部错误边界",
+      "goal": "分类报表第一次展开才下载代码；报表渲染失败时只替换报表区域，列表和编辑草稿继续可用。",
+      "read": [
+        { "lessonId": "C34", "anchor": "3-lazy-报表首次需要时才取代码", "why": "lazy 声明在组件外，第一次渲染时才调用 import。" },
+        { "lessonId": "C34", "anchor": "4-错误边界只替换失败区域", "why": "错误边界管渲染错误，不管请求失败和代码下载中的状态。" },
+        { "lessonId": "C16", "anchor": "3-活绑定初始化与动态加载", "why": "动态 import 在需要时才加载模块。" }
+      ],
+      "files": ["src/react/ReportPanel.jsx", "src/react/ReportErrorBoundary.jsx", "src/react/App.jsx"],
+      "actions": [
+        "新建 `ReportPanel.jsx`：按分类用 `summarize` 汇总传入的全部 products。",
+        "新建 class 组件 `ReportErrorBoundary.jsx`，失败时显示提示。",
+        "App 顶层用 lazy 声明 ReportPanel，InventoryView 加 showReport、failReport 和报表区域，放在列表之后、与编辑器并列。",
+        "编辑 P004、把草稿改成 8 但不保存，勾选「模拟报表故障」再恢复。"
+      ],
+      "preview": {
+        "output": "分类报表   外设 · 2 种 · 12 件 · 478800 分\nP002 补一件后            外设 · 2 种 · 13 件 · 491700 分\n模拟报表故障 → 报表暂时无法显示。（列表与编辑区不变）"
+      },
+      "acceptance": [
+        "展开前 Network 里没有 ReportPanel 模块，展开后才出现。",
+        "报表故障并恢复后，P004 草稿仍是 8，正式商品仍是 3，报表回到初始值。"
+      ],
+      "hint": "报表应是编辑器的兄弟节点。只让报表这段子树卸载重建，不要给整个 App 换随机 key。"
+    },
+    {
+      "stepId": "l3-c35-1",
+      "lessonId": "C35",
+      "title": "三条 RTL 行为测试",
+      "goal": "为空库存、新建商品、详情失败重试写测试；只替换存储介质，保留真实校验、Query 和 repository。",
+      "read": [
+        { "lessonId": "C35", "anchor": "2-用角色和-label-操作空库存", "why": "按角色和 label 查询，像用户一样操作。" },
+        { "lessonId": "C35", "anchor": "4-异步测试等待结果不睡固定时间", "why": "用 findBy、waitFor 等待条件，不等固定秒数。" },
+        { "lessonId": "C20", "anchor": "2-第一批-ut正常空非法与不变性", "why": "第一批 UT 已经覆盖正常、空、非法三类输入。" }
+      ],
+      "files": ["tests/react/support.jsx", "tests/react/inventory.test.jsx"],
+      "actions": [
+        "新建 `tests/react/support.jsx`：`freshRepository()` 用独立的内存存储，`afterEach` 清理组件、mock、计时器和 URL。",
+        "新建 `tests/react/inventory.test.jsx`，写三条用例：空库存阻止提交、新建后卡片与统计一致、详情失败后重试恢复。",
+        "把 ProductEditor 里的 `parseDraft(draft)` 临时改成把空白当 0 的版本，确认空库存用例变红，再恢复。"
+      ],
+      "preview": {
+        "output": "✓ 空库存阻止提交并聚焦，合法的 0 可以保存\n✓ 新建商品后卡片和统计使用同一份已保存数据\n✓ 详情失败后点击重试恢复"
+      },
+      "acceptance": [
+        "新建后显示库存 55、价值 2634887 分，表单关闭，焦点回「新建商品」。",
+        "空库存用例同时断言没有调用保存。"
+      ],
+      "check": "node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs"
+    },
+    {
+      "stepId": "l3-c35-2",
+      "lessonId": "C35",
+      "title": "一条严格静态的浏览器冒烟",
+      "goal": "用 Playwright 打开真实的生产构建：筛选 P004、进入详情、刷新、返回，未知路径返回 404。",
+      "read": [
+        { "lessonId": "C35", "anchor": "5-一条真实浏览器冒烟贯通静态路由", "why": "静态服务器没有单页应用回退，hash 刷新才是 Pages 上的真实行为。" },
+        { "lessonId": "C35", "anchor": "1-按风险选最小有效层级", "why": "子路径资源和刷新只能在真实浏览器里验证。" },
+        { "lessonId": "C31", "anchor": "4-路由把-url-映射成组件树", "why": "冒烟走的就是 hash 详情路由。" }
+      ],
+      "files": ["tests/e2e/inventory.spec.js"],
+      "actions": [
+        "在工作区执行 `npx playwright install chromium`，准备配套的浏览器。",
+        "新建 `tests/e2e/inventory.spec.js`，写“严格静态子路径：筛选、详情、刷新和返回”这一条。",
+        "运行冒烟；失败时用终端给出的 trace 路径执行 `npx playwright show-trace`。",
+        "把详情「重试详情」的回调临时换成空函数，看 RTL 用例停在哪个用户可见条件，再恢复。"
+      ],
+      "preview": {
+        "output": "missing-route              → 404\n搜索 P004 → 详情 P004      → #/products/P004?q=P004\n刷新                       → USB-C 扩展坞 · 库存 3\n返回列表                   → 搜索框仍是 P004"
+      },
+      "acceptance": [
+        "一条 Chromium 冒烟通过，浏览器使用独立 profile，不改你平时的商品存储。",
+        "三条 RTL 用例与冒烟都通过后，本课检查通过。"
+      ],
+      "check": [
+        "node node_modules/@playwright/test/cli.js test --config tools/playwright.config.mjs",
+        "npm run lab -- check C35"
+      ],
+      "hint": "请求发起一次不等于恢复成功：要看到错误、点击按钮、等到正确商品出现、确认错误消失。"
+    },
+    {
+      "stepId": "l3-c36-1",
+      "lessonId": "C36",
+      "title": "故障一：商品变了，统计没变",
+      "goal": "在独立的练习副本里把汇总改成只算一次的 state，取证、修复、重放，写下复盘的第一行。",
+      "read": [
+        { "lessonId": "C36", "anchor": "1-一份业务事实从来源追到显示", "why": "先找数据的主人，再追更新链。" },
+        { "lessonId": "C36", "anchor": "2-故障一商品变了统计没有变", "why": "按现象、工具、证据、原因、修复、确认记录。" },
+        { "lessonId": "C24", "anchor": "1-来源放-app结果随渲染计算", "why": "汇总是派生值，直接从当前输入计算。" }
+      ],
+      "actions": [
+        "先导出当前有效库存，用独立练习目录从 C35 起点开始；不要清空平时浏览器的存储。",
+        "新建 `notes/react-review.md`，写好六列表头。",
+        "把 `const summary = summarize(visible)` 改成只初始化一次的 `useState`，给 P002 补一件，在 Components 记下 products 与 summary。",
+        "恢复直接计算，新建 `tests/react/review.test.jsx`，加入“补货后卡片、详情和派生统计一致”。"
+      ],
+      "preview": {
+        "output": "错误版   P002 卡片 1 件 · 汇总仍是库存 52\n修复后   库存 53 / 价值 2647700 分 · 详情 P002 库存 1"
+      },
+      "acceptance": [
+        "复盘表第一行写的是实际看到的值，不只写“测试通过”。",
+        "“补货后”这条回归在错误版失败、修复后通过。"
+      ],
+      "check": "node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs -t \"补货后\""
+    },
+    {
+      "stepId": "l3-c36-2",
+      "lessonId": "C36",
+      "title": "故障二、三：缓存身份与快照顺序",
+      "goal": "复现 queryKey 漏掉 id 和“先写存储再校验”，各自修复并加回归；坏快照不覆盖好数据。",
+      "read": [
+        { "lessonId": "C36", "anchor": "3-故障二缓存忘了商品身份", "why": "组件 key 和 queryKey 是两套身份，换组件 key 修不了缓存。" },
+        { "lessonId": "C36", "anchor": "4-故障三快照先落盘校验才失败", "why": "外部文本先解析校验，再替换商品和好记录。" },
+        { "lessonId": "C32", "anchor": "3-query-key-和缓存先问是不是同一份数据", "why": "回看详情 key 为什么必须带 id。" }
+      ],
+      "actions": [
+        "把 `inventoryKeys.detail` 改成不含 id，先开 P001 再开 P002，在 Sources 记下 id 与 queryKey；恢复后加入“新鲜缓存仍按商品 id 隔离”。",
+        "在 repository 的 `importText` 提交前加一行 `store().setItem(reactStorageKey, text);`，导入非法字段，看到好原文被覆盖；删掉这一行。",
+        "加入“坏快照不覆盖好数据”的回归，用独立的 Map 验证恢复与保留的坏原文。",
+        "把三行复盘记录补完整：证据、根因、修复位置和重放结果。"
+      ],
+      "preview": {
+        "output": "P001 → P002（key 漏 id）  → 地址是 P002，详情仍是机械键盘\n修复后                    → P002 无线鼠标：库存 0\n导入非法字段（修复后）     → 拒绝，好原文不变"
+      },
+      "acceptance": [
+        "三条回归都在错误版失败、修复后通过。",
+        "复盘表三行都有证据、修复位置和重放结果。"
+      ],
+      "check": [
+        "node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs -t \"新鲜缓存\"",
+        "node node_modules/vitest/vitest.mjs run --config tools/behavior.config.mjs -t \"坏快照\""
+      ]
+    },
+    {
+      "stepId": "l3-c36-3",
+      "lessonId": "C36",
+      "title": "走一遍 L3 收尾流程",
+      "goal": "用独立固定数据走完新建、编辑、坏导入和键盘操作，运行 C36 检查，再勾选本页的收尾清单。",
+      "read": [
+        { "lessonId": "C36", "anchor": "练习", "why": "收尾流程的四步和预期数字都在这里。" },
+        { "lessonId": "C25", "anchor": "4-可访问性名称原因和下一步都要找得到", "why": "用键盘打开、保存、取消，检查焦点与错误定位。" },
+        { "lessonId": "C33", "anchor": "2-草稿等待和失败各有归属", "why": "未提交的草稿不属于商品快照，暂停前要另记。" }
+      ],
+      "actions": [
+        "新建 P007“随身转接头 / 配件 / 3 件 / 0.29 元”，进入它的详情再刷新。",
+        "从初始数据编辑 P004：草稿改 8 后取消仍是 3，再次编辑并保存为 8。",
+        "导出快照，尝试导入损坏的 JSON 与非法字段，确认好数据不变。",
+        "运行本课检查，然后对照[收尾清单](#收尾一次可观察的业务交付)逐项勾选。"
+      ],
+      "preview": {
+        "output": "新建 P007        → 7 种 · 55 件 · 2634887 分\nP004 保存为 8     → 全部总库存再增加 5"
+      },
+      "acceptance": [
+        "CRUD、详情、失败重试、统计、恢复与严格静态冒烟共同通过。",
+        "未提交的草稿不会被导出成正式商品。"
+      ],
+      "answer": "P007 增加 3 件与 87 分，所以初始数据变为 55 件、2634887 分。之后 P004 从 3 到 8，再增加 5 件与 149500 分。"
+    }
+  ],
+  "finish": {
+    "items": [
+      { "id": "l3-finish-1", "text": "初始 6 种、52 件、2634800 分；新建 P007 为“随身转接头 / 配件 / 3 件 / 0.29 元”，结果为 7 种、55 件、2634887 分，新增详情与刷新可用。" },
+      { "id": "l3-finish-2", "text": "从另一份初始数据编辑 P004：草稿 8 后取消仍 3；保存后只有它为 8，总库存 57；名称、分类、金额、tags 保留。" },
+      { "id": "l3-finish-3", "text": "空白和负库存拒绝，0 可保存；提交中按钮禁用；失败时正式值不变、草稿保留，重试后成功。" },
+      { "id": "l3-finish-4", "text": "P004 筛选→详情→刷新→返回保留条件；坏 JSON / 非法字段不覆盖好数据，损坏主记录可从明确的有效备份恢复。" },
+      { "id": "l3-finish-5", "text": "`npm run lab -- check C36` 通过，`notes/react-review.md` 留下旧统计、缓存身份、存储边界的证据、修复与重放。" }
+    ]
+  }
+}
