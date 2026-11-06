@@ -1,6 +1,6 @@
 # 当前进度与续做入口
 
-恢复关键词：**JS_WEB_START**。最后更新：2026-11-06（V2 A/B/C 已完成；V3 改版已规划，下一阶段：**V3 阶段 1 设计系统、交互组件与范例课**）。
+恢复关键词：**JS_WEB_START**。最后更新：2026-11-07（V3 阶段 1 已发布；下一阶段：**V3 阶段 2 L1–L2（C01–C20）**）。
 
 ## 续做时按这个顺序读
 
@@ -24,20 +24,21 @@
 - **2026-10-28：用户明确授权实施 V2 改版。** 从 R1 开始，先工作区/快照/组件门禁和三课试做，再按课程依赖迁移并逐批发布。
 - **2026-10-29：用户要求替换 PLAN/Lab，并明确每阶段 4 个 Sol max 子 agent 同时执行。** 规划与四路分工已落盘；主 agent 等四路交稿/返修结束后集成验收发布，统一返回结果与接续文本，用户清理上下文再开下一阶段；A/B/C 完成即结束。
 - **2026-11-01：用户强调 Lab 必须有网站导航，任务与业务规则必须在网页里写清，不能只放源码。** 本次维护补齐 L1–L5 导航、规则与验收网页、阶段任务和课程任务卡入口。
-- **2026-11-06：用户要求删除旧 PLAN 并重写：UI 更好看、交互更强；以 Lab 为主线、做 Lab 时不断回看课文；课文核心不变但多展示代码效果、降低密度；L5 提供后端，学员写前端。** 新 PLAN 已写成 V3 五阶段，每阶段仍为 4 个子 agent 并行加主 agent 验收；同日指定子 agent 全部用 Opus 5.5 1M Extra High。尚未开始实施。
+- **2026-11-06：用户要求删除旧 PLAN 并重写：UI 更好看、交互更强；以 Lab 为主线、做 Lab 时不断回看课文；课文核心不变但多展示代码效果、降低密度；L5 提供后端，学员写前端。** 新 PLAN 已写成 V3 五阶段，每阶段仍为 4 个子 agent 并行加主 agent 验收；同日指定子 agent 全部用 Opus 5.5 1M Extra High。阶段 1 已发布，见 [V3-1](../labs/records/V3-1.md)。
+- **2026-11-06：阶段 1 发布过程中，用户要求用更好的审美优化页面样式、排版和代码高亮。** 已改为 GitHub 代码配色、轻量提示框与行内代码、单层演示框和首页高亮代码，随阶段 1 发布（`c38b74f`）。
 ## 当前状态
 
 | 项目 | 状态 |
 | --- | --- |
 | 网站 | [socoo123.github.io/js_web](https://socoo123.github.io/js_web/)；L1–L5直达导航与[Lab规则页](https://socoo123.github.io/js_web/labs/rules/)已上线，见[维护记录](../labs/records/2026-11-01-lab-navigation.md) |
-| 工程 | Node 24.22.0、npm 11.19.1（本机默认已对齐）、Astro 7.3.8、Starlight 0.42.6；根目录只有一个 package-lock.json |
+| 工程 | Node 24.22.0、npm 11.19.1（本机默认已对齐）、Astro 7.3.8、Starlight 0.42.6、React islands（`@astrojs/react` 7.1.4、React 19.3.1）；代码高亮 GitHub Dark/Light（`ec.config.mjs`）；根目录只有一个 package-lock.json |
 | 已发布 | 48 / 48（C01–C48）；全部接入Lab主线，任务卡/catalog/旧URL与线上核验通过 |
 | 贯穿项目 | V2 L1–L5全部发布，v2.5提供C00–C48；五起点C00/C10/C20/C36/C44，旧七阶段保留参考；独立抽验见[A](../labs/records/A.md)、[B](../labs/records/B.md)、[C](../labs/records/C.md) |
 | D2 | 0.9.0 + Dagre + Noto Sans SC；14 张图；C16/C18 合并共用，新增 C46 静态交付图 |
 | 自动门禁 | T0 已实现：内容 lint、固定输出示例、自动发现课程与 D2 产物；已接入 build |
 | 学习进度功能 | F1已上线；C最终产物标记/导入导出/恢复/跨标签/存储故障回归通过，见[C](../labs/records/C.md)；首次[Pages](https://github.com/socoo123/js_web/actions/runs/39263906094)保留 |
 | V2 改版 | 已完成；A/v2.3、B/v2.4、C/v2.5均已发布；[C发布证据](../labs/records/C.md#发布) |
-| V3 改版 | **已规划（2026-11-06），未开始实施**；五阶段与分工见 [PLAN §7.1](PLAN.md#71-五个阶段的四路分工)；证据将写 `labs/records/V3-<N>.md` |
+| V3 改版 | **阶段 1 已发布（2026-11-07）**：设计系统与站点外壳、Predict/Effect/RunSnippet、L3 步骤式页面与进度 v2、截图/演示管线、CONTENT_GUIDE §16 与 lint、C03/C15/C23 改写，见 [V3-1](../labs/records/V3-1.md)；阶段 2–5 未开始，分工见 [PLAN §7.1](PLAN.md#71-五个阶段的四路分工) |
 
 ## 已发布课程
 
@@ -45,7 +46,7 @@
 | --- | --- | --- | --- |
 | C01 JavaScript 的故事与生态地图 | [打开](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/) | [examples/c01](../examples/c01/README.md) | 首次：[run 38662138819](https://github.com/socoo123/js_web/actions/runs/38662138819)；重构：[run 38755041902](https://github.com/socoo123/js_web/actions/runs/38755041902) |
 | C02 Web 基础与第一个调试现场 | [打开](https://socoo123.github.io/js_web/01-history-web/c02-web-debugging/) | [examples/c02](../examples/c02/README.md) | 首次：[run 38663909240](https://github.com/socoo123/js_web/actions/runs/38663909240)；重构：[run 38761177588](https://github.com/socoo123/js_web/actions/runs/38761177588) |
-| C03 值、类型、转换与比较 | [打开](https://socoo123.github.io/js_web/02-language-data/c03-values-types/) | [examples/c03](../examples/c03/README.md) | 范例重写：[run 38752272921](https://github.com/socoo123/js_web/actions/runs/38752272921) |
+| C03 值、类型、转换与比较 | [打开](https://socoo123.github.io/js_web/02-language-data/c03-values-types/) | [examples/c03](../examples/c03/README.md) | 范例重写：[run 38752272921](https://github.com/socoo123/js_web/actions/runs/38752272921)；[V3改写](../labs/records/V3-1.md#发布) |
 | C04 变量、作用域与控制流 | [打开](https://socoo123.github.io/js_web/02-language-data/c04-scope-control/) | [examples/c04](../examples/c04/README.md) | 重构：[run 38764394967](https://github.com/socoo123/js_web/actions/runs/38764394967) |
 | C05 对象、引用与数据交换 | [打开](https://socoo123.github.io/js_web/02-language-data/c05-objects-json/) | [examples/c05](../examples/c05/README.md) | 重构：[run 38842751440](https://github.com/socoo123/js_web/actions/runs/38842751440) |
 | C06 函数、闭包与高阶操作 | [打开](https://socoo123.github.io/js_web/02-language-data/c06-functions-closures/) | [examples/c06](../examples/c06/README.md) | [run 38844828221](https://github.com/socoo123/js_web/actions/runs/38844828221) |
@@ -57,7 +58,7 @@
 | C12 从回调到 Promise：执行顺序 | [打开](https://socoo123.github.io/js_web/03-async-modules/c12-callbacks-promises/) | [examples/c12](../examples/c12/README.md) | [run 38915791749](https://github.com/socoo123/js_web/actions/runs/38915791749) |
 | C13 async/await、请求与 Network | [打开](https://socoo123.github.io/js_web/03-async-modules/c13-async-await-fetch/) | [examples/c13](../examples/c13/README.md) | [run 38919408362](https://github.com/socoo123/js_web/actions/runs/38919408362) |
 | C14 原生页面、存储与错误处理 | [打开](https://socoo123.github.io/js_web/03-async-modules/c14-storage-errors/) | [examples/c14](../examples/c14/README.md) | [run 38924073963](https://github.com/socoo123/js_web/actions/runs/38924073963) |
-| C15 CSS 布局与响应式：排版库存页 | [打开](https://socoo123.github.io/js_web/03-async-modules/c15-css-layout-responsive/) | [examples/c15](../examples/c15/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/38927024152)；[C定点修正](../labs/records/C.md#发布) |
+| C15 CSS 布局与响应式：排版库存页 | [打开](https://socoo123.github.io/js_web/03-async-modules/c15-css-layout-responsive/) | [examples/c15](../examples/c15/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/38927024152)；[C定点修正](../labs/records/C.md#发布)；[V3改写](../labs/records/V3-1.md#发布) |
 | C16 模块、依赖与组织代码 | [打开](https://socoo123.github.io/js_web/03-async-modules/c16-modules-dependencies/) | [examples/c16](../examples/c16/README.md) | [run 38984292309](https://github.com/socoo123/js_web/actions/runs/38984292309) |
 | C17 Node 与浏览器的边界 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c17-node-browser/) | [examples/c17](../examples/c17/README.md) | [run 38989123796](https://github.com/socoo123/js_web/actions/runs/38989123796) |
 | C18 npm：项目、版本与可复现安装 | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c18-npm-reproducible-installs/) | [examples/c18](../examples/c18/README.md) | [run 38994824234](https://github.com/socoo123/js_web/actions/runs/38994824234) |
@@ -65,7 +66,7 @@
 | C20 构建工具与第一次 UT | [打开](https://socoo123.github.io/js_web/04-runtime-tooling/c20-vite-vitest/) | [examples/c20](../examples/c20/README.md) | [run 38997587821](https://github.com/socoo123/js_web/actions/runs/38997587821) |
 | C21 React 来由、JSX 与第一个组件 | [打开](https://socoo123.github.io/js_web/05-react/c21-react-jsx-components/) | [examples/c21](../examples/c21/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39009250317)；[A改版](../labs/records/A.md#发布) |
 | C22 Props、组合与渲染模型 | [打开](https://socoo123.github.io/js_web/05-react/c22-props-composition-render/) | [examples/c22](../examples/c22/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39018608877)；[A改版](../labs/records/A.md#发布) |
-| C23 useState：状态快照与更新队列 | [打开](https://socoo123.github.io/js_web/05-react/c23-state-snapshot-queue/) | [examples/c23](../examples/c23/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39020278502)；[A改版](../labs/records/A.md#发布) |
+| C23 useState：状态快照与更新队列 | [打开](https://socoo123.github.io/js_web/05-react/c23-state-snapshot-queue/) | [examples/c23](../examples/c23/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39020278502)；[A改版](../labs/records/A.md#发布)；[V3改写](../labs/records/V3-1.md#发布) |
 | C24 数组更新、key 与派生数据 | [打开](https://socoo123.github.io/js_web/05-react/c24-arrays-keys-derived/) | [examples/c24](../examples/c24/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39021433607)；[A改版](../labs/records/A.md#发布) |
 | C25 表单、校验与可访问性 | [打开](https://socoo123.github.io/js_web/05-react/c25-forms-validation-accessibility/) | [examples/c25](../examples/c25/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39030596833)；[A改版](../labs/records/A.md#发布) |
 | C26 状态提升、保留与重置 | [打开](https://socoo123.github.io/js_web/05-react/c26-state-ownership-reset/) | [examples/c26](../examples/c26/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39037201320)；[A改版](../labs/records/A.md#发布) |
@@ -93,17 +94,16 @@
 | C48 总复盘与后续路线 | [打开](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/) | [examples/c48](../examples/c48/README.md) | [首次](https://github.com/socoo123/js_web/actions/runs/39257555264)；[C改版](../labs/records/C.md#发布) |
 
 ## 周验收记录
-- 建站与 C01–C05（2026-10-15，旧流程）：本地和线上 Pages 都检查过 1280px/360px、亮暗模式、D2 中文、折叠答案、禁用 JS 后阅读、搜索、代码复制，全部通过。
-- T0 配置调整与 C06（2026-10-16）：本地 1280px/360px、亮暗模式、D2、折叠答案、代码复制、三个关键词搜索及禁用 JS 阅读通过。
+- 建站与 C01–C05（2026-10-15，旧流程）及 T0 与 C06（2026-10-16）：1280px/360px、亮暗模式、D2 中文、折叠答案、代码复制、搜索与禁用 JS 阅读通过；C01–C05 另在线上 Pages 检查。
 - C12 / 第一周验收（2026-10-16）：C01–C12 及首页/路线页的 1280px/360px、亮暗模式、9 张 D2 中文、折叠答案、代码复制、三关键词搜索与禁用 JS 阅读通过；阶段 1 业务参考值一致。
 - C24 / 第二周验收（2026-10-17）：本地 28 页的 1280px/360px、亮暗模式、12 张 D2、折叠答案/复制、三关键词搜索、25 页禁用 JS 阅读通过；阶段 1–3 业务参考值、原生页编辑/刷新/坏副本恢复与 React 列表操作通过。
 - C36 / 第三周验收（2026-10-18）：41 页共 164 组宽度/亮暗检查、13 张 D2、折叠答案/复制、竞态/乐观/故障搜索与禁用 JS 阅读通过；库存 v2 本地快照/详情/校验、源码映射与 190 条回归、2 条生产 E2E 通过。
 - C48 / 第四周验收（2026-10-19）：54 页、216 组 1280/360px × 亮暗、14 张 D2、折叠答案/复制、三关键词搜索与禁用 JS 阅读通过；七阶段安装/构建/业务复检通过，§10 仅余 F1 学习进度。
 - F1 / 站点交互变更复检（2026-10-19）：15 条数据测试、浏览器主流程/故障回归、54 页/216 组宽度主题、14 张 D2、搜索/复制/答案和禁用 JS 阅读通过；Pages 与线上交互通过，明细见 SOURCES。
 - V2 R1–R4 / 首批（2026-10-28）：61 页/366 组、双栏复制与无 JS、D2/搜索、旧 F1、三课起点跟做/错误先红后绿、UI5 严格静态子路径通过；[记录](../labs/records/README.md)。[Pages run](https://github.com/socoo123/js_web/actions/runs/40684581291) 成功，线上课程和下载核验通过。
-- V2 A / C24–C36合并验收（2026-10-29）：61页/366组、14张D2、键盘/复制/答案/搜索/无JS及F1通过；四课独立跟做、16个React快照、144包线上SHA与Pages通过，见[A记录](../labs/records/A.md)。
-- V2 B / C37–C44受影响页验收（2026-10-29）：10页/60组、键盘/复制/答案/搜索/D2/无JS通过；四课独立跟做、8快照、234包线上SHA与Pages通过，见[B记录](../labs/records/B.md)；本批未重做全站/F1浏览器验收。
+- V2 A / C24–C36（2026-10-29）：61页/366组、14张D2、键盘/复制/答案/搜索/无JS及F1通过；四课独立跟做、16个React快照、144包线上SHA与Pages通过，见[A记录](../labs/records/A.md)。V2 B / C37–C44（同日）：10页/60组、键盘/复制/答案/搜索/D2/无JS通过；四课独立跟做、8快照、234包线上SHA与Pages通过，见[B记录](../labs/records/B.md)；未重做全站/F1浏览器验收。
 - V2 C / 最终验收（2026-10-30）：61页/366组、14张D2、键盘/复制/答案/七词搜索/无JS/F1及四课独立跟做通过；v2.5冻结、Linux CI/Pages、线上60页/332包SHA与五起点浏览器下载通过，见[C](../labs/records/C.md)。
+- V3 阶段 1（2026-11-06–07）：最终集成 62 页/372 组、14 张 D2、键盘/复制/答案/七词搜索/无 JS、F1 与 Lab 步骤通过；L3 C22→C23 独立跟做红绿、C03/C15 组件行为通过；线上 9 入口/46 资源/332 包 SHA 通过，见 [V3-1](../labs/records/V3-1.md)。
 ## 已知问题（不阻塞）
 
 - Starlight 自定义 404 有一条路由优先级提示，404.html 正常；上游 Pages Actions 有 Node 20 弃用提示，runner 实际使用 Node 24，部署成功，升级时复查。
@@ -111,8 +111,8 @@
 
 ## 下一步
 
-1. **执行 V3 阶段 1「设计系统、交互组件与范例课」**：按 [PLAN §7.1](PLAN.md#71-五个阶段的四路分工) 的四路分工同时启动 4 个子 agent，主 agent 集成、按 §6 验收、发布并核验 Pages，证据写 `labs/records/V3-1.md`。启动语句见 [PLAN §8](PLAN.md#8-新窗口与交接文本)。
-2. 阶段 1 发布后先由用户看线上首页、L3、C03、C15、C23 再决定是否进入阶段 2。V2 成果保留：C 内容提交 `d1f2604`、Lab 导航维护 `04fbb3c`，证据见 [C](../labs/records/C.md) 与[导航记录](../labs/records/2026-11-01-lab-navigation.md#发布)；保留源码、锁、历史包和个人学习数据。
+1. **执行 V3 阶段 2「L1–L2（C01–C20）」**：按 [PLAN §7.1](PLAN.md#71-五个阶段的四路分工) 同时启动 4 个子 agent（路 1 C01–C05；路 2 C06–C10、L1 页与步骤；路 3 C11–C15；路 4 C16–C20、L2 页与步骤、L2 目标演示），C03、C15 已在阶段 1 改写，只做对齐。沿用阶段 1 的组件、步骤数据结构、截图管线与 lint 规则；主 agent 集成，按 §6 独立验收（L1：C02 → C04；L2：C13 → C14），发布并核验 Pages，证据写 `labs/records/V3-2.md`。启动语句按 [PLAN §8](PLAN.md#8-新窗口与交接文本) 的接续模板。
+2. 开始前用户可先看线上首页、L3、C03、C15、C23；需要调整就发送「JS_WEB_START + 修改意见」继续阶段 1 返修。阶段 1 遗留见 [V3-1](../labs/records/V3-1.md#遗留与下一阶段)；V2 成果（C 内容 `d1f2604`、导航维护 `04fbb3c`）、源码、锁、历史包和个人学习数据保留。
 
 ## 本文件的更新规则
 
