@@ -5,7 +5,16 @@
       "labId": "L3",
       "checkpoint": "C36",
       "path": "demos/l3/",
-      "title": "L3 目标演示：React 库存应用"
+      "title": "L3 目标演示：React 库存应用",
+      "sources": ["src/react", "src/core", "src/services", "src/vanilla/styles.css", "data", "vite.config.js"],
+      "smoke": [
+        { "path": "", "text": "库存 52 / 价值 2634800 分" },
+        { "path": "#/products/P004", "text": "P004 USB-C 扩展坞：库存 3" }
+      ],
+      "interaction": {
+        "click": "article[data-id=\"P002\"] >> role=button[name=\"立即补一件\"]",
+        "text": "库存 53 / 价值 2647700 分"
+      }
     }
   ]
 }

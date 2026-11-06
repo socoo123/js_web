@@ -2,9 +2,9 @@
 
 适用于所有新课和按本规范重构的课程。写任何课程前必须读完本文件。当前改版统一采用第 15 节；第 3 节的旧独立练习模板只用于理解历史课程，不作为另一套迁移要求。
 
-**范例**：[C03 值、类型、转换与比较](../src/content/docs/02-language-data/c03-values-types.mdx) 已按本规范整篇重写，配套 [examples/c03](../examples/c03/README.md) 和 [D2 源码](../diagrams/c03-value-boundary.d2)。本文件的规则说「写什么」，C03 示范「写成什么样」：开头场景、Java 对照表、一段代码一个概念、「先猜一猜」、按六步写的调试、带验收条件的练习、只在 examples README 留验证记录。两者冲突时以本文件为准，并修正 C03。
+**范例**：[C03 值、类型、转换与比较](../src/content/docs/02-language-data/c03-values-types.mdx) 已按第 16 节改写，配套 [examples/c03](../examples/c03/README.md) 和 [D2 源码](../diagrams/c03-value-boundary.d2)。本文件的规则说「写什么」，C03 示范「写成什么样」：开头场景与完成效果、Java 对照卡、一段代码一个概念并紧跟效果、`Predict` 与可运行片段、按六步写的调试、带验收条件的练习、只在 examples README 留验证记录。两者冲突时以本文件为准，并修正 C03。
 
-**V3 改版（2026-11-06）**：阶段 1 将在本文件新增第 16 节「可读性与效果」；写入之前，改写课文以 [PLAN §4](PLAN.md#4-课文改写规则阶段-1-写入-content_guide-第-16-节) 为准，核心内容边界见 PLAN §2.1。
+**V3 改版（2026-11-06）**：frontmatter 有 `lesson` 字段的课按 [第 16 节「可读性与效果」](#readability-v3) 写；第 16 节与第 3、4、15 节冲突时，以第 16 节为准。核心内容边界见 [PLAN §2.1](PLAN.md)。三篇范例各示范一种效果：C03（纯 JS：`Predict`、`RunSnippet`、Console 面板）、C15（CSS：真实页面截图）、C23（React：交互演示）。
 
 标 **[lint]** 的条目由 `npm run lint:lessons` 自动检查；其余条目由作者按第 14 节自查。lint 报错时删减内容，不放宽规则。改版遵循 [第 15 节](#revision-v2-writing)；受控片段与双栏计数已实现，直接复用。
 
@@ -31,7 +31,7 @@
 
 ## 3. 每课模板
 
-frontmatter 只用 `title`、`description`、`sidebar.order`。不要加自定义字段，否则需要先改 `src/content.config.ts` 的 schema。
+frontmatter 只用 `title`、`description`、`sidebar.order`；V3 改写课另加 `lesson`，并删除下面模板里的页首引用块（见 [16.2](#readability-v3-header)）。`lesson` 已在 `src/content.config.ts` 声明，其他自定义字段仍不要加，否则需要先改 schema。
 
 ```md
 ---
@@ -317,3 +317,136 @@ Chrome 的 Console 允许在不同输入之间重复声明 `let`/`const`，但�
 从本课起点，仅按正文就能完成任务；自己已有的代码没有被脚本覆盖；错误可以用指定工具收集到证据；完成态满足表里的验收；Java/JS对照准确且可读；本课和受影响前置检查通过。课程标记完成由学员决定，自动检查只提供行为结果。
 
 复用已发布的 C03、C23/C41 试做中有效的讲解；A/B 将试做接回正式路线。主 agent 按 PLAN §6 独立抽验正文可跟做性，自动组装通过单独记录。已迁移 C01–C20 只做明确问题的定点修正。
+
+<a id="readability-v3"></a>
+
+## 16. 可读性与效果（V3）
+
+2026-11-06 起，frontmatter 有 `lesson` 的课就是 V3 改写课，lint 对它启用本节规则。没有 `lesson` 的课仍按第 15 节，保留旧页首。范例：[C03](../src/content/docs/02-language-data/c03-values-types.mdx)、[C15](../src/content/docs/03-async-modules/c15-css-layout-responsive.mdx)、C23。
+
+### 16.1 改写边界
+
+改写只改「怎么讲」，不改「讲什么」。逐课保持不变（PLAN §2.1）：课号、标题、slug、URL 与全部已有锚点；学习日与节奏；概念节的知识点；Java 对照的主题；主错误；练习考查的能力；Lab 任务与验收数字；固定数据和字段规则。
+
+- 标题改了就在原位置加 `<a id="旧锚点"></a>`；旧的兼容锚点原样保留。
+- 交稿附「核心对照清单」：改写前后的概念节知识点、Java 对照主题、主错误、练习考点、验收数字逐项对应。缺一项即退回。
+- 操作细节（下载、恢复、端口、Ctrl+C、`npm ci`、`compare`、暂停记录）只写在 Lab 页和任务卡，课文里写「按任务卡」即可。
+
+<a id="readability-v3-header"></a>
+
+### 16.2 页首：frontmatter `lesson`
+
+删除旧的 `> **第 N 周 · 第 D 天** …` 引用块，改写：
+
+```yaml
+lesson:
+  time: 阅读跟做约 45 分钟 · 实作约 40 分钟
+  prereq: C02 商品卡片
+  env: 本地网页、浏览器 Console 或 Node 24
+  verified: all        # all = 示例全部运行验证；partial = 有未运行的例子，已在对应位置标注
+```
+
+四个字段都必填，`verified` 只能是 `all` 或 `partial` [lint error]。周/天、所属 Lab 由 `LessonHeader` 从 catalog 读取，不要写进正文。
+
+### 16.3 页面结构
+
+必需的二级标题不变（第 3 节）。各部分的写法：
+
+| 部分 | V3 写法 |
+| --- | --- |
+| 这一课解决什么问题 | ≤ 4 句；接一个 `Effect` 作「完成后的效果」；再写「学完你能：」和正好 3 条列表 [lint]；然后放 `LessonTask` |
+| Java 程序员先看这里 | 同第 15 节：对照卡或一段短说明 |
+| 概念节 | 普通课 3–5 节、难点课 4–6 节；节奏见 16.4 |
+| 常见错误与调试 | 六步写法不变；「现象」配截图或输出面板，「证据」优先用文本面板 |
+| 练习 | 一个必做任务；「提示」「参考答案」用 details |
+| 项目进度 | 保留标题与锚点；写本课让 Lab 哪一段/哪一步可以检查，放效果截图，列验收清单，下一步链接 Lab 页（如 `/js_web/labs/l1/`）；不自造步骤锚点 |
+| 小结 | 要点列表；「自测：」后面也写成列表，不把几个问题挤在一段 |
+
+### 16.4 概念节的节奏
+
+**一句主张 → 代码 → 效果 → 为什么（≤ 3 句）→ Java 对照一句 →（可选）「记住」一句。**
+
+- 效果三选一，必须紧跟代码：输出面板（Console/终端）、真实页面截图、交互演示 [lint warning：代码块后没有效果]。
+- 两个代码块之间不能既没有效果也没有解释 [lint warning]。
+- 每个概念节至少 1 个效果 [lint warning]。`Predict` 自带揭晓的答案，算一个效果。
+- 「为什么」只解释这段代码的结果；相关的几条事实写成列表，每条一两句。
+- Java 对照不超过 2 句，一句相同点、一句失效点 [lint]。目录的 `comparisonTheme` 没覆盖的概念宁可省略，不新造主题。DOM、CSS、React、UI5 只写经验类比，不说成 API 等价。
+- 「记住」只写一句 [lint]，是读者合上页面后要带走的规则。
+
+### 16.5 降低阅读密度 [lint]
+
+- 一段最多 3 句，约 120 字以内；一句只讲一个条件或一个结论。
+- 一段的行内代码不超过 3 处；文件路径、命令放进任务卡或代码块，不夹在长句里。
+- 验收数字（12→15、52/2634800）放在效果面板和验收清单里，不塞进说明段落。
+- 不写一连串分号的长句；一段超过 1 个「；」就改成列表。
+- 术语第一次出现时，补一句白话解释，如「视口（显示网页的那块区域）」。
+
+### 16.6 效果从哪里来
+
+- **输出面板**：优先 `example="cNN/name"`，内容直接读 `examples/cNN/name.expected.txt`，由 `npm run examples` 核对。Node 跑不了的（DevTools Console 记录、页面实测数值）可以写成子代码块，但必须实际测过，并在 `examples/cNN/README.md` 记录来源。
+- **页面截图**：在 `labs/previews/<组>.json` 写定义，从参考快照拍摄，不手工截图、不手改图片。步骤见 [labs/previews/README.md](../labs/previews/README.md)。故障现象可以用 `addStyle` 临时追加样式拍摄，同时断言关键数值。
+- **交互演示**：React island 登记在 `src/components/demos/registry.mjs`；整页演示登记在 `labs/demos.json`。
+- 引言的「完成后的效果」和「项目进度」可以复用同一张截图；概念节尽量各用一张能说明本节的图。
+- DOM、CSS、React、UI5 课每课至少 2 张真实截图或 1 个交互演示。手工 DevTools 截图每课最多 1 张，在截图清单里标 `manual` 和日期。
+
+### 16.7 组件写法
+
+组件只接受静态字符串属性，属性白名单见 `scripts/lesson-sources.mjs`。子内容不缩进，代码围栏前后空行。
+
+````mdx
+<Predict question="已售完的商品，两行分别打印什么？">
+
+```js
+console.log(0 || 12);
+console.log(0 ?? 12);
+```
+
+<div slot="answer">
+
+```text
+12
+0
+```
+
+`||` 遇到任何 falsy 值都换成右边，`??` 只换 null 和 undefined。
+
+</div>
+</Predict>
+````
+
+- `Predict`：问题区必须有一个代码块；答案放在最后的 `<div slot="answer">`，不能为空，可以包含 `Effect`。揭晓按钮由组件写成「揭晓答案」，「提示」「参考答案」留给练习。每课至少 2 个 [lint]。
+- `Effect`：`kind="console|terminal"` 配 `example`，或不写 `example`、只放一个子代码块；`kind="page"` 配 `preview="c15/layout"`；`kind="demo"` 配 `demo="c23-update-queue"`。`title`、`caption` 可选，截图不写 `caption` 时用定义里的说明。
+- `RunSnippet example="c03/defaults"`：只用于纯 JS 课；文件要有 `.expected.txt`，源码（含注释）不能出现 `import`、`export`、`require(`、`process`、`node:`、`__dirname`、`Buffer`。
+- `**记住：**`、`**Java 对照：**` 写在段首，样式按段首识别。「自己尝试」仍用 `:::tip[自己尝试 · 环境]`。
+- 代码块计数（≤ 16/20）把组件算进去：`RunSnippet` 2 个（源码与输出）；`Effect` 的 `example` 或子代码块 1 个；`Predict` 的问题代码与答案里的代码各 1 个；`CodeCompare` 2 个；`CodeExcerpt`、`LessonTask` 各 1 个。
+
+### 16.8 lint 规则与阈值
+
+只对有 `lesson` 的课生效；`node scripts/lint-lessons.mjs --preview-v3` 可以对全部课试跑，不影响退出码。阈值在 `scripts/lint-lessons.mjs` 的 `READABILITY`，改阈值时同步改本表。
+
+| 规则 | 阈值 | 级别 |
+| --- | --- | --- |
+| `lesson` 缺字段或 `verified` 取值不对 | `time`、`prereq`、`env`、`verified` 必填 | error |
+| 有 `lesson` 仍保留旧页首 / 用了 V3 组件却没有 `lesson` | — | warning |
+| 段落过长 | > 130 字（不含空白和链接网址）或 > 3 句；`:::` 提示框内不查长度，其他规则照查 | warning |
+| 行内代码过密 | 一段 > 3 处 | warning |
+| 一段多个分号 | > 1 个「；」 | warning |
+| 「记住」/「Java 对照」句数 | > 1 句 / > 2 句 | warning |
+| 两个代码块之间既没有效果也没有解释 | 同一节内 | warning |
+| 代码块后没有效果 | 概念节内，到下一个代码块或节尾之前 | warning |
+| 概念节没有任何效果 | 每个「## N.」节 | warning |
+| 引言过长、缺「完成后的效果」、「学完你能」不是 3 条 | 4 句 / 1 个 `Effect` / 3 条 | warning |
+| 全课没有「**Java 对照：**」段 | — | warning |
+
+句数按「。！？」计，问号也算一句，所以几个自测问题要写成列表。段落字数的目标仍是 120，130 是给「约」留的余量。
+
+校准（2026-11-06，`paragraphChars` 取 120/130/140 对比）：
+
+| 课 | 警告 | 说明 |
+| --- | --- | --- |
+| C03 改写后 | 0 / 0 / 0 | 71 段，最长 99 字；16 个代码块 |
+| C15 改写后 | 0 / 0 / 0 | 54 段，最长 110 字；12 个代码块 |
+| C23 改写前 | 25 / 24 / 21 | 段落过长 8/7/4、代码块后没有效果 6、概念节没有效果 5、引言 3 项、行内代码 1、分号 1、无 Java 对照段 1 |
+| C23 路 2 草稿 | 4 / 4 / 4 | 分号 1、段落过长 2（4 句的答案段、4 个问号的自测段）、代码块后没有效果 1；均为真问题 |
+
+全站试跑（46 篇未改写课）共 1292 条警告，说明这些规则只适合逐课改写时启用，不能一次对全站打开。哪些规则升为 error 由阶段 1 主 agent 决定，并记录在 `labs/records/V3-1.md`。

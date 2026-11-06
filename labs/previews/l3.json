@@ -1,0 +1,26 @@
+{
+  "group": "l3",
+  "shots": [
+    {
+      "name": "goal",
+      "checkpoint": "C36",
+      "entry": "src/react",
+      "path": "/",
+      "sources": ["src/react", "src/core", "src/services", "src/vanilla/styles.css", "data"],
+      "actions": [
+        { "do": "waitText", "selector": "#summary", "text": "库存 52 / 价值 2634800 分" },
+        { "do": "click", "selector": "article[data-id=\"P002\"] >> role=button[name=\"立即补一件\"]" },
+        { "do": "waitText", "selector": "#summary", "text": "库存 53 / 价值 2647700 分" },
+        { "do": "waitText", "selector": "article[data-id=\"P002\"]", "text": "库存 1 件" },
+        { "do": "scrollTop" }
+      ],
+      "viewports": [
+        { "width": 360, "height": 760, "scale": 2 },
+        { "width": 1280, "height": 720 }
+      ],
+      "themes": ["light"],
+      "alt": "L3 完成时的 React 库存应用：工具栏有搜索、分类、排序和新建商品；给售罄的 P002 无线鼠标补一件后，汇总变为库存 53 / 价值 2647700 分，商品卡片带补货、详情、编辑、删除操作。",
+      "caption": "L3 终点：P002 补一件，列表与汇总同步为 53 / 2647700 分"
+    }
+  ]
+}

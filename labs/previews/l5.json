@@ -1,0 +1,22 @@
+{
+  "group": "l5",
+  "shots": [
+    {
+      "name": "goal",
+      "checkpoint": "C48",
+      "entry": "src/react",
+      "path": "/",
+      "sources": ["src/react", "src/core", "src/services", "src/vanilla/styles.css", "data"],
+      "actions": [
+        { "do": "waitText", "selector": "#summary", "text": "库存 52 / 价值 2634800 分" },
+        { "do": "check", "label": "仅低库存" },
+        { "do": "waitText", "selector": "#summary", "text": "库存 8 / 价值 539200 分" },
+        { "do": "waitCount", "selector": "#list article", "count": 2 }
+      ],
+      "viewports": [{ "width": 1280, "height": 720 }],
+      "themes": ["light"],
+      "alt": "L5 收尾时的 React 库存应用：勾选「仅低库存」后只剩 P004 与 P006 两张卡片，汇总为库存 8 / 价值 539200 分。",
+      "caption": "L5 终点：现场增量「仅低库存」，结果为 P004、P006，8 件 / 539200 分"
+    }
+  ]
+}
