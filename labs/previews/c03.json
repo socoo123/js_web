@@ -12,7 +12,7 @@
         { "do": "click", "role": "button", "name": "补货" },
         { "do": "waitText", "selector": "#product", "text": "库存 123 件" }
       ],
-      "viewports": [{ "width": 768, "height": 600 }],
+      "viewports": [{ "width": 360, "height": 640, "scale": 2 }, { "width": 768, "height": 600 }],
       "themes": ["light"],
       "target": "main",
       "alt": "C03 起点的商品卡片：输入框是 3，点补货后标题显示「P001 机械键盘 · 库存 123 件」，库存价值变成 4907700 分。",
@@ -32,7 +32,7 @@
         { "do": "waitText", "selector": "#feedback", "text": "空白无效" },
         { "do": "waitText", "selector": "#product", "text": "库存 15 件" }
       ],
-      "viewports": [{ "width": 768, "height": 600 }],
+      "viewports": [{ "width": 360, "height": 640, "scale": 2 }, { "width": 768, "height": 600 }],
       "themes": ["light"],
       "target": "main",
       "alt": "修好后的商品卡片：先补 3 件得到「库存 15 件」、价值 598500 分；再提交空白，下方提示「请输入库存，空白无效」，库存仍是 15。",

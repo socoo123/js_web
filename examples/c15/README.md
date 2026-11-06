@@ -74,10 +74,15 @@
 | 调试 Console | scrollWidth 616 / innerWidth 360 | 在工作区 styles.css 末尾真实追加故障行后实测 |
 
 - 环境：macOS arm64、Node 24.22.0、Playwright 1.64.1 / Chromium 156.0.8078.4（headless）。
-- `npm run examples -- c15`：2/2 通过。课程 lint（V3 规则）：0 error、0 warning；正文 3690/8000 字符、12 个代码块，段落最长 110 字。
+- `npm run examples -- c15`：2/2 通过。课程 lint（V3 规则，结构类规则为 error）：0 error、0 warning；正文 3830/8000 字符（集成后组件里的文字也计入）、12 个代码块，段落最长 110 字。
 - 正文跟做：从 C14 参考快照恢复到临时目录，`LAB_NATIVE_CHECK_PORT=4344`。
   - 起点 `node tools/lab.mjs check C15` 失败（exit 1）；只按第 1 节替换 styles.css 后 68 条通过，360/768/1280px 无横向滚动。
   - 调试第 1 步在文件末尾加 `article { min-width: 600px; }`：检查失败于 `scrollWidth <= innerWidth`，360px 下 scrollWidth 616、卡片 min-width 600px、列表 328px；删掉后 68 条再次通过。
   - 只用键盘（Tab、输入、Enter）在三种宽度下：搜索 P004、编辑按钮显示 3px 焦点外框，打开后焦点在库存框；保存空白提示「请输入库存，空白无效」且焦点留在库存框；保存 8 后总库存 57、价值 2784300 分。
 - Java 对照：只作布局管理器经验类比（FlowLayout 换行、窗口缩放时按同一规则重排），不声称 API 等价，与目录的对照主题一致。
+- 集成构建上的页面检查（严格静态服务 `dist`，headless Chromium）：
+  - 页首显示「第 2 周 · 第 8 天」、L2 链接和 frontmatter 四项。2 个「先猜一猜」可揭晓，3 个 Console 面板可见。
+  - 6 处页面截图全部加载；`c15/layout` 点 360/768/1280 切到对应图片，窄于 600px 的视口默认显示 360。
+  - 360/768/1280px × 亮/暗无横向溢出、无页面异常。禁用 JavaScript 时隐藏切换按钮，各显示一张默认图。
+- 集成后定点修正：两个 Console 面板标题缩短，360px 下不再挤压面板标签；第 3 节的命令移进面板记录，补一句设备模式的说明并链接 Chrome 文档。`c15/focus` 增加 360 宽截图。
 - 未运行：Firefox、Safari、Edge、真机、屏幕阅读器；DevTools 界面手动点击（Computed、Grid overlay 按官方文档核对，数值经 Playwright 读取）。

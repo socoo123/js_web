@@ -23,6 +23,8 @@ export const READABILITY = {
   rememberSentences: 1,
   javaSentences: 2, // 一句相同点、一句失效点
 };
+// 阶段 1 主 agent 决定：V3 课（有 lesson）里这些规则报 error，其余可读性规则报 warning。
+export const V3_ERROR_RULES = new Set(['old-header', 'missing-lesson', 'concept-no-effect', 'intro-no-effect', 'learn-items', 'code-pair']);
 const OLD_HEADER = /^> \*\*第 \d+ 周 · 第 \d+ 天\*\*/m;
 const OUTPUT_LANGS = new Set(['text', 'txt', 'console', 'output']);
 const EFFECTS = new Set(['Effect', 'RunSnippet', 'CodeCompare']);
@@ -105,8 +107,10 @@ function flatten(tree, admonitionLines) {
   return items;
 }
 
+// 返回 [{ rule, level, message }]；level 由 V3_ERROR_RULES 决定。
 export function readabilityIssues(source, limits = READABILITY) {
   const issues = [];
+  const add = (rule, message) => issues.push({ rule, level: V3_ERROR_RULES.has(rule) ? 'error' : 'warning', message });
   const body = source.replace(/^---\n[\s\S]*?\n---\n/, (match) => '\n'.repeat(match.split('\n').length - 1));
   const lines = body.split('\n');
   const admonitionLines = new Set();
@@ -123,46 +127,47 @@ export function readabilityIssues(source, limits = READABILITY) {
     if (item.section === '延伸阅读') continue;
     const chars = [...item.text.replace(/\s/g, '')].length;
     const sentences = sentenceCount(item.text);
-    if (!item.inAdmonition && (chars > limits.paragraphChars || sentences > limits.paragraphSentences)) issues.push(`${at(item)} 段落过长：${chars} 字、${sentences} 句（上限约 ${limits.paragraphChars} 字、${limits.paragraphSentences} 句），拆段或删减`);
-    if (item.inline > limits.inlineCode) issues.push(`${at(item)} 行内代码过密：${item.inline} 处（上限 ${limits.inlineCode}），把路径、命令放进代码块或任务卡`);
-    if ((item.text.match(/；/g) ?? []).length > limits.semicolons) issues.push(`${at(item)} 一段里有多个分号，改成列表`);
-    if (item.lead === '记住：' && sentences > limits.rememberSentences) issues.push(`${at(item)} 「记住」只写一句`);
-    if (item.lead === 'Java 对照：' && sentences > limits.javaSentences) issues.push(`${at(item)} 「Java 对照」最多 ${limits.javaSentences} 句`);
+    if (!item.inAdmonition && (chars > limits.paragraphChars || sentences > limits.paragraphSentences)) add('paragraph-long', `${at(item)} 段落过长：${chars} 字、${sentences} 句（上限约 ${limits.paragraphChars} 字、${limits.paragraphSentences} 句），拆段或删减`);
+    if (item.inline > limits.inlineCode) add('inline-code', `${at(item)} 行内代码过密：${item.inline} 处（上限 ${limits.inlineCode}），把路径、命令放进代码块或任务卡`);
+    if ((item.text.match(/；/g) ?? []).length > limits.semicolons) add('semicolons', `${at(item)} 一段里有多个分号，改成列表`);
+    if (item.lead === '记住：' && sentences > limits.rememberSentences) add('remember', `${at(item)} 「记住」只写一句`);
+    if (item.lead === 'Java 对照：' && sentences > limits.javaSentences) add('java-sentences', `${at(item)} 「Java 对照」最多 ${limits.javaSentences} 句`);
   }
   const units = items.filter((item) => item.kind !== 'heading' && item.kind !== 'neutral');
   units.forEach((item, i) => {
     if (item.kind !== 'code') return;
     const next = units[i + 1];
-    if (next?.kind === 'code' && next.section === item.section) issues.push(`${at(item)} 两个代码块之间既没有效果也没有解释`);
+    if (next?.kind === 'code' && next.section === item.section) add('code-pair', `${at(item)} 两个代码块之间既没有效果也没有解释`);
     if (!concept(item.section)) return;
     const rest = units.slice(i + 1);
     const stop = rest.findIndex((entry) => entry.kind === 'code' || entry.section !== item.section);
-    if (!(stop < 0 ? rest : rest.slice(0, stop)).some((entry) => entry.kind === 'effect')) issues.push(`${at(item)} 代码块后没有效果（Effect、RunSnippet 或输出块）`);
+    if (!(stop < 0 ? rest : rest.slice(0, stop)).some((entry) => entry.kind === 'effect')) add('code-no-effect', `${at(item)} 代码块后没有效果（Effect、RunSnippet 或输出块）`);
   });
   const sections = [...new Set(items.filter((item) => item.kind === 'heading' && item.depth === 2).map((item) => item.section))];
   for (const section of sections.filter(concept)) {
-    if (!items.some((item) => item.section === section && item.kind === 'effect')) issues.push(`概念节「${section}」没有任何效果`);
+    if (!items.some((item) => item.section === section && item.kind === 'effect')) add('concept-no-effect', `概念节「${section}」没有任何效果`);
   }
   const intro = items.filter((item) => item.section === '这一课解决什么问题');
   if (intro.length) {
     const sentences = intro.filter((item) => item.kind === 'prose' && !/学完你能/.test(item.text)).reduce((sum, item) => sum + sentenceCount(item.text), 0);
-    if (sentences > limits.introSentences) issues.push(`「这一课解决什么问题」${sentences} 句，上限 ${limits.introSentences}`);
-    if (!intro.some((item) => item.kind === 'effect' && item.name === 'Effect')) issues.push('「这一课解决什么问题」缺少「完成后的效果」（Effect）');
+    if (sentences > limits.introSentences) add('intro-sentences', `「这一课解决什么问题」${sentences} 句，上限 ${limits.introSentences}`);
+    if (!intro.some((item) => item.kind === 'effect' && item.name === 'Effect')) add('intro-no-effect', '「这一课解决什么问题」缺少「完成后的效果」（Effect）');
     const index = intro.findIndex((item) => item.kind === 'prose' && /学完你能/.test(item.text));
     const learn = index < 0 ? [] : intro.slice(index + 1).filter((item, i, rest) => item.kind === 'item' && rest.slice(0, i).every((entry) => entry.kind === 'item'));
-    if (learn.length !== limits.learnItems) issues.push(`「学完你能」应为 ${limits.learnItems} 条，现在 ${learn.length} 条`);
+    if (learn.length !== limits.learnItems) add('learn-items', `「学完你能」应为 ${limits.learnItems} 条，现在 ${learn.length} 条`);
   }
-  if (!items.some((item) => item.lead === 'Java 对照：')) issues.push('概念节没有任何「**Java 对照：**」段落');
+  if (!items.some((item) => item.lead === 'Java 对照：')) add('no-java', '概念节没有任何「**Java 对照：**」段落');
   return issues;
 }
 
-function lintLesson(file, { previewV3 = false } = {}) {
+// file 是相对 src/content/docs 的路径；传 text 时不读文件（测试用）。
+export function lintLesson(file, { previewV3 = false, text } = {}) {
   const errors = [];
   const warnings = [];
   const id = path.basename(file).slice(0, 3);
   const hard = difficult.has(id);
   const limit = hard ? 10000 : 8000;
-  const source = readFileSync(path.join(root, file), 'utf8').replace(/\r\n?/g, '\n');
+  const source = (text ?? readFileSync(path.join(root, file), 'utf8')).replace(/\r\n?/g, '\n');
   const body = source.replace(/^---\n[\s\S]*?\n---\n/, '');
   const blocks = [];
   let fence;
@@ -213,16 +218,16 @@ function lintLesson(file, { previewV3 = false } = {}) {
     .filter((match) => !match[1] || Number(match[1]) > Number(id.slice(1))).length;
   if (previews > 3) report(`后续课预告 ${previews} 处，建议不超过 3 处`, true);
 
-  // V3：frontmatter 有 lesson 的课启用页首与可读性规则；其他课本阶段不检查（--preview-v3 可试跑）。
+  // V3：frontmatter 有 lesson 的课启用页首与可读性规则；其他课本阶段不检查（--preview-v3 可试跑，只报 warning）。
   const { lesson } = frontmatter(source);
   const usesV3 = imported.components.some((item) => V3_COMPONENTS.has(item.component));
   if (lesson) {
     for (const key of ['time', 'prereq', 'env', 'verified']) if (!lesson[key]) report(`frontmatter lesson 缺少 ${key}`);
     if (lesson.verified && !['all', 'partial'].includes(lesson.verified)) report('frontmatter lesson.verified 只能是 all 或 partial');
-    if (OLD_HEADER.test(body)) report('已有 frontmatter lesson，仍保留旧页首引用块', true);
-  } else if (usesV3) report('使用了 V3 组件，但缺少 frontmatter lesson', true);
+    if (OLD_HEADER.test(body)) report('已有 frontmatter lesson，仍保留旧页首引用块', !V3_ERROR_RULES.has('old-header'));
+  } else if (usesV3) report('使用了 V3 组件，但缺少 frontmatter lesson', !V3_ERROR_RULES.has('missing-lesson'));
   const v3 = Boolean(lesson);
-  if (v3 || previewV3) for (const issue of readabilityIssues(source)) report(issue, true);
+  if (v3 || previewV3) for (const issue of readabilityIssues(source)) report(issue.message, !(v3 && issue.level === 'error'));
   return { id, count, limit, blocks: blocks.length, errors, warnings, v3 };
 }
 

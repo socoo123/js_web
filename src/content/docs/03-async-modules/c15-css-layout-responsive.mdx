@@ -68,7 +68,7 @@ border-box 让 width 就等于外框，排版时不用心算，所以本课样�
 
 <CodeExcerpt snippetId="c15-css" />
 
-<Effect kind="console" title="360px 宽，在 Elements 选中第一张卡片后输入">
+<Effect kind="console" title="360px，Elements 选中第一张卡片">
 
 ```text
 > getComputedStyle($0).boxSizing
@@ -128,15 +128,18 @@ auto-fit 和 auto-fill 会按可用空间自动生成轨道，适合另一种需
 }
 ```
 
-<Effect kind="console" title="设备模式切到三种宽度，选中 #list 后输入 getComputedStyle($0).gridTemplateColumns">
+<Effect kind="console" title="设备模式切三种宽度，选中 #list">
 
 ```text
+> getComputedStyle($0).gridTemplateColumns
 360px  → '328px'
 768px  → '360px 360px'
 1280px → '284px 284px 284px 284px'
 ```
 
 </Effect>
+
+[设备模式](https://developer.chrome.com/docs/devtools/device-mode)是 DevTools 里模拟手机、平板宽度的工具栏，点 DevTools 左上角的「切换设备工具栏」图标打开。
 
 rem 是相对根字号的单位，这里 1rem 是 16px，所以两个断点是 672px 和 1120px。1280px 同时满足两条查询，后写的同优先级声明胜出。媒体查询不增加选择器权重，仍按 C02 的层叠规则比较。
 

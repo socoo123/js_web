@@ -3,7 +3,7 @@
   "shots": {
     "c03/after": {
       "checkpoint": "C03",
-      "digest": "22aa1db88c54b1d67f7003bd793f35d5f2cd54261f7ca14d1937c1f06f3c7776",
+      "digest": "1bf4af3645acc1b68cbda82cd2e1f145efc12538fc72af807324d5a7ea53613c",
       "capturedAt": "2026-11-06",
       "environment": {
         "playwright": "1.64.1",
@@ -12,6 +12,17 @@
         "browser": "Chromium 156.0.8078.4"
       },
       "images": [
+        {
+          "file": "c03/after-360-light.webp",
+          "width": 360,
+          "theme": "light",
+          "pixels": [
+            720,
+            944
+          ],
+          "bytes": 15184,
+          "sha256": "8971dba2dbcd60347fdc5f4dde1961c872248a009d6c35fd79a5b72d1722fa33"
+        },
         {
           "file": "c03/after-768-light.webp",
           "width": 768,
@@ -27,7 +38,7 @@
     },
     "c03/before": {
       "checkpoint": "C02",
-      "digest": "54a348a246ec2686129b16d32415c66305b9d43bc0073f4b93f531eb1812b8fc",
+      "digest": "f021245cb022f7eaaf61653d796d6fabd9ebf2fa20c07af0adfc9962451f4b31",
       "capturedAt": "2026-11-06",
       "environment": {
         "playwright": "1.64.1",
@@ -36,6 +47,17 @@
         "browser": "Chromium 156.0.8078.4"
       },
       "images": [
+        {
+          "file": "c03/before-360-light.webp",
+          "width": 360,
+          "theme": "light",
+          "pixels": [
+            720,
+            944
+          ],
+          "bytes": 14736,
+          "sha256": "634b457e6fbef455cb03404decedfa1c5d5cb09e4acd7004aeacfb7ead32ba09"
+        },
         {
           "file": "c03/before-768-light.webp",
           "width": 768,
@@ -51,7 +73,7 @@
     },
     "c15/focus": {
       "checkpoint": "C15",
-      "digest": "1beb4798555b0a4a7a7216fbcce0a2c1707189cc378407bf5589c3a4e43e479f",
+      "digest": "624b3c2f75af2e5a5e93859019ab972ea8110891bbc431ce8ef1ab17636a7230",
       "capturedAt": "2026-11-06",
       "environment": {
         "playwright": "1.64.1",
@@ -60,6 +82,17 @@
         "browser": "Chromium 156.0.8078.4"
       },
       "images": [
+        {
+          "file": "c15/focus-360-light.webp",
+          "width": 360,
+          "theme": "light",
+          "pixels": [
+            720,
+            1888
+          ],
+          "bytes": 33592,
+          "sha256": "3ed3115342de59604b705befeead85ca65537d62747f2907f968c5041a839572"
+        },
         {
           "file": "c15/focus-768-light.webp",
           "width": 768,
