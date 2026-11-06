@@ -30,9 +30,12 @@
     "test:lab-delivery": "node scripts/verify-delivery-lab.mjs"
   },
   "dependencies": {
-    "@astrojs/starlight": "0.42.6",
     "@astrojs/markdown-remark": "7.3.2",
-    "astro": "7.3.8"
+    "@astrojs/react": "7.1.4",
+    "@astrojs/starlight": "0.42.6",
+    "astro": "7.3.8",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "overrides": {
     "postcss-nested": {
@@ -41,9 +44,11 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "typescript": "6.0.3",
-    "unified": "11.0.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "remark-mdx": "3.1.1",
     "remark-parse": "11.0.0",
-    "remark-mdx": "3.1.1"
+    "typescript": "6.0.3",
+    "unified": "11.0.5"
   }
 }

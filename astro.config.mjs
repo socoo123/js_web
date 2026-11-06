@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import react from '@astrojs/react';
 import { existsSync } from 'node:fs';
 
 const courseSections = [
@@ -51,5 +52,6 @@ export default defineConfig({
         { label: '速查手册', items: [{ autogenerate: { directory: 'reference' } }] },
       ],
     }),
+    react(),
   ],
 });
