@@ -298,7 +298,7 @@
     },
     "l3/goal": {
       "checkpoint": "C36",
-      "digest": "6d593c555873fd55144ec8a4a4fe0b1082bc1d645b1883a8c864bd5a7ae0c379",
+      "digest": "edd9511d126ca8e6601c72b1cf3fb8cbd03dc13d743787ba94665669e979d75e",
       "capturedAt": "2026-11-06",
       "environment": {
         "playwright": "1.64.1",
@@ -315,8 +315,8 @@
             720,
             1520
           ],
-          "bytes": 28262,
-          "sha256": "8861f93320e8f2763cecd9861e59015f8fe16bb047162ca0f4cd343343db42c1"
+          "bytes": 28386,
+          "sha256": "946a46da7f524bcf3c08f050cb55958c1d69f899235fa12ffa5e41f911a1e368"
         },
         {
           "file": "l3/goal-1280-light.webp",
@@ -326,8 +326,8 @@
             1280,
             720
           ],
-          "bytes": 24266,
-          "sha256": "005ef609afbd63bb85acfeec00a3a00a2ce0bf8502c2a3189f71a9d5c4640f3d"
+          "bytes": 24348,
+          "sha256": "fbe473009bd4b5d39a04fbe452667da0ba844c7ff74224fe945e0addab05ee73"
         }
       ]
     },
