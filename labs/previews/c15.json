@@ -89,10 +89,10 @@
         { "do": "waitText", "selector": "#stock-error", "text": "请输入库存，空白无效" },
         { "do": "mouseAway" }
       ],
-      "viewports": [{ "width": 768, "height": 1000 }],
+      "viewports": [{ "width": 360, "height": 900, "scale": 2 }, { "width": 768, "height": 1000 }],
       "themes": ["light"],
       "target": "main",
-      "alt": "768px 宽的库存页只显示 P004，编辑区里的库存输入框带有 3px 蓝色焦点外框，下方显示「请输入库存，空白无效」。",
+      "alt": "库存页只显示 P004，编辑区里的库存输入框带有 3px 蓝色焦点外框，下方显示「请输入库存，空白无效」。",
       "caption": "键盘保存空白：焦点回到库存输入框，错误显示在预留的位置"
     }
   ]

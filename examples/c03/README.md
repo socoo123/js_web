@@ -83,11 +83,16 @@ V3 正文直接使用的文件：
 
 - 环境：macOS arm64、Node 24.22.0、Playwright 1.64.1 / Chromium 156.0.8078.4（headless）。
 - `npm run examples -- c03`：16/16 通过，含新增 4 个文件。正文 3 个 js 代码块与 number-predict、convert-predict、compare 逐字一致；两个可运行片段 types、defaults 不含 Node API。
-- 课程 lint（V3 规则）：0 error、0 warning；正文 4672/8000 字符、16 个代码块，段落最长 99 字。
+- 课程 lint（V3 规则，结构类规则为 error）：0 error、0 warning；正文 4804/8000 字符（集成后组件里的文字也计入）、16 个代码块，段落最长 99 字。
 - 正文跟做：从 C02 参考快照恢复到临时目录，只按正文加入第 3 节 `parseStock`、用参考答案两个函数替换旧 `restockProduct`。
   - 改前 `node tools/lab.mjs check C03` 失败（exit 1），页面 12 补 3 显示「库存 123 件」。
   - 按调试第 2 步在 `restockProduct` 的 return 行（第 8 行）设断点：`typeof text` 为 string、`text` 为 "3"、`product.stock` 为数字 12，与正文一致。
   - 改后检查通过（21 条）；页面 12 补 3 得 15，库存价值 478800 → 598500 分；空白、3件、-1、3.5 分别显示两种 RangeError 原因，库存保持 15，无页面异常。
-- 效果截图 `c03/before`、`c03/after` 由 `npm run capture:previews`（建议脚本）从 C02、C03 参考快照拍摄，定义见 `labs/previews/c03.json`。
+- 效果截图 `c03/before`、`c03/after` 由 `npm run capture:previews` 从 C02、C03 参考快照拍摄（360 与 768 两种宽度，窄屏读者默认看到 360），定义见 `labs/previews/c03.json`。
 - Java 对照核对（Java 21.0.2 实际执行临时文件）：`5 / 2` 得 2；`Objects.requireNonNullElse(0, 12)` 得 0、传 null 得 12；`Integer.parseInt("3件")` 抛 NumberFormatException；两个内容相同的对象 `==` 为 false；字符串 `equals` 比内容为 true。
+- 集成构建上的页面检查（严格静态服务 `dist`，headless Chromium）：
+  - 页首显示「第 1 周 · 第 2 天」、L1 链接和 frontmatter 四项；没有旧页首。
+  - 2 个「先猜一猜」默认收起，点击后显示答案；4 个 Console 面板与 `.expected.txt` 逐行一致。
+  - `types`、`defaults` 在页面里运行，7 行、4 行全部与已验证输出一致；编辑后多打印一行会标出 1 行不同，重置恢复。
+  - 360/768/1280px × 亮/暗无横向溢出、无页面异常。禁用 JavaScript 时页首完整，答案仍能展开，可运行片段隐藏按钮、显示源码和已验证输出。
 - 未运行：DevTools 界面手动点击（断点与 Scope 经 DevTools 协议读取）、Firefox、Safari、Windows。
