@@ -545,3 +545,5 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 ## V3 阶段 1 的依赖与组件核查（2026-11-06）
 
 - 网站 React islands：npm registry 元数据与 [Astro React 集成](https://docs.astro.build/en/guides/integrations-guide/react/)核对，`@astrojs/react` **7.1.4**（v7 对应 Astro 7，Oxc 编译 JSX；peer 为 React 17–19，`oxc-transform-react` 可选）、`react`/`react-dom` **19.3.1**（与 `labs/inventory` 同版本）、`@types/react`/`@types/react-dom` **19.3.0**。集成依赖 vite ^8.3.5，Astro 7.3.8 接受 ^8.3.1，根锁去重为 vite 8.3.6。按官方说明在 `astro.config.mjs` 加 `react()`，tsconfig 加 `jsx: react-jsx`。安装后 `npm run check` 零诊断、`npm run build` 62 页通过；`npm audit` 报告的 undici 漏洞在本次安装前已存在，未在本批处理。
+- C15 改写：[Chrome DevTools 设备模式](https://developer.chrome.com/docs/devtools/device-mode)用于第 3 节首次出现「设备模式」时的白话说明；正文只写工具栏按钮，不写快捷键（官方页未核实到固定快捷键）。
+- 课页 JS 预算：`@astrojs/react` 岛使用 `client:visible`（[Astro 岛指令](https://docs.astro.build/en/reference/directives-reference/#client-directives)），不用岛的页面不加载 React；动态标签不能带 client 指令，演示组件用显式映射。
