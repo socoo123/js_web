@@ -1,0 +1,422 @@
+---
+// 五个 Lab 的卡片：效果缩略图（无截图时用示意图）、课程范围、进度环与继续按钮。
+// 进度环与「下一课」只在读到本地进度后显示；禁用 JS 时卡片是指向 Lab 页的静态入口。
+import { Image } from 'astro:assets';
+import catalog from '../../labs/catalog.json';
+import { getShot } from '../lib/previews.mjs';
+import LessonIndexData from './LessonIndexData.astro';
+
+interface Props {
+  /** map：首页路线地图，五张紧凑卡片按顺序连起来；grid：Lab 总览的卡片网格。 */
+  variant?: 'map' | 'grid';
+  /** 覆盖卡片说明文字（键为 L1–L5），默认用 catalog 的 Lab 描述。 */
+  outcomes?: Record<string, string>;
+  headingLevel?: 2 | 3;
+}
+
+const { variant = 'grid', outcomes = {}, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const base = import.meta.env.BASE_URL;
+const sizes = variant === 'map' ? '(min-width: 72rem) 14rem, (min-width: 40rem) 45vw, 100vw' : '(min-width: 64rem) 20rem, (min-width: 40rem) 45vw, 100vw';
+
+const cards = catalog.labs.map((lab, index) => {
+  const rows = catalog.lessons.filter((row) => row.labId === lab.labId);
+  if (!rows.length) throw new Error(`${lab.labId} 缺少课程`);
+  const weeks = [...new Set(rows.map((row) => Math.ceil(row.day / 6)))];
+  const shot = getShot(`${lab.labId.toLowerCase()}/goal`);
+  const pick = (theme: 'light' | 'dark') => shot?.images.filter((image) => image.theme === theme).sort((a, b) => b.width - a.width)[0];
+  const light = pick('light');
+  const dark = pick('dark');
+  return {
+    lab,
+    step: index + 1,
+    ids: rows.map((row) => row.lessonId),
+    range: `${rows[0].lessonId}–${rows.at(-1)!.lessonId}`,
+    weeks: weeks.length > 1 ? `第 ${weeks[0]}–${weeks.at(-1)} 周` : `第 ${weeks[0]} 周`,
+    start: rows[0].startCheckpoint,
+    first: rows[0],
+    href: `${base}labs/${lab.labId.toLowerCase()}/`,
+    shot,
+    images: light && dark ? [{ image: dark, className: 'light:sl-hidden' }, { image: light, className: 'dark:sl-hidden' }] : [light ?? dark].filter((image) => image !== undefined).map((image) => ({ image, className: '' })),
+  };
+});
+---
+
+<ol class:list={['lab-cards', 'not-content', `lab-cards--${variant}`]} aria-label="五个 Lab">
+  {cards.map((card) => (
+    <li class="lab-card" data-lab-card={card.lab.labId} data-lab-lessons={card.ids.join(' ')}>
+      <div class="lab-card__thumb" data-art={card.lab.labId}>
+        {card.shot && card.images.length > 0 ? (
+          card.images.map(({ image, className }) => (
+            <Image src={image.src} alt={card.shot!.alt} widths={[480, 960]} sizes={sizes} class={className} loading="lazy" decoding="async" />
+          ))
+        ) : (
+          <div class="lab-art" aria-hidden="true">
+            <div class="lab-art__bar"><i></i><i></i><i></i><span>{card.lab.labId.toLowerCase()} · inventory</span></div>
+            <div class="lab-art__body">
+              {card.lab.labId === 'L1' && <svg viewBox="0 0 48 48"><path d="M17 8c-5 0-6 3-6 7v4c0 3-2 5-5 5 3 0 5 2 5 5v4c0 4 1 7 6 7M31 8c5 0 6 3 6 7v4c0 3 2 5 5 5-3 0-5 2-5 5v4c0 4-1 7-6 7" /><path d="M20 24h8" /></svg>}
+              {card.lab.labId === 'L2' && <svg viewBox="0 0 48 48"><rect x="6" y="9" width="16" height="13" rx="3" /><rect x="26" y="9" width="16" height="13" rx="3" /><rect x="6" y="26" width="16" height="13" rx="3" /><rect x="26" y="26" width="16" height="13" rx="3" /></svg>}
+              {card.lab.labId === 'L3' && <svg viewBox="0 0 48 48"><ellipse cx="24" cy="24" rx="19" ry="7.5" /><ellipse cx="24" cy="24" rx="19" ry="7.5" transform="rotate(60 24 24)" /><ellipse cx="24" cy="24" rx="19" ry="7.5" transform="rotate(120 24 24)" /><circle cx="24" cy="24" r="3" /></svg>}
+              {card.lab.labId === 'L4' && <svg viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="8" rx="2.5" /><rect x="6" y="20" width="16" height="20" rx="2.5" /><path d="M27 22h15M27 29h15M27 36h9" /></svg>}
+              {card.lab.labId === 'L5' && <svg viewBox="0 0 48 48"><path d="M24 30V8M15 17l9-9 9 9" /><path d="M8 28v8a4 4 0 0 0 4 4h24a4 4 0 0 0 4-4v-8" /></svg>}
+              <span class="lab-art__lines"><b></b><b></b><b></b></span>
+            </div>
+          </div>
+        )}
+        <span class="lab-card__step" aria-hidden="true">{card.step}</span>
+      </div>
+      <div class="lab-card__body">
+        <p class="lab-card__meta">
+          <span class="lab-card__id">{card.lab.labId}</span>
+          <span>{card.range} · {card.ids.length} 课</span>
+        </p>
+        <Heading class="lab-card__title">{card.lab.title}</Heading>
+        <p class="lab-card__desc">{outcomes[card.lab.labId] ?? card.lab.description}</p>
+        <p class="lab-card__facts">4 周路线{card.weeks} · 补课起点 {card.start}</p>
+        <div class="lab-card__foot">
+          <a class="js-button lab-card__action" data-variant="primary" href={card.href}>
+            <span data-lab-action>进入</span> {card.lab.labId}<span class="js-visually-hidden">：{card.lab.title}</span>
+          </a>
+          <span class="lab-ring" data-lab-ring role="img" aria-label="" hidden>
+            <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="lab-ring__track" cx="18" cy="18" r="15" pathLength="100" /><circle class="lab-ring__value" cx="18" cy="18" r="15" pathLength="100" /></svg>
+            <span class="lab-ring__text" data-lab-ring-text aria-hidden="true"></span>
+          </span>
+        </div>
+        <p class="lab-card__next" data-lab-next hidden>下一课：<a href={`${base}${card.first.slug}/`}>{card.first.lessonId} {card.first.title}</a></p>
+      </div>
+    </li>
+  ))}
+</ol>
+<LessonIndexData />
+
+<script>
+  import '../scripts/progress-marks.mjs';
+</script>
+
+<style>
+  .lab-cards {
+    display: grid;
+    gap: 1rem;
+    margin: 1.5rem 0 2rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lab-cards--grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr));
+  }
+
+  .lab-cards--map {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    counter-reset: lab;
+  }
+
+  @media (min-width: 72rem) {
+    .lab-cards--map {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* 五张卡排成一行时，用连接线把 L1→L5 画成一条路线 */
+    .lab-cards--map .lab-card:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 4.4rem;
+      inset-inline-end: -1.25rem;
+      width: 1.25rem;
+      height: 2px;
+      background: repeating-linear-gradient(90deg, var(--js-color-primary) 0 4px, transparent 4px 8px);
+      opacity: 0.7;
+    }
+  }
+
+  .lab-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: 1px solid var(--js-border);
+    border-radius: var(--js-radius);
+    background: var(--js-surface-raised);
+    box-shadow: var(--js-shadow);
+    transition: border-color var(--js-motion) var(--js-ease), transform var(--js-motion) var(--js-ease);
+  }
+
+  .lab-card:hover {
+    border-color: color-mix(in srgb, var(--js-color-primary) 50%, var(--js-border));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lab-card:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .lab-card[data-lab-state='active'] {
+    border-color: color-mix(in srgb, var(--js-color-amber-stroke) 60%, var(--js-border));
+  }
+
+  .lab-card__thumb {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: calc(var(--js-radius) - 1px) calc(var(--js-radius) - 1px) 0 0;
+    border-bottom: 1px solid var(--js-border);
+    background: var(--js-surface);
+  }
+
+  .lab-card__thumb :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top left;
+  }
+
+  .lab-card__step {
+    position: absolute;
+    top: 0.6rem;
+    inset-inline-start: 0.6rem;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--js-color-primary-solid);
+    color: var(--js-color-on-primary);
+    font-size: 0.875rem;
+    font-weight: 800;
+    box-shadow: 0 0 0 3px var(--js-surface-raised);
+  }
+
+  /* 无截图时的示意图：浏览器外框 + 每个 Lab 的图标 */
+  .lab-art {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background:
+      radial-gradient(90% 80% at 85% 100%, var(--js-color-primary-soft), transparent 70%),
+      radial-gradient(70% 60% at 0% 0%, var(--js-color-amber-soft), transparent 70%),
+      var(--js-surface);
+  }
+
+  .lab-art__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.45rem 0.6rem 0.45rem 2.9rem;
+    background: var(--js-frame-bar);
+    border-bottom: 1px solid var(--js-frame-border);
+  }
+
+  .lab-art__bar i {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--js-dot-close);
+  }
+
+  .lab-art__bar i:nth-child(2) {
+    background: var(--js-dot-min);
+  }
+
+  .lab-art__bar i:nth-child(3) {
+    background: var(--js-dot-max);
+  }
+
+  .lab-art__bar span {
+    flex: 1;
+    min-width: 0;
+    margin-inline-start: 0.4rem;
+    padding: 0.05rem 0.5rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--js-frame-url-bg);
+    color: var(--js-frame-url-fg);
+    font-family: var(--sl-font-mono);
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .lab-art__body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .lab-art__body svg {
+    width: clamp(2.75rem, 30%, 4.25rem);
+    height: auto;
+    fill: none;
+    stroke: var(--js-color-primary);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .lab-art__lines {
+    display: grid;
+    gap: 0.4rem;
+    width: 38%;
+  }
+
+  .lab-art__lines b {
+    height: 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--js-color-muted) 30%, transparent);
+  }
+
+  .lab-art__lines b:first-child {
+    width: 80%;
+    background: var(--js-color-amber-stroke);
+    opacity: 0.85;
+  }
+
+  .lab-art__lines b:last-child {
+    width: 60%;
+  }
+
+  .lab-card__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .lab-card__body p {
+    margin: 0;
+  }
+
+  .lab-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--js-color-muted);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lab-card__id {
+    padding: 0 0.45rem;
+    border-radius: 999px;
+    background: var(--js-color-amber-stroke);
+    color: #1c1300;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1.45rem;
+  }
+
+  .lab-card__title {
+    margin: 0;
+    color: var(--js-color-heading);
+    font-size: 1.125rem;
+    font-weight: 750;
+    line-height: 1.4;
+  }
+
+  .lab-card__desc {
+    color: var(--js-color-text);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+
+  .lab-card__facts {
+    color: var(--js-color-muted);
+    font-size: 0.8125rem;
+  }
+
+  .lab-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+  }
+
+  .lab-card__action {
+    min-height: 2.5rem;
+    padding-block: 0.4rem;
+  }
+
+  .lab-ring {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .lab-ring svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .lab-ring circle {
+    fill: none;
+    stroke-width: 3.5;
+  }
+
+  .lab-ring__track {
+    stroke: color-mix(in srgb, var(--js-color-muted) 25%, transparent);
+  }
+
+  .lab-ring__value {
+    stroke: var(--js-color-primary);
+    stroke-linecap: round;
+    stroke-dasharray: calc(var(--ring, 0) * 100) 100;
+    transition: stroke-dasharray var(--js-motion) var(--js-ease);
+  }
+
+  .lab-card[data-lab-state='done'] .lab-ring__value {
+    stroke: var(--js-color-ok);
+  }
+
+  /* 0 课时不画圆头线段，避免出现一个点 */
+  .lab-card[data-lab-state='new'] .lab-ring__value {
+    stroke: transparent;
+  }
+
+  .lab-ring__text {
+    position: relative;
+    color: var(--js-color-heading);
+    font-size: 0.6875rem;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lab-card__next {
+    color: var(--js-color-muted);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+
+  .lab-card__next a {
+    color: var(--js-color-primary);
+    font-weight: 600;
+  }
+
+  .lab-cards--map .lab-card__desc {
+    font-size: 0.875rem;
+  }
+
+  @media (min-width: 72rem) {
+    .lab-cards--map .lab-card__title {
+      font-size: 1.0625rem;
+    }
+
+    .lab-cards--map .lab-card__body {
+      padding-inline: 0.85rem;
+    }
+  }
+</style>

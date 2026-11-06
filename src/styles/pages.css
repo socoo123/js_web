@@ -1,0 +1,482 @@
+/* 页面级样式：首页分区、学习路线时间线、速查页、404，以及进度状态文字。 */
+
+/* ---------- 进度状态（learning-progress.mjs 在 data-lesson-status 上切换） ---------- */
+
+.lesson-completed {
+  color: var(--js-color-ok);
+  font-weight: 650;
+}
+
+/* ---------- 首页 ---------- */
+
+/* splash 页没有侧栏：正文段落仍按 46rem 排，分区组件用满 72rem 画布 */
+:root:not([data-has-sidebar]) .sl-markdown-content > :is(.home-steps, .pace-cards, .home-links, .lab-cards) {
+  max-width: none;
+}
+
+.home-lead {
+  max-width: var(--js-prose-width);
+  color: var(--js-color-text);
+  font-size: 1.0625rem;
+}
+
+/* 「每课怎么学」三步：Markdown 有序列表外包一层 .home-steps，列表文字保持可搜索、无 JS 可读 */
+.sl-markdown-content .home-steps > ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: how-step;
+}
+
+.sl-markdown-content .home-steps > ol > li {
+  --step-accent: var(--js-color-primary);
+  --step-soft: var(--js-color-primary-soft);
+  --step-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='3' width='16' height='18' rx='3'/%3E%3Cpath d='M8 8h8M8 12h8M8 16h5'/%3E%3C/svg%3E");
+  position: relative;
+  margin: 0;
+  padding: 3.6rem 1.1rem 1.1rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+  counter-increment: how-step;
+  line-height: 1.7;
+}
+
+.sl-markdown-content .home-steps > ol > li:nth-child(2) {
+  --step-accent: var(--js-color-amber);
+  --step-soft: var(--js-color-amber-soft);
+  --step-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9.5'/%3E%3Cpath d='M9.2 9.3a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.6-2.8 2.6M12 17h.01'/%3E%3C/svg%3E");
+}
+
+.sl-markdown-content .home-steps > ol > li:nth-child(3) {
+  --step-accent: var(--js-color-ok);
+  --step-soft: var(--js-color-ok-soft);
+  --step-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9.5'/%3E%3Cpath d='m8 12.5 2.8 2.8L16.5 9.5'/%3E%3C/svg%3E");
+}
+
+.sl-markdown-content .home-steps > ol > li::before {
+  content: counter(how-step);
+  position: absolute;
+  top: 1rem;
+  inset-inline-start: 1.1rem;
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  background: var(--step-soft);
+  color: var(--step-accent);
+  font-weight: 800;
+}
+
+.sl-markdown-content .home-steps > ol > li::after {
+  content: '';
+  position: absolute;
+  top: 1.15rem;
+  inset-inline-end: 1.1rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--step-accent);
+  opacity: 0.85;
+  -webkit-mask: var(--step-icon) center / contain no-repeat;
+  mask: var(--step-icon) center / contain no-repeat;
+}
+
+.sl-markdown-content .home-steps > ol > li > strong:first-child {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--js-color-heading);
+  font-size: 1.0625rem;
+}
+
+/* 4 周 / 8 周两种节奏 */
+.sl-markdown-content .pace-cards > ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sl-markdown-content .pace-cards > ul > li {
+  position: relative;
+  margin: 0;
+  padding: 1.1rem 1.15rem 1.15rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+  line-height: 1.7;
+}
+
+.sl-markdown-content .pace-cards > ul > li > strong:first-child {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--js-color-heading);
+  font-size: 1.125rem;
+}
+
+/* 节奏条：4 周 24 天两课一格，8 周 48 天一课一格 */
+.sl-markdown-content .pace-cards > ul > li::after {
+  content: '';
+  display: block;
+  height: 0.5rem;
+  margin-top: 0.9rem;
+  border-radius: 999px;
+  background: repeating-linear-gradient(90deg, var(--js-color-primary) 0 calc(25% - 3px), transparent calc(25% - 3px) 25%);
+  opacity: 0.75;
+}
+
+.sl-markdown-content .pace-cards > ul > li:nth-child(2)::after {
+  background: repeating-linear-gradient(90deg, var(--js-color-amber-stroke) 0 calc(12.5% - 3px), transparent calc(12.5% - 3px) 12.5%);
+}
+
+/* 速查入口卡片 */
+.sl-markdown-content .home-links > ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sl-markdown-content .home-links > ul > li {
+  position: relative;
+  margin: 0;
+  padding: 0.85rem 1rem 0.9rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+  transition: border-color var(--js-motion) var(--js-ease), background-color var(--js-motion) var(--js-ease);
+}
+
+.sl-markdown-content .home-links > ul > li:hover {
+  border-color: color-mix(in srgb, var(--js-color-primary) 55%, var(--js-border));
+  background: color-mix(in srgb, var(--js-color-primary) 6%, var(--js-surface-raised));
+}
+
+.sl-markdown-content .home-links > ul > li > a {
+  color: var(--js-color-heading);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* 整张卡可点：链接的伪元素铺满卡片，焦点轮廓也画在卡片上 */
+.sl-markdown-content .home-links > ul > li > a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.sl-markdown-content .home-links > ul > li:has(> a:focus-visible) {
+  outline: var(--js-focus-ring);
+  outline-offset: 2px;
+}
+
+.sl-markdown-content .home-links > ul > li > a:focus-visible {
+  outline: none;
+}
+
+.sl-markdown-content .home-links > ul > li > span {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--js-color-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* ---------- 学习路线：按周时间线 ---------- */
+
+.roadmap-week-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+  margin: 0.75rem 0 0;
+  color: var(--js-color-muted);
+  font-size: 0.875rem;
+}
+
+.roadmap-week-meta [data-done-count] {
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--js-color-muted) 14%, transparent);
+  color: var(--js-color-text);
+  font-weight: 650;
+  line-height: 1.6rem;
+}
+
+.roadmap-week-meta [data-done-count][data-complete] {
+  background: var(--js-color-ok-soft);
+  color: var(--js-color-ok);
+}
+
+.roadmap-timeline {
+  position: relative;
+  max-width: var(--js-prose-width);
+  margin: 1rem 0 0;
+  padding: 0 0 0 1.75rem;
+  list-style: none;
+}
+
+.roadmap-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0.6rem;
+  bottom: 0.6rem;
+  inset-inline-start: 0.5rem;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--js-border);
+}
+
+.roadmap-timeline > li {
+  position: relative;
+  margin: 0;
+}
+
+.roadmap-timeline > li + li {
+  margin-top: 1rem;
+}
+
+/* 学习日节点 */
+.roadmap-day::before {
+  content: '';
+  position: absolute;
+  top: 0.35rem;
+  inset-inline-start: calc(-1.75rem + 0.5rem - 6px);
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--js-color-primary);
+  border-radius: 50%;
+  background: var(--sl-color-bg);
+}
+
+.roadmap-day:has([data-lesson-status]):not(:has([data-lesson-status]:not(.lesson-completed)))::before {
+  border-color: var(--js-color-ok);
+  background: var(--js-color-ok)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center / 70% no-repeat;
+}
+
+.roadmap-day__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.75rem;
+  margin: 0 0 0.5rem;
+}
+
+.roadmap-day__label strong {
+  color: var(--js-color-heading);
+  font-size: 0.9375rem;
+  font-weight: 750;
+}
+
+.roadmap-day__label span {
+  color: var(--js-color-muted);
+  font-size: 0.8125rem;
+}
+
+.roadmap-lessons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roadmap-lesson {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.7rem 0.9rem 0.75rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+  transition: border-color var(--js-motion) var(--js-ease);
+}
+
+.roadmap-lesson:hover {
+  border-color: color-mix(in srgb, var(--js-color-primary) 50%, var(--js-border));
+}
+
+.roadmap-lesson:has(.lesson-completed) {
+  border-color: color-mix(in srgb, var(--js-color-ok) 40%, var(--js-border));
+}
+
+.roadmap-lesson > a {
+  color: var(--js-color-heading);
+  font-weight: 650;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.roadmap-lesson > a:hover {
+  color: var(--js-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.roadmap-lesson__id {
+  margin-inline-end: 0.3rem;
+  color: var(--js-color-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.roadmap-lesson__state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--js-color-muted);
+  font-size: 0.8125rem;
+}
+
+.roadmap-lesson__state [data-lesson-status]:not(.lesson-completed) {
+  color: var(--js-color-muted);
+}
+
+/* 已完成的课：卡片右上角加勾选图标，状态文字同时变为「已完成」 */
+.roadmap-lesson:has(.lesson-completed)::after {
+  content: '';
+  position: absolute;
+  top: 0.7rem;
+  inset-inline-end: 0.75rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  background: var(--js-color-ok);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m8 12.5 2.8 2.8L16.5 9.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m8 12.5 2.8 2.8L16.5 9.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.roadmap-lesson:has(.lesson-completed) > a {
+  padding-inline-end: 1.5rem;
+}
+
+.roadmap-lab-chip {
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--js-color-amber-soft);
+  color: var(--js-color-amber);
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.4rem;
+}
+
+/* Lab 起点里程碑 */
+.roadmap-milestone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px dashed color-mix(in srgb, var(--js-color-amber-stroke) 60%, var(--js-border));
+  border-radius: var(--js-radius);
+  background: var(--js-color-amber-soft);
+  font-size: 0.9375rem;
+}
+
+.roadmap-milestone::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  inset-inline-start: calc(-1.75rem + 0.5rem - 8px);
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  border-radius: 5px;
+  background: var(--js-color-amber-stroke);
+  transform: rotate(45deg) scale(0.8);
+}
+
+.roadmap-milestone .roadmap-lab-chip {
+  background: var(--js-color-amber-stroke);
+  color: #1c1300;
+}
+
+.roadmap-milestone a {
+  color: var(--js-color-heading);
+  font-weight: 700;
+}
+
+.roadmap-milestone span:last-child {
+  color: var(--js-color-muted);
+  font-size: 0.8125rem;
+}
+
+/* ---------- 速查页：表格占满正文宽，窄屏仍在表格内横向滚动 ---------- */
+
+@media (min-width: 50rem) {
+  html:has([data-page-kind='reference']) .sl-markdown-content > table {
+    display: table;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+html:has([data-page-kind='reference']) .sl-markdown-content td:first-child {
+  color: var(--js-color-heading);
+  font-weight: 600;
+}
+
+/* ---------- 404 ---------- */
+
+.not-found-art {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+  color: var(--js-color-primary);
+  font-size: clamp(3.5rem, 2.5rem + 5vw, 5.5rem);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.not-found-art svg {
+  width: 0.9em;
+  height: 0.9em;
+  fill: none;
+  stroke: var(--js-color-amber-stroke);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html:has([data-page-kind='not-found']) .sl-markdown-content > p:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  color: transparent;
+  font-size: 0;
+}
+
+html:has([data-page-kind='not-found']) .sl-markdown-content > p:last-child > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--js-color-primary) 45%, var(--js-border));
+  border-radius: 10px;
+  color: var(--js-color-primary);
+  font-size: 1rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+html:has([data-page-kind='not-found']) .sl-markdown-content > p:last-child > a:first-child {
+  border-color: transparent;
+  background: var(--js-color-primary-solid);
+  color: var(--js-color-on-primary);
+}

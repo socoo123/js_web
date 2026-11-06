@@ -1,0 +1,91 @@
+---
+// 「继续上次学习」：读本地进度后显示首个未完成课与所属 Lab；禁用 JS 或存储不可用时保持隐藏。
+import LessonIndexData from './LessonIndexData.astro';
+---
+
+<section class="continue-card" data-continue hidden aria-labelledby="continue-title" data-pagefind-ignore>
+  <svg class="continue-card__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v16M5 5h11l-2 4 2 4H5" /></svg>
+  <div class="continue-card__body">
+    <p class="continue-card__title" id="continue-title">继续上次学习</p>
+    <p class="continue-card__kicker" data-continue-kicker></p>
+    <a class="continue-card__lesson" data-continue-lesson href={`${import.meta.env.BASE_URL}01-history-web/c01-story-ecosystem/`}>C01</a>
+    <p class="continue-card__lab">所属 <a data-continue-lab href={`${import.meta.env.BASE_URL}labs/l1/`}>L1</a></p>
+  </div>
+</section>
+<LessonIndexData />
+
+<script>
+  import '../scripts/progress-marks.mjs';
+</script>
+
+<style>
+  .continue-card {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    max-width: 30rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--js-color-primary) 35%, var(--js-border));
+    border-radius: var(--js-radius);
+    background: var(--js-color-primary-soft);
+    text-align: start;
+  }
+
+  .continue-card__icon {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: 0.15rem;
+    fill: none;
+    stroke: var(--js-color-primary);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .continue-card__body {
+    min-width: 0;
+  }
+
+  .continue-card p {
+    margin: 0;
+  }
+
+  .continue-card__title {
+    color: var(--js-color-primary);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .continue-card__kicker {
+    color: var(--js-color-muted);
+    font-size: 0.875rem;
+  }
+
+  .continue-card__lesson {
+    display: inline-block;
+    margin-block: 0.1rem 0.2rem;
+    color: var(--js-color-heading);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.45;
+    text-decoration: none;
+  }
+
+  .continue-card__lesson:hover {
+    color: var(--js-color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .continue-card__lab {
+    color: var(--js-color-muted);
+    font-size: 0.875rem;
+  }
+
+  .continue-card__lab a {
+    color: var(--js-color-primary);
+    font-weight: 600;
+  }
+</style>

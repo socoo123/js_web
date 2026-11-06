@@ -1,0 +1,165 @@
+/*
+ * V3 设计变量。`--js-*` 中 V3-1 §4 列出的名称是跨路接口，名称固定、只调值；
+ * 其余 `--js-*`（文字层级、Console/终端/浏览器外框、提示色）是本层补充，组件可选用。
+ * Starlight 默认深色写在 :root，亮色写在 :root[data-theme='light']；::backdrop 跟随，搜索弹窗遮罩才同色。
+ */
+:root,
+::backdrop {
+  --js-color-primary: #a5b4fc;
+  --js-color-primary-soft: rgb(99 102 241 / 0.16);
+  --js-color-amber: #fbbf24;
+  --js-color-amber-soft: rgb(245 158 11 / 0.14);
+  --js-color-java: #f4a36b;
+  --js-color-java-soft: rgb(217 119 58 / 0.16);
+  --js-color-ok: #4ade80;
+  --js-color-err: #f87171;
+  --js-surface: #12141c;
+  --js-surface-raised: #1a1d29;
+  --js-border: #2e3244;
+  --js-radius: 12px;
+  --js-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px rgb(0 0 0 / 0.22);
+  --js-motion: 200ms;
+  --js-prose-width: 46rem;
+  --js-wide-width: 64rem;
+  --js-code-size: 14px;
+
+  /* 补充：文字层级与实心按钮 */
+  --js-color-heading: #f3f4f9;
+  --js-color-text: #c9cdd9;
+  --js-color-muted: #9aa0b4;
+  --js-color-primary-solid: #5558ea;
+  --js-color-on-primary: #ffffff;
+  --js-color-amber-stroke: #fbbf24;
+  --js-color-java-stroke: #e8894a;
+  --js-color-remember: #5eead4;
+  --js-color-remember-soft: rgb(20 184 166 / 0.14);
+  --js-color-ok-soft: rgb(34 197 94 / 0.14);
+  --js-color-err-soft: rgb(239 68 68 / 0.14);
+  --js-focus-ring: 2px solid var(--js-color-primary);
+  --js-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* 补充：Console、终端与浏览器窗口外框（路 2 的 Effect 使用） */
+  --js-console-bg: #0f1119;
+  --js-console-fg: #d6dae6;
+  --js-console-muted: #8b91a7;
+  --js-console-border: #2a2f42;
+  --js-console-row: rgb(255 255 255 / 0.04);
+  --js-terminal-bg: #0b0d13;
+  --js-terminal-fg: #e2e8f0;
+  --js-terminal-prompt: #86efac;
+  --js-terminal-border: #262b3d;
+  --js-frame-bar: #23263a;
+  --js-frame-border: #33384d;
+  --js-frame-url-bg: #12141c;
+  --js-frame-url-fg: #9aa0b4;
+  --js-frame-dot-close: #ff5f57;
+  --js-frame-dot-min: #febc2e;
+  --js-frame-dot-max: #28c840;
+
+  /* Starlight 对齐：中性色带一点靛蓝，强调色为靛蓝 */
+  --sl-color-white: #f3f4f9;
+  --sl-color-gray-1: #e2e5ef;
+  --sl-color-gray-2: #c9cdd9;
+  --sl-color-gray-3: #9aa0b4;
+  --sl-color-gray-4: #646a80;
+  --sl-color-gray-5: #363b4e;
+  --sl-color-gray-6: #1d2030;
+  --sl-color-black: #12141c;
+  --sl-color-accent-low: #262a5c;
+  --sl-color-accent: #6366f1;
+  --sl-color-accent-high: #a5b4fc;
+  --sl-color-text-invert: #14163a;
+  --sl-color-bg-nav: #161925;
+  --sl-color-bg-sidebar: #141721;
+  --sl-color-bg-inline-code: #262a3a;
+  --sl-color-hairline-light: #2e3244;
+  --sl-color-hairline: #222636;
+  --sl-color-hairline-shade: #0b0c12;
+  --sl-color-backdrop-overlay: rgb(10 11 18 / 0.7);
+
+  --sl-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', 'Noto Sans CJK SC',
+    'WenQuanYi Micro Hei', sans-serif;
+  --sl-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --sl-text-body: 1.0625rem;
+  --sl-line-height: 1.8;
+  --sl-line-height-headings: 1.3;
+  --sl-text-code: var(--js-code-size);
+  --sl-text-h1: clamp(1.75rem, 1.25rem + 1.6vw, 2.375rem);
+  --sl-text-h2: clamp(1.375rem, 1.15rem + 0.8vw, 1.75rem);
+  --sl-text-h3: 1.3125rem;
+  --sl-text-h4: 1.125rem;
+  --sl-text-h5: 1.0625rem;
+  --sl-content-width: var(--js-prose-width);
+  --sl-sidebar-width: 17rem;
+}
+
+:root[data-theme='light'],
+[data-theme='light'] ::backdrop {
+  --js-color-primary: #4338ca;
+  --js-color-primary-soft: rgb(79 70 229 / 0.08);
+  --js-color-amber: #8a5800;
+  --js-color-amber-soft: rgb(245 158 11 / 0.14);
+  --js-color-java: #9c4a14;
+  --js-color-java-soft: rgb(194 98 15 / 0.1);
+  --js-color-ok: #157a3a;
+  --js-color-err: #b91c1c;
+  --js-surface: #ffffff;
+  --js-surface-raised: #f6f7fb;
+  --js-border: #dfe2ea;
+  --js-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 6px 18px rgb(15 23 42 / 0.07);
+
+  --js-color-heading: #11131a;
+  --js-color-text: #2f3341;
+  --js-color-muted: #5b6072;
+  --js-color-primary-solid: #4338ca;
+  --js-color-on-primary: #ffffff;
+  --js-color-amber-stroke: #f59e0b;
+  --js-color-java-stroke: #c2620f;
+  --js-color-remember: #0f766e;
+  --js-color-remember-soft: rgb(20 184 166 / 0.1);
+  --js-color-ok-soft: rgb(22 163 74 / 0.1);
+  --js-color-err-soft: rgb(220 38 38 / 0.08);
+
+  --js-console-bg: #ffffff;
+  --js-console-fg: #1f2230;
+  --js-console-muted: #5b6072;
+  --js-console-border: #dfe2ea;
+  --js-console-row: rgb(15 23 42 / 0.035);
+  --js-terminal-bg: #161925;
+  --js-terminal-fg: #e2e5ef;
+  --js-terminal-prompt: #86efac;
+  --js-terminal-border: #161925;
+  --js-frame-bar: #eceef4;
+  --js-frame-border: #d5d8e2;
+  --js-frame-url-bg: #ffffff;
+  --js-frame-url-fg: #5b6072;
+
+  --sl-color-white: #11131a;
+  --sl-color-gray-1: #1f2230;
+  --sl-color-gray-2: #2f3341;
+  --sl-color-gray-3: #5b6072;
+  --sl-color-gray-4: #8b90a0;
+  --sl-color-gray-5: #d5d8e2;
+  --sl-color-gray-6: #eceef4;
+  --sl-color-gray-7: #f6f7fb;
+  --sl-color-black: #ffffff;
+  --sl-color-accent-low: #e3e6ff;
+  --sl-color-accent: #4f46e5;
+  --sl-color-accent-high: #3730a3;
+  --sl-color-text-accent: #4338ca;
+  --sl-color-text-invert: #ffffff;
+  --sl-color-bg-nav: #f8f9fc;
+  --sl-color-bg-sidebar: #fbfbfd;
+  --sl-color-bg-inline-code: #eef0f6;
+  --sl-color-hairline-light: #e4e7ee;
+  --sl-color-hairline: #eceef4;
+  --sl-color-hairline-shade: #e4e7ee;
+  --sl-color-backdrop-overlay: rgb(40 44 60 / 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --js-motion: 0ms;
+  }
+}
