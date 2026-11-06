@@ -1,0 +1,55 @@
+---
+import { labFor, finishAnchor } from '../lib/lab-steps.mjs';
+import { inlineHtml } from '../../labs/steps/model.mjs';
+interface Props { labId: string }
+const lab = labFor(Astro.props.labId);
+if (!lab) throw new Error(`没有 ${Astro.props.labId} 的步骤数据`);
+const base = import.meta.env.BASE_URL;
+const ids = lab.finish.map((item) => item.id);
+---
+<section class="lab-finish" id={finishAnchor(lab.labId)} data-lab-finish={lab.labId} data-lab-root data-lab-scope aria-label={`${lab.labId} 收尾清单`}>
+  <p class="head" data-lab-progress data-ids={ids.join(' ')} data-unit="项">
+    <strong>收尾清单 · {ids.length} 项</strong>
+    <span data-lab-js hidden> · <span data-lab-progress-count></span></span>
+  </p>
+  <ol>
+    {lab.finish.map((item, index) => (
+      <li data-lab-step-item>
+        <input type="checkbox" id={`${item.id}-check`} data-lab-step-toggle={item.id} data-label={`收尾第 ${index + 1} 项`} data-lab-js hidden />
+        <label for={`${item.id}-check`} set:html={inlineHtml(item.text, base)} />
+      </li>
+    ))}
+  </ol>
+  <p class="note">勾选只记录你自己的确认，不代表 <code>npm run lab -- check</code> 已通过。</p>
+  <p class="steps-state" data-lab-progress-state hidden></p>
+  <p class="message" data-lab-message role="status" aria-live="polite"></p>
+</section>
+
+<script>
+  import '../scripts/lab-progress.mjs';
+</script>
+
+<style>
+  [hidden] { display: none !important; }
+  .lab-finish {
+    margin-block: 1rem 1.5rem; padding: 1rem 1.25rem;
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
+    border-radius: var(--js-radius, 0.75rem);
+    background: var(--js-surface-raised, var(--sl-color-bg-nav));
+    scroll-margin-top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0rem) + 1rem);
+  }
+  .lab-finish:target { border-color: var(--js-color-primary, var(--sl-color-text-accent)); box-shadow: 0 0 0 3px var(--js-color-primary-soft, var(--sl-color-accent-low)); }
+  .head { margin: 0; font-variant-numeric: tabular-nums; }
+  ol { margin: 0.75rem 0 0; padding-inline-start: 1.5rem; }
+  li { padding: 0.4rem 0.25rem; display: flex; gap: 0.65rem; align-items: flex-start; }
+  li + li { border-top: 1px solid var(--js-border, var(--sl-color-hairline-light)); }
+  ol:has(input:not([hidden])) { list-style: none; padding-inline-start: 0; }
+  input { flex: none; width: 1.15rem; height: 1.15rem; margin-top: 0.3rem; accent-color: var(--js-color-ok, var(--sl-color-green)); }
+  input:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
+  label { cursor: pointer; }
+  li.is-done label { color: var(--sl-color-gray-2); }
+  code { overflow-wrap: anywhere; }
+  .note, .steps-state, .message { font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); margin: 0.75rem 0 0; }
+  .steps-state, .message[data-error] { color: var(--js-color-err, var(--sl-color-orange-high)); }
+  .message:empty { display: none; }
+</style>

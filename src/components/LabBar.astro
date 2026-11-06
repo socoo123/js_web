@@ -1,12 +1,87 @@
 ---
-// 接口骨架：路 3 负责替换为正式 LabBar 与返回浮标。
 import catalog from '../../labs/catalog.json';
+import { stepsForLesson, returnsForLesson, labHref, stepAnchor } from '../lib/lab-steps.mjs';
 interface Props { lessonId: string }
-const row = catalog.lessons.find((item) => item.lessonId === Astro.props.lessonId);
-if (!row) throw new Error(`未知课号：${Astro.props.lessonId}`);
-const lab = catalog.labs.find((item) => item.labId === row.labId);
-const href = `${import.meta.env.BASE_URL}labs/${row.labId.toLowerCase()}/`;
+const row = catalog.lessons.find((lesson) => lesson.lessonId === Astro.props.lessonId);
+if (!row) throw new Error(`catalog 中没有 ${Astro.props.lessonId}`);
+const lab = catalog.labs.find((item) => item.labId === row.labId)!;
+const base = import.meta.env.BASE_URL;
+const own = stepsForLesson(row.lessonId);
+const first = own?.steps[0];
+const last = own?.steps.at(-1);
+const range = own && first && last ? (first === last ? `第 ${first.number} 步` : `第 ${first.number}–${last.number} 步`) : '';
+const href = first ? labHref(base, lab.labId, stepAnchor(first.stepId)) : labHref(base, lab.labId);
+const returns = returnsForLesson(row.lessonId, base);
 ---
 <nav class="lab-bar" data-lab-bar={row.lessonId} aria-label="所属 Lab">
-  <a href={href}>{row.labId} {lab?.title} · 返回 Lab</a>
+  <a href={href}>
+    <span class="lab-id">{lab.labId}</span>
+    {own ? <span class="lab-where">{range} / 共 {own.lab.steps.length} 步</span> : <span class="lab-where">{lab.title}</span>}
+    <span class="lab-back">返回 Lab</span>
+  </a>
+  {own && <span class="lab-status" data-lab-progress data-ids={own.steps.map((step) => step.stepId).join(' ')} data-unit="步" data-lab-js hidden>本课<span data-lab-progress-count></span></span>}
 </nav>
+{Object.keys(returns).length > 0 && (
+  <aside class="lab-return" data-lab-return data-returns={JSON.stringify(returns)} aria-label="回到 Lab 步骤" hidden>
+    <a data-lab-return-link href={href}>
+      <span aria-hidden="true">←</span>
+      <span class="return-text"><strong data-lab-return-text>返回 Lab</strong><span data-lab-return-title></span></span>
+    </a>
+    <button type="button" data-lab-return-close aria-label="关闭返回提示"><span aria-hidden="true">×</span></button>
+  </aside>
+)}
+
+<script>
+  import '../scripts/lab-progress.mjs';
+</script>
+
+<style>
+  [hidden] { display: none !important; }
+  .lab-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.85rem;
+    margin-block: 0 1rem; font-size: var(--sl-text-sm);
+  }
+  .lab-bar a {
+    display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem;
+    min-height: 2.5rem; padding: 0.3rem 0.9rem 0.3rem 0.35rem;
+    border: 1px solid var(--js-border, var(--sl-color-hairline-light)); border-radius: 999px;
+    background: var(--js-surface-raised, var(--sl-color-bg-nav));
+    color: var(--sl-color-white); text-decoration: none;
+    transition: border-color var(--js-motion, 200ms);
+  }
+  .lab-bar a:hover { border-color: var(--js-color-primary, var(--sl-color-text-accent)); }
+  .lab-id {
+    padding: 0.1rem 0.55rem; border-radius: 999px; font-weight: 700;
+    background: var(--js-color-primary-soft, var(--sl-color-accent-low)); color: var(--js-color-primary, var(--sl-color-text-accent));
+  }
+  .lab-where { font-variant-numeric: tabular-nums; }
+  .lab-back { color: var(--js-color-primary, var(--sl-color-text-accent)); font-weight: 600; }
+  .lab-back::before { content: '· '; color: var(--sl-color-gray-3); font-weight: 400; }
+  .lab-status { color: var(--sl-color-gray-2); font-variant-numeric: tabular-nums; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
+
+  .lab-return {
+    position: fixed; z-index: calc(var(--sl-z-index-menu, 5) - 1);
+    inset-inline: 0.75rem; inset-block-end: max(0.75rem, env(safe-area-inset-bottom));
+    display: flex; align-items: stretch; gap: 0.25rem;
+    max-width: 26rem; margin-inline: auto; padding: 0.3rem;
+    border: 1px solid var(--js-color-primary, var(--sl-color-text-accent)); border-radius: 999px;
+    background: var(--js-surface-raised, var(--sl-color-bg-nav)); box-shadow: var(--js-shadow, 0 4px 12px rgb(0 0 0 / 0.25));
+  }
+  @media (min-width: 72rem) {
+    .lab-return { inset-inline: auto 1.5rem; margin-inline: 0; }
+  }
+  .lab-return a {
+    flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.6rem;
+    min-height: 2.75rem; padding: 0.25rem 0.9rem; border-radius: 999px;
+    background: var(--js-color-primary, var(--sl-color-text-accent)); color: var(--js-surface, var(--sl-color-black)); text-decoration: none;
+  }
+  .return-text { display: grid; min-width: 0; line-height: 1.25; }
+  .return-text span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--sl-text-xs); }
+  .lab-return button {
+    flex: none; width: 2.75rem; border: 0; border-radius: 999px; background: transparent;
+    color: var(--sl-color-white); font-size: 1.25rem; cursor: pointer;
+  }
+  .lab-return button:hover { background: var(--js-color-primary-soft, var(--sl-color-accent-low)); }
+  :global(html.has-lab-return) :global(.main-frame) { padding-bottom: 5rem; }
+</style>
