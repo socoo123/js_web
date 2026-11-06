@@ -1,0 +1,179 @@
+/*
+ * Lab 步骤、课页任务与学习进度组件共用的外观。
+ * 根元素带 .lab-ui.not-content：放在正文里和正文外（课末、页头下方）看起来一样。
+ * 颜色、圆角、阴影与动效只取 src/styles/tokens.css 的 --js-* 变量；按钮与卡片沿用 base.css 的 .js-button / .js-card。
+ * 前缀包在 :where() 里，组件自己的样式（Astro 作用域同样不加权重）总能覆盖这里。
+ */
+:where(.lab-ui) {
+  color: var(--js-color-text);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+:where(.lab-ui) :where(p, ul, ol, dl, dd, figure) {
+  margin: 0;
+}
+
+:where(.lab-ui) :where(ul, ol) {
+  padding-inline-start: 1.25rem;
+}
+
+:where(.lab-ui) :where(li + li) {
+  margin-top: 0.3rem;
+}
+
+:where(.lab-ui) li::marker {
+  color: var(--js-color-muted);
+}
+
+:where(.lab-ui) strong {
+  color: var(--js-color-heading);
+  font-weight: 650;
+}
+
+:where(.lab-ui) a:where(:not(.js-button)) {
+  color: var(--js-color-primary);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--js-color-primary) 45%, transparent);
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color var(--js-motion) var(--js-ease);
+}
+
+:where(.lab-ui) a:where(:not(.js-button)):is(:visited, :hover, :active, :focus-visible) {
+  color: var(--js-color-primary);
+}
+
+:where(.lab-ui) a:where(:not(.js-button)):hover {
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+}
+
+:where(.lab-ui) :not(pre) > code {
+  padding: 0.1em 0.38em;
+  border: 1px solid var(--js-border);
+  border-radius: 6px;
+  background-color: var(--sl-color-bg-inline-code);
+  color: var(--js-color-heading);
+  font-size: 0.875em;
+  overflow-wrap: anywhere;
+}
+
+:where(.lab-ui) .expressive-code {
+  margin: 0;
+}
+
+/* 小节标签：灰色小字，不用强调色，避免被当成链接 */
+:where(.lab-ui) .lab-label {
+  margin: 0 0 0.35rem;
+  color: var(--js-color-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+:where(.lab-ui) .lab-note {
+  color: var(--js-color-muted);
+  font-size: var(--sl-text-sm);
+}
+
+/* 折叠区：与正文的「提示 / 参考答案」同一套卡片样式 */
+:where(.lab-ui) .lab-fold {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface);
+  transition: border-color var(--js-motion) var(--js-ease);
+}
+
+:where(.lab-ui) .lab-fold:not([open]):hover,
+:where(.lab-ui) .lab-fold:has(> summary:hover) {
+  border-color: color-mix(in srgb, var(--js-color-primary) 55%, var(--js-border));
+}
+
+:where(.lab-ui) .lab-fold + .lab-fold {
+  margin-top: 0.6rem;
+}
+
+:where(.lab-ui) .lab-fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 6px;
+  color: var(--js-color-heading);
+  font-weight: 650;
+  list-style: none;
+  cursor: pointer;
+}
+
+:where(.lab-ui) .lab-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+:where(.lab-ui) .lab-fold > summary::before {
+  content: '';
+  flex: none;
+  width: 0.9em;
+  height: 0.9em;
+  background: currentColor;
+  -webkit-mask: var(--lab-fold-icon) center / contain no-repeat;
+  mask: var(--lab-fold-icon) center / contain no-repeat;
+  transition: transform var(--js-motion) var(--js-ease);
+  --lab-fold-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 5 7 7-7 7'/%3E%3C/svg%3E");
+}
+
+:where(.lab-ui) .lab-fold[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+:where(.lab-ui) .lab-fold[open] > summary {
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--js-border);
+}
+
+:where(.lab-ui) .lab-fold[data-disclosure='hint'] > summary {
+  color: var(--js-color-amber);
+}
+
+:where(.lab-ui) .lab-fold[data-disclosure='answer'] > summary {
+  color: var(--js-color-primary);
+}
+
+:where(.lab-ui) .lab-fold[data-disclosure='answer'][open] {
+  border-color: color-mix(in srgb, var(--js-color-primary) 40%, var(--js-border));
+}
+
+:where(.lab-ui) .lab-fold > :not(summary) + :not(summary) {
+  margin-top: 0.5rem;
+}
+
+/* 文件名小标签：长路径可在任意位置换行，窄屏不撑破页面 */
+:where(.lab-ui) .lab-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.lab-ui) .lab-files > li {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+}
+
+/* 保存结果与错误提示 */
+:where(.lab-ui) [data-lab-message],
+:where(.lab-ui) [data-progress-message] {
+  font-size: var(--sl-text-sm);
+}
+
+:where(.lab-ui) :is([data-lab-message], [data-progress-message]):empty {
+  display: none;
+}
+
+:where(.lab-ui) :is([data-lab-message], [data-progress-message])[data-error],
+:where(.lab-ui) [data-lab-progress-state] {
+  color: var(--js-color-err);
+}

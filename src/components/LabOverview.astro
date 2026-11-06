@@ -1,6 +1,7 @@
 ---
 import catalog from '../../labs/catalog.json';
 import { stepsForLesson, labHref, stepAnchor } from '../lib/lab-steps.mjs';
+import './lab-ui.css';
 interface Props { labId?: string }
 const { labId } = Astro.props;
 const base = import.meta.env.BASE_URL;
@@ -8,10 +9,10 @@ const base = import.meta.env.BASE_URL;
 {catalog.labs.filter((lab) => !labId || lab.labId === labId).map((lab) => {
   const lessons = catalog.lessons.filter((lesson) => lesson.labId === lab.labId);
   return (
-    <section class="lab-overview" data-lab-overview={lab.labId}>
+    <section class="lab-overview lab-ui not-content" data-lab-overview={lab.labId}>
       <h2 id={lab.labId.toLowerCase()}>{labId ? `${lab.labId} 的 ${lessons.length} 课` : <a href={labHref(base, lab.labId)}>{lab.labId} {lab.title}</a>}</h2>
       <p>{lab.description}</p>
-      <p class="note">在同一工作区持续修改。课程的完成标记由你自己确认，不代表本地检查已通过。</p>
+      <p class="lab-note">在同一工作区持续修改。课程的完成标记由你自己确认，不代表本地检查已通过。</p>
       <ol class="lessons">
         {lessons.map((lesson) => {
           const own = stepsForLesson(lesson.lessonId);
@@ -19,7 +20,7 @@ const base = import.meta.env.BASE_URL;
           const last = own?.steps.at(-1);
           return (
             <li>
-              <a href={`${base}${lesson.slug}/`}><span class="id">{lesson.lessonId}</span> {lesson.title}</a>
+              <a class="lesson-link" href={`${base}${lesson.slug}/`}><span class="id">{lesson.lessonId}</span> {lesson.title}</a>
               <span class="meta">
                 第 {lesson.day} 天
                 {first && last && <> · <a href={labHref(base, lab.labId, stepAnchor(first.stepId))}>{first === last ? `第 ${first.number} 步` : `第 ${first.number}–${last.number} 步`}</a></>}
@@ -36,20 +37,29 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   .lab-overview { margin-block: 2rem; }
-  .note { font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); }
+  h2 {
+    margin: 0 0 0.6rem; padding-bottom: 0.45rem; border-bottom: 1px solid var(--js-border);
+    color: var(--js-color-heading); font-size: var(--sl-text-h2); font-weight: 700; line-height: 1.3;
+  }
+  h2 a, h2 a:visited { color: var(--js-color-heading); text-decoration: none; }
+  h2 a:hover { color: var(--js-color-primary); }
+  .lab-overview > p { max-width: var(--js-prose-width); }
+  .lab-overview > p + p { margin-top: 0.5rem; }
   .lessons {
-    list-style: none; padding: 0; margin: 0.75rem 0 0;
-    display: grid; gap: 0.4rem;
+    list-style: none; padding: 0; margin-top: 0.85rem;
+    display: grid; gap: 0.5rem;
   }
   @media (min-width: 50rem) { .lessons { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .lessons li {
     display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.15rem 0.75rem;
-    margin: 0; padding: 0.55rem 0.8rem;
-    border: 1px solid var(--js-border, var(--sl-color-hairline-light));
-    border-radius: calc(var(--js-radius, 0.75rem) - 4px);
-    background: var(--js-surface-raised, var(--sl-color-bg-nav));
+    margin: 0; padding: 0.6rem 0.85rem;
+    border: 1px solid var(--js-border); border-radius: var(--js-radius);
+    background: var(--js-surface-raised);
+    transition: border-color var(--js-motion) var(--js-ease);
   }
-  .id { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .meta { font-size: var(--sl-text-sm); color: var(--sl-color-gray-2); font-variant-numeric: tabular-nums; }
-  a:focus-visible { outline: 2px solid var(--js-color-primary, var(--sl-color-text-accent)); outline-offset: 3px; }
+  .lessons li:hover { border-color: color-mix(in srgb, var(--js-color-primary) 50%, var(--js-border)); }
+  .lesson-link, .lesson-link:visited { color: var(--js-color-heading); font-weight: 650; text-decoration: none; }
+  .lesson-link:hover { color: var(--js-color-primary); text-decoration: underline; text-underline-offset: 0.22em; }
+  .id { color: var(--js-color-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .meta { font-size: var(--sl-text-sm); color: var(--js-color-muted); font-variant-numeric: tabular-nums; }
 </style>
