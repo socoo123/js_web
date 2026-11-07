@@ -18,7 +18,7 @@ L5 回到 **C44 中保留的 `src/react/` 主应用**，不是 `adapters/ui5-rea
 
 <LessonTask lessonId="C45" />
 
-继续自己的 `inventory/`。需要补课时，从 [L5 起点说明](/js_web/labs/l5/#从哪里开始)把 C44 恢复到**新目录**，在那里执行一次 `npm ci`。停止 C44 的适配器服务，选择本课后开两个终端：一个运行 `npm run lab -- api`，一个运行 `npm run lab -- dev`。接后端的四个文件按 [L5 目标 1](/js_web/labs/l5/#目标-1接上后端) 完成，接口细节查 [L5 后端接口](/js_web/labs/api/)。
+继续自己的 `inventory/`。需要补课时，从 [L5 起点说明](/js_web/labs/l5/#从哪里开始)把 C44 恢复到**新目录**，在那里执行一次 `npm ci`。停止 C44 的适配器服务，选择本课后开两个终端：一个运行 `npm run lab -- api`，一个运行 `npm run lab -- dev`。接后端要改的文件按 [L5 目标 1](/js_web/labs/l5/#目标-1接上后端) 完成，接口细节查 [L5 后端接口](/js_web/labs/api/)。
 
 接好后，“React 库存工作台”标题下显示“数据源：本地后端 /api”。固定数据应为六种、52 件、2634800 分，来自 `GET /api/products`。后端第一次启动时从 `data/products.json` 生成自己的数据文件，浏览器里原来的个人快照不受影响。学完你能按层选择工具、解释更新链，并让别人根据笔记重现和复验。
 
@@ -57,7 +57,7 @@ console.log(new URL("products.json", deliveryPage).pathname);
 | `(failed)`、Failed to fetch | 没拿到可用 HTTP 响应 | 结合 Console 查断网、连接或浏览器策略 |
 | `/api` 请求 4xx/5xx，Response 是 `{"error":…}` | 后端收到并拒绝了请求 | 读错误体的 `code` 与 `fields`，对照 api 终端同一行 |
 
-接上后端后，详情读取就是一次 `GET /api/products/P002`。点“模拟详情失败”会先向后端注入一次 500 再重新读取：Network 和 api 终端都留下失败的那一次，点“重试详情”后恢复。mock 模式没有这条请求，失败只发生在浏览器内 repository。
+接上后端后，详情读取就是一次 `GET /api/products/P002`。点“模拟详情失败”会先向后端注入一次 500 再重新读取：Network 和 api 终端都留下失败的那一次（终端行尾带“注入故障”），详情区显示“HTTP 500：注入的故障：500”，点“重试详情”后恢复。mock 模式没有这条请求，失败只发生在浏览器内 repository。
 
 Failed to fetch 不一定是断网。把 `VITE_API_BASE` 设成 `http://127.0.0.1:8070/api` 直连后端，页面在 8060，端口不同就是跨源。后端默认不发 [CORS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Guides/CORS) 响应头，浏览器不让脚本读响应，api 终端却照样记下了 200。改回相对地址 `/api`，由 Vite 代理转发，浏览器只和同源的 8060 通信。完整操作见 [L5 场景 1](/js_web/labs/l5/#场景-1直连-8070被-cors-拦下)。
 

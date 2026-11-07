@@ -1,6 +1,6 @@
 ---
 title: C47 综合项目与测试选择
-description: 为当前库存项目保留四项风险回归，让坏快照、连续输入和失败重试真正能被测试发现。
+description: 为当前库存项目保留五项风险回归，让坏快照、连续输入、后端拒绝和失败重试真正能被测试发现。
 sidebar:
   order: 47
 ---
@@ -8,32 +8,33 @@ sidebar:
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 4 周 · 第 24 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
-> 前置：C35、C36、C45、C46 · 运行：Node 24、本地 React · 示例已运行验证
+> 前置：C35、C36、C45、C46 · 运行：Node 24、本地 React、本地后端 · 部分示例未运行，已在对应位置标注
 
 ## 这一课解决什么问题
 
 测试都绿了，仍可能丢掉上一次好快照，或在连续打字时只剩最后一个字符。你需要先说清失败会造成什么后果，再选择能观察这个后果的断言。
 
-继续自己的C46工作区。本课新增 `tests/react/regression.test.jsx` 和 `notes/test-plan.md`，在 `src/react/App.jsx` 修复连续输入的更新时机。已有表单、请求重试和静态路径回归继续使用，不为了凑数量重复写。
+继续自己的C46工作区。本课新增 `tests/react/regression.test.jsx`、`tests/e2e/api.spec.js` 和 `notes/test-plan.md`，在 `src/react/App.jsx` 修复连续输入的更新时机。已有表单、请求重试和静态路径回归继续使用，不为了凑数量重复写。
 
 <LessonTask lessonId="C47" />
 
-本课只选四项交付风险。检查由Vitest、RTL和真实浏览器分工完成；测试文件数、截图数、快照断言数都不是“理解了多少”的分数。
+本课选五项交付风险，其中一项是接上后端才有的：服务器拒绝了保存，用户却不知道该改哪里。检查由Vitest、RTL和真实浏览器分工完成；测试文件数、截图数、快照断言数都不是“理解了多少”的分数。
 
 ## Java 程序员先看这里
 
-JUnit的Arrange/Act/Assert与分层经验可以直接迁移。Vitest是运行器，RTL帮助渲染和查询界面，user-event驱动交互，Playwright运行真实浏览器；由谁启动测试，不决定测试范围。既有项目也常用Jest，本项目不维护两套重复运行器。
+JUnit的Arrange/Act/Assert与分层经验可以直接迁移。Vitest是运行器，RTL帮助渲染和查询界面，user-event驱动交互，Playwright运行真实浏览器；由谁启动测试，不决定测试范围。既有项目也常用Jest，本项目不维护两套重复运行器。让repository抛出 `ApiError`，相当于用Mockito让DAO抛异常；连真实后端的那条流程，相当于带测试数据库的Spring集成测试。
 
 ## 1. 从失败后果开始写测试计划
 
-在新建的 `notes/test-plan.md` 先写下这四行，补上你自己的执行结果：
+在新建的 `notes/test-plan.md` 先写下这五行，补上你自己的执行结果：
 
 | 风险与后果 | 输入、操作、期望 | 最小合适层级与位置 |
 | --- | --- | --- |
 | 非法库存覆盖好快照 | 两次合法保存后传库存字符串，抛错且主键/备份原文都不变 | 新增函数UT：regression.test.jsx |
 | 连续输入丢字 | 逐字输入P004、清空，保留完整文本、一项P004、恢复6/52/2634800 | 新增RTL；严格浏览器补生产入口 |
-| 失败后不能重试 | 详情首次失败后人工重试；保存失败保留草稿，重试成功才改库存 | 沿用inventory.test.jsx已有两条RTL |
-| 文件路径、键盘或刷新断链 | 嵌套base、hash刷新、缺文件404；P004取消与Enter保存 | 沿用C46严格浏览器 |
+| 后端拒绝时不知道改哪里 | 422的 `fields.priceCents` 落到价格输入框并聚焦；409提示服务器上的库存、草稿保留，载入最新后再保存 | 新增RTL：regression.test.jsx，repository抛 `ApiError` |
+| 失败后不能重试 | 列表500显示原因与「重新读取」；详情首次失败后人工重试；保存失败保留草稿，重试成功才改库存 | 新增列表RTL；沿用inventory.test.jsx已有两条 |
+| 写入没到后端，或路径、键盘、刷新断链 | 恢复固定数据后保存P004=8，刷新仍8、汇总57；嵌套base、hash刷新、缺文件404；P004取消与Enter保存 | 新增Playwright：tests/e2e/api.spec.js；沿用C46严格浏览器 |
 
 **先猜一猜：** 错误保存抛了异常，是不是就证明旧快照没被覆盖？不是。异常只停止后续语句，前面已经执行的setItem不会自动回滚。
 
@@ -43,16 +44,17 @@ Java里也不能用“Service抛错”代替持久化副作用断言；Web Stora
 
 <a id="2-核心规则先在-node-测断言业务结果"></a>
 
-新建 `tests/react/regression.test.jsx`。下面三段按顺序组成完整文件。第一段是导入；沿用C35的support，它提供DOM清理、断言扩展和独立内存repository。
+新建 `tests/react/regression.test.jsx`。下面几段按顺序组成完整文件。第一段是导入；沿用C35的support，它提供DOM清理、断言扩展和独立内存repository。`vi`、`within` 和 `ApiError` 留给第3节的后端错误测试。
 
 ```jsx
 // @vitest-environment happy-dom
 import React from "react";
-import { expect, test } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { expect, test, vi } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { freshRepository } from "./support.jsx";
 import { saveProducts, storageKey } from "../../src/services/storage.js";
+import { ApiError } from "../../src/services/api-repository.js";
 import App from "../../src/react/App.jsx";
 import seed from "../../data/products.json";
 ```
@@ -103,9 +105,77 @@ test("连续输入保留完整条件，清空后回到原库存", async () => {
 
 <a id="请求替身放在哪里决定测到了什么"></a>
 
-第三项风险不新增重复测试。打开已有 `tests/react/inventory.test.jsx`，找到“详情失败后点击重试恢复”：它只让repository.get首次拒绝，真实App、ProductDetail、Query以及后续repository读取都保留。第一次看到错误，点重试后读到P002/库存0；不能把两次读取都改成直接成功。
+后端拒绝这一项新增两条。替身放在repository边界：`vi.spyOn(repository, "save")` 只让第一次保存抛出 `ApiError`，真实的App、编辑器、Provider和Query都参与。先加一个打开编辑器的小函数和422这条：
 
-同文件的“提交失败后草稿保留，重试成功才更新列表和统计”要求草稿8保留、全量仍52，解除失败后才57。它测的是浏览器内异步mock；如果要检查HTTP状态与JSON响应，应测C30那层fetch边界，不能把两者混成一条“网络测试”。
+> 未运行验证：本节的三条后端错误测试还没有在本课的工作区里运行。请按步骤自己尝试。
+
+```jsx
+async function openEditor(repository, id) {
+  const user = userEvent.setup();
+  render(<App inventoryRepository={repository} />);
+  await user.click(await screen.findByRole("button", { name: `编辑 ${id}`, exact: true }));
+  return { user, form: screen.getByRole("form", { name: "商品编辑", exact: true }) };
+}
+test("后端 422 的字段错误落到对应输入框，草稿与库存不变", async () => {
+  const repository = freshRepository();
+  vi.spyOn(repository, "save").mockRejectedValueOnce(new ApiError(422,
+    { code: "VALIDATION", message: "商品字段不合法", fields: { priceCents: "价格必须是非负安全整数分" } }));
+  const { user, form } = await openEditor(repository, "P004");
+  await user.click(within(form).getByRole("button", { name: "保存", exact: true }));
+  const price = within(form).getByLabelText("价格（元）", { exact: true });
+  await waitFor(() => expect(price).toHaveAccessibleDescription("价格必须是非负安全整数分"));
+  expect(price).toHaveAttribute("aria-invalid", "true");
+  expect(price).toHaveFocus();
+  expect(screen.getByText("库存 52 / 价值 2634800 分")).toBeInTheDocument();
+});
+```
+
+预期：价格输入框的可访问说明就是服务器给的消息，`aria-invalid` 为true，焦点在它上面，汇总仍52。用可访问说明断言，是因为读屏软件读的也是这条说明，不只是“页面某处出现了这句话”。
+
+409这条让保存抛出带 `current` 的冲突，服务器上的P004已被别人改成9：
+
+```jsx
+test("409 冲突提示服务器上的库存并保留草稿，载入最新后才保存", async () => {
+  const repository = freshRepository();
+  const current = { ...seed[3], stock: 9, version: 2 };
+  vi.spyOn(repository, "save").mockRejectedValueOnce(new ApiError(409, { code: "CONFLICT", message: "版本已变化", current }));
+  const { user, form } = await openEditor(repository, "P004");
+  const stock = within(form).getByLabelText("库存", { exact: true });
+  await user.clear(stock); await user.type(stock, "8");
+  await user.click(within(form).getByRole("button", { name: "保存", exact: true }));
+  expect(await within(form).findByText("保存冲突：服务器上的 P004 已被修改（库存 9）。草稿已保留，可载入最新后再保存。")).toBeInTheDocument();
+  expect(stock).toHaveValue("8");
+  await user.click(within(form).getByRole("button", { name: "载入最新", exact: true }));
+  expect(stock).toHaveValue("9");
+  await user.clear(stock); await user.type(stock, "8");
+  await user.click(within(form).getByRole("button", { name: "保存", exact: true }));
+  await waitFor(() => expect(screen.queryByRole("form", { name: "商品编辑" })).not.toBeInTheDocument());
+  expect(screen.getByText("库存 57 / 价值 2784300 分")).toBeInTheDocument();
+});
+```
+
+预期：冲突提示带服务器上的库存9，草稿8保留；点「载入最新」后输入框变成9，再改成8保存才成功，汇总57。
+
+失败后能不能重试，列表读取补一条：
+
+```jsx
+test("列表读取失败后显示原因，不停在加载中，重新读取恢复", async () => {
+  const user = userEvent.setup();
+  const repository = freshRepository();
+  vi.spyOn(repository, "list").mockRejectedValueOnce(new ApiError(500, { code: "FAULT", message: "注入的故障：500" }));
+  render(<App inventoryRepository={repository} />);
+  expect(await screen.findByText(/^读取失败：HTTP 500：注入的故障：500/)).toBeInTheDocument();
+  expect(screen.queryByText("正在加载库存")).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "重新读取", exact: true }));
+  expect(await screen.findAllByRole("article")).toHaveLength(6);
+});
+```
+
+预期：页面说出失败原因，不停在“正在加载库存”；点一次「重新读取」回到六种商品。
+
+详情和保存的失败重试不新增重复测试。打开已有 `tests/react/inventory.test.jsx`，找到“详情失败后点击重试恢复”：它只让repository.get首次拒绝，真实App、ProductDetail、Query以及后续repository读取都保留。第一次看到错误，点重试后读到P002/库存0；不能把两次读取都改成直接成功。
+
+同文件的“提交失败后草稿保留，重试成功才更新列表和统计”要求草稿8保留、全量仍52，解除失败后才57。这几条都用mock repository加替身，测不到HTTP状态、`If-Match` 和数据有没有写进后端；这些交给第4节连真实后端的一条流程，不能把两者混成一条“网络测试”。
 
 ## 4. 浏览器冒烟串起最重要的一条交付路径
 
@@ -123,15 +193,40 @@ RTL能等待每次事件完成，真实浏览器却可能在路由尚未提交�
 
 预期：路由位置同步提交，受控搜索值及时更新；刷新后仍从hash查询参数恢复。React的[transition不能控制文本输入](https://react.dev/reference/react/startTransition)，本项目六条商品选择同步导航；大型页面也可把输入草稿与延后结果拆开，当前不再增加第二份状态。Java顺序赋值直觉不等于React/路由更新的调度时机。
 
-工作区运行 `npm run lab -- check C47`。它运行两条新增回归、已有必要行为和严格浏览器；包括逐字输入、P004取消/空白/Enter保存、刷新、详情失败重试及缺文件404。默认8068端口，先结束手工预览。
+写入有没有真的到后端，只有真实浏览器加真实后端能回答。新建 `tests/e2e/api.spec.js`：
+
+> 未运行验证：这条浏览器流程还没有在本课的工作区里运行。请按步骤自己尝试。
+
+```js
+import { test, expect } from "@playwright/test";
+test("真实后端：保存 P004=8 后刷新仍是 8，总库存 57", async ({ page, request }) => {
+  expect((await request.post("/api/_lab/reset")).status()).toBe(204);
+  await page.goto("./");
+  await expect(page.locator("#summary")).toHaveText("库存 52 / 价值 2634800 分");
+  await page.getByRole("button", { name: "编辑 P004", exact: true }).click();
+  const form = page.getByRole("form", { name: "商品编辑", exact: true });
+  await form.getByLabel("库存", { exact: true }).fill("8");
+  await form.getByRole("button", { name: "保存", exact: true }).click();
+  await expect(form).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator('article[data-id="P004"]')).toContainText("库存 8 件");
+  await expect(page.locator("#summary")).toHaveText("库存 57 / 价值 2784300 分");
+  const saved = await request.get("/api/products/P004");
+  expect(await saved.json()).toMatchObject({ id: "P004", stock: 8, version: 2 });
+});
+```
+
+预期：先恢复固定数据，保存后刷新仍是8和57，后端读回的P004是version 2。刷新这一步排除了“只是Query缓存里变了”；最后一次 `request.get` 直接问后端，排除了“只是页面显示变了”。这里用 `fill` 没问题：它测的是持久化，逐字输入的风险已由上面的回归负责。
+
+工作区运行 `npm run lab -- check C47`。它运行新增回归、已有必要行为、严格浏览器和这条真实后端流程；包括逐字输入、P004取消/空白/Enter保存、刷新、详情失败重试及缺文件404。检查器用临时数据文件启动后端和带 `/api` 代理的严格预览，不改你的 `.lab/server/products.json`。默认8068端口，先结束手工预览。
 
 ## 5. 键盘、窄屏、恢复还要自己走一遍
 
 <a id="5-键盘窄屏恢复还要自己走一遍"></a>
 
-happy-dom不计算真实布局。自动焦点断言也不替你判断焦点轮廓是否看得清。build后启动 `LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs`，用Tab、Shift+Tab、Enter完成编辑、报错、纠正与保存，在360/768/1280px检查。
+happy-dom不计算真实布局。自动焦点断言也不替你判断焦点轮廓是否看得清。build后保持 `npm run lab -- api` 运行，启动 `LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs`，用Tab、Shift+Tab、Enter完成编辑、报错、纠正与保存，在360/768/1280px检查。
 
-repository会**自动持久化确认成功的修改**，“保存本地快照”是额外明确保存，不是唯一写入时机。P004保存8后刷新应保留8；取消草稿则仍3。损坏恢复先备份、只操作库存键，检查坏原文保留、有效备份回来。记录真实结果和未做环境，真机软键盘不能由桌面尺寸模拟替代。
+API模式下，**确认成功的修改由后端写进** `.lab/server/products.json`，页面上只有「恢复固定数据」，没有快照按钮。P004保存8后刷新应保留8；取消草稿则仍3；做完点「恢复固定数据」。损坏恢复改在mock模式（`VITE_DATA_SOURCE=mock npm run lab -- dev`）检查：那里repository仍自动持久化，“保存本地快照”是额外明确保存；先备份、只操作库存键，检查坏原文保留、有效备份回来。记录真实结果和未做环境，真机软键盘不能由桌面尺寸模拟替代。
 
 ## 常见错误与调试
 
@@ -163,28 +258,28 @@ node node_modules/vitest/vitest.mjs run --config tools/delivery.config.mjs tests
 <a id="练习-3交出自己的风险计划"></a>
 
 :::tip[自己尝试 · 本地 React]
-完成两个文件与HashRouter改动，让非法保存测试经历红→绿，再运行check C47。把四项风险、输入操作、层级、具体测试位置和实际结果填入notes/test-plan.md；已有请求回归只引用，不抄一份相同测试。
+完成三个文件与HashRouter改动，让非法保存测试经历红→绿，再运行check C47。把五项风险、输入操作、层级、具体测试位置和实际结果填入notes/test-plan.md；已有请求回归只引用，不抄一份相同测试。
 
-验收：坏数据拒绝且旧原文不变；逐字搜索完整并可清空；请求/保存失败都能恢复；严格产物中键盘编辑和刷新正常。手工检查只记录实际做过的项目。
+验收：坏数据拒绝且旧原文不变；逐字搜索完整并可清空；422落到价格输入框、409保留草稿；列表、详情、保存失败都能恢复；真实后端保存后刷新仍8/57；严格产物中键盘编辑和刷新正常。手工检查只记录实际做过的项目。
 :::
 
 <details>
 <summary>提示</summary>
 
-替身放在外部边界：Map替代存储介质，不替代saveProducts；首次get失败，不替代真实表单与Query。断言可见结果和副作用，而不是只数mock调用。
+替身放在外部边界：Map替代存储介质，不替代saveProducts；首次get失败或save抛 `ApiError`，不替代真实表单与Query。断言可见结果和副作用，而不是只数mock调用。
 
 </details>
 
 <details>
 <summary>参考答案</summary>
 
-新增两条回归已给出完整导入与测试体。非法保存同时限制异常与主键/backup原文，连续输入限制完整字符串和派生列表；HashRouter同步位置保证受控值及时提交。已有C35失败重试与C46严格路径覆盖另外两类后果。一个风险可以由不同层互补，不需要为每个分支启动浏览器。
+新增回归已给出完整导入与测试体。非法保存同时限制异常与主键/backup原文，连续输入限制完整字符串和派生列表；HashRouter同步位置保证受控值及时提交。422、409、列表500在repository边界抛 `ApiError`，断言用户看到的说明、焦点和草稿；HTTP状态、`If-Match` 和持久化由api.spec.js连真实后端验证。已有C35失败重试与C46严格路径覆盖其余后果。一个风险可以由不同层互补，不需要为每个分支启动浏览器。
 
 </details>
 
 ## 项目进度
 
-- 现在有四项明确风险与对应可执行检查，不用测试数量充当覆盖。
+- 现在有五项明确风险与对应可执行检查，不用测试数量充当覆盖。
 - 正式写入、持久化和失败恢复保持同一repository；URL只管理筛选与导航。
 - `notes/test-plan.md`关联实际结果；暂停写notes/next.md，自己的工作区继续保留。
 
@@ -193,9 +288,10 @@ node node_modules/vitest/vitest.mjs run --config tools/delivery.config.mjs tests
 - 先写失败后果，再选最小合适层级。
 - 抛异常之后还要验证外部副作用，快照必须保住旧原文。
 - RTL与真实键盘浏览器互补，等待条件而非固定时间。
+- 后端错误在repository边界用替身测界面反应，持久化用一条真实后端流程测。
 - 复用已有有效回归，手工补真实布局和操作可达性。
 
-自测：为什么throw不足以保护快照？Vitest运行的用例为什么也可能是集成测试？逐字type和整串fill能观察到什么差别？repository失败与HTTP失败各在哪一层？下一课用现场小增量与故障定位检验自己的理解。
+自测：为什么throw不足以保护快照？Vitest运行的用例为什么也可能是集成测试？逐字type和整串fill能观察到什么差别？repository失败与HTTP失败各在哪一层？api.spec.js为什么要刷新、还要直接请求一次后端？下一课用现场小增量与故障定位检验自己的理解。
 
 ## 延伸阅读
 

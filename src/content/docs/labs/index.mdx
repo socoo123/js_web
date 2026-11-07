@@ -7,7 +7,7 @@ import LabCards from '../../../components/LabCards.astro';
 import LabOverview from '../../../components/LabOverview.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
-**6 个 Lab、48 课、一个长期工作区。** L1–L5 把同一个库存应用从商品卡片做到静态交付，L6 毕业挑战检验你学到的全部能力。先准备工程，再进入 [L1](/js_web/labs/l1/)；按天排列的课表见[学习路线](/js_web/roadmap/)。
+**6 个 Lab、48 课、一个长期工作区。** L1–L5 把同一个库存应用从商品卡片做到接上本地后端、静态交付，L6 毕业挑战检验你学到的全部能力。先准备工程，再进入 [L1](/js_web/labs/l1/)；按天排列的课表见[学习路线](/js_web/roadmap/)。
 
 <LabCards variant="grid" headingLevel={2} />
 
@@ -15,7 +15,7 @@ import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
 先读 [Lab 规则与验收](/js_web/labs/rules/)：那里列出六件固定商品、字段限制、补货与编辑的区别、取消/保存/恢复的要求，以及各阶段应该看到的结果。
 
-然后按顺序进入 Lab 主页：[L1 库存规则](/js_web/labs/l1/) → [L2 原生页面](/js_web/labs/l2/) → [L3 React 应用](/js_web/labs/l3/) → [L4 组件库与 UI5](/js_web/labs/l4/) → [L5 静态交付](/js_web/labs/l5/) → [L6 毕业挑战](/js_web/labs/l6/)。每个 Lab 主页上方是目标与效果，下方的课程标签逐课列出要改的文件、验收标准和「打开课文」入口。
+然后按顺序进入 Lab 主页：[L1 库存规则](/js_web/labs/l1/) → [L2 原生页面](/js_web/labs/l2/) → [L3 React 应用](/js_web/labs/l3/) → [L4 组件库与 UI5](/js_web/labs/l4/) → [L5 对接后端与交付](/js_web/labs/l5/) → [L6 毕业挑战](/js_web/labs/l6/)。每个 Lab 主页上方是目标与效果，下方的课程标签逐课列出要改的文件、验收标准和「打开课文」入口。
 
 侧栏也按 Lab 分组：展开一个 Lab，先是它的主页，再是它的课；手机上先打开顶部“菜单”。学习时按「Lab 主页选课 → 读课文 → 本地改代码 → 回 Lab 对照验收」的顺序进行。
 
@@ -60,7 +60,7 @@ npm run lab -- check C03
 | [L2 可用的原生库存页](/js_web/labs/l2/) · C11–C20 | <WorkspaceDownload checkpoint="C10" label="C10 起点" /> | 列表、异步、存储、布局、模块、Node 报表与 UT |
 | [L3 React 库存应用](/js_web/labs/l3/) · C21–C36 | <WorkspaceDownload checkpoint="C20" label="C20 起点" /> | 从 JSX 到状态、表单、路由、缓存、测试与恢复 |
 | [L4 组件库与 UI5 适配](/js_web/labs/l4/) · C37–C44 | <WorkspaceDownload checkpoint="C36" label="C36 起点" /> | 四种并列界面适配，复用公共规则 |
-| [L5 调试与静态交付](/js_web/labs/l5/) · C45–C48 | <WorkspaceDownload checkpoint="C44" label="C44 起点" /> | 回到保留的 React 主应用，排错、风险回归、生产交付与复盘 |
+| [L5 对接后端与交付](/js_web/labs/l5/) · C45–C48 | <WorkspaceDownload checkpoint="C44" label="C44 起点" /> | 回到保留的 React 主应用，接上本地后端，排错、风险回归、生产交付与复盘 |
 | [L6 毕业挑战](/js_web/labs/l6/) · 学完 C48 后 | 你自己的 C48 工程 | 能力自测、Bug 猎人和一个跨全部层次的毕业项目 |
 
 L1–L5 的收尾包含在 48 课里，不另加一套作业；L6 是学完之后的综合检验。正常跟做不用下载这些起点；先用自己的上一课完成态继续。
@@ -89,6 +89,8 @@ npm run lab -- compare C03
 
 C23、C41 分别从正式 C22、C40 继续；恢复时按上表选择前置完成态，不用历史试做起点。来自较早版本的 L4 工程也要保留已完成的 adapter；迁入源码时先比较再合并，不用新的占位外壳覆盖自己的答案。
 
+L5 的本地后端 `server/` 和空白前端壳 `shell/` 从 2026.11-v4.0 的 C44 起点包开始提供。2026.10-v2.5 及更早的工作区没有它们，旧工作区的 `restore` 也取不到：把 2026.11-v4.0 的 C44 起点包解压到新目录，保留其中的 `tools/`、`server/`、`shell/`、`data/` 与依赖清单/锁，再按上面的方法迁入自己的源码与 notes。步骤见 [L5 的升级说明](/js_web/labs/l5/#从旧发行版升级)。
+
 ## 阶段路线
 
 下列列表连接每一课，工作区接入状态与[学习路线](/js_web/roadmap/)一致。`examples/cNN` 是机制参考和验证记录，旧 `examples/inventory/` 七阶段工程也保留为参考；日常必做任务不在那里另开项目。
@@ -99,4 +101,4 @@ C23、C41 分别从正式 C22、C40 继续；恢复时按上表选择前置完�
 
 课程网站部署在 `/js_web/`，学习包从带发行版的下载目录获取。Lab 应用在本地启动、构建和静态预览；默认生产演示路径 `/js_web/demos/inventory/` 是构建目标，不等于该地址已经部署在线应用。
 
-库存使用静态数据、浏览器存储或浏览器内 mock。UI5 的四个名称、运行方式与资源要求见 [UI5 家族速查](/js_web/reference/ui5-family/)。
+库存使用静态数据、浏览器存储或浏览器内 mock。L5 起另有作者提供的本地后端，只在你的电脑上用 `npm run lab -- api` 运行；课程网站和 GitHub Pages 只发静态文件，没有这个后端，见 [L5 后端接口](/js_web/labs/api/#pages-上没有后端)。UI5 的四个名称、运行方式与资源要求见 [UI5 家族速查](/js_web/reference/ui5-family/)。

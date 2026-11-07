@@ -43,7 +43,7 @@ npm run lab -- api
 | `LAB_API_DATA` | 换一个数据文件，用于独立实验 | `LAB_API_DATA=/tmp/try.json npm run lab -- api` |
 | `LAB_API_CORS_ORIGIN` | 放行一个来源的跨源请求，见 [CORS 与代理](#cors-与代理) | `LAB_API_CORS_ORIGIN=http://127.0.0.1:8060 npm run lab -- api` |
 
-换了端口，`vite.config.js` 里的代理目标和 `api reset` 都要用同一个 `LAB_API_PORT`。设置了 `LAB_API_CORS_ORIGIN` 时，启动行下面多一行「CORS 只放行来源 http://127.0.0.1:8060」。
+换了端口，`vite.config.js` 里的代理目标要改成同一个端口；`api reset` 和 `shell` 也要带上同样的 `LAB_API_PORT`。设置了 `LAB_API_CORS_ORIGIN` 时，启动行下面多一行「CORS 只放行来源 http://127.0.0.1:8060」。
 
 **数据文件损坏时拒绝启动。** 文件不是合法 JSON，或任何一个商品不合规则，后端不会带着坏数据运行，命令以退出码 1 结束：
 
