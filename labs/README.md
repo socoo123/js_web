@@ -1,6 +1,6 @@
 # 六个 Lab 的设计与实施契约
 
-**V4（2026-11-07）**：站点改为 Lab 优先，L1–L5 的 Lab 主页用课程标签逐课进入课文，新增 L6 毕业挑战（[PLAN §3](../docs/PLAN.md#3-lab-设计)）；L5 对接本地后端的设计排在 V4 批次 2。下文 V2 契约中的课程范围、起点与验收数字继续有效。
+**V4（2026-11-07）**：站点改为 Lab 优先，L1–L5 的 Lab 主页用课程标签逐课进入课文，新增 L6 毕业挑战（[PLAN §3](../docs/PLAN.md#3-lab-设计)）；V4 批次 2 起 L5 对接作者提供的本地后端（发行版 `2026.11-v4.0`，C44 起点附带 `server/` 与 `shell/`，见下文 L5 与 [PLAN §3.4](../docs/PLAN.md#3-lab-设计)）。下文 V2 契约中的课程范围、起点与验收数字继续有效。
 
 2026-10-30 · **L1–L5已全部发布，V2 改版完成。** 本文保留五个Lab的交付契约；最终发行版为`2026.10-v2.5`，验收与线上证据见[C](records/C.md)，实际状态看[STATUS](../docs/STATUS.md)，当前命令看[工作区 README](inventory/README.md)。
 
@@ -16,7 +16,7 @@
 | L2 | C10 / C11 | C20 | 已发布，沿用 |
 | L3 | C20 / C21 | C36 | 已发布 `2026.10-v2.3`；C23已接正式C22，证据见 [A](records/A.md) |
 | L4 | C36 / C37 | C44 | 已发布 `2026.10-v2.4`；C41已接正式C40，独立教学验收/Pages/线上核验通过，见 [B](records/B.md) |
-| L5 | C44 / C45 | C48 | 已发布 `2026.10-v2.5`；四课独立跟做、最终验收/Pages/线上下载通过，见 [C](records/C.md) |
+| L5 | C44 / C45 | C48 | 已发布 `2026.10-v2.5`，见 [C](records/C.md)；V4 批次 2 改为对接本地后端，新发行版 `2026.11-v4.0` |
 
 “阶段起点”只给现有版本化 Cnn 包加清晰链接，不创建一套平行的 Lnn 包/生成器。已发布逐课快照保留，后续沿用同一格式补齐。快照属于作者恢复材料；正常学习不每天下载或替换自己的工程。
 
@@ -75,9 +75,11 @@ C36 起点保留可运行的 React 主应用与公共 core。各 adapter 只在�
 
 OpenUI5 特有验收：P004 详情刷新、回退、未知 id；V2 metadata、读取/过滤/排序/分页请求可见；区分 JSONModel、ODataModel、V2/V4。mock 是静态浏览器教学实现，不扩展到真实 SAP 鉴权或完整 OData 写服务。
 
-### L5：把项目交付出来（C45–C48，阶段 C）
+### L5：对接后端并交付（C45–C48）
 
 - **已有**：C44 包中保留的 C36 React 主应用和 L4 adapters。主学习入口回到 `src/react`，不把 UI5 React 变成所有后续课程的强制基础。
+- **后端（作者提供，学员不写）**：`server/`，Node 24 `node:http` + ESM，无新依赖，`npm run lab -- api` 只监听 `127.0.0.1:8070`，终端逐行打印 `方法 路径 状态 耗时`；数据在 `.lab/server/products.json`，原子写入，损坏时拒绝启动并提示 `npm run lab -- api reset`；规则由 `scripts/build-server-rules.mjs` 从 `labs/reference/core` 生成，不 import 学员的 `src/core`。接口、错误格式与故障注入见网站 [L5 后端接口](https://socoo123.github.io/js_web/labs/api/)，契约测试 `npm run test:api`。
+- **前端（学员写）**：C45 新建 `src/services/api-repository.js`（与原 repository 同名同形，另加 `listPage`，HTTP 失败抛 `ApiError`）和 `data-source.js`（`VITE_DATA_SOURCE=api|mock`，默认 api），Vite 把 `/api` 代理到 8070；C46 的严格静态预览同样代理 `/api`，Pages 演示只能用 mock 构建；C47 加 422/409/重试回归与 1 条真实后端浏览器流程；C48 的「仅低库存」走服务端 `stock=low`。选做：两标签页 409 冲突、用 `shell/` 从零写前端（`npm run lab -- shell`）。
 - **任务**：C45 按层排错并记证据；C46 构建和严格静态路径；C47 选择 3–5 条真实风险回归；C48 不看答案增加一个已学过的筛选条件、解释实现并定位一个故障。
 - **测试目标**：非法快照不破坏好数据、连续交互正确、请求失败后可恢复，必要时补表单身份/资源路径。已有有效用例计入，不为凑数量重复写。
 - **交付物**：生产产物与四份笔记：`notes/debug.md`、`notes/delivery.md`（运行/恢复说明）、`notes/test-plan.md`、`notes/final-review.md`，沿用已有 notes 而非另建报告系统。

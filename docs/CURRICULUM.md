@@ -75,7 +75,7 @@ C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。�
 | --- | --- | --- | --- | --- |
 | 19 | C37 组件生态与选择标准 | 写 notes/components.md 的界面契约，并在 adapters/antd/select-product.js 按 id 连接排序后的商品 | Java 接口/适配经验 / UI 组件契约；库与业务数据分离 | 按可访问性、主题、维护、许可选型；比较整库/primitives/代码分发；同一个商品 id 贯穿排序与编辑 |
 | 19 | C38 一个普通组件库的完整案例 | 在 `adapters/antd/` 替换列表与弹窗，调用同一 core/repository | Java Bean 初值经验 / Form initialValues 与受控更新边界 | 按库存排序后编辑 P002 仍是它；取消 P001 草稿不残留；校验、空/错态、主题与焦点可用 |
-| 20 | C39 SAP Fiori 与 UI5 家族 | 写 notes/ui5-choice.md，对同一库存需求选择经典 UI5 或 Web Components；阅读现有 D2 | Java MVC 经验 / UI5 View/Controller/Model；Fiori 不等于框架 | 分清 SAPUI5、OpenUI5、原生 UI5 Web Components 和 React 包装库；说明静态 mock 的边界 |
+| 20 | C39 SAP Fiori 与 UI5 家族 | 写 notes/ui5-choice.md，对同一库存需求选择经典 UI5 或 Web Components；读懂 UI5 家族图 | Java MVC 经验 / UI5 View/Controller/Model；Fiori 不等于框架 | 分清 SAPUI5、OpenUI5、原生 UI5 Web Components 和 React 包装库；说明静态 mock 的边界 |
 | 20 | C40 OpenUI5 入门：MVC 与工程 | 在 `adapters/openui5/webapp/` 配 Component、manifest、XML View、Controller，接共享规则桥接 | Java 包/类路径 / UI5 namespace、模块与资源路径 | 列表加载 6 件；Console/Network 定位模块名错误；UI5 CLI 构建能生成静态产物；不手抄第二份业务规则 |
 | 21 | C41 UI5 Model、绑定与业务控件 | 在 Inventory.view/controller、编辑 Fragment 和 i18n 中完成筛选、草稿、保存 | Java Bean/监听经验 / JSONModel.setProperty 与绑定通知 | 筛选 P004 后只改它；取消不污染源数据；汇总与语言切换正确；理解 model 名称、路径与 binding context |
 | 21 | C42 UI5 路由与 OData 起点 | 增加 Detail View/Controller、manifest 路由、静态 metadata 和有限 V2 mock | Java DTO/Repository 经验 / OData 实体集、元数据、模型请求；不是接口等价 | P004 详情刷新/回退正常；有限过滤/排序/分页可观察；JSONModel/ODataModel、V2/V4 区分清楚 |
@@ -84,14 +84,16 @@ C01–C48 仍是稳定 ID，原课程标题、slug 和 24 个学习日保持。�
 
 写作边界：C37 不做市场排名，不安装全部候选库；C38 只完整用 Ant Design，其余短对照。C39 的运行接到 C40，模块桥接复用已验证原型。C42 仅有限 V2 浏览器 mock，不做真实 SAP 鉴权、完整 OData CRUD 或 V4 服务。C43/C44 按版本核对事件、属性、主题和资源。四种界面共同场景以 Lab 设计为准，不各写一套完整 CRUD。
 
-## Lab 5 调试与静态交付
+## Lab 5 对接后端与交付
+
+C44 起工作区附带作者提供的本地后端 `server/`（`npm run lab -- api`，只监听 127.0.0.1:8070）与空白前端壳 `shell/`；学员只写前端，接口见网站「L5 后端接口」页。存储实验与 Pages 演示用 `VITE_DATA_SOURCE=mock`。
 
 | 日 | 课号与标题 | 本课主任务与文件 | Java / JS 并排主题 | 完成标准 |
 | --- | --- | --- | --- | --- |
-| 23 | C45 全链路 Debug 与交付前检查 | 在当前 src/react 应用依次复现状态/资源/存储/布局问题，写 notes/debug.md | Java 堆栈/调试经验 / 浏览器跨层证据与 source maps | 每个修复可复现并回归；做键盘/手机检查；Performance/Memory 有前后证据，不凭一张快照断言泄漏 |
-| 23 | C46 静态构建与 GitHub Pages | 修改构建 base、严格静态预览和交付说明；学习个人 Pages 流程 | Java 打包部署经验 / Node 构建与浏览器运行的边界 | `/js_web/` 及演示嵌套路径资源无 404；深层/hash 刷新可用；无开发服务器 fallback 掩盖错误，无服务端 API 假设 |
-| 24 | C47 综合项目与测试选择 | 写 notes/test-plan.md，给目前项目补 3–5 条风险驱动回归 | JUnit 分层经验 / Vitest、RTL、Playwright 各自边界 | 至少覆盖非法快照保护、连续交互、请求失败恢复；不用快照数量充当覆盖；完成恢复与键盘验收 |
-| 24 | C48 总复盘与后续路线 | 在 notes/final-review.md 记录十题自测、现场增量、排错记录和下一阶段 | Java/JS 本次最易错的对照回看；不新增业务框架 | 不看答案给当前应用加一条筛选并解释测试；现场定位一个已学故障；能说清语言→UI→工具→交付；L5/最终验收 |
+| 23 | C45 全链路 Debug 与交付前检查 | 新建 src/services/api-repository.js 与 data-source.js，经 Vite 代理接上本地后端；依次复现请求/状态/资源/存储/布局问题（含 CORS、422、失效、500、慢请求），写 notes/debug.md | Java 堆栈/调试经验 / 浏览器跨层证据与 source maps | 初始数据来自 GET /api/products；每个修复可复现并回归，证据含 Network 与 api 终端日志；做键盘/手机检查；Performance/Memory 有前后证据，不凭一张快照断言泄漏 |
+| 23 | C46 静态构建与 GitHub Pages | 修改构建 base 与构建时数据源、带 /api 代理的严格静态预览和交付说明；学习个人 Pages 流程 | Java 打包部署经验 / Node 构建与浏览器运行的边界 | `/js_web/` 及演示嵌套路径资源无 404；深层/hash 刷新可用；无开发服务器 fallback 掩盖错误；本地预览经代理读后端，Pages 只发 mock 构建 |
+| 24 | C47 综合项目与测试选择 | 写 notes/test-plan.md，给目前项目补 3–5 条风险驱动回归和 1 条真实后端浏览器流程 | JUnit 分层经验 / Vitest、RTL、Playwright 各自边界 | 至少覆盖非法快照保护、422 映射、409 冲突、请求失败恢复与连续输入；不用快照数量充当覆盖；完成恢复与键盘验收 |
+| 24 | C48 总复盘与后续路线 | 在 notes/final-review.md 记录十题自测、现场增量（「仅低库存」走服务端 stock=low）、排错记录和下一阶段；选做两标签页 409 冲突 | Java/JS 本次最易错的对照回看；不新增业务框架 | 不看答案给当前应用加一条服务端筛选并解释测试；现场定位一个已学故障；能说清语言→UI→工具→交付；L5/最终验收 |
 
 ## 不压缩掉的机制与参考页
 

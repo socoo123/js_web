@@ -17,7 +17,7 @@ await mkdir(qa, { recursive: true });
 const requestedRoutes = process.env.REVISION_ROUTES?.split(',').filter(Boolean);
 const routes = globSync('**/*.html', { cwd: dist }).filter((route) => !route.startsWith('demos/')).map((route) => route.replace(/index\.html$/, '')).filter((route) => !requestedRoutes || requestedRoutes.includes(route)).sort();
 if (requestedRoutes) assert.deepEqual([...routes].sort(), [...requestedRoutes].sort(), '请求验收的页面必须全部存在');
-else assert.equal(routes.length, 63, '全站验收必须包含 63 个静态页面（含 Lab 规则页与 L6）');
+else assert.equal(routes.length, 64, '全站验收必须包含 64 个静态页面（含 Lab 规则页、L5 后端接口与 L6）');
 // 固定第一版公开地址；不能随 catalog 改名而静默跳过旧 URL。
 const legacyGroups = {
   '01-history-web': ['c01-story-ecosystem', 'c02-web-debugging'],
@@ -41,7 +41,7 @@ const cardCounts = new Map(catalog.lessons.filter((row) => row.migrated).map((ro
 const copyRoute = '02-language-data/c03-values-types/';
 const sampleRoutes = new Set([
   ...(requestedRoutes ?? []),
-  '', 'roadmap/', 'labs/', 'labs/l5/', 'labs/l6/',
+  '', 'roadmap/', 'labs/', 'labs/l5/', 'labs/api/', 'labs/l6/',
   '03-async-modules/c15-css-layout-responsive/',
   '05-react/c21-react-jsx-components/',
   '05-react/c26-state-ownership-reset/',
