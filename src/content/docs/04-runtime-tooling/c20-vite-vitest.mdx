@@ -87,7 +87,7 @@ npm run lab -- build
 
 静态产物在 dist/src-vanilla，默认资源 base 为 /js_web/demos/inventory/。本机预览需把此目录挂到相同子路径；例如在工作区执行 `python3 -m http.server 8070 --directory .lab/preview` 前，创建 .lab/preview/js_web/demos/inventory 并复制 dist/src-vanilla 内的产物进去。打开 http://127.0.0.1:8070/js_web/demos/inventory/。
 
-Sources 开启 JavaScript source maps，在源文件 app.js 的保存行设断点，再编辑 P004。生成代码位置映射回原源码；映射必须对应本次构建，改源码后重新 build 才会更新静态预览。
+Sources 开启 JavaScript source maps，在源文件 app.js 的保存行设断点，再编辑 P004。生成代码位置映射回原源码；改源码后要重新 build，再将新产物复制到上述预览目录，刷新页面。
 
 <a id="5-typescript-短桥接能转成-js不等于类型正确"></a>
 
@@ -100,7 +100,9 @@ const stock: number = "3";
 console.log(stock + 1);
 ```
 
-Vite 转译这段仍能生成 JS，运行输出 31；独立 tsc 类型检查报 string 不能赋给 number。照终端打印的命令，在隔离文件把字符串改为数字后再检查，应通过，运行结果为 4。
+Vite 转译这段仍能生成 JS，运行输出 31；独立 tsc 类型检查报 string 不能赋给 number。把隔离文件里的字符串改为数字，再执行终端打印的类型检查命令，应通过。
+
+该命令带 `--noEmit`，不会更新之前的 price.mjs。进入终端打印的隔离目录，用 `node price.ts` 直接运行修改后的文件，输出 4；Node 24 会擦除这里的类型标注，但不做类型检查（[Node 官方说明](https://nodejs.org/docs/latest-v24.x/api/typescript.html#type-stripping)）。
 
 类型标注、接口、泛型帮助编辑与静态分析，运行时不保留这些约束。即使 `JSON.parse(text)` 被断言为 Product，真实输入仍可能缺字段；共享校验继续必需。[Vite 的 TypeScript 职责](https://vite.dev/guide/features.html#typescript)。
 

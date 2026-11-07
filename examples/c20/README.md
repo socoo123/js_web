@@ -1,6 +1,6 @@
 # C20 构建工具与第一次 UT · 示例
 
-配套正文：[C20](../../src/content/docs/04-runtime-tooling/c20-vite-vitest.md)。工具与测试在 [阶段 3](../inventory/03-tooling/)，本目录的 Node 示例不需要安装依赖。
+配套正文：[C20](../../src/content/docs/04-runtime-tooling/c20-vite-vitest.mdx)。工具与测试在 [阶段 3](../inventory/03-tooling/)，本目录的 Node 示例不需要安装依赖。
 
 | 文件 | 运行 | 说明 |
 | --- | --- | --- |
@@ -32,6 +32,7 @@
 
 ## 验证记录
 
+- 2026-11-07 · V4 勘误：静态预览是产物副本，补明 build 后重新复制；TS 实验打印的 `tsc --noEmit` 不更新 price.mjs，补上在隔离目录运行 `node price.ts`。依据 `labs/inventory/tools/experiments.mjs` 与 [Node 24 类型擦除文档](https://nodejs.org/docs/latest-v24.x/api/typescript.html#type-stripping)。Node 24.22.0 临时副本实测：修复后的 TS 类型检查 exit 0，旧 price.mjs 仍输出 31，`node price.ts` 输出 4；固定输出 4/4 通过。本轮未重跑浏览器构建预览。
 - 2026-10-17 · macOS arm64 · Node 24.22.0、npm 11.19.1；阶段 3 锁定 Vite 8.3.4、Vitest 5.0.5、TypeScript 7.0.2，根清单与根锁未改。
 - `npm run examples -- c20` 4/4，全量固定输出 200/200 通过。阶段 3 重新 `npm ci` 后，`npm test` 38 条、`npm run build`、report、versions 通过；根 lint/check/build 通过，24 个 HTML 与 20 课产物检查通过。
 - 低库存实验实际先失败再修复通过。练习 2 扩展后 6 条通过；删除下界/排除 5 分别被边界用例发现。实验文件最后恢复故意带错的原始起点。
