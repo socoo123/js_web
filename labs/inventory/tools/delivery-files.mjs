@@ -28,6 +28,6 @@ export async function verifyDeliveryFiles(root = deliveryOutput) {
     sources.push(...map.sources);
   }
   assert(sources.some((name) => name.endsWith('/src/react/App.jsx') || name.endsWith('/App.jsx')), 'map 中找不到当前 App.jsx');
-  assert(sources.some((name) => name.endsWith('/inventory-repository.js')), 'map 中找不到 repository');
+  assert(sources.some((name) => name.endsWith('/api-repository.js')), 'map 中找不到 api-repository.js：默认构建应是 API 模式（不要带 VITE_DATA_SOURCE=mock）');
   console.log(`生产文件：${references.length} 个入口资源、固定 JSON、${maps.length} 份同次构建 source map 通过。`);
 }

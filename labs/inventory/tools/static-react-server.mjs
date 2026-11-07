@@ -1,4 +1,4 @@
-import { createServer } from 'node:http';
+import { createServer, request as forward } from 'node:http';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,11 +8,28 @@ export const deliveryBase = '/js_web/demos/inventory/';
 export const deliveryOutput = path.join(workspace, 'dist/src-react');
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.map': 'application/json', '.woff': 'font/woff', '.woff2': 'font/woff2' };
 
+// /api/ 原样转发给本地后端；后端不可达时给 502 与中文说明，不回退到页面。
+function proxyApi(request, response, apiOrigin) {
+  const target = new URL(request.url, apiOrigin);
+  const upstream = forward(target, { method: request.method, headers: { ...request.headers, host: target.host } }, (answer) => {
+    response.writeHead(answer.statusCode, answer.headers);
+    answer.pipe(response);
+  });
+  response.on('close', () => { if (!response.writableFinished) upstream.destroy(); });
+  upstream.on('error', () => {
+    if (response.headersSent || response.destroyed) { response.destroy(); return; }
+    response.writeHead(502, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+    response.end(JSON.stringify({ error: { code: 'BAD_GATEWAY', message: `本地后端没有响应：${apiOrigin}。先在另一个终端运行 npm run lab -- api。` } }));
+  });
+  request.pipe(upstream);
+}
+
 // Reuse the C35 strict file server. This function never rebuilds or repairs base.
-export async function serveStatic({ root, port }) {
+export async function serveStatic({ root, port, apiOrigin = process.env.LAB_API_ORIGIN ?? 'http://127.0.0.1:8070' }) {
   const actualRoot = await realpath(root);
   await stat(path.join(actualRoot, 'index.html'));
   const server = createServer(async (request, response) => {
+    if (request.url.startsWith('/api/')) { proxyApi(request, response, apiOrigin); return; }
     try {
       if (!['GET', 'HEAD'].includes(request.method)) throw new Error('method');
       const url = new URL(request.url, 'http://localhost');
@@ -39,8 +56,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       config.build.outDir = out;
       await build(config);
     }
-    const server = await serveStatic({ root: out, port: Number(process.env.LAB_E2E_PORT ?? (existing ? 8068 : 8064)) });
-    console.log(`严格静态预览：http://127.0.0.1:${server.address().port}${deliveryBase}${existing ? '（只读已有产物，不build、不修复base）' : '（C35构建冒烟）'}`);
+    const apiOrigin = process.env.LAB_API_ORIGIN ?? 'http://127.0.0.1:8070';
+    const server = await serveStatic({ root: out, port: Number(process.env.LAB_E2E_PORT ?? (existing ? 8068 : 8064)), apiOrigin });
+    console.log(`严格静态预览：http://127.0.0.1:${server.address().port}${deliveryBase}${existing ? '（只读已有产物，不build、不修复base）' : '（C35构建冒烟）'}；/api 转发到 ${apiOrigin}`);
     for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => server.close(() => process.exit(0)));
   } catch (error) { console.error(`严格预览失败：${error.message}。已有产物模式需先执行 npm run lab -- build。`); process.exitCode = 1; }
 }
