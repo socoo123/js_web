@@ -1,0 +1,1061 @@
+/*
+ * L6 毕业挑战。根元素都带 .lab-ui.not-content.cap，基础排版沿用 lab-ui.css。
+ * 颜色只取 tokens.css 的 --js-*；对错状态一律「图标 + 文字 + 颜色」，不只靠颜色。
+ * 宽度跟随正文栏，不向外扩。
+ */
+
+.cap {
+  --cap-gap: 0.75rem;
+  --cap-radius-sm: 10px;
+  margin-block: 1.25rem;
+}
+
+.cap :where(h3, h4) {
+  margin: 0;
+  color: var(--js-color-heading);
+  line-height: 1.35;
+}
+
+.cap-muted {
+  color: var(--js-color-muted);
+  font-size: 0.875rem;
+}
+
+.cap [hidden] {
+  display: none !important;
+}
+
+/* 网格轨道默认不会窄于最长的代码行；显式 minmax(0, 1fr) 才能让代码块在窄屏内部滚动 */
+.cap :where(.cap-q, .cap-bug, .cap-goal, .cap-score, .cap-feedback, .cap-goal-body, .cap-dl, .cap-report, .cap-rubric, .cap-checks, .cap-options) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cap .js-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cap .js-button[data-confirm] {
+  border-color: var(--js-color-err);
+  color: var(--js-color-err);
+}
+
+/* ---------- 进度条（总览、成绩单、项目级别共用） ---------- */
+.cap-bar {
+  position: relative;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--js-border) 80%, transparent);
+  overflow: hidden;
+}
+
+.cap-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--cap-fill, 0%);
+  border-radius: inherit;
+  background: var(--js-color-primary-solid);
+  transition: width var(--js-motion) var(--js-ease);
+}
+
+.cap-bar[data-tone='ok'] > span {
+  background: var(--js-color-ok);
+}
+
+.cap-bar[data-tone='warn'] > span {
+  background: var(--js-color-amber-stroke);
+}
+
+.cap-bar[data-tone='err'] > span {
+  background: var(--js-color-err);
+}
+
+/* ---------- 总览 ---------- */
+.cap-overview {
+  display: grid;
+  gap: var(--cap-gap);
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  padding: 0;
+  list-style: none;
+}
+
+.cap-overview > li {
+  margin: 0;
+}
+
+.cap-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 1rem 1.05rem;
+}
+
+.cap-stage-num {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--js-color-primary-soft);
+  color: var(--js-color-primary);
+  font-weight: 750;
+}
+
+.cap-stage h3 {
+  font-size: 1.0625rem;
+}
+
+.cap-stage p {
+  color: var(--js-color-text);
+  font-size: 0.9375rem;
+}
+
+.cap-stage-foot {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: auto;
+  padding-top: 0.35rem;
+}
+
+.cap-stage-status {
+  color: var(--js-color-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.cap-stage a {
+  font-weight: 650;
+}
+
+/* ---------- 题目 ---------- */
+.cap-quiz-top {
+  position: sticky;
+  top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0rem) + 0.5rem);
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: color-mix(in srgb, var(--js-surface) 92%, transparent);
+  backdrop-filter: blur(6px);
+  font-size: 0.9rem;
+}
+
+.cap-quiz-top .cap-bar {
+  flex: 1 1 8rem;
+}
+
+.cap-quiz-top strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.cap-area {
+  margin-top: 2rem;
+}
+
+.cap-area:first-of-type {
+  margin-top: 0;
+}
+
+.cap-area-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.cap-area-head h3 {
+  font-size: 1.125rem;
+}
+
+.cap-area-mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 8px;
+  background: var(--js-color-primary-soft);
+  color: var(--js-color-primary);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.cap-q {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  scroll-margin-top: calc(var(--sl-nav-height, 3.5rem) + var(--sl-mobile-toc-height, 0rem) + 4.5rem);
+}
+
+.cap-q + .cap-q {
+  margin-top: var(--cap-gap);
+}
+
+.cap-q-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cap-q-num {
+  margin-right: 0.25rem;
+  color: var(--js-color-heading);
+  font-weight: 750;
+}
+
+.cap-q-state {
+  margin-left: auto;
+  font-size: 0.875rem;
+}
+
+.cap-q-prompt {
+  color: var(--js-color-heading);
+  font-weight: 550;
+}
+
+.cap-options {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-options > li {
+  margin: 0;
+}
+
+.cap-opt {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--cap-radius-sm);
+  background: var(--js-surface);
+  color: var(--js-color-text);
+  font: inherit;
+  font-size: 0.9625rem;
+  line-height: 1.55;
+  text-align: start;
+  transition: border-color var(--js-motion) var(--js-ease), background-color var(--js-motion) var(--js-ease),
+    opacity var(--js-motion) var(--js-ease);
+}
+
+button.cap-opt {
+  cursor: pointer;
+}
+
+button.cap-opt:hover:not([aria-disabled='true']) {
+  border-color: color-mix(in srgb, var(--js-color-primary) 60%, var(--js-border));
+  background: var(--js-color-primary-soft);
+}
+
+button.cap-opt:focus-visible,
+.cap-line:focus-visible,
+.cap-rubric-choice input:focus-visible + span,
+.cap-check input:focus-visible {
+  outline: var(--js-focus-ring);
+  outline-offset: 2px;
+}
+
+.cap-opt[aria-disabled='true'] {
+  cursor: default;
+}
+
+.cap-opt-key {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid var(--js-border);
+  border-radius: 50%;
+  background: var(--js-surface-raised);
+  color: var(--js-color-muted);
+  font-size: 0.8125rem;
+  font-weight: 750;
+}
+
+.cap-opt-text {
+  min-width: 0;
+  padding-top: 0.08rem;
+}
+
+.cap-opt-output {
+  margin: 0;
+  padding: 0;
+  background: none;
+  font-family: var(--sl-font-mono);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cap-opt-mark {
+  align-self: center;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.cap-opt[aria-pressed='true'] {
+  border-color: var(--js-color-primary);
+  background: var(--js-color-primary-soft);
+}
+
+.cap-opt[aria-pressed='true'] .cap-opt-key {
+  border-color: var(--js-color-primary-solid);
+  background: var(--js-color-primary-solid);
+  color: var(--js-color-on-primary);
+}
+
+.cap-opt[data-state='correct'],
+.cap-opt[data-state='missed'] {
+  border-color: var(--js-color-ok);
+  background: var(--js-color-ok-soft);
+}
+
+.cap-opt[data-state='missed'] {
+  border-style: dashed;
+}
+
+.cap-opt[data-state='wrong'] {
+  border-color: var(--js-color-err);
+  background: var(--js-color-err-soft);
+}
+
+.cap-opt[data-state='correct'] .cap-opt-key {
+  border-color: var(--js-color-ok);
+  background: var(--js-color-ok);
+  color: var(--js-surface);
+}
+
+.cap-opt[data-state='wrong'] .cap-opt-key {
+  border-color: var(--js-color-err);
+  background: var(--js-color-err);
+  color: var(--js-surface);
+}
+
+.cap-options[data-done] .cap-opt:not([data-state]) {
+  opacity: 0.62;
+}
+
+.cap-q-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.cap-q-actions .js-button {
+  min-height: 2.4rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+}
+
+.cap-q-actions .js-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cap-feedback {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.cap-feedback .cap-feedback-detail {
+  color: var(--js-color-text);
+  font-size: 0.9rem;
+}
+
+.cap-answer-line {
+  color: var(--js-color-heading);
+  font-weight: 650;
+}
+
+.cap-explain > :not(summary) + :not(summary) {
+  margin-top: 0.6rem;
+}
+
+.cap-review {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.cap-review-label {
+  color: var(--js-color-muted);
+  font-weight: 650;
+}
+
+.cap-review a {
+  font-weight: 600;
+}
+
+.cap-lesson-id {
+  margin-right: 0.3rem;
+  font-family: var(--sl-font-mono);
+  font-size: 0.85em;
+}
+
+/* ---------- 成绩单 ---------- */
+.cap-score {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  padding: 1.1rem 1.15rem;
+  scroll-margin-top: calc(var(--sl-nav-height, 3.5rem) + 1rem);
+}
+
+.cap-score-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.9rem;
+}
+
+.cap-score-total {
+  color: var(--js-color-heading);
+  font-size: 1.75rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.cap-areas {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-areas > li {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 13rem) 1fr 3.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.cap-areas .cap-area-count {
+  color: var(--js-color-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.cap-wrong {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-wrong > li {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--js-color-err);
+  border-radius: 0 8px 8px 0;
+  background: var(--js-color-err-soft);
+  font-size: 0.9rem;
+}
+
+.cap-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cap-actions .js-button {
+  min-height: 2.4rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+}
+
+.cap-actions .js-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- 代码（Bug 猎人逐行） ---------- */
+.cap-code {
+  border: 1px solid var(--js-code-border);
+  border-radius: var(--cap-radius-sm);
+  background: var(--js-code-bg);
+  overflow: hidden;
+}
+
+.cap-code-file {
+  padding: 0.35rem 0.85rem;
+  border-bottom: 1px solid var(--js-code-border);
+  color: var(--js-color-muted);
+  font-family: var(--sl-font-mono);
+  font-size: 0.8125rem;
+}
+
+.cap-code-scroll {
+  overflow-x: auto;
+}
+
+.cap-code-body {
+  display: grid;
+  min-width: max-content;
+  padding: 0.45rem 0;
+  font-family: var(--sl-font-mono);
+  font-size: var(--js-code-size);
+  line-height: 1.65;
+}
+
+.cap-line {
+  display: grid;
+  grid-template-columns: 2.6rem auto;
+  align-items: start;
+  margin: 0;
+  padding: 0 0.85rem 0 0;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  white-space: pre;
+}
+
+button.cap-line {
+  cursor: pointer;
+}
+
+button.cap-line:hover:not([data-state]) {
+  background: var(--js-color-primary-soft);
+}
+
+.cap-ln {
+  padding-right: 0.85rem;
+  color: var(--js-color-muted);
+  text-align: end;
+  user-select: none;
+}
+
+.cap-lc span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+  font-weight: var(--shiki-dark-font-weight);
+}
+
+:root[data-theme='light'] .cap-lc span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+  font-weight: var(--shiki-light-font-weight);
+}
+
+.cap-line[data-state='found'] {
+  border-left-color: var(--js-color-ok);
+  background: var(--js-color-ok-soft);
+}
+
+.cap-line[data-state='miss'] {
+  border-left-color: var(--js-color-err);
+  background: var(--js-color-err-soft);
+}
+
+.cap-line[data-state='answer'] {
+  border-left-color: var(--js-color-amber-stroke);
+  background: var(--js-color-amber-soft);
+}
+
+/* ---------- Bug 猎人 ---------- */
+.cap-bug {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  scroll-margin-top: calc(var(--sl-nav-height, 3.5rem) + 1rem);
+}
+
+.cap-bug + .cap-bug {
+  margin-top: 1rem;
+}
+
+.cap-bug h3 {
+  font-size: 1.0625rem;
+}
+
+.cap-bug-scenario {
+  padding: 0.55rem 0.8rem;
+  border-radius: 8px;
+  background: var(--js-color-amber-soft);
+  color: var(--js-color-text);
+}
+
+.cap-bug-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.cap-bug-tools .js-button,
+.cap-bug-tally .js-button {
+  min-height: 2.3rem;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.875rem;
+}
+
+.cap-bug-hint {
+  padding: 0.5rem 0.8rem;
+  border-left: 3px solid var(--js-color-amber-stroke);
+  border-radius: 0 8px 8px 0;
+  background: var(--js-color-amber-soft);
+  font-size: 0.9375rem;
+}
+
+.cap-bug-tally {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  margin-top: 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+}
+
+.cap-bug-tally .cap-bar {
+  flex: 1 1 8rem;
+}
+
+.cap-dl {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.cap-dl dt {
+  color: var(--js-color-heading);
+  font-weight: 700;
+}
+
+.cap-dl dd {
+  margin: 0.1rem 0 0;
+}
+
+/* ---------- 项目 ---------- */
+.cap-cases {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.cap-cases-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+}
+
+.cap-cases :is(th, td) {
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--js-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.cap-cases tr:last-child > * {
+  border-bottom: 0;
+}
+
+.cap-cases th {
+  background: var(--js-surface-raised);
+  color: var(--js-color-heading);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cap-cases td:first-child {
+  font-family: var(--sl-font-mono);
+  white-space: nowrap;
+}
+
+.cap-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.cap-level-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.cap-level-head .cap-bar {
+  flex: 1 1 8rem;
+  max-width: 14rem;
+}
+
+.cap-level-tag {
+  padding: 0.1rem 0.65rem;
+  border-radius: 999px;
+  background: var(--js-color-primary-soft);
+  color: var(--js-color-primary);
+  font-size: 0.8125rem;
+  font-weight: 750;
+}
+
+.cap-level[data-level='advanced'] .cap-level-tag {
+  background: var(--js-color-amber-soft);
+  color: var(--js-color-amber);
+}
+
+.cap-level[data-level='challenge'] .cap-level-tag {
+  background: var(--js-color-java-soft);
+  color: var(--js-color-java);
+}
+
+.cap-level-count {
+  color: var(--js-color-muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cap-goal {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem 1.1rem;
+}
+
+.cap-goal + .cap-goal {
+  margin-top: var(--cap-gap);
+}
+
+.cap-goal h4 {
+  font-size: 1.03rem;
+}
+
+.cap-goal[data-complete] {
+  border-color: color-mix(in srgb, var(--js-color-ok) 55%, var(--js-border));
+}
+
+.cap-goal-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+}
+
+.cap-goal-done {
+  font-size: 0.8125rem;
+}
+
+.cap-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-files > li {
+  margin: 0;
+}
+
+.cap-files code {
+  font-size: 0.8125rem !important;
+}
+
+.cap-goal-body {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.cap-read {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: var(--js-color-primary-soft);
+  font-size: 0.9rem;
+}
+
+.cap-read ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-read li {
+  margin: 0 !important;
+}
+
+.cap-checks {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-checks > li {
+  margin: 0;
+}
+
+.cap-check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color var(--js-motion) var(--js-ease);
+}
+
+.cap-check:hover {
+  background: var(--js-surface-raised);
+}
+
+.cap-check input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0.28rem 0 0;
+  accent-color: var(--js-color-ok);
+}
+
+.cap-check:has(input:checked) > span {
+  color: var(--js-color-muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--js-color-muted) 60%, transparent);
+}
+
+/* ---------- 自评量表 ---------- */
+.cap-scale {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface-raised);
+  font-size: 0.9rem;
+  list-style: none;
+}
+
+.cap-scale > li {
+  margin: 0;
+}
+
+.cap-scale b {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: var(--js-color-primary-soft);
+  color: var(--js-color-primary);
+  font-size: 0.8rem;
+}
+
+.cap-rubric {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.cap-rubric-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--js-surface);
+}
+
+.cap-rubric-name {
+  color: var(--js-color-heading);
+  font-weight: 700;
+}
+
+.cap-rubric-text {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.cap-rubric-actions {
+  margin-top: 0.75rem;
+}
+
+.cap-rubric-choices {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.cap-rubric-choice {
+  position: relative;
+}
+
+.cap-rubric-choice input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.cap-rubric-choice span[aria-hidden] {
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid var(--js-border);
+  border-radius: 50%;
+  background: var(--js-surface-raised);
+  color: var(--js-color-text);
+  font-weight: 700;
+  transition: background-color var(--js-motion) var(--js-ease), border-color var(--js-motion) var(--js-ease);
+}
+
+.cap-rubric-choice input:hover + span {
+  border-color: var(--js-color-primary);
+}
+
+.cap-rubric-choice input:checked + span {
+  border-color: var(--js-color-primary-solid);
+  background: var(--js-color-primary-solid);
+  color: var(--js-color-on-primary);
+}
+
+/* ---------- 毕业报告 ---------- */
+.cap-report {
+  display: grid;
+  gap: 1rem;
+}
+
+.cap-report-stats {
+  display: grid;
+  gap: var(--cap-gap);
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-report-stats > li {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.85rem 1rem;
+}
+
+.cap-report-value {
+  color: var(--js-color-heading);
+  font-size: 1.5rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.cap-weak {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cap-weak > li {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--js-border);
+  border-left: 3px solid var(--js-border);
+  border-radius: 0 var(--js-radius) var(--js-radius) 0;
+  background: var(--js-surface);
+}
+
+.cap-weak > li[data-tone='weak'] {
+  border-left-color: var(--js-color-amber-stroke);
+  background: color-mix(in srgb, var(--js-color-amber-soft) 60%, var(--js-surface));
+}
+
+.cap-weak > li[data-tone='ok'] {
+  border-left-color: var(--js-color-ok);
+}
+
+.cap-weak-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  color: var(--js-color-heading);
+  font-weight: 700;
+}
+
+.cap-weak-why {
+  color: var(--js-color-muted);
+  font-size: 0.875rem;
+}
+
+.cap-weak-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.cap-weak-links > li {
+  margin: 0 !important;
+}
+
+/* 只在脚本接管后显示的控件，和只在没有脚本时显示的说明；只负责隐藏，不改元素自己的 display */
+.cap:not([data-ready]) .cap-js-only,
+.cap[data-ready] .cap-nojs {
+  display: none !important;
+}
+
+@media (max-width: 30rem) {
+  .cap-q,
+  .cap-bug,
+  .cap-goal {
+    padding: 0.85rem 0.8rem;
+  }
+
+  .cap-areas > li {
+    grid-template-columns: 1fr 3rem;
+  }
+
+  .cap-areas > li .cap-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .cap-rubric-row {
+    grid-template-columns: 1fr;
+  }
+
+  .cap-quiz-top {
+    position: static;
+  }
+}

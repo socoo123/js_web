@@ -1,0 +1,40 @@
+---
+// 自评量表：六个领域各选 1–4 分。原生单选按钮，方向键即可切换。
+import { AREAS, RUBRIC, RUBRIC_SCALE } from '../../lib/capstone.mjs';
+import '../lab-ui.css';
+import './capstone.css';
+
+for (const area of AREAS) if (!RUBRIC[area.id]) throw new Error(`L6：自评量表缺少 ${area.id}`);
+---
+
+<section class="cap lab-ui not-content" data-cap-rubric aria-label="自评量表">
+  <ol class="cap-scale" aria-label="分值含义">
+    {RUBRIC_SCALE.map((item) => <li><b>{item.value}</b>{item.label}</li>)}
+  </ol>
+  <div class="cap-rubric">
+    {AREAS.map((area) => (
+      <div class="cap-rubric-row" role="radiogroup" aria-labelledby={`cap-rubric-${area.id}`}>
+        <div class="cap-rubric-text">
+          <span class="cap-rubric-name" id={`cap-rubric-${area.id}`}>{area.label}</span>
+          <span class="cap-muted">{RUBRIC[area.id]}</span>
+        </div>
+        <div class="cap-rubric-choices">
+          {RUBRIC_SCALE.map((item) => (
+            <label class="cap-rubric-choice">
+              <input type="radio" name={`cap-rubric-${area.id}`} value={item.value} data-rubric={area.id} />
+              <span aria-hidden="true">{item.value}</span>
+              <span class="js-visually-hidden">{item.value} 分：{item.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+  <div class="cap-actions cap-rubric-actions cap-js-only">
+    <button type="button" class="js-button" data-variant="secondary" data-rubric-reset disabled>清除自评</button>
+  </div>
+</section>
+
+<script>
+  import '../../scripts/capstone.mjs';
+</script>

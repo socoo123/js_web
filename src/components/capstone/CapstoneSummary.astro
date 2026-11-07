@@ -1,0 +1,57 @@
+---
+// 收尾：从本页记录汇总三关结果，按领域列出薄弱项和建议回看的 Lab / 课。没有 JS 时是一张按领域回看的索引。
+import { AREAS, BUGS, LEVELS, QUESTIONS, href } from '../../lib/capstone.mjs';
+import '../lab-ui.css';
+import './capstone.css';
+---
+
+<section class="cap cap-report lab-ui not-content" data-cap-summary aria-label="毕业报告">
+  <ul class="cap-report-stats cap-js-only">
+    <li class="js-card" data-sum="quiz">
+      <span class="cap-muted">第一关 · 能力自测</span>
+      <span class="cap-report-value" data-sum-value>—</span>
+      <div class="cap-bar" aria-hidden="true"><span></span></div>
+      <span class="cap-muted" data-sum-note>共 {QUESTIONS.length} 题</span>
+    </li>
+    <li class="js-card" data-sum="bugs">
+      <span class="cap-muted">第二关 · Bug 猎人</span>
+      <span class="cap-report-value" data-sum-value>—</span>
+      <div class="cap-bar" aria-hidden="true"><span></span></div>
+      <span class="cap-muted" data-sum-note>共 {BUGS.length} 个</span>
+    </li>
+    <li class="js-card" data-sum="project">
+      <span class="cap-muted">第三关 · 毕业项目</span>
+      <span class="cap-report-value" data-sum-value>—</span>
+      <div class="cap-bar" aria-hidden="true"><span></span></div>
+      <span class="cap-muted" data-sum-note>{LEVELS.map((level) => level.label).join(' / ')}</span>
+    </li>
+  </ul>
+
+  <p class="cap-muted cap-js-only" data-weak-intro>完成第一关后，这里会按领域标出薄弱项。</p>
+  <p class="cap-nojs cap-muted">按领域回看：</p>
+  <ul class="cap-weak" data-weak>
+    {AREAS.map((area) => (
+      <li data-area={area.id}>
+        <div class="cap-weak-title">
+          <span>{area.label}</span>
+          <span class="cap-muted">{area.range}</span>
+          <span class="js-status cap-js-only" data-weak-status hidden></span>
+        </div>
+        <p class="cap-weak-why cap-js-only" data-weak-why hidden></p>
+        <ul class="cap-weak-links">
+          {area.review.map((item) => <li><a href={href(item.href)}>{item.text}</a></li>)}
+        </ul>
+      </li>
+    ))}
+  </ul>
+
+  <div class="cap-actions cap-js-only">
+    <button type="button" class="js-button" data-variant="secondary" data-reset-all disabled>清除本页全部记录</button>
+  </div>
+  <p class="cap-muted">记录只保存在当前浏览器里，不会上传。换浏览器、使用隐私窗口或清除站点数据后，需要重新作答。</p>
+  <p class="js-visually-hidden" aria-live="polite" data-live></p>
+</section>
+
+<script>
+  import '../../scripts/capstone.mjs';
+</script>

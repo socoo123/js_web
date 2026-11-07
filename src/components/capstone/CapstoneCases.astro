@@ -1,0 +1,30 @@
+---
+// 固定数据的验收数字。数字由 scripts/check-capstone.mjs 按 examples/shared/products.json 重新计算核对。
+import { CASES, START } from '../../lib/capstone.mjs';
+import '../lab-ui.css';
+import './capstone.css';
+---
+
+<div class="cap lab-ui not-content">
+  <div class="cap-cases-wrap" tabindex="0" role="region" aria-label="固定数据的预期结果">
+    <table class="cap-cases">
+      <thead>
+        <tr><th scope="col">阈值 / 目标</th><th scope="col">进入计划（补货件数）</th><th scope="col">计划合计</th><th scope="col">确认补货后的汇总</th></tr>
+      </thead>
+      <tbody>
+        {CASES.map((item) => (
+          <tr>
+            <td>{item.threshold} / {item.target}</td>
+            {item.error
+              ? <><td colspan="2">抛出 <code>RangeError</code>：{item.error}</td><td class="cap-num">不变：{START.summary}</td></>
+              : <>
+                  <td>{item.items?.map(([id, amount]) => `${id} +${amount}`).join('、')}</td>
+                  <td class="cap-num">{item.kinds} 种、{item.quantity} 件、{item.costCents} 分</td>
+                  <td class="cap-num">库存 {item.after?.[0]} / 价值 {item.after?.[1]} 分</td>
+                </>}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
