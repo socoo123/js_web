@@ -9,6 +9,11 @@
 - `npm run lab -- compare C03`：只读对照本发行版参考解，不应用补丁。
 - `npm run lab -- restore C02 ../inventory-recovery`：将 C03 的参考起点另存到新目录。目标存在且非空时拒绝，不覆盖作业。
 - `npm run lab -- build`：构建当前界面，默认演示路径 `/js_web/demos/inventory/`，不是网站源码目录。
+- `npm run lab -- api`：启动本地库存后端 `http://127.0.0.1:8070/api`，前台运行并逐行打印请求，Ctrl+C 停止。
+- `npm run lab -- api reset`：恢复后端的固定数据；后端在运行时通过接口恢复，没运行时直接改写数据文件，损坏的文件另存不删。
+- `npm run lab -- shell`：在 `http://127.0.0.1:8061` 打开空白前端壳 `shell/`，`/api` 代理到 8070，供 L5 选做「从零写前端」。
+
+L5 的本地后端 `server/` 与前端壳 `shell/` 从 2026.11-v4.0 的 C44 工作区起提供，说明见 `server/README.md`；学员只写前端。更早发行版的工作区没有这两个目录，执行上面三个命令会提示按 Lab 总览的升级说明取得新工作区。
 
 ## 暂停、恢复与只读对照
 
