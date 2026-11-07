@@ -7,14 +7,18 @@ import { fileURLToPath } from 'node:url';
 import catalog from '../labs/catalog.json' with { type: 'json' };
 import demos from '../labs/demos.json' with { type: 'json' };
 import l3 from '../labs/steps/l3.json' with { type: 'json' };
+import l1 from '../labs/steps/l1.json' with { type: 'json' };
 import { LAB_STEP_IDS } from '../labs/steps/ids.mjs';
-import { finishAnchor, inlineHtml, normalizeLab, readHref, stepAnchor, validateLab } from '../labs/steps/model.mjs';
-import { anchorIssue, checkLabSteps, idsModule } from '../scripts/check-lab-steps.mjs';
+import {
+  finishAnchor, inlineHtml, lessonTabHref, lessonTabId, normalizeLab, readHref, stepAnchor, validateLab,
+} from '../labs/steps/model.mjs';
+import { anchorIssue, checkLabSteps, idsModule, loadSteps } from '../scripts/check-lab-steps.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const context = { catalog, demos: demos.demos, file: 'l3.json' };
 const copy = () => structuredClone(l3);
 const errorsOf = (data) => validateLab(data, context);
+const allLabs = () => loadSteps(repo).map(({ file, data }) => normalizeLab(data, { catalog, demos: demos.demos, file }));
 
 test('L3 步骤数据通过校验，C21–C36 每课 1–3 步且都被「先读」引用', () => {
   assert.deepEqual(errorsOf(l3), []);
@@ -38,10 +42,38 @@ test('缺省的文件与检查命令取自 catalog', () => {
   assert.equal(lab.steps.find((step) => step.stepId === 'l3-c23-2').lastOfLesson, true);
 });
 
+test('五个 Lab 都有数据文件；没有步骤的 Lab 只有目标与收尾', () => {
+  const labs = allLabs();
+  assert.deepEqual(labs.map((lab) => lab.labId), ['L1', 'L2', 'L3', 'L4', 'L5']);
+  for (const lab of labs.filter((item) => item.labId !== 'L3')) {
+    assert.deepEqual(lab.steps, [], lab.labId);
+    assert.deepEqual(lab.lessons, catalog.lessons.filter((row) => row.labId === lab.labId).map((row) => row.lessonId));
+    assert.ok(lab.finish.length >= 4, lab.labId);
+    assert.deepEqual(lab.finish.map((item) => item.id), lab.finish.map((_, index) => `${lab.labId.toLowerCase()}-finish-${index + 1}`));
+  }
+  assert.deepEqual(validateLab(l1, { ...context, file: 'l1.json' }), []);
+});
+
+test('没有步骤就省略 steps；空数组和缺目标被拒绝', () => {
+  const ctx = { ...context, file: 'l1.json' };
+  const empty = { ...structuredClone(l1), steps: [] };
+  assert.match(validateLab(empty, ctx).join('\n'), /steps 不能为空/);
+  const noGoal = structuredClone(l1);
+  delete noGoal.goal.summary;
+  assert.ok(validateLab(noGoal, ctx).length > 0);
+});
+
+test('课程标签的 id 与链接', () => {
+  assert.equal(lessonTabId('C06'), 'c06');
+  assert.equal(lessonTabHref('/js_web/', 'L1', 'C06'), '/js_web/labs/l1/#c06');
+});
+
 test('生成的 ids.mjs 与步骤数据同步', () => {
-  const lab = normalizeLab(l3, context);
-  assert.equal(readFileSync(path.join(repo, 'labs/steps/ids.mjs'), 'utf8'), idsModule([lab]));
+  const labs = allLabs();
+  assert.equal(readFileSync(path.join(repo, 'labs/steps/ids.mjs'), 'utf8'), idsModule(labs));
+  const lab = labs.find((item) => item.labId === 'L3');
   assert.deepEqual(LAB_STEP_IDS.L3, [...lab.steps.map((step) => step.stepId), ...lab.finish.map((item) => item.id)]);
+  assert.deepEqual(LAB_STEP_IDS.L1, ['l1-finish-1', 'l1-finish-2', 'l1-finish-3', 'l1-finish-4']);
 });
 
 for (const [name, mutate, pattern] of [
@@ -83,36 +115,36 @@ test('行内文字只渲染代码和站内链接，其余转义', () => {
   assert.equal(inlineHtml('<b>粗</b>'), '&lt;b&gt;粗&lt;/b&gt;');
 });
 
-function fakeDist(lab, { drop } = {}) {
+function fakeDist(labs, { drop, bar } = {}) {
   const dist = mkdtempSync(path.join(tmpdir(), 'lab-steps-dist-'));
   const put = (slug, html) => { mkdirSync(path.join(dist, slug), { recursive: true }); writeFileSync(path.join(dist, slug, 'index.html'), html); };
-  const anchors = new Map();
-  for (const step of lab.steps) for (const item of step.read) {
-    if (!anchors.has(item.slug)) anchors.set(item.slug, new Set());
-    if (`${item.lessonId}#${item.anchor}` !== drop) anchors.get(item.slug).add(item.anchor);
+  const pages = new Map();
+  const add = (slug, html) => pages.set(slug, [...(pages.get(slug) ?? []), html]);
+  for (const lab of labs) {
+    for (const step of lab.steps) for (const item of step.read) {
+      if (`${item.lessonId}#${item.anchor}` !== drop) add(item.slug, `<div class="sl-heading-wrapper level-h2"><h2 id="${item.anchor}">x</h2></div>`);
+    }
+    for (const lessonId of lab.lessons) {
+      const row = catalog.lessons.find((item) => item.lessonId === lessonId);
+      const href = bar?.[lessonId] ?? lessonTabHref('/js_web/', lab.labId, lessonId);
+      add(row.slug, `<nav class="lab-bar" data-lab-bar="${lessonId}"><a href="${href}">返回</a></nav>`);
+    }
+    put(`labs/${lab.labId.toLowerCase()}`, [
+      `<ol>${lab.lessons.map((id) => `<li><a href="#${lessonTabId(id)}">${id}</a></li>`).join('')}</ol>`,
+      ...lab.lessons.map((id) => `<section id="${lessonTabId(id)}" data-lesson-panel="${id}">${lab.steps.filter((step) => step.lessonId === id).map((step) => (
+        `<li id="${stepAnchor(step.stepId)}">${step.read.map((item) => `<a href="${readHref('/js_web/', item, step.stepId)}">读</a>`).join('')}<input data-lab-step-toggle="${step.stepId}"></li>`
+      )).join('')}</section>`),
+      `<ol id="${finishAnchor(lab.labId)}">${lab.finish.map((item) => `<input data-lab-step-toggle="${item.id}">`).join('')}</ol>`,
+    ].join('\n'));
   }
-  for (const lessonId of lab.lessons) {
-    const row = catalog.lessons.find((item) => item.lessonId === lessonId);
-    const first = lab.steps.find((step) => step.lessonId === lessonId);
-    if (!anchors.has(row.slug)) anchors.set(row.slug, new Set());
-    anchors.get(row.slug).add(`bar:${lessonId}:${first.stepId}`);
-  }
-  for (const [slug, ids] of anchors) {
-    put(slug, [...ids].map((id) => id.startsWith('bar:')
-      ? `<nav data-lab-bar="${id.split(':')[1]}"><a href="/js_web/labs/l3/#${stepAnchor(id.split(':')[2])}">返回</a></nav>`
-      : `<div class="sl-heading-wrapper level-h2"><h2 id="${id}">x</h2></div>`).join('\n'));
-  }
-  const page = [
-    ...lab.steps.map((step) => `<li id="${stepAnchor(step.stepId)}">${step.read.map((item) => `<a href="${readHref('/js_web/', item, step.stepId)}">读</a>`).join('')}<input data-lab-step-toggle="${step.stepId}"></li>`),
-    `<ol id="${finishAnchor(lab.labId)}">${lab.finish.map((item) => `<input data-lab-step-toggle="${item.id}">`).join('')}</ol>`,
-  ].join('\n');
-  put('labs/l3', page);
+  for (const [slug, parts] of pages) put(slug, parts.join('\n'));
   return dist;
 }
 
 function fakeRepo() {
   const root = mkdtempSync(path.join(tmpdir(), 'lab-steps-repo-'));
-  for (const file of ['labs/catalog.json', 'labs/demos.json', 'labs/steps/l3.json', 'labs/steps/ids.mjs']) {
+  const steps = loadSteps(repo).map(({ file }) => `labs/steps/${file}`);
+  for (const file of ['labs/catalog.json', 'labs/demos.json', ...steps, 'labs/steps/ids.mjs']) {
     mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
     cpSync(path.join(repo, file), path.join(root, file));
   }
@@ -120,16 +152,31 @@ function fakeRepo() {
 }
 
 test('先红后绿：删掉一个「先读」锚点时检查失败，恢复后通过', () => {
-  const lab = normalizeLab(l3, context);
+  const labs = allLabs();
   const root = fakeRepo();
-  const red = fakeDist(lab, { drop: 'C06#4-闭包函数返回以后绑定仍然可用' });
-  const green = fakeDist(lab);
+  const red = fakeDist(labs, { drop: 'C06#4-闭包函数返回以后绑定仍然可用' });
+  const green = fakeDist(labs);
   try {
     const failed = checkLabSteps({ root, dist: red });
     assert.deepEqual(failed.errors, ['l3-c23-1 先读 C06#4-闭包函数返回以后绑定仍然可用：锚点不存在']);
     assert.deepEqual(checkLabSteps({ root, dist: green }).errors, []);
   } finally {
     for (const dir of [root, red, green]) rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('LabBar 没指向本课标签、或 Lab 页少了课程面板时检查失败', () => {
+  const labs = allLabs();
+  const root = fakeRepo();
+  const wrongBar = fakeDist(labs, { bar: { C06: '/js_web/labs/l1/' } });
+  const missingPanel = fakeDist(labs);
+  const l2 = path.join(missingPanel, 'labs/l2/index.html');
+  writeFileSync(l2, readFileSync(l2, 'utf8').replace('data-lesson-panel="C14"', ''));
+  try {
+    assert.deepEqual(checkLabSteps({ root, dist: wrongBar }).errors, ['C06 的 LabBar 没有链接到本课标签 /js_web/labs/l1/#c06']);
+    assert.deepEqual(checkLabSteps({ root, dist: missingPanel }).errors, ['labs/l2 缺少 C14 的标签面板 #c14']);
+  } finally {
+    for (const dir of [root, wrongBar, missingPanel]) rmSync(dir, { recursive: true, force: true });
   }
 });
 

@@ -1,10 +1,13 @@
-// 校验 labs/steps/l*.json：结构与编号、每课有步骤、Lab 内每课都被「先读」引用、生成的 ids.mjs 同步，
-// 以及「先读」锚点在构建产物 dist/<slug>/index.html 中真实存在。截图是否存在由 check-build 的 data-missing-preview 规则负责。
+// 校验 labs/steps/l*.json：结构与编号、有步骤的 Lab 每课有步骤且都被「先读」引用、生成的 ids.mjs 同步，
+// 以及构建产物里：「先读」锚点真实存在；Lab 页每课一个标签面板、步骤锚点、收尾清单与勾选框；课页 LabBar 指向本课标签。
+// 截图是否存在由 check-build 的 data-missing-preview 规则负责。
 // 用法：node scripts/check-lab-steps.mjs [--write] [--source] [--dist 目录]
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LAB_FILE, finishAnchor, labProgressIds, normalizeLab, readHref, stepAnchor, validateLab } from '../labs/steps/model.mjs';
+import {
+  LAB_FILE, finishAnchor, labProgressIds, lessonTabHref, lessonTabId, normalizeLab, readHref, stepAnchor, validateLab,
+} from '../labs/steps/model.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const base = '/js_web/';
@@ -82,6 +85,11 @@ export function checkLabSteps({ root = repo, dist = path.join(root, 'dist'), sou
     const labSlug = `labs/${lab.labId.toLowerCase()}`;
     const html = page(labSlug);
     if (html === null) { errors.push(`缺少 ${labSlug}/index.html`); continue; }
+    for (const lessonId of lab.lessons) {
+      const tab = lessonTabId(lessonId);
+      if (!html.includes(`id="${tab}"`) || !html.includes(`data-lesson-panel="${lessonId}"`)) errors.push(`${labSlug} 缺少 ${lessonId} 的标签面板 #${tab}`);
+      if (!html.includes(`href="#${tab}"`)) errors.push(`${labSlug} 缺少指向 #${tab} 的课程标签`);
+    }
     for (const step of lab.steps) {
       if (!html.includes(`id="${stepAnchor(step.stepId)}"`)) errors.push(`${labSlug} 缺少步骤锚点 ${stepAnchor(step.stepId)}`);
       for (const item of step.read) {
@@ -94,11 +102,11 @@ export function checkLabSteps({ root = repo, dist = path.join(root, 'dist'), sou
     }
     for (const lessonId of lab.lessons) {
       const row = catalog.lessons.find((item) => item.lessonId === lessonId);
-      const own = lab.steps.filter((step) => step.lessonId === lessonId);
       const lesson = page(row.slug);
       if (lesson === null) continue;
-      const first = `href="${base}${labSlug}/#${stepAnchor(own[0].stepId)}"`;
-      if (!lesson.includes(`data-lab-bar="${lessonId}"`) || !lesson.includes(first)) errors.push(`${lessonId} 的 LabBar 没有链接到第一步 ${own[0].stepId}`);
+      const href = lessonTabHref(base, lab.labId, lessonId);
+      const bar = lesson.match(new RegExp(`<nav\\b[^>]*data-lab-bar="${lessonId}"[^]*?</nav>`))?.[0] ?? '';
+      if (!bar.includes(`href="${href}"`)) errors.push(`${lessonId} 的 LabBar 没有链接到本课标签 ${href}`);
     }
   }
   return { errors, labs };
@@ -106,6 +114,7 @@ export function checkLabSteps({ root = repo, dist = path.join(root, 'dist'), sou
 
 export function summarize(labs) {
   return labs.map((lab) => {
+    if (!lab.steps.length) return `${lab.labId}：尚无步骤数据，${lab.finish.length} 项收尾；Lab 页按 catalog 显示 ${lab.lessons.length} 个课程标签`;
     const perLesson = lab.lessons.map((id) => `${id}×${lab.steps.filter((step) => step.lessonId === id).length}`).join(' ');
     const reads = lab.steps.flatMap((step) => step.read.map((item) => ({ step, item })));
     const back = reads.filter(({ step, item }) => item.lessonId !== step.lessonId);

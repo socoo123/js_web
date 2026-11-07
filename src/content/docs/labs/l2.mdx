@@ -5,27 +5,69 @@ sidebar:
   order: 2
 ---
 
-import LabOverview from '../../../components/LabOverview.astro';
+import LabHero from '../../../components/LabHero.astro';
+import LabPoints from '../../../components/LabPoints.astro';
+import LabLessonTabs from '../../../components/LabLessonTabs.astro';
+import LabFinish from '../../../components/LabFinish.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
+
+<LabHero labId="L2" />
 
 ## 本 Lab 的任务与规则
 
-你要让店员通过网页使用 L1 的库存规则。字段与数字沿用[共用规则](/js_web/labs/rules/)，本阶段完成：
+字段与数字沿用[共用规则](/js_web/labs/rules/)，本阶段完成四件事：
 
-1. **列表与编辑**：显示六件商品，筛选后仍按编号编辑；P004 库存填 8 后取消仍是 3，保存后变成 8，总库存为 57。
-2. **加载与数据保护**：展示加载、空结果和错误；保存后刷新可恢复，非法导入保留现有好数据。
-3. **可用的页面**：用键盘完成编辑，焦点清楚；在 360/768/1280px 下分别排单、双、四列，整页没有横向滚动。
-4. **同一规则两端运行**：浏览器和 Node 报表用相同的统计逻辑；为正常、空集合和非法输入写单元测试。
+<LabPoints>
+
+1. **列表与编辑**
+
+   显示六件商品，筛选后仍按编号编辑；P004 库存填 8 后取消仍是 3，保存后变成 8，总库存为 57。
+
+2. **加载与数据保护**
+
+   展示加载、空结果和错误；保存后刷新可恢复，非法导入保留现有好数据。
+
+3. **可用的页面**
+
+   用键盘完成编辑，焦点清楚；在 360/768/1280px 下分别排单、双、四列，整页没有横向滚动。
+
+4. **同一规则两端运行**
+
+   浏览器和 Node 报表用相同的统计逻辑；为正常、空集合和非法输入写单元测试。
+
+</LabPoints>
 
 页面在 `src/vanilla/`，请求与存储在 `src/services/`，Node 报表在 `src/cli/report.js`。按课程逐步拆分，具体文件位置和操作写在每课正文。
 
-## 从哪里开始
-
-继续 L1 自己完成的 `inventory/`。需要补课时，将 <WorkspaceDownload checkpoint="C10" label="C10 起点包" />解压到新的空目录，执行一次 `npm ci`；也可在已有工程运行 `npm run lab -- restore C10 ../inventory-web`，非空目标会被拒绝。安装、校验与升级说明见[工作区入口](/js_web/labs/)。
-
-在工作区执行 `npm run lab -- start C11`、`npm run lab -- dev`。C10 已有规则与单商品卡片；六商品列表、存储和构建由这一阶段逐步完成，不必另建原生项目。
-
 ## 在同一页面推进
+
+每课一个标签：要做什么、改哪些文件、怎样验收都在标签里。读完课文，用课页顶部的「返回 Lab」回到本课标签。
+
+<LabLessonTabs labId="L2">
+<Fragment slot="C16">
+
+C16 列出完整的文件搬移清单，按正文一次完成。
+
+</Fragment>
+<Fragment slot="C18">
+
+锁与包管理器实验在 `.lab/sandboxes/`，不切换主工程锁。
+
+</Fragment>
+<Fragment slot="C19">
+
+管理器实验同样在 `.lab/sandboxes/`，不切换主工程锁。Node/Bun 是运行时，npm/Yarn/pnpm 是包管理器。
+
+</Fragment>
+<Fragment slot="C20">
+
+TypeScript 只做短桥接。
+
+</Fragment>
+</LabLessonTabs>
+
+<details>
+<summary>按学习段看全貌</summary>
 
 | 学习段 | 增加什么 | 看得到的结果 |
 | --- | --- | --- |
@@ -33,23 +75,32 @@ import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 | C15–C16 | CSS 布局、响应式与一次模块拆分 | 360/768/1280px 可用，焦点可见；业务行为不因拆分改变 |
 | C17–C20 | Node 报表、npm scripts、隔离工具实验、Vite 与 Vitest | 浏览器与 Node 用同一规则；空白输入回归能先红后绿 |
 
-C16 列出完整的文件搬移清单，按正文一次完成。C18/C19 的锁与管理器实验在 `.lab/sandboxes/`，不切换主工程锁。Node/Bun 是运行时，npm/Yarn/pnpm 是包管理器；TypeScript 只做短桥接。
+</details>
 
 ## 收尾：页面真的可用
 
-每个场景从独立固定数据开始，按 [C20](/js_web/04-runtime-tooling/c20-vite-vitest/)完成：
+每个场景从独立固定数据开始，按 [C20](/js_web/04-runtime-tooling/c20-vite-vitest/) 完成，逐项核对后勾选：
 
-1. 筛选 P004，库存草稿填 8 后取消，仍为 3/总库存 52；重新保存 8，只改 P004，总库存 57，P001 仍 12。
-2. 刷新保留已保存值；坏 JSON 或非法字段导入被拒绝，好数据原文保持不变。
-3. 手机无整页横滚；360/768/1280px 单/双/四列，键盘能编辑与保存。
-4. 独立初始数据的 Node 报表为 6/52/2634800；正常、空集合、非法输入的 UT 覆盖真实规则。
+<LabFinish labId="L2" />
 
 在当前目录执行 `npm run lab -- check C20`，按课内步骤检查构建和 source map。开发服务器能显示页面，不代表生产路径也正确。
 
-## 暂停、恢复与下一步
+## 起点、暂停与恢复
+
+<details id="从哪里开始">
+<summary>从哪里开始：继续 L1 的工程或从 C10 补课</summary>
+
+继续 L1 自己完成的 `inventory/`。需要补课时，将 <WorkspaceDownload checkpoint="C10" label="C10 起点包" />解压到新的空目录，执行一次 `npm ci`；也可在已有工程运行 `npm run lab -- restore C10 ../inventory-web`，非空目标会被拒绝。安装、校验与升级说明见[工作区入口](/js_web/labs/)。
+
+在工作区执行 `npm run lab -- start C11`、`npm run lab -- dev`。C10 已有规则与单商品卡片；六商品列表、存储和构建由这一阶段逐步完成，不必另建原生项目。
+
+</details>
+
+<details id="暂停恢复与下一步">
+<summary>暂停、恢复与进入 L3</summary>
 
 在 `notes/next.md` 留下当前课、改动、观察结果和下一步；商品数据先从应用导出，源码另行备份。网页阅读进度不会备份这些内容。
 
 完成后从自己的 C20 继续 [L3](/js_web/labs/l3/)。需要对照时再用 <WorkspaceDownload checkpoint="C20" label="C20 完成参考解" />另存到新目录，不用它覆盖已有作业。
 
-<LabOverview labId="L2" />
+</details>

@@ -127,7 +127,7 @@ try {
 
   const labs = await context.newPage(); track(labs);
   await page.evaluate((key) => localStorage.setItem(key, JSON.stringify({ version: 1, completed: ['C21'] })), PROGRESS_KEY);
-  await labs.goto(base + lab3);
+  await labs.goto(base + lab3 + '#c23');
   const step = (target, id) => target.locator(`[data-lab-step-toggle="${id}"]`);
   await expect(step(labs, 'l3-c23-1')).not.toBeChecked();
   await expect(labs.locator('[data-lab-steps] [data-lab-progress-count]')).toHaveText(`已勾选 0 / ${LAB_STEPS.L3.length - 5} 步`);
@@ -145,7 +145,7 @@ try {
   await expect(labs.locator('#step-l3-c23-1')).toHaveClass(/is-done/);
   await expect(labs.locator('[data-lab-progress-next]').first()).toHaveText(/^继续第 1 步/);
   const labsOther = await context.newPage(); track(labsOther);
-  await labsOther.goto(base + lab3);
+  await labsOther.goto(base + lab3 + '#c23');
   await step(labsOther, 'l3-c23-1').uncheck();
   await expect(step(labs, 'l3-c23-1')).not.toBeChecked();
   await expect(summary(page)).toHaveText(roadmapText(1, 1));
