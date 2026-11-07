@@ -12,6 +12,7 @@ lesson:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import Effect from '../../../components/Effect.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 import Predict from '../../../components/Predict.astro';
@@ -125,7 +126,7 @@ console.log(Number.parseInt("3.8", 10));
 
 `Number.isInteger` 对 NaN、Infinity 和小数都返回 false。失败时抛出带原因的 RangeError，页面显示这个原因，商品保留上次的有效值。
 
-![输入边界：文本先经过非空检查、Number 转换和整数范围校验，再参与库存计算，最后转换成显示文字。](../../../assets/diagrams/c03-value-boundary.svg)
+<Diagram name="c03-value-boundary" />
 
 从上往下读：外部文本只在入口处理一次，后面的计算只用检查过的数字。
 

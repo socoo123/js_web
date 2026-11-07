@@ -1,0 +1,100 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Group from './Group.astro';
+
+const legend = [
+  { line: 'solid' as const, text: '「模块依赖」里箭头指向被导入的模块；「包安装」里箭头表示安装信息流；两部分没有时序关系' },
+];
+---
+<DiagramFrame name="c16-esm-dependencies" legend={legend}>
+  <div class="c16">
+    <Group label="模块依赖 · 谁导入谁" tone="primary" bodyClass="c16-mod">
+      <Node class="c16-app"><span class="dg-t"><code>app.js</code></span><span class="dg-s">页面事件与状态</span></Node>
+      <Arrow class="c16-am1" label="静态 import" />
+      <Arrow class="c16-am2" label="静态 import" />
+      <Node class="c16-core" tone="primary"><span class="dg-t"><code>src/<wbr />core/<wbr />inventory.js</code></span><span class="dg-s">公开入口 facade</span></Node>
+      <Arrow class="c16-reuse" dir="left" label="复用校验与统计" />
+      <Node class="c16-storage"><span class="dg-t"><code>src/<wbr />services/<wbr />storage.js</code></span><span class="dg-s">持久化适配</span></Node>
+      <Arrow class="c16-fwd" label="转发导出" />
+      <Node class="c16-rules"><span class="dg-t">validation / stock / summary 等</span><span class="dg-s">已有纯业务函数</span></Node>
+    </Group>
+    <Group label="包安装 · 文件从哪里来" tone="ok" bodyClass="c16-ins">
+      <Node class="c16-man"><span class="dg-t"><code>package.json</code></span><span class="dg-s">依赖范围 · scripts</span></Node>
+      <Node class="c16-lock"><span class="dg-t"><code>package-<wbr />lock.json</code></span><span class="dg-s">具体版本 · 来源 · 摘要</span></Node>
+      <Arrow class="c16-a-man" />
+      <Arrow class="c16-a-lock" />
+      <Node class="c16-ci" tone="primary"><span class="dg-t"><code>npm ci</code></span><span class="dg-s">检查清单与锁</span></Node>
+      <Arrow class="c16-a-ok" tone="ok" label="一致" />
+      <Arrow class="c16-a-bad" tone="err" label="不一致" />
+      <Node class="c16-reg"><span class="dg-t">registry / 缓存</span><span class="dg-s">取得锁定内容</span></Node>
+      <Node class="c16-rej" tone="err"><span class="dg-t">安装失败</span><span class="dg-s">确认是否有意改依赖</span></Node>
+      <Arrow class="c16-a-disk" label="安装包并建立命令入口" />
+      <Node class="c16-disk" tone="ok"><span class="dg-t"><code>node_modules</code></span><span class="dg-s">锁定依赖与本地工具</span></Node>
+      <Arrow class="c16-a-run" />
+      <Node class="c16-run"><span class="dg-t"><code>npm run report</code></span><span class="dg-s">调用 Node 报表</span></Node>
+    </Group>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c16 {
+    display: grid;
+    gap: 0.9rem;
+    text-align: center;
+  }
+  .c16 .dg-group-body { display: grid; align-items: center; }
+  .c16-mod > .dg-node { display: grid; align-content: center; padding-inline: 0.45rem; }
+  .c16-mod code { font-size: 0.8em; }
+  .c16-mod {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      'app app app'
+      'am1 . am2'
+      'core reuse storage'
+      'fwd . .'
+      'rules . .';
+  }
+  .c16-app { grid-area: app; }
+  .c16-am1 { grid-area: am1; }
+  .c16-am2 { grid-area: am2; }
+  .c16-core { grid-area: core; align-self: stretch; }
+  .c16-reuse { grid-area: reuse; }
+  .c16-reuse .dg-arrow-label { max-inline-size: 5em; }
+  .c16-storage { grid-area: storage; align-self: stretch; }
+  .c16-fwd { grid-area: fwd; }
+  .c16-rules { grid-area: rules; }
+  .c16-ins {
+    grid-template-columns: minmax(0, 1fr) 0.6rem minmax(0, 1fr);
+    grid-template-areas:
+      'man . lock'
+      'aman . alock'
+      'ci ci ci'
+      'aok . abad'
+      'reg . rej'
+      'adisk . .'
+      'disk . .'
+      'arun . .'
+      'run . .';
+  }
+  .c16-man { grid-area: man; align-self: stretch; }
+  .c16-lock { grid-area: lock; align-self: stretch; }
+  .c16-a-man { grid-area: aman; }
+  .c16-a-lock { grid-area: alock; }
+  .c16-ci { grid-area: ci; }
+  .c16-a-ok { grid-area: aok; }
+  .c16-a-bad { grid-area: abad; }
+  .c16-reg { grid-area: reg; align-self: stretch; }
+  .c16-rej { grid-area: rej; align-self: stretch; }
+  .c16-a-disk { grid-area: adisk; }
+  .c16-disk { grid-area: disk; }
+  .c16-a-run { grid-area: arun; }
+  .c16-run { grid-area: run; }
+  @container dg (min-width: 40rem) {
+    .c16 {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+</style>

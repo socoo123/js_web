@@ -7,6 +7,7 @@ sidebar:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 1 周 · 第 1 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -102,7 +103,7 @@ console.log(document.querySelector("#product").textContent);
 
 `./app.js` 相对当前 HTML 的目录解析；`/app.js` 从域名根目录解析。目录名、文件名和大小写都要一致。GitHub Pages 使用子路径，到了交付阶段会再检查这些差异。
 
-![页面加载：浏览器取得 HTML，建立 DOM，加载 CSS 和模块脚本；脚本查找节点并绑定事件，用户提交后再更新页面。](../../../assets/diagrams/c02-page-flow.svg)
+<Diagram name="c02-page-flow" />
 
 沿请求与解析读到事件更新：HTML 负责结构，CSS 负责布局，脚本负责把数据与节点连起来。这里的 module 脚本在文档解析后执行，因此能找到前面写出的节点；模块规则在后面的专门课程展开。
 

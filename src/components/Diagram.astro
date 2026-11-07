@@ -1,0 +1,41 @@
+---
+// 课程机制图入口：课文写 <Diagram name="c12-browser-event-loop" />，名称见 diagrams/registry.mjs。
+import { DIAGRAMS } from './diagrams/registry.mjs';
+import C01Ecosystem from './diagrams/C01Ecosystem.astro';
+import C02PageFlow from './diagrams/C02PageFlow.astro';
+import C03ValueBoundary from './diagrams/C03ValueBoundary.astro';
+import C04Scope from './diagrams/C04Scope.astro';
+import C05AliasCopy from './diagrams/C05AliasCopy.astro';
+import C06ClosureEnvironment from './diagrams/C06ClosureEnvironment.astro';
+import C07PrototypeLookup from './diagrams/C07PrototypeLookup.astro';
+import C10CategoryTraversal from './diagrams/C10CategoryTraversal.astro';
+import C12BrowserEventLoop from './diagrams/C12BrowserEventLoop.astro';
+import C16EsmDependencies from './diagrams/C16EsmDependencies.astro';
+import C23StateSnapshot from './diagrams/C23StateSnapshot.astro';
+import C29EffectLifecycle from './diagrams/C29EffectLifecycle.astro';
+import C39Ui5FamilyBinding from './diagrams/C39Ui5FamilyBinding.astro';
+import C46StaticBuildPages from './diagrams/C46StaticBuildPages.astro';
+
+interface Props { name: string }
+const { name } = Astro.props;
+const components = {
+  'c01-ecosystem': C01Ecosystem,
+  'c02-page-flow': C02PageFlow,
+  'c03-value-boundary': C03ValueBoundary,
+  'c04-scope': C04Scope,
+  'c05-alias-copy': C05AliasCopy,
+  'c06-closure-environment': C06ClosureEnvironment,
+  'c07-prototype-lookup': C07PrototypeLookup,
+  'c10-category-traversal': C10CategoryTraversal,
+  'c12-browser-event-loop': C12BrowserEventLoop,
+  'c16-esm-dependencies': C16EsmDependencies,
+  'c23-state-snapshot': C23StateSnapshot,
+  'c29-effect-lifecycle': C29EffectLifecycle,
+  'c39-ui5-family-binding': C39Ui5FamilyBinding,
+  'c46-static-build-pages': C46StaticBuildPages,
+};
+if (Object.keys(components).join() !== Object.keys(DIAGRAMS).join()) throw new Error('Diagram.astro 的分支与 diagrams/registry.mjs 不一致');
+const Component = components[name as keyof typeof components];
+if (!Component) throw new Error(`未登记的机制图：${name}`);
+---
+<Component />

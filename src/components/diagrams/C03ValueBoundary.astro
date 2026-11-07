@@ -1,0 +1,97 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+
+const steps = [
+  '外部输入来自输入框、JSON 或 URL，拿到的都是 string。',
+  '进入边界先判空：去掉首尾空白后什么都没有，就直接拒绝。',
+  '再转换：`Number(text)` 可能得到 NaN。',
+  '最后校验整数和 0–99999 的范围；不通过就拒绝，提示原因，库存保持不变。',
+  '通过后才进入业务计算，这里只用检查过的 number（整数分、`===`）。',
+  '显示时再用 `toFixed(2)`、`String()` 转回 string。',
+];
+const legend = [
+  { line: 'solid' as const, text: '箭头表示一份输入依次经过的处理阶段，不表示函数调用关系' },
+  { text: '红色只用于拒绝分支，绿色只用于正常路径' },
+];
+---
+<DiagramFrame name="c03-value-boundary" steps={steps} legend={legend}>
+  <div class="c03">
+    <Node class="c03-input" step="1"><span class="dg-t">外部输入</span><span class="dg-s">输入框 · JSON · URL</span><span class="dg-s">都是 <code>string</code></span></Node>
+    <Arrow class="c03-a1" step="1" />
+    <div class="c03-zone" aria-hidden="true"></div>
+    <p class="c03-zone-label">入口边界</p>
+    <Node class="c03-empty c03-in" tone="primary" step="2"><span class="dg-t">判空</span><span class="dg-s">去掉首尾空白后不能为空</span></Node>
+    <Arrow class="c03-ae" dir="right" tone="err" label="空白" step="2" />
+    <Arrow class="c03-a2 c03-in" step="3" />
+    <Node class="c03-conv c03-in" tone="primary" step="3"><span class="dg-t">转换</span><span class="dg-s"><code>Number(text)</code></span><span class="dg-s">可能得到 NaN</span></Node>
+    <Arrow class="c03-a3 c03-in" step="4" />
+    <Node class="c03-check c03-in" tone="primary" step="4"><span class="dg-t">校验</span><span class="dg-s">整数 · 范围 <span class="dg-nowrap">0–99999</span></span></Node>
+    <Arrow class="c03-ac" dir="right" tone="err" label="不通过" step="4" />
+    <Node class="c03-reject" tone="err" step="2 4"><span class="dg-t"><span class="dg-chip">拒绝</span></span><span class="dg-s">提示原因</span><span class="dg-s">库存不变</span></Node>
+    <span class="c03-zone-end" aria-hidden="true"></span>
+    <Arrow class="c03-a4" tone="ok" label="通过" step="5" />
+    <Node class="c03-core" tone="ok" step="5"><span class="dg-t">业务计算</span><span class="dg-s">只用检查过的 <code>number</code></span><span class="dg-s">整数分 · <code>===</code></span></Node>
+    <Arrow class="c03-a5" step="6" />
+    <Node class="c03-output" step="6"><span class="dg-t">显示</span><span class="dg-s"><code>toFixed(2)</code> · <code>String()</code></span><span class="dg-s">转回 <code>string</code></span></Node>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c03 {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) auto minmax(0, 0.8fr);
+    grid-template-areas:
+      'input . .'
+      'a1 . .'
+      'zlabel . .'
+      'empty ae reject'
+      'a2 . reject'
+      'conv . reject'
+      'a3 . reject'
+      'check ac reject'
+      'zend . .'
+      'a4 . .'
+      'core . .'
+      'a5 . .'
+      'output . .';
+    text-align: center;
+  }
+  .c03-input { grid-area: input; }
+  .c03-a1 { grid-area: a1; }
+  .c03-zone {
+    grid-column: 1;
+    grid-row: 3 / 10;
+    border: 1.5px dashed color-mix(in srgb, var(--js-color-primary-solid) 42%, var(--js-border));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--js-color-primary-solid) 4%, transparent);
+  }
+  .c03-zone-label {
+    grid-area: zlabel;
+    padding: 0.45rem 0.75rem 0.5rem;
+    color: var(--js-color-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: start;
+  }
+  .c03 .c03-in { margin-inline: 0.7rem; }
+  .c03-empty { grid-area: empty; }
+  .c03-ae { grid-area: ae; margin-inline-start: -0.7rem; }
+  .c03-a2 { grid-area: a2; }
+  .c03-conv { grid-area: conv; }
+  .c03-a3 { grid-area: a3; }
+  .c03-check { grid-area: check; }
+  .c03-ac { grid-area: ac; margin-inline-start: -0.7rem; }
+  .c03-reject {
+    grid-area: reject;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .c03-zone-end { grid-area: zend; block-size: 0.7rem; }
+  .c03-a4 { grid-area: a4; }
+  .c03-core { grid-area: core; }
+  .c03-a5 { grid-area: a5; }
+  .c03-output { grid-area: output; }
+</style>

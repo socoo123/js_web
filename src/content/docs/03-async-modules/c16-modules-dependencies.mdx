@@ -7,6 +7,7 @@ sidebar:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 2 周 · 第 8 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -57,13 +58,9 @@ stock.js 使 history 直接依赖底层补货规则。各模块不能反过来�
 
 旧 inventory.js 只保留上方卡的转发导出与 describeProduct。app.js、loader、storage 的导入地址都不用改变。
 
-<figure class="diagram-scroll" tabindex="0">
+<Diagram name="c16-esm-dependencies" />
 
-![ESM 依赖图与包安装布局](../../../assets/diagrams/c16-esm-dependencies.svg)
-
-</figure>
-
-左侧从业务入口向依赖读取，右侧表示包安装后如何解析。源码依赖关系与磁盘安装布局是两个层次。
+「模块依赖」从业务入口向依赖读取，「包安装」表示包安装后如何解析。源码依赖关系与磁盘安装布局是两个层次。
 
 <a id="3-路径由谁解析决定模块能否找到"></a>
 

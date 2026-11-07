@@ -89,6 +89,7 @@ function flatten(tree, admonitionLines) {
         const line = node.position.start.line;
         if (EFFECTS.has(node.name)) { items.push({ kind: 'effect', section, line, name: node.name }); return; }
         if (node.name === 'CodeExcerpt') { items.push({ kind: 'code', section, line, name: 'CodeExcerpt' }); return; }
+        if (node.name === 'Diagram') { items.push({ kind: 'figure', section, line }); return; }
         if (NEUTRAL.has(node.name)) { items.push({ kind: 'neutral', section, line, name: node.name }); return; }
         if (node.name === 'Predict') {
           items.push({ kind: 'code', section, line, name: 'Predict' });

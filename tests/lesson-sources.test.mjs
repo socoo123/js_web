@@ -20,6 +20,13 @@ test('缺来源、越界、区域缺失或重复、未运行原因缺失均拒�
   try { pairs['c03-input-number'].left.verified = false; assert.throws(() => importedContent('<CodeCompare pairId="c03-input-number" />'), /原因标注/); }
   finally { pairs['c03-input-number'].left.verified = original; }
 });
+test('机制图只接受登记过的 name，图的描述计入正文', () => {
+  const result = importedContent('<Diagram name="c12-browser-event-loop" />');
+  assert.deepEqual(result.components, [{ component: 'Diagram', id: 'c12-browser-event-loop' }]);
+  assert.match(result.prose, /微任务/);
+  assert.throws(() => importedContent('<Diagram name="c99-missing" />'), /未登记的机制图/);
+  assert.throws(() => importedContent('<Diagram name="c12-browser-event-loop" title="x" />'));
+});
 test('MDX 不能用代码字符串、表达式、slot 或任意 import 绕过门禁', () => {
   for (const source of ['<CodeCompare pairId={"c03-input-number"} />', '<CodeCompare pairId="c03-input-number" code="hidden" />', '<CodeCompare pairId="c03-input-number">hidden</CodeCompare>', 'export const code = "hidden";', 'import Code from "./answer.js";', '<div title={"hidden"} />']) assert.throws(() => importedContent(source));
 });

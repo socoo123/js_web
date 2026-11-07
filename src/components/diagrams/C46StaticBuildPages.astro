@@ -1,0 +1,66 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Group from './Group.astro';
+
+const steps = [
+  '构建环境里的 Node 读取源码与锁文件：MD、JSX、CSS、JSON。',
+  '本地或 Actions 执行 `npm ci` → 检查 → build，输出各项目的 dist 静态产物。',
+  '把同一份产物上传并部署到静态托管（如 GitHub Pages），它只按 URL 返回文件。',
+  '静态阅读：课程 /js_web/ 下的深层地址读取对应的 index.html，直接得到正文。',
+  '浏览器交互：库存应用有独立路径，Pages 返回入口与 JS；#/products/P004 这段 hash 只由浏览器里的 React 解析。',
+];
+const legend = [
+  { line: 'solid' as const, text: '实线：构建与交付' },
+  { line: 'dashed' as const, text: '虚线：浏览器读取文件，hash 只在浏览器内解析' },
+];
+---
+<DiagramFrame name="c46-static-build-pages" steps={steps} legend={legend}>
+  <div class="c46">
+    <Group label="构建环境 · Node" tone="primary" bodyClass="c46-build">
+      <Node step="1"><span class="dg-t">源码与锁文件</span><span class="dg-s">MD · JSX · CSS · JSON</span></Node>
+      <Arrow dir="down" wide="right" step="2" />
+      <Node step="2"><span class="dg-t">本地或 Actions</span><span class="dg-s"><code>npm ci</code> → 检查 → build</span></Node>
+    </Group>
+    <Arrow label="构建输出" step="2" />
+    <Node tone="ok" step="2 3"><span class="dg-t">各项目的 dist · 静态产物</span><span class="dg-s">HTML / JS / CSS / JSON / SVG</span></Node>
+    <Arrow label="上传并部署同一份产物" step="3" />
+    <Node step="3 4 5"><span class="dg-t">静态托管 · 如 GitHub Pages</span><span class="dg-s">按 URL 返回文件</span></Node>
+    <div class="c46-fork">
+      <Arrow dashed label="静态阅读" step="4" />
+      <Arrow dashed label="浏览器交互" step="5" />
+    </div>
+    <Group label="浏览器 · 用户设备" tone="amber" bodyClass="c46-browser">
+      <Node step="4"><span class="dg-t">课程 <code>/js_web/</code> 下的深层地址</span><span class="dg-s">读取对应 <code>index.html</code></span><span class="dg-s">直接得到正文</span></Node>
+      <Node step="5"><span class="dg-t">库存应用的独立路径</span><span class="dg-s"><code>/js_web/<wbr />demos/<wbr />inventory/</code></span><span class="dg-s"><code>#/products/<wbr />P004</code></span><span class="dg-s">读取入口与 JS，React 解析 hash</span></Node>
+    </Group>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c46 {
+    display: grid;
+    text-align: center;
+  }
+  .c46-build {
+    display: grid;
+  }
+  .c46-fork,
+  .c46-browser {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 0.6rem;
+  }
+  .c46-fork {
+    padding-inline: calc(0.7rem + 1.5px);
+  }
+  @container dg (min-width: 34rem) {
+    .c46-build {
+      grid-template-columns: minmax(0, 1fr) 4rem minmax(0, 1fr);
+      align-items: center;
+    }
+    .c46-browser { gap: 0 1rem; }
+    .c46-fork { gap: 0 1rem; }
+  }
+</style>

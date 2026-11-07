@@ -1,0 +1,22 @@
+---
+// 图中的一个节点。内容写在 slot 里：.dg-t 是标题行，.dg-s 是补充行，<code> 渲染成等宽小标签。
+interface Props {
+  tone?: 'neutral' | 'primary' | 'amber' | 'java' | 'ok' | 'err' | 'remember';
+  shape?: 'box' | 'decision' | 'var';
+  step?: string;
+  only?: string;
+  class?: string;
+  style?: string;
+}
+const { tone = 'neutral', shape = 'box', step, only, class: className, style } = Astro.props;
+const visible = only === undefined || only.split(/\s+/).includes('0');
+---
+<div
+  class:list={['dg-node', className]}
+  data-tone={tone}
+  data-shape={shape === 'box' ? undefined : shape}
+  data-step={step}
+  data-only={only}
+  hidden={!visible}
+  style={style}
+><slot /></div>

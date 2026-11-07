@@ -1,0 +1,261 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import { only } from './text.mjs';
+
+// 与库存工作区 buildCategoryTree 相同的六商品、四分类；dfs/bfs 是按 children 顺序的访问次序。
+interface TreeNode { name: string; dfs: number; bfs: number; children: TreeNode[] }
+const leaf = (name: string, dfs: number, bfs: number): TreeNode => ({ name, dfs, bfs, children: [] });
+const tree: TreeNode = {
+  name: '全部商品', dfs: 1, bfs: 1, children: [
+    { name: '外设', dfs: 2, bfs: 2, children: [leaf('P001', 3, 6), leaf('P002', 4, 7)] },
+    { name: '显示器', dfs: 5, bfs: 3, children: [leaf('P003', 6, 8)] },
+    { name: '配件', dfs: 7, bfs: 4, children: [leaf('P004', 8, 9), leaf('P005', 9, 10)] },
+    { name: '音频', dfs: 10, bfs: 5, children: [leaf('P006', 11, 11)] },
+  ],
+};
+
+// 按 walkDepthFirst / walkBreadthFirst 的写法实际走一遍，核对图上的序号，并记下每一步的栈与队列。
+const dfs: { node: TreeNode; stack: string[] }[] = [];
+const walk = (node: TreeNode, path: string[]) => {
+  dfs.push({ node, stack: [...path, node.name] });
+  for (const child of node.children) walk(child, [...path, node.name]);
+};
+walk(tree, []);
+const bfs: { node: TreeNode; queue: string[] }[] = [];
+const queue = [tree];
+for (let head = 0; head < queue.length; head++) {
+  queue.push(...queue[head].children);
+  bfs.push({ node: queue[head], queue: queue.slice(head + 1).map((item) => item.name) });
+}
+dfs.forEach(({ node }, index) => { if (node.dfs !== index + 1) throw new Error(`C10 DFS 序号不符：${node.name}`); });
+bfs.forEach(({ node }, index) => { if (node.bfs !== index + 1) throw new Error(`C10 BFS 序号不符：${node.name}`); });
+
+const dfsSteps = [
+  '访问「全部商品」，再按 children 顺序递归进入第一个孩子。',
+  '访问「外设」，继续深入它的第一个孩子。',
+  '访问「P001」。它没有孩子，这层调用返回到「外设」。',
+  '访问「P002」。外设的孩子都处理完，调用逐层返回到「全部商品」。',
+  '访问「显示器」，深入它的孩子。',
+  '访问「P003」，调用返回到「全部商品」。',
+  '访问「配件」，深入它的孩子。',
+  '访问「P004」，返回到「配件」。',
+  '访问「P005」，配件处理完，返回到「全部商品」。',
+  '访问「音频」，深入它的孩子。',
+  '访问「P006」。所有调用返回，DFS 结束：每个节点访问一次。',
+];
+const bfsSteps = [
+  '取出「全部商品」访问，把 4 个分类放到队尾。',
+  '取出「外设」访问，把 P001、P002 放到队尾。',
+  '取出「显示器」访问，P003 入队。',
+  '取出「配件」访问，P004、P005 入队。',
+  '取出「音频」访问，P006 入队。同一层的四个分类都已访问。',
+  '取出「P001」访问。商品没有孩子，队列只出不进。',
+  '取出「P002」访问。',
+  '取出「P003」访问。',
+  '取出「P004」访问。',
+  '取出「P005」访问。',
+  '取出「P006」访问。队列为空，BFS 结束：每个节点访问一次。',
+];
+const tracks = [
+  { id: 'dfs', label: 'DFS 深度优先', steps: dfsSteps },
+  { id: 'bfs', label: 'BFS 广度优先', steps: bfsSteps },
+];
+const leaves = (node: TreeNode): number => node.children.length ? node.children.reduce((sum, child) => sum + leaves(child), 0) : 1;
+const legend = [{ text: '节点上的序号是按 children 数组顺序的 DFS / BFS 访问次序；两种遍历都对每个节点访问一次' }];
+---
+<DiagramFrame name="c10-category-traversal" tracks={tracks} trackLabel="遍历方式" legend={legend}>
+  <div class="c10">
+    <ul class="c10-tree" role="list">
+      <li>
+        <Node tone="primary" class="c10-node" step={`dfs:${tree.dfs} bfs:${tree.bfs}`}>
+          <span class="dg-t">{tree.name}</span>
+          <span class="c10-ord"><span data-k="dfs">DFS {tree.dfs}</span> · <span data-k="bfs">BFS {tree.bfs}</span></span>
+        </Node>
+        <ul role="list">
+          {tree.children.map((category) => (
+            <li style={`flex-grow: ${leaves(category)}`}>
+              <Node tone="ok" class="c10-node" step={`dfs:${category.dfs} bfs:${category.bfs}`}>
+                <span class="dg-t">{category.name}</span>
+                <span class="c10-ord"><span data-k="dfs">DFS {category.dfs}</span> · <span data-k="bfs">BFS {category.bfs}</span></span>
+              </Node>
+              <ul role="list">
+                {category.children.map((product) => (
+                  <li>
+                    <Node class="c10-node" step={`dfs:${product.dfs} bfs:${product.bfs}`}>
+                      <span class="dg-t"><code>{product.name}</code></span>
+                      <span class="c10-ord"><span data-k="dfs">DFS {product.dfs}</span> · <span data-k="bfs">BFS {product.bfs}</span></span>
+                    </Node>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </li>
+    </ul>
+    <div class="c10-panel">
+      <div class="c10-state" {...only('0')}>
+        <div class="dg-slot">
+          <span class="dg-slot-label">DFS 次序 · 沿调用栈深入一个分类</span>
+          <ol class="dg-cells">{dfs.map(({ node }) => <li class="dg-cell" data-tone="primary">{node.name}</li>)}</ol>
+        </div>
+        <div class="dg-slot">
+          <span class="dg-slot-label">BFS 次序 · 同层节点先放进队列</span>
+          <ol class="dg-cells">{bfs.map(({ node }) => <li class="dg-cell" data-tone="amber">{node.name}</li>)}</ol>
+        </div>
+      </div>
+      {dfs.map(({ stack }, index) => (
+        <div class="c10-state" {...only(`dfs:${index + 1}`)}>
+          <div class="dg-slot">
+            <span class="dg-slot-label">调用栈（栈底在左，栈顶在右）</span>
+            <ol class="dg-cells">{stack.map((name) => <li class="dg-cell" data-tone="primary">walk({name})</li>)}</ol>
+          </div>
+          <div class="dg-slot">
+            <span class="dg-slot-label">已访问</span>
+            <ol class="dg-cells">{dfs.slice(0, index + 1).map(({ node }) => <li class="dg-cell">{node.name}</li>)}</ol>
+          </div>
+        </div>
+      ))}
+      {bfs.map(({ queue: waiting }, index) => (
+        <div class="c10-state" {...only(`bfs:${index + 1}`)}>
+          <div class="dg-slot">
+            <span class="dg-slot-label">队列（队首在左，访问后孩子排到队尾）</span>
+            <ol class="dg-cells">{waiting.map((name) => <li class="dg-cell" data-tone="amber">{name}</li>)}</ol>
+          </div>
+          <div class="dg-slot">
+            <span class="dg-slot-label">已访问</span>
+            <ol class="dg-cells">{bfs.slice(0, index + 1).map(({ node }) => <li class="dg-cell">{node.name}</li>)}</ol>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c10 {
+    --c10-line: var(--dg-ink);
+    --c10-gap: 1.35rem;
+    display: grid;
+    gap: 1rem;
+  }
+  .c10-tree,
+  .c10-tree ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .c10-node {
+    padding: 0.35rem 0.65rem;
+  }
+  .c10-node .dg-t {
+    display: inline;
+    margin-inline-end: 0.5rem;
+  }
+  .c10-ord {
+    color: var(--js-color-muted);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .c10-ord span { padding: 0 0.2rem; border-radius: 4px; white-space: nowrap; }
+  .dg[data-current][data-track='dfs'] .c10-ord [data-k='dfs'],
+  .dg[data-current][data-track='bfs'] .c10-ord [data-k='bfs'] {
+    background: var(--js-color-primary-soft);
+    color: var(--js-color-primary);
+    font-weight: 700;
+  }
+  /* 已访问的节点保持清晰并加淡绿底；尚未访问的变淡 */
+  .c10 .c10-node[data-state='past'] {
+    opacity: 1;
+    border-color: color-mix(in srgb, var(--js-color-ok) 45%, var(--js-border));
+    background: color-mix(in srgb, var(--js-color-ok) 10%, var(--dg-card));
+  }
+
+  /* 窄屏：缩进树 */
+  .c10-tree ul {
+    margin-inline-start: 0.85rem;
+  }
+  .c10-tree ul > li {
+    position: relative;
+    padding: 0.4rem 0 0 1.15rem;
+  }
+  .c10-tree ul > li::before,
+  .c10-tree ul > li::after {
+    content: '';
+    position: absolute;
+    border: 0 solid var(--c10-line);
+  }
+  .c10-tree ul > li::before {
+    inset: 0 auto 0 0;
+    border-inline-start-width: 2px;
+  }
+  .c10-tree ul > li:last-child::before {
+    inset-block-end: auto;
+    block-size: 1.45rem;
+  }
+  .c10-tree ul > li::after {
+    inset: 1.45rem auto auto 0;
+    inline-size: 0.95rem;
+    border-block-start-width: 2px;
+  }
+
+  /* 宽屏：自上而下的树 */
+  @container dg (min-width: 34rem) {
+    .c10-tree { text-align: center; }
+    .c10-node .dg-t { display: block; margin: 0; }
+    .c10-tree ul {
+      position: relative;
+      display: flex;
+      margin: 0;
+      padding-top: var(--c10-gap);
+    }
+    .c10-tree ul::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto auto 50%;
+      block-size: var(--c10-gap);
+      border-inline-start: 2px solid var(--c10-line);
+      transform: translateX(-1px);
+    }
+    .c10-tree ul > li {
+      flex: 1 1 0;
+      min-inline-size: 0;
+      padding: var(--c10-gap) 0.25rem 0;
+    }
+    .c10-tree ul > li::before,
+    .c10-tree ul > li::after {
+      block-size: var(--c10-gap);
+      inline-size: 50%;
+      border-width: 2px 0 0;
+    }
+    .c10-tree ul > li::before { inset: 0 50% auto auto; }
+    .c10-tree ul > li::after {
+      inset: 0 auto auto 50%;
+      border-inline-start-width: 2px;
+      transform: translateX(-1px);
+    }
+    .c10-tree ul > li:first-child::before,
+    .c10-tree ul > li:last-child::after { border-width: 0; }
+    .c10-tree ul > li:last-child::before {
+      border-inline-end-width: 2px;
+      border-start-end-radius: 8px;
+      transform: translateX(1px);
+    }
+    .c10-tree ul > li:first-child::after { border-start-start-radius: 8px; }
+    .c10-tree ul > li:only-child::before { display: none; }
+    .c10-tree ul > li:only-child::after { border-block-start-width: 0; border-radius: 0; }
+    .c10-tree > li > .c10-node { max-inline-size: 16rem; margin-inline: auto; }
+  }
+
+  .c10-panel {
+    padding: 0.75rem;
+    border: 1px solid var(--js-border);
+    border-radius: var(--js-radius);
+    background: var(--dg-card);
+  }
+  .c10-state {
+    display: grid;
+    gap: 0.55rem;
+  }
+</style>

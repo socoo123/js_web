@@ -1,0 +1,87 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Group from './Group.astro';
+
+const steps = [
+  '本次渲染拿到一张快照：stock = 12。',
+  '点击时运行本次渲染创建的事件函数，它的闭包读到的 stock 也是 12。',
+  '事件函数把三个 updater 排进更新队列；本次渲染里的 stock 仍然是 12。',
+  'React 依次处理队列：第一个 updater 拿到 12，算出 13。',
+  '第二个 updater 拿到上一步的 13，算出 14。',
+  '第三个 updater 拿到 14，算出 15。',
+  '下一次渲染拿到 stock = 15，并生成新的事件函数。',
+  '提交 DOM，页面显示 15。',
+  '本次创建的延时回调稍后执行，闭包保留的仍是本次绑定，读到旧的 stock = 12。',
+];
+const updater = 'pending => pending + 1';
+const legend = [{ line: 'solid' as const, text: '展示一次事件的快照与单个 state 的更新队列；不表达渲染次数或调度实现' }];
+---
+<DiagramFrame name="c23-state-snapshot" steps={steps} legend={legend}>
+  <div class="c23">
+    <Node class="c23-before" step="1"><span class="dg-t">本次渲染</span><span class="dg-s"><code>stock = 12</code></span></Node>
+    <Arrow class="c23-a1" step="2" />
+    <Node class="c23-handler" step="2 3"><span class="dg-t">本次事件函数</span><span class="dg-s">闭包读取 <code>stock = 12</code></span></Node>
+    <Arrow class="c23-ab" dir="right" wide="down" tone="amber" label="闭包保留本次绑定" step="9" />
+    <Node class="c23-later" tone="amber" step="9"><span class="dg-t">本次创建的延时回调</span><span class="dg-s">仍读取旧 <code>stock = 12</code></span></Node>
+    <Arrow class="c23-x1" dir="down" wide="right" label="排入三个 updater" step="3" />
+    <Group class="c23-queue" label="更新队列：依次处理" tone="primary" dashed bodyClass="c23-queue-body">
+      <Node step="4"><span class="dg-t"><code>{updater}</code></span><span class="dg-s">12 → 13</span></Node>
+      <Arrow step="5" />
+      <Node step="5"><span class="dg-t"><code>{updater}</code></span><span class="dg-s">13 → 14</span></Node>
+      <Arrow step="6" />
+      <Node step="6"><span class="dg-t"><code>{updater}</code></span><span class="dg-s">14 → 15</span></Node>
+    </Group>
+    <Arrow class="c23-x2" dir="down" wide="right" step="7" />
+    <Node class="c23-after" tone="ok" step="7"><span class="dg-t">下一次渲染</span><span class="dg-s"><code>stock = 15</code></span><span class="dg-s">生成新的事件函数</span></Node>
+    <Arrow class="c23-a3" step="8" />
+    <Node class="c23-commit" step="8"><span class="dg-t">提交 DOM</span><span class="dg-s">页面显示 15</span></Node>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c23 {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      'before . .'
+      'a1 . .'
+      'handler ab later'
+      'x1 . .'
+      'queue queue queue'
+      'x2 . .'
+      'after . .'
+      'a3 . .'
+      'commit . .';
+    align-items: center;
+    text-align: center;
+  }
+  .c23-before { grid-area: before; }
+  .c23-a1 { grid-area: a1; }
+  .c23-handler { grid-area: handler; }
+  .c23-ab { grid-area: ab; }
+  .c23-ab .dg-arrow-label { max-inline-size: 5em; }
+  .c23-later { grid-area: later; }
+  .c23-x1 { grid-area: x1; }
+  .c23-queue { grid-area: queue; }
+  .c23-queue-body { display: grid; }
+  .c23-x2 { grid-area: x2; }
+  .c23-after { grid-area: after; }
+  .c23-a3 { grid-area: a3; }
+  .c23-commit { grid-area: commit; }
+  .c23-queue code { font-size: 0.82em; }
+  @container dg (min-width: 34rem) {
+    .c23 {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.25fr) auto minmax(0, 1fr);
+      grid-template-areas:
+        'before . queue . .'
+        'a1 . queue . .'
+        'handler x1 queue x2 after'
+        'ab . queue . a3'
+        'later . queue . commit';
+    }
+    .c23-x1 .dg-arrow-label { max-inline-size: 5em; }
+    .c23-ab .dg-arrow-label { max-inline-size: none; }
+  }
+</style>

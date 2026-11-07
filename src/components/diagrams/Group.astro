@@ -1,0 +1,23 @@
+---
+// 分组框：带标签的容器，虚线框表示「条件性」或「边界」区域；bodyClass 交给各图排版内部。
+interface Props {
+  label?: string;
+  tone?: 'neutral' | 'primary' | 'amber' | 'java' | 'ok' | 'err' | 'remember';
+  dashed?: boolean;
+  step?: string;
+  class?: string;
+  bodyClass?: string;
+}
+const { label, tone = 'neutral', dashed = false, step, class: className, bodyClass } = Astro.props;
+---
+<div
+  class:list={['dg-group', className]}
+  role={label ? 'group' : undefined}
+  aria-label={label}
+  data-tone={tone}
+  data-dashed={dashed ? '' : undefined}
+  data-step={step}
+>
+  {label && <p class="dg-group-label" aria-hidden="true">{label}</p>}
+  <div class:list={['dg-group-body', bodyClass]}><slot /></div>
+</div>

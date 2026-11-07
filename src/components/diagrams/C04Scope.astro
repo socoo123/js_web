@@ -1,0 +1,93 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+
+const steps = [
+  '代码读取 `warehouse`，要先找到这个名字对应的绑定。',
+  '按词法作用域从当前作用域开始找；这一层没有，就沿外层继续找。',
+  '所有外层都没有这个绑定：它未声明，读取抛 ReferenceError。',
+  '在某一层找到绑定就停止外查，接着检查它是否已初始化。',
+  '还没执行到声明、仍处于 TDZ：抛 ReferenceError，不会退回外层。',
+  '已经初始化：读取这个绑定的值。',
+];
+const legend = [{ line: 'solid' as const, text: '箭头表示绑定查找与初始化检查，不表示语句的执行顺序' }];
+---
+<DiagramFrame name="c04-scope" steps={steps} legend={legend}>
+  <div class="c04">
+    <Node class="c04-read" tone="primary" step="1"><span class="dg-t">读取 <code>warehouse</code></span></Node>
+    <Arrow class="c04-a1" step="2" />
+    <Node class="c04-search" step="2">
+      <span class="dg-t">按词法作用域，从内向外找绑定</span>
+      <span class="c04-scopes" aria-label="查找方向：当前作用域、外层、直到最外层"><span>当前作用域</span><i aria-hidden="true">›</i><span>外层</span><i aria-hidden="true">›</i><span>…</span><i aria-hidden="true">›</i><span>最外层</span></span>
+    </Node>
+    <Arrow class="c04-a2" step="3 4" />
+    <Node class="c04-found" shape="decision" step="3 4"><span class="dg-t">找到了？</span></Node>
+    <Arrow class="c04-am" dir="right" tone="err" label="没找到" step="3" />
+    <Node class="c04-missing" tone="err" step="3"><span class="dg-t"><span class="dg-chip">未声明</span></span><span class="dg-s"><code>Reference<wbr />Error</code></span></Node>
+    <Arrow class="c04-a3" label="找到，停止外查" step="4" />
+    <Node class="c04-init" shape="decision" step="5 6"><span class="dg-t">已初始化？</span></Node>
+    <Arrow class="c04-at" dir="right" tone="err" label="否" step="5" />
+    <Node class="c04-tdz" tone="err" step="5"><span class="dg-t"><span class="dg-chip">TDZ</span></span><span class="dg-s"><code>Reference<wbr />Error</code></span></Node>
+    <Arrow class="c04-a4" tone="ok" label="是" step="6" />
+    <Node class="c04-value" tone="ok" step="6"><span class="dg-t">读取值</span></Node>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c04 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      'read . .'
+      'a1 . .'
+      'search . .'
+      'a2 . .'
+      'found am missing'
+      'a3 . .'
+      'init at tdz'
+      'a4 . .'
+      'value . .';
+    align-items: center;
+    text-align: center;
+  }
+  .c04-read { grid-area: read; }
+  .c04-a1 { grid-area: a1; }
+  .c04-search { grid-area: search; }
+  .c04-a2 { grid-area: a2; }
+  .c04-found { grid-area: found; }
+  .c04-am { grid-area: am; }
+  .c04-missing { grid-area: missing; }
+  .c04-a3 { grid-area: a3; }
+  .c04-init { grid-area: init; }
+  .c04-at { grid-area: at; }
+  .c04-tdz { grid-area: tdz; }
+  .c04-a4 { grid-area: a4; }
+  .c04-value { grid-area: value; }
+  .c04-missing,
+  .c04-tdz { padding-inline: 0.45rem; }
+  @container dg (min-width: 34rem) {
+    .c04 { grid-template-columns: minmax(0, 1.5fr) auto minmax(0, 0.8fr); }
+  }
+  .c04-scopes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem 0.3rem;
+    margin-top: 0.4rem;
+  }
+  .c04-scopes span {
+    padding: 0 0.45rem;
+    border: 1px solid var(--js-border);
+    border-radius: 999px;
+    background: var(--dg-canvas);
+    color: var(--js-color-text);
+    font-size: 0.72rem;
+    line-height: 1.5rem;
+  }
+  .c04-scopes i {
+    color: var(--js-color-muted);
+    font-style: normal;
+  }
+</style>

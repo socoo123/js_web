@@ -5,6 +5,7 @@ sidebar:
   order: 46
 ---
 
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 4 周 · 第 23 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
@@ -32,7 +33,7 @@ Java打包和静态前端构建都先生成可交付物，但运行位置不同�
 
 构建可以读取本地文件，浏览器按钮不能直接访问你的工程磁盘。用户加载的是这一批HTML、JS、CSS和数据，修改源码后必须重新构建。
 
-![静态交付关系图：Node在构建环境生成文件，Actions上传完整产物，Pages按路径返回HTML与资源；浏览器取得首页后解析React hash路由。](../../../assets/diagrams/c46-static-build-pages.svg)
+<Diagram name="c46-static-build-pages" />
 
 顺着实线读一次构建与发布，再沿虚线读一次访问。课程HTML与库存hash详情走不同入口，库存演示使用更深的公开前缀。
 

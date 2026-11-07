@@ -1,0 +1,57 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Group from './Group.astro';
+
+const legend = [
+  { line: 'solid' as const, text: '箭头表示标注的职责关系，不表示执行顺序或依赖下载时序' },
+];
+---
+<DiagramFrame name="c01-ecosystem" legend={legend}>
+  <div class="c01">
+    <Node class="c01-rules" tone="primary"><span class="dg-t">ECMAScript</span><span class="dg-s">语言规则</span></Node>
+    <Node class="c01-pkg" tone="amber"><span class="dg-t">npm / Yarn / pnpm</span><span class="dg-s">管理依赖</span></Node>
+    <Arrow class="c01-a1" label="定义规则" />
+    <Arrow class="c01-a2" label="安装" />
+    <Node class="c01-code" tone="ok"><span class="dg-t">库存业务代码</span><span class="dg-s">变量 · 函数 · Array</span></Node>
+    <Arrow class="c01-a3" dir="left" label="供代码使用" />
+    <Node class="c01-lib" tone="amber"><span class="dg-t">React / UI5</span><span class="dg-s">界面库与控件</span></Node>
+    <Arrow class="c01-a4" label="在选定环境执行" />
+    <Group class="c01-hosts" label="运行环境 = 引擎 + 宿主能力" tone="primary" dashed bodyClass="c01-hosts-body">
+      <Node><span class="dg-t">浏览器页面</span><span class="dg-s">引擎 + DOM / 事件</span></Node>
+      <Node><span class="dg-t">Node.js</span><span class="dg-s">V8 + 文件 / 进程</span></Node>
+      <Node><span class="dg-t">Bun 运行时</span><span class="dg-s">JavaScriptCore + 文件</span></Node>
+    </Group>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c01 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      'rules . pkg'
+      'a1 . a2'
+      'code a3 lib'
+      'a4 . .'
+      'hosts hosts hosts';
+    align-items: center;
+    text-align: center;
+  }
+  .c01-rules { grid-area: rules; }
+  .c01-pkg { grid-area: pkg; }
+  .c01-a1 { grid-area: a1; }
+  .c01-a2 { grid-area: a2; }
+  .c01-code { grid-area: code; }
+  .c01-a3 { grid-area: a3; }
+  .c01-lib { grid-area: lib; }
+  .c01-a4 { grid-area: a4; }
+  .c01-hosts { grid-area: hosts; }
+  .c01-hosts-body { display: grid; gap: 0.5rem; }
+  .c01 > .dg-node { align-self: stretch; display: grid; align-content: center; }
+  @container dg (min-width: 34rem) {
+    .c01-hosts-body { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+    .c01-a3 { min-inline-size: 5.5rem; }
+  }
+</style>

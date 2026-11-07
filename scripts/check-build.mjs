@@ -5,6 +5,7 @@ import path from 'node:path';
 import { importedContent } from './lesson-sources.mjs';
 import catalog from '../labs/catalog.json' with { type: 'json' };
 import { repo, checkpointIds, verifyRelease } from '../labs/snapshots.mjs';
+import { DIAGRAMS } from '../src/components/diagrams/registry.mjs';
 
 const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 const origin = 'https://socoo123.github.io';
@@ -18,9 +19,14 @@ const references = globSync('reference/*.{md,mdx}', { cwd: docsRoot })
   .map((file) => file.replace(/\.(?:md|mdx)$/, ''));
 const lessons = globSync('**/c[0-9][0-9]-*.{md,mdx}', { cwd: docsRoot }).sort().map((file) => {
   const source = readFileSync(path.join(docsRoot, file), 'utf8');
-  const diagrams = [...source.matchAll(/assets\/diagrams\/([^\s)"']+)\.svg/g)].map((match) => match[1]);
+  const diagrams = [...source.matchAll(/<Diagram\s+name="([^"]+)"/g)].map((match) => match[1]);
   return [path.basename(file).slice(0, 3).toUpperCase(), file.replace(/\.(?:md|mdx)$/, ''), diagrams, source];
 });
+// 每张登记的机制图恰好由它所属的那一课引用一次。
+for (const [name, info] of Object.entries(DIAGRAMS)) {
+  const users = lessons.filter(([, , diagrams]) => diagrams.includes(name)).map(([id]) => id);
+  if (users.length !== 1 || users[0] !== info.lessonId) errors.push(`机制图 ${name} 应只由 ${info.lessonId} 引用，实际为：${users.join('、') || '无'}`);
+}
 for (const required of ['index.html', 'roadmap/index.html', 'labs/index.html', 'pagefind/pagefind.js', ...references.map((slug) => `${slug}/index.html`), ...lessons.map(([, slug]) => `${slug}/index.html`)]) {
   if (!existsSync(path.join(dist, required))) errors.push(`缺少输出：${required}`);
 }
@@ -77,8 +83,12 @@ for (const [id, slug, diagrams, source] of lessons) {
     errors.push(`${id} 应保留源码中的 ${sourceAnswers} 个有正文的练习折叠区（至少 2 个）。`);
   }
   for (const diagram of diagrams) {
-    if (!lesson.includes(diagram)) errors.push(`${id} 缺少 D2 教学图 ${diagram}。`);
+    // 图的文字和描述是静态 HTML，禁用 JS 也能读；分步控件只是增强。
+    const info = DIAGRAMS[diagram];
+    if (!info) errors.push(`${id} 引用了未登记的机制图 ${diagram}。`);
+    else if (!new RegExp(`<figure\\b[^>]*data-diagram="${diagram}"`).test(lesson) || !lesson.includes(escapeHtml(info.description))) errors.push(`${id} 缺少静态渲染的机制图 ${diagram} 或它的文字描述。`);
   }
+  if (/assets\/diagrams\//.test(source)) errors.push(`${id} 仍引用已删除的 SVG 机制图。`);
   checkInteractive(id, source, lesson);
 }
 
@@ -177,5 +187,5 @@ if ((roadmap.match(/data-progress\s/g) ?? []).length !== 1 || lessons.some(([id]
   errors.push('学习路线缺少进度管理或课程状态入口。');
 }
 if (errors.length) throw new Error(errors.join('\n'));
-console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口、${references.length} 张速查导航与 ${lessons.length} 课折叠区/D2 图/交互组件静态结果；${new Set([...frozenReleases, catalog.release]).size} 版 ${archives} 个学习包/源码清单。`);
+console.log(`生产输出检查通过：${pages.length} 个 HTML 页面、中文语言、${base} 链接/资源、搜索入口、${references.length} 张速查导航与 ${lessons.length} 课折叠区/${Object.keys(DIAGRAMS).length} 张机制图/交互组件静态结果；${new Set([...frozenReleases, catalog.release]).size} 版 ${archives} 个学习包/源码清单。`);
 console.log(`页面 JS：${islandPages.length} 个页面含交互岛，其余页面不加载 React；单页新增 JS 最大 ${kb(Math.max(0, ...budgets.map(([, bytes]) => bytes)))}（gzip，上限 80 KB）${islandPages.map(([page, bytes]) => `；${page.replace(/\/index\.html$/, '')} ${kb(bytes)}`).join('')}。`);

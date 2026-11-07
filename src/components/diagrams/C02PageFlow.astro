@@ -1,0 +1,60 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Group from './Group.astro';
+
+const steps = [
+  '浏览器边解析 HTML 边建立 DOM，发现并下载 CSS 与 app.js；下载与解析可以重叠。',
+  'HTML 解析完成、脚本也就绪后，执行模块脚本，查找页面节点。',
+  '脚本注册 submit 监听，然后等待用户操作。',
+  '用户提交表单：处理函数读取输入、计算库存。',
+  '更新 DOM：写回文本与按钮状态。',
+  '等待渲染机会：浏览器结合 DOM 与 CSS，安排后续的布局与绘制。',
+];
+const legend = [
+  { line: 'solid' as const, text: '箭头表示脚本从连接页面到处理提交的顺序；初始绘制不在这条交互路径中' },
+  { text: '展示资源与处理阶段的依赖，不是精确的请求瀑布时间线' },
+];
+---
+<DiagramFrame name="c02-page-flow" steps={steps} legend={legend}>
+  <div class="c02">
+    <Node class="c02-parse" tone="primary" step="1"><span class="dg-t">解析 HTML · 建立 DOM</span><span class="dg-s">发现并下载 CSS 与 <code>app.js</code></span></Node>
+    <Arrow class="c02-a1" label="下载与解析可重叠" step="2" />
+    <Node class="c02-ready" tone="primary" step="2"><span class="dg-t">HTML 解析完成 + 脚本就绪</span><span class="dg-s">执行模块脚本，查找节点</span><span class="dg-s"><code>type="module"</code> 默认按 defer 的时机执行</span></Node>
+    <Arrow class="c02-in" step="3" />
+    <Group class="c02-group" label="页面交互" tone="primary" dashed bodyClass="c02-flow">
+      <Node class="c02-listen" step="3"><span class="dg-t">注册 submit 监听</span><span class="dg-s">等待用户操作</span></Node>
+      <Arrow dir="down" wide="right" label="用户提交" step="4" />
+      <Node class="c02-submit" step="4"><span class="dg-t">提交表单</span><span class="dg-s">读取输入 · 计算库存</span></Node>
+      <Arrow dir="down" wide="right" step="5" />
+      <Node class="c02-update" step="5"><span class="dg-t">更新 DOM</span><span class="dg-s">写回文本与按钮状态</span></Node>
+    </Group>
+    <Arrow class="c02-out" label="等待渲染机会" step="6" />
+    <Node class="c02-view" tone="ok" step="6"><span class="dg-t">浏览器结合 DOM 与 CSS</span><span class="dg-s">安排后续布局与绘制</span></Node>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c02 {
+    --c02-pad: calc(0.7rem + 1.5px);
+    --c02-arrow: 4.75rem;
+    display: grid;
+    text-align: center;
+  }
+  .c02-flow {
+    display: grid;
+  }
+  @container dg (min-width: 34rem) {
+    .c02-flow {
+      grid-template-columns: minmax(0, 1fr) var(--c02-arrow) minmax(0, 1fr) var(--c02-arrow) minmax(0, 1fr);
+      align-items: stretch;
+    }
+    .c02-flow > .dg-arrow { align-self: center; }
+    .c02-in,
+    .c02-out {
+      inline-size: calc(2 * var(--c02-pad) + (100% - 2 * var(--c02-pad) - 2 * var(--c02-arrow)) / 3);
+    }
+    .c02-out { margin-inline-start: auto; }
+  }
+</style>

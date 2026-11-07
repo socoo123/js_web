@@ -1,0 +1,123 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Group from './Group.astro';
+import Loop from './Loop.astro';
+
+const legend = [
+  { line: 'solid' as const, text: '上半部箭头表示设计指导与包装关系；下半部表示经典 UI5 一次事件到绑定更新的方向' },
+];
+---
+<DiagramFrame name="c39-ui5-family-binding" legend={legend}>
+  <div class="c39">
+    <Node class="c39-design" tone="amber"><span class="dg-t">SAP Fiori</span><span class="dg-s">设计系统与交互规范</span></Node>
+    <Arrow label="设计指导" />
+    <Group label="UI5 家族" tone="primary" bodyClass="c39-family">
+      <Node class="c39-classic"><span class="dg-t">经典 UI5</span><span class="dg-s">SAPUI5 / OpenUI5</span><span class="dg-s">共享核心，交付库范围不同</span></Node>
+      <Node class="c39-web"><span class="dg-t">UI5 Web Components</span><span class="dg-s">标准自定义元素</span></Node>
+      <Arrow class="c39-wrap" dir="up" wide="left" label="包装 / 组合" />
+      <Node class="c39-react"><span class="dg-t">UI5 Web Components for React</span><span class="dg-s">React 接口与组合组件</span></Node>
+    </Group>
+    <Arrow label="经典 UI5 采用" />
+    <Group label="经典 UI5 的 MVC 与绑定" tone="ok" bodyClass="c39-mvc">
+      <Node class="c39-view"><span class="dg-t">XML View / 控件</span><span class="dg-s">声明显示与绑定路径</span></Node>
+      <Arrow class="c39-press" wide="right" label="press 事件" />
+      <Node class="c39-ctrl"><span class="dg-t">Controller</span><span class="dg-s">响应补货事件</span></Node>
+      <Arrow class="c39-write" wide="right" label="读取并写入" />
+      <Node class="c39-model"><span class="dg-t"><code>JSONModel</code></span><span class="dg-s"><code>setProperty</code> 更新库存</span></Node>
+      <Loop class="c39-back-narrow" side="right" head="top" label="绑定通知，更新显示" />
+      <div class="c39-back c39-back-start" aria-hidden="true"></div>
+      <div class="c39-back c39-back-mid"><span class="c39-back-label">绑定通知，更新显示</span></div>
+      <div class="c39-back c39-back-end" aria-hidden="true"></div>
+    </Group>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c39 {
+    display: grid;
+    text-align: center;
+  }
+  .c39-design { justify-self: center; min-inline-size: min(100%, 15rem); }
+  .c39-family { display: grid; }
+  .c39-classic { margin-bottom: 0.6rem; }
+  .c39-mvc {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 2.1rem;
+  }
+  .c39-mvc > .dg-node,
+  .c39-mvc > .dg-arrow { grid-column: 1; }
+  .c39-back-narrow {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    margin-block: 1.4rem;
+  }
+  .c39-back { display: none; }
+
+  @container dg (min-width: 34rem) {
+    .c39-family {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: stretch;
+      column-gap: 0;
+    }
+    .c39-classic { margin: 0 0.75rem 0 0; }
+    .c39-family > .dg-node { display: grid; align-content: center; }
+    .c39-wrap { align-self: center; min-inline-size: 5.5rem; }
+    .c39-mvc {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+      grid-template-rows: auto 2.4rem;
+    }
+    .c39-mvc > .dg-node,
+    .c39-mvc > .dg-arrow { grid-column: auto; grid-row: 1; align-self: stretch; }
+    .c39-mvc > .dg-node { display: grid; align-content: center; }
+    .c39-mvc > .dg-arrow { align-self: center; min-inline-size: 5.5rem; }
+    .c39-back-narrow { display: none; }
+    .c39-back {
+      display: block;
+      position: relative;
+      grid-row: 2;
+      block-size: 1.35rem;
+      border: 0 solid var(--dg-ink);
+      border-bottom-width: 2px;
+    }
+    .c39-back-start {
+      grid-column: 1;
+      justify-self: end;
+      inline-size: 50%;
+      border-left-width: 2px;
+      border-bottom-left-radius: 12px;
+    }
+    .c39-back-start::after {
+      content: '';
+      position: absolute;
+      inset: -6px auto auto -7px;
+      inline-size: 12px;
+      block-size: 9px;
+      background: var(--dg-ink);
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+    .c39-back-mid { grid-column: 2 / 5; }
+    .c39-back-end {
+      grid-column: 5;
+      justify-self: start;
+      inline-size: 50%;
+      border-right-width: 2px;
+      border-bottom-right-radius: 12px;
+    }
+    .c39-back-label {
+      position: absolute;
+      inset: auto 0 0;
+      transform: translateY(50%);
+      justify-self: center;
+      inline-size: max-content;
+      max-inline-size: 100%;
+      margin-inline: auto;
+      padding: 0 0.45rem;
+      background: var(--dg-canvas);
+      color: var(--js-color-muted);
+      font-size: 0.74rem;
+      line-height: 1.4;
+    }
+  }
+</style>

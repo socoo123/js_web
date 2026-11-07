@@ -7,6 +7,7 @@ sidebar:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 1 周 · 第 5 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -101,13 +102,9 @@ Java 可以为节点写类；JS 也可以直接用形状一致的对象和数组
 
 Java/JS 对照卡给出了 BFS：处理当前节点后，把它的孩子放到队尾。它先访问根，再访问四个分类，最后访问六个商品。
 
-<figure class="diagram-scroll" tabindex="0" aria-label="分类树遍历图，可横向滚动">
+<Diagram name="c10-category-traversal" />
 
-![分类树遍历机制：DFS 沿调用栈深入一个分类，BFS 把同层节点放入队列；两者对每个节点访问一次。](../../../assets/diagrams/c10-category-traversal.svg)
-
-</figure>
-
-窄屏可在图内横向滚动；序号与上面的六商品访问结果一致。
+可切换 DFS / BFS 逐步查看；序号与上面的六商品访问结果一致。
 
 看同一棵树的两条路径：DFS 先把一个分支读完，BFS 先处理整层。节点、边和访问顺序分别观察，就能决定需要哪一种。
 

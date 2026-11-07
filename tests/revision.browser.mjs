@@ -7,6 +7,7 @@ import { chromium, expect } from '../labs/inventory/node_modules/@playwright/tes
 import { comparison } from '../labs/sources.mjs';
 import catalog from '../labs/catalog.json' with { type: 'json' };
 import { importedContent } from '../scripts/lesson-sources.mjs';
+import { DIAGRAMS } from '../src/components/diagrams/registry.mjs';
 import { emptyProgress, markLabStep, markLesson, writeProgress } from '../src/lib/progress.mjs';
 
 const base = process.env.REVISION_BASE_URL ?? 'http://127.0.0.1:8874/js_web/';
@@ -114,19 +115,28 @@ try {
         const scripts = await page.evaluate(() => performance.getEntriesByType('resource').map((entry) => entry.name).filter((name) => /\.m?js(?:$|\?)/.test(name)));
         for (const url of scripts) assert(!(await loadsReact(context.request, url)), `没有 island 的页面不得加载 React ${route} ${url}`);
       }
-      // 亮/暗成对的截图只有一张可见；正文截图不是 D2，只核对加载、alt 与子路径。
+      // 亮/暗成对的截图只有一张可见；正文截图只核对加载、alt 与子路径。
       for (const image of await page.locator('.sl-markdown-content img').all()) {
         if (!(await image.isVisible())) continue;
         await image.scrollIntoViewIfNeeded();
         await expect.poll(() => image.evaluate((img) => Boolean(img.alt) && img.complete && img.naturalWidth > 0), { message: `正文图片 ${route}` }).toBe(true);
         const src = await image.getAttribute('src');
         assert(src.startsWith('/js_web/'), `图片必须保留 Pages 子路径 ${route}`);
-        if (!/\.svg(?:$|\?)/.test(src)) continue;
-        const name = /\/(c\d{2}-[^.]+)\./.exec(src)?.[1];
-        assert(name, `D2 资源命名 ${src}`);
-        diagrams.set(name, { route, src, alt: await image.getAttribute('alt') });
+      }
+      // 机制图是 HTML：与正文栏同宽、内部不滚动，标题和描述可被读屏读到。
+      for (const figure of await page.locator('figure[data-diagram]').all()) {
+        const name = await figure.getAttribute('data-diagram');
+        assert(DIAGRAMS[name], `未登记的机制图 ${name}`);
+        await expect(figure.locator('.dg-title')).toHaveText(DIAGRAMS[name].title);
+        const [box, column] = [await figure.boundingBox(), await page.locator('.sl-markdown-content').first().boundingBox()];
+        assert(box && column && box.x >= column.x - 1 && box.x + box.width <= column.x + column.width + 1, `机制图超出正文栏 ${route} ${width}`);
+        assert(await figure.evaluate((element) => [element, ...element.querySelectorAll('*')].every((node) => node.matches('.js-visually-hidden') || node.scrollWidth <= node.clientWidth + 1 || getComputedStyle(node).overflowX === 'visible')), `机制图内部横向溢出 ${name} ${width}`);
+        diagrams.set(name, { route, steps: await figure.locator('[data-dg-steps] li').count() });
         // 长图的元素截图会跨过固定页头；仅在特写截图中隐藏页头，整页截图保留原样。
-        if (width === 1280) await screenshot(image, `${name}-${theme}.png`, { style: 'header.header, .mobile-preferences { visibility: hidden !important; }' });
+        if (width === 1280 || width === 360) {
+          await figure.scrollIntoViewIfNeeded();
+          await screenshot(figure, `${name}-${width}-${theme}.png`, { style: 'header.header, .mobile-preferences, mobile-starlight-toc { visibility: hidden !important; }' });
+        }
       }
       if (trials.includes(route)) {
         await expect(page.locator('[data-lesson-task]')).toBeVisible();
@@ -144,9 +154,20 @@ try {
       }
     }
   }
-  if (!process.env.REVISION_INTERACTIONS_ONLY && !requestedRoutes) assert.equal(diagrams.size, 14, '全站必须显示全部 14 张 D2');
+  if (!process.env.REVISION_INTERACTIONS_ONLY && !requestedRoutes) assert.deepEqual([...diagrams.keys()].sort(), Object.keys(DIAGRAMS).sort(), '全站必须显示全部登记的机制图');
   evidence.diagrams = Object.fromEntries(diagrams);
   await page.setViewportSize({ width: 1280, height: 950 });
+  // 分步图：键盘按「下一步」后，当前步高亮、说明随之更新；「上一步」回到全图。
+  await page.goto(base + '03-async-modules/c12-callbacks-promises/');
+  const stepper = page.locator('figure[data-diagram="c12-browser-event-loop"]');
+  const next = stepper.getByRole('button', { name: /下一步/ });
+  await focusVisible(next); await page.keyboard.press('Enter');
+  await expect(stepper.locator('[data-dg-live]')).toContainText('第 1 / 7 步');
+  await expect(stepper.locator('[data-state="current"]').first()).toBeVisible();
+  await page.keyboard.press('ArrowLeft');
+  await expect(stepper.locator('[data-dg-live]')).toContainText('全图');
+  await expect(stepper.locator('[data-state]')).toHaveCount(0);
+  evidence.checks.push('diagram stepper keyboard next/previous and live caption');
   await page.goto(base + copyRoute);
   await page.keyboard.press('Tab');
   for (let side = 0; side < 2; side++) {
@@ -167,7 +188,7 @@ try {
   await screenshot(page, 'keyboard-copy-answer.png');
   evidence.checks.push('copy rejection feedback, keyboard code focus and native answer');
   const images = page.locator('article img');
-  for (const image of await images.all()) if (await image.isVisible()) assert(await image.evaluate((img) => Boolean(img.alt) && img.complete && img.naturalWidth > 0), 'D2 加载/alt');
+  for (const image of await images.all()) if (await image.isVisible()) assert(await image.evaluate((img) => Boolean(img.alt) && img.complete && img.naturalWidth > 0), '正文图片加载/alt');
   for (const query of ['闭包', '状态快照', '断点', '单元测试', 'UI5', 'useEffect', 'npm ci']) {
     const search = page.getByRole('button', { name: '搜索' }).first();
     await focusVisible(search); await page.keyboard.press('Enter');
@@ -250,6 +271,12 @@ try {
       await expect(plain.locator('.compare-side')).toHaveCount(cardCounts.get(route) * 2);
       for (const button of await plain.locator('.code-compare button').all()) await expect(button).toBeHidden();
     }
+    // 无 JS：分步图的控件隐藏，步骤以有序列表完整显示。
+    for (const figure of await plain.locator('figure[data-diagram][data-stepper]').all()) {
+      if (!(await figure.locator('[data-dg-steps]').count())) continue;
+      await expect(figure.locator('[data-dg-controls]')).toBeHidden();
+      await expect(figure.locator('[data-dg-steps] li').first()).toBeVisible();
+    }
     const answer = plain.locator('summary').filter({ hasText: /^参考答案$/ }).first();
     if (await answer.count()) { await answer.focus(); await plain.keyboard.press('Enter'); await expect(answer.locator('..')).toHaveAttribute('open', ''); }
     evidence.noJavaScript.push(route);
@@ -258,7 +285,7 @@ try {
   await nojs.close();
   assert.deepEqual(errors, []);
   evidence.status = 'passed';
-  console.log(`V2 浏览器自动验收（${evidence.phase}，Chromium ${evidence.browser}）：${evidence.geometry.length ? `${routes.length} 页 × 三宽度/亮暗 = ${evidence.geometry.length} 组；${diagrams.size} 张 D2` : '交互专项复测（未重做全图统计）'}、键盘/复制/答案、七词搜索、${evidence.noJavaScript.length} 页禁用 JS 阅读。截图/JSON：${qa}。自动断言不代表人工逐图审阅或最终集成通过。`);
+  console.log(`V2 浏览器自动验收（${evidence.phase}，Chromium ${evidence.browser}）：${evidence.geometry.length ? `${routes.length} 页 × 三宽度/亮暗 = ${evidence.geometry.length} 组；${diagrams.size} 张机制图` : '交互专项复测（未重做全图统计）'}、键盘/复制/答案、七词搜索、${evidence.noJavaScript.length} 页禁用 JS 阅读。截图/JSON：${qa}。自动断言不代表人工逐图审阅或最终集成通过。`);
 } catch (error) {
   evidence.status = 'failed'; evidence.failure = error.stack;
   throw error;

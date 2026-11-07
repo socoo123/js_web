@@ -212,39 +212,11 @@ main:has([data-lesson-header]) .sl-markdown-content blockquote.lesson-meta-legac
   border-color: color-mix(in srgb, var(--js-color-primary) 40%, var(--js-border));
 }
 
-/* 图片与 D2 机制图 */
+/* 正文图片；机制图是 Diagram 组件，样式在 src/components/diagrams/diagram.css */
 .sl-markdown-content img {
   max-width: 100%;
   height: auto;
   border-radius: 10px;
-}
-
-.sl-markdown-content p > img:only-child,
-.sl-markdown-content > img {
-  padding: 0.75rem;
-  border: 1px solid var(--js-border);
-  background: #fff;
-}
-
-.diagram-scroll {
-  max-width: 100%;
-  margin-inline: 0;
-  overflow-x: auto;
-  padding: 0.75rem;
-  border: 1px solid var(--js-border);
-  border-radius: var(--js-radius);
-  background: #fff;
-}
-
-.diagram-scroll img {
-  min-width: 48rem;
-  padding: 0;
-  border: 0;
-}
-
-.diagram-scroll:focus-visible {
-  outline: var(--js-focus-ring);
-  outline-offset: 3px;
 }
 
 /* ---------- 代码块（Expressive Code，配色在 ec.config.mjs） ---------- */

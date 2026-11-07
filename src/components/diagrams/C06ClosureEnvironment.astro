@@ -1,0 +1,76 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Group from './Group.astro';
+
+const steps = [
+  '`const nextKeyboard = createCounter()`：第一次调用创建一份词法环境，count = 0，并返回 next 函数。',
+  '`const sameCounter = nextKeyboard`：只复制函数引用，两个名字指向同一个 next。',
+  '`const nextMouse = createCounter()`：第二次调用创建另一份环境（count = 0）和另一个 next。',
+  '`nextKeyboard()`：第一份 count 从 0 变成 1，输出 1。',
+  '`sameCounter()`：调用的还是同一个 next，同一份 count 从 1 变成 2，输出 2。',
+  '`nextMouse()`：读写另一份 count，从 0 变成 1，输出 1。',
+];
+const legend = [
+  { line: 'solid' as const, text: '箭头表示引用关系；两个 next 函数使用同一段代码，但来自不同的工厂调用' },
+];
+---
+<DiagramFrame name="c06-closure-environment" steps={steps} legend={legend}>
+  <div class="c06">
+    <Group label="第一次 createCounter()" tone="primary" bodyClass="c06-flow">
+      <div class="c06-names">
+        <Node shape="var" step="1 4">nextKeyboard</Node>
+        <Node shape="var" step="2 5">sameCounter</Node>
+      </div>
+      <Arrow label="都引用" step="1 2 4 5" />
+      <Node step="1 4 5"><span class="dg-t">返回的 next 函数</span></Node>
+      <Arrow label="读写 count" step="4 5" />
+      <Node tone="ok" step="1 4 5">
+        <span class="dg-t">保留的词法环境</span>
+        <span class="dg-s c06-count">count：<span class="dg-mark" data-step="1 2 3">0</span> → <span class="dg-mark" data-step="4">1</span> → <span class="dg-mark" data-step="5 6">2</span></span>
+      </Node>
+    </Group>
+    <Group label="第二次 createCounter()" tone="amber" bodyClass="c06-flow">
+      <div class="c06-names">
+        <Node shape="var" step="3 6">nextMouse</Node>
+      </div>
+      <Arrow label="引用" step="3 6" />
+      <Node step="3 6"><span class="dg-t">另一个 next 函数</span></Node>
+      <Arrow label="读写 count" step="6" />
+      <Node tone="ok" step="3 6">
+        <span class="dg-t">另一份词法环境</span>
+        <span class="dg-s c06-count">count：<span class="dg-mark" data-step="3 4 5">0</span> → <span class="dg-mark" data-step="6">1</span></span>
+      </Node>
+    </Group>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c06 {
+    display: grid;
+    gap: 0.9rem;
+    text-align: center;
+  }
+  .c06-flow { display: grid; }
+  .c06-names {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .c06-count { font-variant-numeric: tabular-nums; }
+  .c06-count .dg-mark { font-family: var(--sl-font-mono); }
+  /* 计数是一个会被改写的值：已经被覆盖的旧值划掉，尚未出现的值变淡 */
+  .c06 .dg-mark[data-state='past'] {
+    opacity: 1;
+    color: var(--js-color-muted);
+    text-decoration: line-through;
+  }
+  @container dg (min-width: 34rem) {
+    .c06 {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+</style>

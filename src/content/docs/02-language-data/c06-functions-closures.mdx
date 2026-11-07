@@ -7,6 +7,7 @@ sidebar:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 1 周 · 第 3 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -138,7 +139,7 @@ console.log(nextMouse());    // → 1
 
 三行依次输出 **1、2、1**。`nextKeyboard` 与 `sameCounter` 指向同一个返回函数，第一次把 `count` 从 0 改到 1，第二次继续改到 2。`nextMouse` 来自另一次工厂调用，它有另一份 `count`，从 0 开始。
 
-![闭包引用图：nextKeyboard 与 sameCounter 指向第一次工厂调用返回的同一个 next 函数，读写同一份 count；nextMouse 指向另一次调用创建的 next，读写独立的 count。](../../../assets/diagrams/c06-closure-environment.svg)
+<Diagram name="c06-closure-environment" />
 
 分开看两次工厂调用：每一组都沿着「变量引用 → 函数 → 保留的词法环境」读取。外层调用已经结束，返回的函数仍可访问所需的绑定；它们会随着这些引用继续可达。
 

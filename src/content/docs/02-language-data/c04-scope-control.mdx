@@ -7,6 +7,7 @@ sidebar:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 1 周 · 第 2 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -121,7 +122,7 @@ console.log(pending); // → undefined
 
 最后的 `let pending;` 已经执行完声明，把变量初始化为 `undefined`，因此可以读取。`undefined` 是一个可读取的值，TDZ 则是尚不能读取的状态。
 
-![作用域查找流程：从当前作用域寻找 warehouse，找不到就沿外层继续；找到后检查初始化状态，已初始化就读取，未初始化就因 TDZ 抛 ReferenceError。所有外层都没有绑定时，也抛 ReferenceError。](../../../assets/diagrams/c04-scope.svg)
+<Diagram name="c04-scope" />
 
 箭头表示查找路径：未声明与 TDZ 是两个不同的报错出口。
 

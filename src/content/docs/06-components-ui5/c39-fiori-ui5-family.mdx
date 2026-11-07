@@ -5,6 +5,7 @@ sidebar:
   order: 39
 ---
 
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 4 周 · 第 20 天** · 阅读约 35 分钟 · 实作约 25 分钟<br />
@@ -64,7 +65,7 @@ React 包装：import { Button } from "@ui5/webcomponents-react" → <Button />
 
 **先猜一猜：** JSX 中出现 `Button`，就说明底层是经典 `sap.m.Button` 吗？不是。要看 import 来源；React 包装连接的是 Web Components，不是 OpenUI5 的 React 皮肤。
 
-![UI5 家族与经典 MVC 绑定图：Fiori 指导经典 UI5 和 Web Components；React 包装 Web Components；经典 UI5 由 View 事件经 Controller 更新 Model，再由绑定通知控件。](../../../assets/diagrams/c39-ui5-family-binding.svg)
+<Diagram name="c39-ui5-family-binding" />
 
 先读上面的设计与包装关系，再读下面的 MVC 通知链。视觉相近不表示运行机制相同。
 
@@ -138,7 +139,7 @@ UI5 CLI 4 用 Node 提供开发服务和静态构建；UI5 框架在浏览器运
 
 **现象**：决定保留 React，却计划把 JSX 的 props 改成 `{inventory>stock}`，并额外加 JSONModel。
 
-**工具**：打开编辑器里的组件 import，与第 2 节的三条入口对照；再沿 D2 图查看包装关系。
+**工具**：打开编辑器里的组件 import，与第 2 节的三条入口对照；再沿家族图查看包装关系。
 
 **证据**：`@ui5/webcomponents-react` 指向 Web Components，图上的包装线也没有连接经典 MVC。
 
