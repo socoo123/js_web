@@ -1,6 +1,6 @@
 # Java → JavaScript 学习站
 
-面向**会 Java、初学前端**的开发者，用中文从 HTML/CSS 和浏览器讲起，逐步掌握 JavaScript、工程工具、React、开源组件与 SAP UI5。**48 课、5 个 Lab、一个长期库存工作区**；用任务、代码、预期结果、有价值的 Java 对照、调试与测试连起整条学习路径。
+面向**会 Java、初学前端**的开发者，用中文从 HTML/CSS 和浏览器讲起，逐步掌握 JavaScript、工程工具、React、开源组件与 SAP UI5。**48 课、6 个 Lab、一个长期库存工作区**；用任务、代码、预期结果、有价值的 Java 对照、调试与测试连起整条学习路径。
 
 48 课必修正文、四张速查页、14 张机制图与本地阅读进度保留。站点以 Lab 为主线：侧栏按 Lab 分组，首页与 Lab 主页用标签进入课程，学完以 L6 毕业挑战收尾；阶段内连续修改，阶段间可用固定快照补课。C23/C41 分别接正式 C22/C40，L4 保留 React 主应用并提供四种并列适配，L5 回到 React 主应用交付。实际发布版本、验证范围与维护状态以 [STATUS](docs/STATUS.md) 和 [阶段记录](labs/records/)为准。
 
@@ -20,7 +20,7 @@ npm run lab -- dev
 
 打开终端地址，应看到 P001 机械键盘、库存 12 件，再从 [C01](https://socoo123.github.io/js_web/01-history-web/c01-story-ecosystem/)开始。启动骨架已提供；npm、模块与框架原理会按课解释。已克隆仓库也可直接在 `labs/inventory/` 跟做，不必安装根目录网站依赖。
 
-### 五个 Lab 与固定起点
+### 六个 Lab 与固定起点
 
 | Lab / 课程 | 补课起点（2026.11-v4.0） | 阶段交付 |
 | --- | --- | --- |
@@ -29,6 +29,7 @@ npm run lab -- dev
 | [L3 React 库存应用](https://socoo123.github.io/js_web/labs/l3/) · C21–C36 | [C20](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/C20.tar.gz) | 从 JSX 到状态、表单、路由、缓存、测试与恢复 |
 | [L4 组件库与 UI5 适配](https://socoo123.github.io/js_web/labs/l4/) · C37–C44 | [C36](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/C36.tar.gz) | 四个并列 adapter，共用业务规则与 P004 编辑场景 |
 | [L5 对接后端与交付](https://socoo123.github.io/js_web/labs/l5/) · C45–C48 | [C44](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/C44.tar.gz) | 保留的 React 主应用接上本地后端：全链路排错、带代理的生产预览、风险回归与服务端低库存筛选 |
+| [L6 毕业挑战](https://socoo123.github.io/js_web/labs/l6/) · 学完 C48 后 | 自己的 C48 完成态 | 44 道能力自测、8 个 Bug、跨层补货计划；毕业项目按清单自评 |
 
 该发行格式提供 C00–C48 快照及 [SHA-256 清单](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/manifest.json)。C00 是初始工程，Cnn 是该课完成参考态；例如 C20 是 C21 的起点，不是 L3 答案。正常跟做一直用自己的目录，不每天下载完成解。历史包和 48 个课程 URL 保留。
 
@@ -40,9 +41,11 @@ npm run lab -- dev
 
 ### L5 的本地交付
 
-从 C44 保留的 `src/react/` 继续，不切到 UI5 React adapter。四课留下 `notes/debug.md`、`notes/delivery.md`、`notes/test-plan.md`、`notes/final-review.md`；先保管个人快照，再按 C45 准备固定数据的 `baseline.json`，每次独立实验前导入。
+从 C44 保留的 `src/react/` 继续，不切到 UI5 React adapter。四课留下 `notes/debug.md`、`notes/delivery.md`、`notes/test-plan.md`、`notes/final-review.md`；先保管个人数据，每次独立实验前用「恢复固定数据」或 `npm run lab -- api reset` 恢复后端起点。
 
 C46 在现有 `vite.config.js` 增加 `base: "/js_web/demos/inventory/"`，保留 source map 与 test 配置。**以下命令在学员 `inventory/` 执行，不在网站根目录执行：**
+
+先在另一终端运行 `npm run lab -- api`，保持后端运行，再构建并启动带 `/api` 代理的预览：
 
 ```sh
 npm run lab -- start C46
@@ -135,7 +138,7 @@ npm run preview -- --host 127.0.0.1
 
 如需运行旧参考，按各自 README 安装和启动；仍被固定输出或检查依赖的安装路径保留。逐课 `examples/cNN/README.md` 记录示例、精确环境和验证结果，不是另一套日常作业。
 
-Pages 发布课程网站与学习包。Lab 应用按课程在本地构建和严格静态预览，默认 `/js_web/demos/inventory/` 是生产目标，不是已经上线的演示承诺。数据编辑在浏览器内存或本地存储，UI5 使用静态教学数据或浏览器内 mock；Pages 不运行 Node 后端。
+Pages 发布课程网站、学习包与浏览器 mock 演示。Lab 应用按课程在本地构建和严格静态预览，默认 `/js_web/demos/inventory/` 是生产目标。L5 本地编辑持久化到后端的 `.lab/server/products.json`；Pages 演示使用浏览器内存或本地存储，UI5 使用静态教学数据或浏览器内 mock；Pages 不运行 Node 后端。个人部署使用 C46 的 `VITE_DATA_SOURCE=mock` 构建方式。
 
 ## 学习进度与备份
 
@@ -159,7 +162,9 @@ Pages 发布课程网站与学习包。Lab 应用按课程在本地构建和严�
 | `npm run test:lab-ui5` | C37–C44 连续快照、四个 adapter 共同场景及 UI5 专项检查 |
 | `npm run test:lab-delivery` | C44→C48 实际交付链，入口为 `node scripts/verify-delivery-lab.mjs` |
 | `npm run test:progress` | 进度格式、合并、备份与故障恢复 |
-| `npm run build` | 学习包/冻结源码 → Lab/片段契约 → Java 对照 → 课程 lint/固定输出 → F1 数据 → 路线 → Astro/Pagefind → 页面、全部发行包 SHA/源码清单与子路径资源检查 |
+| `npm run test:api` | 本地后端契约、生成规则同步 |
+| `npm run check:capstone` | L6 题库、预测输出与项目验收数字 |
+| `npm run build` | 学习包/冻结源码 → Lab/片段与后端契约 → Java 对照 → 课程 lint/固定输出 → L6/F1 数据 → 截图新鲜度/路线/演示 → Astro/Pagefind → 页面、全部发行包 SHA/源码清单与子路径资源、Lab 标签锚点检查 |
 | `npm run check:build` | 检查已有 `dist/` 的页面、链接、资源、折叠区、进度、速查导航与全部发行版下载包 |
 
 CI 在同一源码与环境下执行一次 `check`、一次完整 `build`，再将 walkthrough、react、ui5、delivery 四条行为门禁各跑一次。四条行为命令不重新打包；`build` 也不包含它们。不要在 `build` 前后再全量重跑它已包含的子命令，单项命令用于定位失败。
@@ -185,7 +190,7 @@ npm run test:progress:browser
 ## 仓库结构
 
 ```text
-src/content/docs/       48 课正文、首页、路线、五个 Lab 与四张速查页
+src/content/docs/       48 课正文、首页、路线、六个 Lab、规则/接口与四张速查页
 src/components/         课程包装、学习进度与主题组件
 src/lib/                进度数据校验、保存与恢复
 src/scripts/            浏览器进度交互
@@ -198,7 +203,7 @@ labs/records/           实际跟做、测试和发布证据
 examples/c01…c48/       每课机制参考、预期输出与验证记录
 examples/shared/        固定库存数据
 examples/inventory/     旧七阶段参考工程，保留必要验证依赖
-scripts/                内容/示例/产物检查、路线同步与图构建
+scripts/                内容/示例/产物检查、路线同步、截图与演示构建
 tests/                  工作区/片段契约、站点进度与浏览器回归
 docs/                   计划、规范、架构、来源与状态
 .github/workflows/      GitHub Pages 检查、构建与发布
@@ -209,8 +214,8 @@ docs/                   计划、规范、架构、来源与状态
 | 文档 | 用途 |
 | --- | --- |
 | [STATUS](docs/STATUS.md) | 实际完成状态、发布记录、已知问题与下一步 |
-| [PLAN](docs/PLAN.md) | V3 改版五阶段、固定数据、课文与界面规则、L5 后端、验收、主/子 agent 协作与接续提示词 |
-| [Lab 设计](labs/README.md) | 五个 Lab 的固定起点、任务边界、共同场景与恢复契约 |
+| [PLAN](docs/PLAN.md) | V4 三批交付、固定数据、课文与界面规则、L5 后端、验收、主/子 agent 协作与接续提示词 |
+| [Lab 设计](labs/README.md) | 六个 Lab 的任务边界、五个固定起点、共同场景与恢复契约 |
 | [CURRICULUM](docs/CURRICULUM.md) | 48 课范围、学习节奏与选修方向 |
 | [CONTENT_GUIDE](docs/CONTENT_GUIDE.md) | 写课规范；修改课程前必读 |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | 内容模型、进度、搜索、机制图与站点边界 |
@@ -221,7 +226,7 @@ docs/                   计划、规范、架构、来源与状态
 
 推送 `main` 或手动触发[工作流](.github/workflows/deploy.yml)后，Actions 安装锁定依赖、执行相应门禁并发布 `dist/`；具体命令以工作流与 [DEPLOYMENT](docs/DEPLOYMENT.md)为准。发布地址为 `https://socoo123.github.io/js_web/`，资源和链接必须保留 `/js_web/` 子路径。对应提交的 Pages 成功后还要核验课程、Lab 与下载校验值，实际结果见 [Actions](https://github.com/socoo123/js_web/actions)和阶段记录。当前工作流未配置 PR 自动触发。
 
-恢复工作时发送 **`JS_WEB_START`**，先读 STATUS 的真实下一步。当前队列是 V3 改版五阶段，阶段实施和主/子 agent 验收协议见 PLAN §7–8；STATUS 写明“V3 改版完成，下一阶段：无”之后，只按用户提出的具体维护需求行动。
+恢复工作时发送 **`JS_WEB_START`**，先读 STATUS 的真实下一步。V4 三批的执行与交接协议见 PLAN §6–8；批次 3 完成后关闭计划，下一步为无，只按用户提出的具体维护需求行动。
 
 ## 当前范围与待办
 

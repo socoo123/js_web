@@ -158,6 +158,30 @@ try {
   if (!process.env.REVISION_INTERACTIONS_ONLY && !requestedRoutes) assert.deepEqual([...diagrams.keys()].sort(), Object.keys(DIAGRAMS).sort(), '全站必须显示全部登记的机制图');
   evidence.diagrams = Object.fromEntries(diagrams);
   await page.setViewportSize({ width: 1280, height: 950 });
+  // 终验走完每张过程图的每条轨道，核对末步和回退；静态图由上面的布局与无 JS 检查覆盖。
+  for (const [name, { route, steps }] of diagrams) {
+    if (!steps) continue;
+    await page.goto(base + route);
+    const figure = page.locator(`figure[data-diagram="${name}"]`);
+    const tracks = await figure.locator('ol[data-track]').evaluateAll((lists) => lists.map((list) => ({ id: list.dataset.track, total: list.children.length })));
+    for (const track of tracks) {
+      const switcher = figure.locator(`[data-dg-track="${track.id}"]`);
+      if (await switcher.count()) await switcher.click();
+      else await figure.locator('[data-dg-next]').click();
+      for (let step = 1; step <= track.total; step++) {
+        await expect(figure.locator('[data-dg-live]')).toContainText(`第 ${step} / ${track.total} 步`);
+        if (step < track.total) await figure.locator('[data-dg-next]').click();
+      }
+      await expect(figure.locator('[data-dg-next]')).toBeDisabled();
+      await figure.locator('[data-dg-prev]').click();
+      await expect(figure.locator('[data-dg-live]')).toContainText(`第 ${track.total - 1} / ${track.total} 步`);
+      await figure.locator('[data-dg-play]').click();
+      await expect(figure.locator('[data-dg-live]')).toContainText(`第 1 / ${track.total} 步`);
+      await expect(figure.locator('[data-dg-play]')).toHaveText('暂停');
+      await figure.locator('[data-dg-play]').click();
+    }
+    evidence.checks.push(`diagram complete tracks, previous and replay: ${name}`);
+  }
   // 分步图：键盘按「下一步」后，当前步高亮、说明随之更新；「上一步」回到全图。
   await page.goto(base + '03-async-modules/c12-callbacks-promises/');
   const stepper = page.locator('figure[data-diagram="c12-browser-event-loop"]');
@@ -298,7 +322,7 @@ try {
   await nojs.close();
   assert.deepEqual(errors, []);
   evidence.status = 'passed';
-  console.log(`V2 浏览器自动验收（${evidence.phase}，Chromium ${evidence.browser}）：${evidence.geometry.length ? `${routes.length} 页 × 三宽度/亮暗 = ${evidence.geometry.length} 组；${diagrams.size} 张机制图` : '交互专项复测（未重做全图统计）'}、键盘/复制/答案、七词搜索、${evidence.noJavaScript.length} 页禁用 JS 阅读。截图/JSON：${qa}。自动断言不代表人工逐图审阅或最终集成通过。`);
+  console.log(`全站浏览器自动验收（${evidence.phase}，Chromium ${evidence.browser}）：${evidence.geometry.length ? `${routes.length} 页 × 三宽度/亮暗 = ${evidence.geometry.length} 组；${diagrams.size} 张机制图` : '交互专项复测（未重做全图统计）'}、键盘/复制/答案、七词搜索、${evidence.noJavaScript.length} 页禁用 JS 阅读。截图/JSON：${qa}。自动断言不代表人工逐图审阅或最终集成通过。`);
 } catch (error) {
   evidence.status = 'failed'; evidence.failure = error.stack;
   throw error;

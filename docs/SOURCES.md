@@ -33,6 +33,7 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 
 ## Node 与包管理
 
+- 2026-11-07 · C20 勘误核查 [Node 24 类型擦除](https://nodejs.org/docs/latest-v24.x/api/typescript.html#type-stripping)：`node price.ts` 可运行可擦除的类型标注，不做类型检查；`tsc --noEmit` 不更新旧 JS。隔离目录的修复前后输出记录见 `examples/c20/README.md`。
 - [Node 事件循环](https://nodejs.org/learn/asynchronous-work/event-loop-timers-and-nexttick)：说明 JS 执行与系统 I/O/线程池，浏览器与 Node 的时序不能直接等同。
 - [Node TypeScript](https://nodejs.org/api/typescript.html)：type stripping 与完整类型检查分别解释。
 - [npm package.json](https://docs.npmjs.com/cli/v11/configuring-npm/package-json)、[npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci/)：这些是带版本的文档入口，实施时查所安装 CLI 对应版本。

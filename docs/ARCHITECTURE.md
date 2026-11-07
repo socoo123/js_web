@@ -1,8 +1,8 @@
 # 静态网站架构与部署规划
 
-状态：48 课主线、四张速查页、七阶段库存项目、14 张机制图与本地学习进度已实现。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。课程 React 示例使用独立阶段工程，站点尚无需要 React island 的交互示例。
+状态：48 课主线、六个 Lab、四张速查页、14 张机制图与本地学习进度已实现，旧七阶段工程保留参考。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。站点已接入少量 React islands，其余交互使用原生浏览器脚本。
 
-2026-10-29 收尾约定：本文件保留现有架构及组件规格；唯一执行队列为 [PLAN](PLAN.md) 的 A/B/C，Lab 边界见 [Lab 设计](../labs/README.md)。已有工作区、快照、片段与双栏门禁直接复用，下文历史的“规划/拟新增”不构成重建任务。
+2026-11-07 同步：当前架构以 [V4 PLAN](PLAN.md) 为准，Lab 边界见 [Lab 设计](../labs/README.md)。下文 V2 规格保留历史设计，V4 已将导航改为 Lab 优先、对照卡改为纵向、所有块对齐同一正文栏，并加入交互揭晓、图步进与 L6。历史的“规划/拟新增”不构成重建任务。
 
 ## 技术选择
 
@@ -13,7 +13,7 @@
 | 长篇中文课程、目录和移动阅读 | Starlight 提供文档站骨架，减少重复搭建导航 |
 | 代码显示与复制 | 使用现有 Expressive Code 能力，保留文件名/高亮/差异标记 |
 | 课程正文 | Markdown 为主；需要嵌入组件时使用 MDX；构建成真实 HTML |
-| React 示例 | 独立 Vite + React 练习工程；需要站内演示时再按需接入 island |
+| React 示例 | Lab 工作区的 Vite + React 应用；少量站内演示用 island，完整目标演示独立构建 |
 | 搜索 | Starlight 默认 Pagefind 静态索引，测试中文分词与英文 API 搜索 |
 | 进度 | 浏览器 localStorage；不引入账号/后端 |
 | 关键图 | Astro 图形组件（HTML/CSS + 主题变量），过程图可逐步播放 |
@@ -80,7 +80,7 @@ js_web/
 │   └── styles/
 ├── examples/
 │   ├── cNN/                   # 每课的独立例子、.expected.txt 与 README
-│   ├── shared/                # PLAN §3.1 固定样例数据
+│   ├── shared/                # PLAN §3.3 固定样例数据
 │   └── inventory/             # 第一版 7 阶段保留参考；主线改用 labs/inventory
 ├── scripts/                   # 路线同步、产物检查、课程 lint 与固定输出检查
 ├── public/                    # 静态数据与可下载练习资料
@@ -96,7 +96,7 @@ js_web/
 
 ## 内容模型
 
-**当前约定**：课程 frontmatter 只用 `title`、`description`、`sidebar.order`；课号、周次、前置、时间写在页首信息行（见 CONTENT_GUIDE §3），验证明细写在 examples README。学习进度读取标题开头的稳定课号，不新增字段。下面的扩展字段是备选设计，没有实施；以后确需它们时，先扩展 `src/content.config.ts` 的 schema，再批量写入。
+**当前约定**：课程 frontmatter 使用 `title`、`description`、`sidebar.order`；C03/C15/C23 另用已声明的 `lesson`（时间、前置、环境、验证状态，见 CONTENT_GUIDE §16），其他课保留页首信息行。课号和 Lab 关系来自 catalog，验证明细写在 examples README。下面的扩展字段是历史备选设计，没有实施。
 
 备选的扩展字段：
 
@@ -121,7 +121,7 @@ lastReviewed: 2026-10-15
 
 ## 进度与搜索
 
-进度键：`js_web:progress:v1`。已实现的格式为 `{"version":1,"completed":["C01","C02"]}`，只记录主动标记完成的课号。原设想的最近阅读位置和更新时间没有纳入 F1。
+进度键仍为 `js_web:progress:v1`，当前格式为 `{"version":2,"completed":["C01","C02"],"labSteps":[]}`，读取与导入兼容旧 v1。课号和步骤均由学员主动勾选。练习自评另存 `js-web-practice-v1`，L6 三关另存 `js-web-capstone-v1`，不改变 F1 格式。
 
 - localStorage 不可用、JSON 损坏或包含已删除课号时，页面继续可读并给出恢复方式。
 - 完成标记由学习者控制；翻页不等于学会。
@@ -163,7 +163,7 @@ trailingSlash: 'always'
 
 ## 依赖与命令规划
 
-当前核心依赖：astro、@astrojs/starlight、@astrojs/markdown-remark；检查依赖为 @astrojs/check 与 TypeScript 6。Starlight 自带 MDX 集成；没有 React island 时不预装 React，后续按实际示例接入 @astrojs/react、react、react-dom。
+当前核心依赖：astro、@astrojs/starlight、@astrojs/markdown-remark、@astrojs/react、react、react-dom；检查依赖为 @astrojs/check 与 TypeScript 6。Starlight 自带 MDX 集成。构建门禁检查无 island 页面不加载 React，单页新增 JS gzip 不超过 80KB。
 
 本地与 CI 固定 Node 24.22.0 + npm 11.19.1，网站工程统一 npm、一份根级 `package-lock.json`；其他管理器实验在独立目录，不混用根锁文件。实际命令与文章提交约定见 [DEPLOYMENT](DEPLOYMENT.md)。
 
@@ -178,7 +178,7 @@ trailingSlash: 'always'
 | npm run test:progress | Node 内置运行器检查进度校验、合并、备份与故障恢复 |
 | npm run test:progress:browser | 对生产预览检查进度交互、存储故障、跨标签与静态阅读 |
 
-上述命令均已实现。浏览器验收复用阶段 4 的锁定 Playwright，准备与运行方式见根 README；进度数据测试接入 build。课程用的 UT 练习与网站自身测试分开组织。
+上述命令均已实现。浏览器验收使用 `labs/inventory` 的锁定 Playwright，准备与运行方式见根 README；进度数据测试接入 build。完整构建链与浏览器命令见 DEPLOYMENT。课程用的 UT 练习与网站自身测试分开组织。
 
 ## GitHub Actions 部署计划
 

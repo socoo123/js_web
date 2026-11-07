@@ -136,7 +136,7 @@ V3 阶段 1 的视觉系统（靛蓝主色、琥珀 JS、咖啡橙 Java、12px �
 ### 6.2 何时并行
 
 - 主 agent 先判断工作能否按文件归属干净拆开。能拆就同时启动 **最多 4 个**后台子 agent；拆不开就主 agent 自己做，不为凑数派发。
-- 模型：用户 2026-11-06 起指定子 agent 与主 agent 相同，用 **Opus 5.5 Extra High**（Cursor `Task` 中为 `claude-opus-5-5-xhigh`）。启动前核验在可用列表里；不可用就问用户，不静默换模型。
+- 模型：用户 2026-11-07 因 Opus 额度用完，授权 **V4 批次 3 主、子 agent 均改用 GPT-6 Astra**（`openai/gpt-6-astra`）。启动子 agent 前核验在可用列表里；不可用就问用户，不静默换模型。之前批次实际使用 Opus 5.5 Extra High 的历史记录保留；工作区隔离、验收与发布要求不变。
 - 隔离：每路一个 git worktree（`git worktree add -b v4-<名> ../js_web-v4/<名> HEAD`），用 `cp -cR node_modules` 克隆依赖（APFS 写时复制）。每路有明确的文件归属与禁改清单，各自用不同端口跑 `astro dev`，在自己的分支上提交，不推送、不合并 main、不再派子 agent。共享文件（`package.json`、`astro.config.mjs`、`labs/catalog.json`、`docs/`、STATUS/记录）只由主 agent 改。
 - 主 agent 在子 agent 运行时并行做自己的部分，不轮询；交稿后按依赖合并分支、解决冲突、补小接线，实质问题交回原会话返修。
 
@@ -165,6 +165,6 @@ V3 阶段 1 的视觉系统（靛蓝主色、琥珀 JS、咖啡橙 Java、12px �
 
 每批的主 agent 最终回复包含：`V4 批次 N：成功 / 未完成（原因）` 与准确范围；各路子 agent 的结果与是否全部结束；关键验收结果、提交号、Pages run 与线上入口；可直接复制的接续段落：
 
-> JS_WEB_START。V4 批次【N】已发布，证据在【labs/records/V4-N.md】，提交【SHA】、Pages【run URL】。以 docs/STATUS.md 为准执行 V4 批次【N+1 名称】：读 AGENTS、STATUS、PLAN、CONTENT_GUIDE、labs/README，检查并保留 Git 改动；按 PLAN §6 判断是否并行（子 agent 用 Opus 5.5 Extra High，即 claude-opus-5-5-xhigh，各自 worktree），集成、验收、发布并核验 Pages 后返回结果与下一段接续文本。
+> JS_WEB_START。V4 批次 2 已发布，证据在 labs/records/V4-2.md，提交 218d728（发布记录 8e69eeb），Pages https://github.com/socoo123/js_web/actions/runs/42354130699。以 docs/STATUS.md 为准执行 V4 批次 3「勘误与全站终验」：读 AGENTS、STATUS、PLAN、CONTENT_GUIDE、labs/README，检查并保留 Git 改动；主、子 agent 均用 GPT-6 Astra（openai/gpt-6-astra），按 PLAN §6 判断是否并行，各路使用独立 worktree。完成集成、验收、发布并核验 Pages 后返回结果与接续文本；按 §7 关闭 V4，下一步为无，不自动开启新一轮。
 
 未完成时首句写「V4 批次 N 未完成」，列清已做范围、未提交文件、剩余步骤与阻塞；没有提交或部署就写未提交/未部署，不填虚构的 SHA 或 run。清理上下文指新开会话重新读仓库，不删除文件、`.lab`、Git 改动或学习数据。

@@ -14,6 +14,7 @@ npm --version
 npm ci
 npm ci --prefix labs/inventory
 npm ci --prefix examples/inventory/04-react
+npm exec --prefix labs/inventory -- playwright install chromium
 npm run check
 npm run build
 npm run preview
@@ -23,20 +24,34 @@ npm run preview
 
 C32 等旧 Node 示例仍复用阶段 4 安装的 TanStack Query，因此不能删去该安装。学习工作区与旧阶段 4 的锁均独立于网站根锁；各自在对应目录安装，不能用其他副本的根 `node_modules` 软链代替 `npm ci`。
 
-根目录只有 npm 的 `package-lock.json`。没有使用 React island 的当前页面只需 Astro/Starlight；未来真正加入交互示例时再核查并安装 React 集成。
+根目录只有 npm 的 `package-lock.json`。React 集成已用于少量交互演示；没有 island 的页面不加载 React。Java 对照运行另需 JDK 21。
 
 ## 构建流程
 
 - `npm run sync:roadmap`：从 `docs/CURRICULUM.md` 的 48 课大纲与现有文章生成路线页；已有文章显示链接，其余显示「待发布」。
 - `npm run check`：Astro 内容与类型检查。
-- `npm run build`：生成当前学习包并核对冻结源码 → Lab/受控片段契约 → Java 对照 → 课程 lint 与固定输出 → F1 数据 → 路线 → Astro/Pagefind → 生产 HTML/资产、全部发行版的包 SHA 与源码清单。任一步失败都会停止。已冻结发行版从 `labs/releases/` 原样复制，不能在原版号下改写源码或历史包。
-- `npm run test:lab-walkthrough`：C00→C20 连续自动组装、C03/C23/C41 主错误红绿；`test:lab-react`：C21–C36 实际快照；`test:lab-ui5`：C37–C44 实际快照及严格静态资源；`test:lab-delivery`：C44→C48 交付链。它们独立于根 build，不再次打包。先在 `labs/inventory` 执行 `npx playwright install chromium`（Linux CI 用 `--with-deps`）。自动组装不等于独立读者验收，后者仍按 PLAN §6 执行。
+- `npm run build`：生成当前学习包并核对冻结源码 → Lab/受控片段契约 → 后端契约与规则同步 → Java 对照 → 课程 lint 与固定输出 → L6 题库与验收数字 → F1/Lab 进度数据 → 截图新鲜度 → 路线与演示 → Astro/Pagefind → 生产 HTML/资产、全部发行版的包 SHA 与源码清单 → Lab 标签与步骤锚点。任一步失败都会停止。已冻结发行版从 `labs/releases/` 原样复制，不能在原版号下改写源码或历史包。
+- `npm run test:lab-walkthrough`：C00→C20 连续自动组装、C03/C23/C41 主错误红绿；`test:lab-react`：C21–C36 实际快照；`test:lab-ui5`：C37–C44 实际快照及严格静态资源；`test:lab-delivery`：C44→C48 交付链。它们独立于根 build，不再次打包。Linux CI 安装 Chromium 时用 `--with-deps`。自动组装与独立读者验收分开记录；按 PLAN §6，只在改动需要时补读者跟做。
 - `npm run test:progress:browser`：生产预览运行后检查进度标记、导入导出、损坏恢复、存储受限、跨标签与禁用 JS 阅读，准备方式见根 README。默认端口 8751，可通过 `PROGRESS_BASE_URL` 指定地址。
+
+### 全站浏览器终验
+
+完成构建后，在一个终端执行 `npm run preview -- --host 127.0.0.1 --port 8874 --ignore-lock`。另一个终端在仓库根执行：
+
+```sh
+REVISION_PHASE=V4-final node tests/revision.browser.mjs
+PROGRESS_BASE_URL=http://127.0.0.1:8874/js_web/ node tests/progress.browser.mjs
+PROGRESS_BASE_URL=http://127.0.0.1:8874/js_web/ node tests/lab-steps.browser.mjs
+REVEAL_BASE_URL=http://127.0.0.1:8874/js_web/ node tests/reveal.browser.mjs
+node tests/capstone.browser.mjs
+```
+
+依次覆盖全站三宽度/亮暗与机制图、F1、Lab 标签/步骤、答案揭晓、L6 三关。脚本在独立浏览器上下文中运行，证据输出到各自的 `.cache/qa/` 子目录；自动断言与人工截图审查分开记录。
 
 
 ### 命令责任与执行次数
 
-同一源码和环境执行一次 `npm run check` 与一次 `npm run build`，再按改动执行必要行为检查。`build` 已包含 `build:labs`、`test:labs`、`test:comparisons`、`lint:lessons`、`examples`、`test:progress` 与 `check:build`，不要在同一批前后全量再跑。只改一课时可先运行其固定输出或单课检查；修改后重跑不是重复执行。
+同一源码和环境执行一次 `npm run check` 与一次 `npm run build`，再按改动执行必要行为检查。上列构建子项均已包含在 `build`，不要在同一批前后全量再跑。只改一课时可先运行其固定输出或单课检查；修改后重跑不是重复执行。
 
 CI 中四个 `test:lab-*` 行为检查仍各执行一次。旧阶段 4 的 `lint`、`test`、`build` 检查的是另一份仍被引用的源码，不与当前 Lab 等价，继续保留。全站视觉/F1 浏览器、线上下载与主 agent 的独立教学验收不在根 build 内。
 
@@ -50,18 +65,18 @@ CI 中四个 `test:lab-*` 行为检查仍各执行一次。旧阶段 4 的 `lint
 
 ## 每次生成文章后的同步
 
-用户已授权自动提交和推送，完整约定在 [AGENTS.md](../AGENTS.md)，门禁定义在 [PLAN §6](PLAN.md)。每阶段按 PLAN §7 同时启动 4 个指定模型子 agent，主 agent 等四路及返修全部结束，集成验收并负责发布：
+用户已授权自动提交和推送，完整约定在 [AGENTS.md](../AGENTS.md)，门禁定义在 [PLAN §6](PLAN.md)。能按文件归属干净拆分时才并行，最多 4 路，各用独立 worktree；V4 批次 3 主、子 agent 使用 GPT-6 Astra（`openai/gpt-6-astra`）。主 agent 等全部子任务及返修结束，集成验收并负责发布：
 
 1. 每课运行相应固定输出、Lab/错误行为检查；发布批次运行 `npm run check`、`npm run build`（内含 `lint:lessons`）及本批必要浏览器检查。同一源码/环境不重复执行 build 已包含的全量检查。验证明细写进 `examples/cNN/README.md` 并链接阶段记录。
 2. 主 agent 等待全部子任务完成并独立验收；准备阶段记录，STATUS 在发布核验后更新现有课程行、实际状态与下一步。路线页由构建自动同步。
 3. 审阅 Git 差异，只提交本次的文章、配套示例、图和相关网站改动；不提交缓存、凭据或用户无关的工作。
 4. 检查远端，再正常提交并推送到 `origin/main`，例如 `docs: publish C06 functions and closures lesson`。不强制推送。
 5. 等对应提交的 Actions 完成，确认课程/Lab/下载线上入口与资源正常、下载校验值一致；失败修复或明确报告阻塞。记录更新若触发再次部署，也等待该次完成。
-6. 全套视觉验收（宽度、亮暗模式、搜索、禁用 JS）按 PLAN §6 每周做一次。
+6. 每批检查受影响页面；全站 360/768/1280 × 亮暗、键盘、无 JS、搜索、复制、答案、机制图、F1 与 Lab 进度终验在 V4 批次 3 完成，证据见 [V4-3](../labs/records/V4-3.md)。
 
 这是执行者的项目约定。仅编辑并保存一个文件不会自行创建 Git 提交；提交并推送到 `main` 后，Pages 工作流会自动部署。用户当次要求「仅本地草稿」或「暂不发布」时遵循该要求。
 
-每阶段成功后，主 agent 按 PLAN §8 输出全新窗口可复制的接续段落；失败仍接续同阶段，V3 阶段 5 成功后结束改版。
+每批成功后，主 agent 按 PLAN §8 输出新窗口可复制的接续段落；失败仍接续同批。V4 批次 3 发布核验后关闭改版，下一步为无，只处理用户具体维护需求。
 
 ## Pages 自动部署
 
