@@ -1,5 +1,5 @@
 {
-  "release": "2026.10-v2.5",
+  "release": "2026.11-v4.0",
   "labs": [
     {
       "labId": "L1",
@@ -23,8 +23,8 @@
     },
     {
       "labId": "L5",
-      "title": "调试与静态交付",
-      "description": "从排错到可恢复的静态交付"
+      "title": "对接后端与交付",
+      "description": "接上本地后端，按层排错、构建交付并补风险回归"
     }
   ],
   "lessons": [
@@ -1528,7 +1528,7 @@
       "files": [
         "notes/ui5-choice.md"
       ],
-      "task": "写 notes/ui5-choice.md，对同一库存需求选择经典 UI5 或 Web Components；阅读现有 D2",
+      "task": "写 notes/ui5-choice.md，对同一库存需求选择经典 UI5 或 Web Components；读懂 UI5 家族图",
       "comparisonTheme": "Java MVC 经验 / UI5 View/Controller/Model；Fiori 不等于框架",
       "acceptance": [
         "四种 UI5 名称与 Fiori 设计系统区分清楚；记录当前 P004 任务、保留项与静态 mock 边界"
@@ -1764,13 +1764,18 @@
       "startCheckpoint": "C44",
       "endCheckpoint": "C45",
       "files": [
+        "src/services/api-repository.js",
+        "src/services/data-source.js",
+        "src/react/InventoryProvider.jsx",
+        "vite.config.js",
         "notes/debug.md"
       ],
-      "task": "回到保留的React主应用，在当前文件按状态、资源、存储与布局收集排错证据，写notes/debug.md",
+      "task": "启动 npm run lab -- api，新建 api-repository 与 data-source，经 Vite 代理把保留的 React 主应用接到本地后端；按请求、状态、资源、存储与布局收集排错证据，写 notes/debug.md",
       "comparisonTheme": "Java 堆栈/调试经验 / 浏览器跨层证据与 source maps",
       "acceptance": [
-        "绕开dispatch的补货故障可红→绿，修复后P001=13、总库存53；P004取消3/52、保存8/57且P001仍12",
-        "资源404、非法快照原文与360px布局可定位；性能/内存手工采样分别记录"
+        "初始 6/52/2634800 来自 GET /api/products，Network 与 api 终端各有记录；直连 8070 的 CORS 失败能说明原因并改回代理",
+        "绕开 dispatch 的补货故障可红→绿，修复后 P001=13、总库存 53 且刷新仍在；P004 取消 3/52、保存 8/57 且 P001 仍 12",
+        "422 字段错误显示在对应输入框，保存后列表重新读取，500 后能重试而不卡在加载，慢请求不覆盖新选择；资源 404、非法快照原文与 360px 布局可定位"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1778,9 +1783,9 @@
       ],
       "error": {
         "trigger": "App.restock直接修改Query读取结果，按钮执行但未走dispatch/repository",
-        "evidence": "Sources字段已13、界面仍12，实际浏览器断言失败；Network、Application、Computed分别收证",
-        "repair": "恢复await dispatch，让repository持久化与Query失效后重读，重放同一操作",
-        "risk": "把清缓存当根因；用内存mock冒充HTTP；检查清空学员存储；单张堆图判定泄漏"
+        "evidence": "Sources字段已13、界面仍12；Network与api终端都没有restock请求，刷新后仍12；Application、Computed分别收证",
+        "repair": "恢复await dispatch，让repository发出POST restock、Query失效后重读，重放同一操作",
+        "risk": "把清缓存当根因；用内存mock冒充HTTP；检查清空学员存储或后端数据；单张堆图判定泄漏"
       },
       "commands": {
         "start": "npm run lab -- start C45",
@@ -1804,11 +1809,11 @@
         "vite.config.js",
         "notes/delivery.md"
       ],
-      "task": "配置React嵌套base，构建dist/src-react并用已有产物的严格静态服务验收，写运行与恢复说明",
+      "task": "配置React嵌套base与构建时数据源，构建dist/src-react，用带/api代理的严格静态服务验收，写运行与恢复说明",
       "comparisonTheme": "Java 打包部署经验 / Node 构建与浏览器运行的边界",
       "acceptance": [
-        "base=/js_web/demos/inventory/，入口资源、products.json、按需报表和同次source map可用",
-        "hash P004详情刷新成功，干净详情路径与缺失JS返回真正404；错误base不能被服务器修复或fallback掩盖"
+        "base=/js_web/demos/inventory/，入口资源、products.json、按需报表和同次source map可用；预览经/api代理读到后端6/52/2634800",
+        "hash P004详情刷新成功，干净详情路径与缺失JS返回真正404；错误base不能被服务器修复或fallback掩盖；mock构建不请求/api，可作Pages演示"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1840,14 +1845,16 @@
       "endCheckpoint": "C47",
       "files": [
         "tests/react/regression.test.jsx",
+        "tests/e2e/api.spec.js",
         "src/react/App.jsx",
         "notes/test-plan.md"
       ],
-      "task": "按四项风险补两条必要回归并复用已有重试/严格静态测试，修复真实连续输入时机",
+      "task": "按风险补3–5条回归（坏快照保护、422映射、409冲突、失败重试、连续输入）和1条真实后端浏览器流程，修复真实连续输入时机",
       "comparisonTheme": "JUnit 分层经验 / Vitest、RTL、Playwright 各自边界",
       "acceptance": [
         "非法快照抛错且主键/备份原文不变；真实源码写入顺序故障使断言先红后绿",
-        "逐字输入P004完整、可清空；详情与保存失败可重试；键盘/刷新/静态404继续通过"
+        "422字段落到输入框、409保留草稿并提示冲突、详情与保存失败可重试；逐字输入P004完整、可清空",
+        "真实后端流程：reset后保存P004=8，刷新仍8、总库存57；键盘/刷新/静态404继续通过"
       ],
       "comparisonIds": [],
       "errorIds": [
@@ -1879,13 +1886,14 @@
       "endCheckpoint": "C48",
       "files": [
         "src/react/App.jsx",
+        "src/services/inventory-repository.js",
         "tests/react/final-filter.test.jsx",
         "notes/final-review.md"
       ],
-      "task": "先独立增加URL低库存筛选，定位浅复制故障并记录十题自测、现场证据与补缺路线",
+      "task": "先独立把「仅低库存」改走服务端stock=low，URL保留条件、统计用summary/totals；定位浅复制故障并记录十题自测、现场证据与补缺路线；选做两标签页409冲突",
       "comparisonTheme": "Java/JS 本次最易错的对照回看；不新增业务框架",
       "acceptance": [
-        "仅低库存1–5排除0，与搜索/分类相交；初始P004/P006、8/539200，清除回6/52/2634800，hash刷新恢复",
+        "仅低库存走GET /api/products?stock=low：1–5排除0，与搜索/分类相交；初始P004/P006、8/539200，totals仍6/52/2634800；清除回6/52/2634800，hash刷新恢复",
         "低库存内保存P004=8后离开结果、焦点回标题，清除后全量57且P001仍12；浅复制回归同时检查旧值与对象身份"
       ],
       "comparisonIds": [],
