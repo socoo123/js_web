@@ -2,7 +2,7 @@
 
 面向**会 Java、初学前端**的开发者，用中文从 HTML/CSS 和浏览器讲起，逐步掌握 JavaScript、工程工具、React、开源组件与 SAP UI5。**48 课、5 个 Lab、一个长期库存工作区**；用任务、代码、预期结果、有价值的 Java 对照、调试与测试连起整条学习路径。
 
-48 课必修正文、四张速查页、14 张 D2 机制图与本地阅读进度保留。当前学习导航以 Lab 为主：阶段内连续修改，阶段间可用固定快照补课。C23/C41 分别接正式 C22/C40，L4 保留 React 主应用并提供四种并列适配，L5 回到 React 主应用交付。实际发布版本、验证范围与维护状态以 [STATUS](docs/STATUS.md) 和 [阶段记录](labs/records/)为准。
+48 课必修正文、四张速查页、14 张机制图与本地阅读进度保留。站点以 Lab 为主线：侧栏按 Lab 分组，首页与 Lab 主页用标签进入课程，学完以 L6 毕业挑战收尾；阶段内连续修改，阶段间可用固定快照补课。C23/C41 分别接正式 C22/C40，L4 保留 React 主应用并提供四种并列适配，L5 回到 React 主应用交付。实际发布版本、验证范围与维护状态以 [STATUS](docs/STATUS.md) 和 [阶段记录](labs/records/)为准。
 
 **V2 改版已完成，V3 改版进行中：阶段 1 已发布，下一阶段为 V3 阶段 2「L1–L2（C01–C20）」。** `2026.10-v2.5` 已发布，L1–L5 与 C00–C48 快照齐全，证据见 [C 记录](labs/records/C.md)；V3 阶段 1 的设计系统、交互组件、L3 步骤页与 C03/C15/C23 改写见 [V3-1 记录](labs/records/V3-1.md)。
 
@@ -81,7 +81,7 @@ C47 用同步 HashRouter 和四项风险检查覆盖坏快照、逐字输入、�
 
 ## 本地启动网站
 
-这是维护课程网站的入口，**不是学员启动 Lab 的步骤**。网站使用 Astro + Starlight + Markdown/MDX 静态生成，搜索使用 Pagefind，机制图由 D2 构建为 SVG；站点进度交互使用原生浏览器脚本。
+这是维护课程网站的入口，**不是学员启动 Lab 的步骤**。网站使用 Astro + Starlight + Markdown/MDX 静态生成，搜索使用 Pagefind，机制图是 `src/components/diagrams/` 里的 Astro 组件（HTML/CSS + 主题变量，过程图可逐步播放）；站点进度、答案揭晓与图的步进使用原生浏览器脚本。
 
 仓库固定 **Node 24.22.0 + npm 11.19.1**，以 [.node-version](.node-version) 和 [package.json](package.json) 为准。先用已有版本管理器或 [Node 官方下载](https://nodejs.org/en/download)切换版本，再执行：
 
@@ -102,12 +102,10 @@ npm run dev -- --host 127.0.0.1
 npm ci --prefix labs/inventory
 npm ci --prefix examples/inventory/04-react
 npm exec --prefix labs/inventory -- playwright install chromium
-npm run setup:diagrams
 ```
 
 `examples/inventory/04-react` 的锁定依赖仍供 C32 等旧固定输出使用，它不是主线学员要切换的工程。Lab 与站点 F1 浏览器测试统一使用 `labs/inventory` 锁定的 Playwright 和上面准备的 Chromium，不必再为 F1 准备旧阶段浏览器。根目录网站只用 npm 和唯一根锁；Lab 与保留参考工程各用自己的独立锁。Linux CI 安装 Chromium 时加 `--with-deps`，补齐系统依赖。
 
-D2 准备脚本需要 Bash、curl、tar、Python 3，以及 `shasum` 或 `sha256sum`；首次下载工具与中文字体需要联网。自动准备支持 macOS/Linux 的 arm64、x64，已实测 macOS arm64 与 Linux x64；其他环境与手动准备方式见 [D2 说明](diagrams/README.md)。
 
 构建会实际运行 Java 对照，需要 JDK 21（`java --version`）。自动组装和真实源码检查的命令映射见下表；只看正文完成的独立读者抽验另记在阶段记录中，二者不混为一种证据。
 
@@ -161,7 +159,7 @@ Pages 发布课程网站与学习包。Lab 应用按课程在本地构建和严�
 | `npm run test:lab-ui5` | C37–C44 连续快照、四个 adapter 共同场景及 UI5 专项检查 |
 | `npm run test:lab-delivery` | C44→C48 实际交付链，入口为 `node scripts/verify-delivery-lab.mjs` |
 | `npm run test:progress` | 进度格式、合并、备份与故障恢复 |
-| `npm run build` | 学习包/冻结源码 → Lab/片段契约 → Java 对照 → 课程 lint/固定输出 → F1 数据 → 路线/D2 → Astro/Pagefind → 页面、全部发行包 SHA/源码清单与子路径资源检查 |
+| `npm run build` | 学习包/冻结源码 → Lab/片段契约 → Java 对照 → 课程 lint/固定输出 → F1 数据 → 路线 → Astro/Pagefind → 页面、全部发行包 SHA/源码清单与子路径资源检查 |
 | `npm run check:build` | 检查已有 `dist/` 的页面、链接、资源、折叠区、进度、速查导航与全部发行版下载包 |
 
 CI 在同一源码与环境下执行一次 `check`、一次完整 `build`，再将 walkthrough、react、ui5、delivery 四条行为门禁各跑一次。四条行为命令不重新打包；`build` 也不包含它们。不要在 `build` 前后再全量重跑它已包含的子命令，单项命令用于定位失败。
@@ -192,8 +190,7 @@ src/components/         课程包装、学习进度与主题组件
 src/lib/                进度数据校验、保存与恢复
 src/scripts/            浏览器进度交互
 src/styles/             站点样式
-src/assets/diagrams/    D2 生成的 SVG
-diagrams/               D2 源码、字体许可与构建说明
+src/components/diagrams/ 机制图组件、登记表与步进脚本
 labs/inventory/         学员长期库存工作区（C00）
 labs/reference/         作者参考起点与逐课改动
 labs/releases/          冻结发行包与校验清单
@@ -216,7 +213,7 @@ docs/                   计划、规范、架构、来源与状态
 | [Lab 设计](labs/README.md) | 五个 Lab 的固定起点、任务边界、共同场景与恢复契约 |
 | [CURRICULUM](docs/CURRICULUM.md) | 48 课范围、学习节奏与选修方向 |
 | [CONTENT_GUIDE](docs/CONTENT_GUIDE.md) | 写课规范；修改课程前必读 |
-| [ARCHITECTURE](docs/ARCHITECTURE.md) | 内容模型、进度、搜索、D2 与站点边界 |
+| [ARCHITECTURE](docs/ARCHITECTURE.md) | 内容模型、进度、搜索、机制图与站点边界 |
 | [DEBUG_TESTING](docs/DEBUG_TESTING.md) | 调试与测试教学路线 |
 | [SOURCES](docs/SOURCES.md) | 官方来源、核查日期与实际验证范围 |
 | [DEPLOYMENT](docs/DEPLOYMENT.md) | 环境安装、构建、文章同步与 Pages 发布 |
@@ -230,6 +227,6 @@ docs/                   计划、规范、架构、来源与状态
 
 - X01–X10 是待展开的选修方向，尚无独立课程，不计入 48 课必修完成度。
 - 实测以 macOS/Chrome 和 Pages Linux 构建为主；Firefox/Safari、Windows、真实手机与屏幕阅读器未做完整验收，各课保留具体标注。
-- 仓库尚未选定项目级许可证，未添加 `LICENSE`；第三方字体的 [OFL 许可](diagrams/NotoSansSC-OFL.txt)已保留。
+- 仓库尚未选定项目级许可证，未添加 `LICENSE`。
 
 反馈问题可在 [Issues](https://github.com/socoo123/js_web/issues)附上课程地址、复现步骤、预期与实际结果；涉及运行时再补浏览器/Node 版本。

@@ -1,6 +1,6 @@
 # 静态网站架构与部署规划
 
-状态：48 课主线、四张速查页、七阶段库存项目、14 张 D2 图与本地学习进度已实现。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。课程 React 示例使用独立阶段工程，站点尚无需要 React island 的交互示例。
+状态：48 课主线、四张速查页、七阶段库存项目、14 张机制图与本地学习进度已实现。Node 24.22.0、npm 11.19.1、Astro 7.3.8 与 Starlight 0.42.6 已核查并固定，只有一个根级 package-lock.json。实际发布与验证状态见 [STATUS](STATUS.md)。课程 React 示例使用独立阶段工程，站点尚无需要 React island 的交互示例。
 
 2026-10-29 收尾约定：本文件保留现有架构及组件规格；唯一执行队列为 [PLAN](PLAN.md) 的 A/B/C，Lab 边界见 [Lab 设计](../labs/README.md)。已有工作区、快照、片段与双栏门禁直接复用，下文历史的“规划/拟新增”不构成重建任务。
 
@@ -16,7 +16,7 @@
 | React 示例 | 独立 Vite + React 练习工程；需要站内演示时再按需接入 island |
 | 搜索 | Starlight 默认 Pagefind 静态索引，测试中文分词与英文 API 搜索 |
 | 进度 | 浏览器 localStorage；不引入账号/后端 |
-| 关键图 | D2 构建期生成 SVG，浏览器只显示图 |
+| 关键图 | Astro 图形组件（HTML/CSS + 主题变量），过程图可逐步播放 |
 | 部署 | GitHub Actions 构建 dist，再发布 GitHub Pages |
 
 VitePress 同样能生成静态文档，但默认主题基于 Vue，本项目要讲大量 React；Astro 的 React 集成使示例组织更直接。无需另做一个全站 React SPA。
@@ -77,14 +77,12 @@ js_web/
 │   ├── components/            # 课程内容包装、进度与存储受限时的主题组件
 │   ├── lib/                   # 进度格式、校验、备份与恢复
 │   ├── scripts/               # 学习进度的客户端增强
-│   ├── assets/diagrams/       # D2 构建生成 SVG
 │   └── styles/
-├── diagrams/                  # D2 源文件
 ├── examples/
 │   ├── cNN/                   # 每课的独立例子、.expected.txt 与 README
 │   ├── shared/                # PLAN §3.1 固定样例数据
 │   └── inventory/             # 第一版 7 阶段保留参考；主线改用 labs/inventory
-├── scripts/                   # D2、路线同步、产物检查、课程 lint 与固定输出检查
+├── scripts/                   # 路线同步、产物检查、课程 lint 与固定输出检查
 ├── public/                    # 静态数据与可下载练习资料
 ├── tests/                     # 必要的站点关键行为验收
 ├── astro.config.mjs
@@ -135,16 +133,13 @@ lastReviewed: 2026-10-15
 
 搜索采用静态索引；在生产构建后验证“闭包”“状态快照”“断点”“单元测试”“UI5”“useEffect”“npm ci”等查询。开发服务器里能显示页面不代表搜索索引正确。
 
-## D2 构建
+## 机制图组件（2026-11-07 起替代 D2）
 
-1. 源码放 `diagrams/`，有稳定文件名和对应课号。
-2. 实施时选择并固定 D2 CLI 版本，使用无需商业许可的布局引擎。
-3. 一条构建脚本逐个生成 SVG 到 `src/assets/diagrams/`，供课程相对导入。
-4. D2 先构建，再进行 Astro 构建；非零退出必须阻止发布，不能只检查文件存在。
-5. 中文字体、布局、文字大小和亮暗模式实际渲染检查；统一风格，避免图内塞长代码。
-6. 每图有 alt/邻近文字解释；流程即使不看图也能理解。
-
-依据：[D2 导出](https://www.d2lang.com/tour/exports/)、[D2 CLI](https://d2lang.com/tour/man/)。C01 使用 D2 0.9.0 + Dagre；`npm run setup:diagrams` 准备并校验工具/字体，`npm run build` 先执行图构建。字体来源、SHA-256 与复现命令见 [diagrams/README.md](../diagrams/README.md)。工具在被忽略的 `.cache/` 中，未全局安装；Astro 产物检查校验带 `/js_web/` 的 SVG 资产路径。
+1. 课文写 `<Diagram name="c12-browser-event-loop" />`；`src/components/Diagram.astro` 按名称分发到 `src/components/diagrams/` 里的单图组件，名称、所属课、标题与说明登记在 `registry.mjs`，未登记的名称在构建与 lint 时报错。
+2. 图由 `DiagramFrame`、`Node`、`Arrow`、`Group`、`Loop` 等原语组成，颜色、字体与圆角全部取自 `tokens.css`，亮暗主题即时切换；宽度占满正文栏，窄屏改为竖排，不出现横向滚动。
+3. 过程图用 `data-step` 标出每步高亮的元素，`stepper.mjs` 提供上一步/下一步/重播与方向键，步骤说明放在 `aria-live` 区域；禁用 JS 时显示完整图与有序步骤列表。
+4. 图的文字是真实 HTML 文本，说明段由 `aria-describedby` 关联；`check-build` 检查每课构建页含对应 `figure[data-diagram]` 与说明文字，且不再引用 `assets/diagrams/`。
+5. 原 D2 源码与 SVG 已删除，历史见 Git `ba2c814`。
 
 ## Pages 子路径与路由
 
@@ -177,9 +172,8 @@ trailingSlash: 'always'
 | 命令 | 用途 |
 | --- | --- |
 | npm run dev | 网站本地开发 |
-| npm run diagrams | D2 生成 SVG |
 | npm run check | 内容 schema、Astro/类型、必要链接检查 |
-| npm run build | 课程/示例/进度测试、同步路线、D2、静态构建与产物检查 |
+| npm run build | 课程/示例/进度测试、同步路线、静态构建与产物检查 |
 | npm run preview | 检查生产产物与搜索 |
 | npm run test:progress | Node 内置运行器检查进度校验、合并、备份与故障恢复 |
 | npm run test:progress:browser | 对生产预览检查进度交互、存储故障、跨标签与静态阅读 |
@@ -192,7 +186,7 @@ Pages 自动部署已实现，第一版交付记录见 STATUS；改版门禁以�
 
 1. 仓库 Pages Source 设为 GitHub Actions。
 2. 当前在 main 推送或手动触发时执行检查、构建与发布；尚未配置 PR 自动触发。
-3. 构建 job：contents: read，安装固定 Node、npm ci、固定 D2、检查、构建、上传 dist。
+3. 构建 job：contents: read，安装固定 Node、npm ci、检查、构建、上传 dist。
 4. 发布 job：依赖构建，仅此 job 给 pages: write、id-token: write，environment 为 github-pages。
 5. 采用 GitHub 官方 Pages actions，实施时核对版本并固定完整 commit SHA；无需在仓库提交长期 PAT。
 6. 设置部署 concurrency，记录成功部署的提交与 URL。
@@ -205,7 +199,7 @@ Pages 自动部署已实现，第一版交付记录见 STATUS；改版门禁以�
 
 用户允许示例自己尝试；验收仍需确保网站本身能构建、阅读和部署。
 
-必须检查：静态构建、内容/链接、关键资源、首页与深层刷新、搜索、代码复制、答案展开、进度恢复、360px 阅读、键盘操作、关键 D2 渲染。
+必须检查：静态构建、内容/链接、关键资源、首页与深层刷新、搜索、代码复制、答案展开、进度恢复、360px 阅读、键盘操作、关键机制图渲染与步进。
 
 教学示例：选择代表性的核心机制与测试示范实际执行，其余核对代码/官方文档并标注自己尝试及验证状态。不要声称 48 课全部已运行。
 
@@ -225,7 +219,7 @@ Pages 自动部署已实现，第一版交付记录见 STATUS；改版门禁以�
 | 章节开头 | 标题、属于哪个 Lab、上一课已有什么、本课增加什么、阅读/实作时间、真实验证状态 | 首屏知道要做的业务变化；不先铺一页术语或目录 |
 | 本课任务卡 | 当前工作目录、1–3 个改动文件、固定启动/检查命令、输入→预期结果 | 提供本课起点/提示/参考解入口；起点只为恢复，不引导每天下载新工程 |
 | Java/JS 对照 | 左 Java，右 JS/React；各自输出；共同输入；一句行为差异 | 两种代码同时可见，不用默认只显示一种语言的 Tabs |
-| 机制解释 | 3–5 个概念节，必要机制 D2，至少两次预测 | 每段回到任务里的同一变量、商品或操作；核心解释保持展开 |
+| 机制解释 | 3–5 个概念节，必要机制图，至少两次预测 | 每段回到任务里的同一变量、商品或操作；核心解释保持展开 |
 | 自己尝试与调试 | 改动位置、操作、观察证据、修复与确认 | 在当前工作文件进行；可选独立机制实验折叠收纳 |
 | 页尾 | 验收清单、暂停点、下一步、完成标记、延伸阅读 | 手动标记沿用 F1；检查通过不自动视为学会 |
 
@@ -253,7 +247,7 @@ Pages 自动部署已实现，第一版交付记录见 STATUS；改版门禁以�
 - 暗色同步现有主题变量，卡片边界和代码对比足够；主题不能写入存储时沿用现有容错。
 - 键盘可操作复制、锚点、提示/答案，focus-visible 清楚；details/summary 使用原生语义，代码区可聚焦滚动，复制反馈使用 aria-live。
 - 禁用 JS 后：两侧代码、输出、解释、任务和原生 details 仍存在。复制按钮等增强功能隐藏；不展示失效的执行按钮。
-- 不使用 Java/JS 双栏的全局 CSS 选择器影响整站表格；样式限定到组件。现有 D2 保持 alt 和相邻说明。
+- 不使用 Java/JS 双栏的全局 CSS 选择器影响整站表格；样式限定到组件。机制图保持说明文字和相邻解释。
 
 ### 组件与元数据契约
 
@@ -280,7 +274,7 @@ MDX 使用 `<CodeCompare pairId="c03-input-number" />` 一类稳定引用。不�
 | `scripts/lint-lessons.mjs` | 在原有规则上识别 CodeCompare 的清单片段；计算两侧代码块/行数及组件承载的正文 | 普通16块/难点20块、单块25行；导入片段超限、缺来源、未运行标注缺失均能被发现 |
 | `scripts/run-examples.mjs` | 旧行为保留；新增独立 Lab 检查入口，不靠其自动发现带package.json的工程 | check导入学员/参考快照的实际文件，故意改错真实代码能让它失败 |
 | `scripts/sync-roadmap.mjs` | 保留48课识别；Lab入口从catalog生成；只根据真实迁移状态显示“已改版” | 旧进度课号不变；新增关系不导致重复48行或漏课 |
-| `scripts/check-build.mjs` | 保留现有路径/D2检查；增加双栏静态文本、Lab页/下载和快照清单引用 | 生产HTML含两侧代码；`/js_web/`下实际目标存在，不能只匹配字符串 |
+| `scripts/check-build.mjs` | 保留现有路径/机制图检查；增加双栏静态文本、Lab页/下载和快照清单引用 | 生产HTML含两侧代码；`/js_web/`下实际目标存在，不能只匹配字符串 |
 | `src/content.config.ts` | 优先继续只用原frontmatter三字段；Lab关系走catalog | 不先给所有课程加未定义的frontmatter字段 |
 | `package.json` / Actions | 新Lab构建与关键契约检查显式接入；代码对照需要Java执行时配置相应JDK | 缺JDK不能冒称Java已运行；旧examples所需阶段4依赖仍可用 |
 

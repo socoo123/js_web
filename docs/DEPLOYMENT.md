@@ -14,7 +14,6 @@ npm --version
 npm ci
 npm ci --prefix labs/inventory
 npm ci --prefix examples/inventory/04-react
-npm run setup:diagrams
 npm run check
 npm run build
 npm run preview
@@ -28,14 +27,12 @@ C32 等旧 Node 示例仍复用阶段 4 安装的 TanStack Query，因此不能�
 
 ## 构建流程
 
-- `npm run setup:diagrams`：按当前 macOS/Linux 的架构下载固定 D2 和中文字体，核对 SHA-256，保存在被忽略的 `.cache/tools/`。首次准备需要网络；生成图本身可离线。
 - `npm run sync:roadmap`：从 `docs/CURRICULUM.md` 的 48 课大纲与现有文章生成路线页；已有文章显示链接，其余显示「待发布」。
 - `npm run check`：Astro 内容与类型检查。
-- `npm run build`：生成当前学习包并核对冻结源码 → Lab/受控片段契约 → Java 对照 → 课程 lint 与固定输出 → F1 数据 → 路线/D2 → Astro/Pagefind → 生产 HTML/资产、全部发行版的包 SHA 与源码清单。任一步失败都会停止。已冻结发行版从 `labs/releases/` 原样复制，不能在原版号下改写源码或历史包。
+- `npm run build`：生成当前学习包并核对冻结源码 → Lab/受控片段契约 → Java 对照 → 课程 lint 与固定输出 → F1 数据 → 路线 → Astro/Pagefind → 生产 HTML/资产、全部发行版的包 SHA 与源码清单。任一步失败都会停止。已冻结发行版从 `labs/releases/` 原样复制，不能在原版号下改写源码或历史包。
 - `npm run test:lab-walkthrough`：C00→C20 连续自动组装、C03/C23/C41 主错误红绿；`test:lab-react`：C21–C36 实际快照；`test:lab-ui5`：C37–C44 实际快照及严格静态资源；`test:lab-delivery`：C44→C48 交付链。它们独立于根 build，不再次打包。先在 `labs/inventory` 执行 `npx playwright install chromium`（Linux CI 用 `--with-deps`）。自动组装不等于独立读者验收，后者仍按 PLAN §6 执行。
 - `npm run test:progress:browser`：生产预览运行后检查进度标记、导入导出、损坏恢复、存储受限、跨标签与禁用 JS 阅读，准备方式见根 README。默认端口 8751，可通过 `PROGRESS_BASE_URL` 指定地址。
 
-如果更新 D2 版本或字体，先核查官方来源，再同时更新下载摘要、固定版本与许可信息，不能仅改版本号。
 
 ### 命令责任与执行次数
 
@@ -68,10 +65,10 @@ CI 中四个 `test:lab-*` 行为检查仍各执行一次。旧阶段 4 的 `lint
 
 ## Pages 自动部署
 
-[工作流](../.github/workflows/deploy.yml) 在 `main` 推送或手动触发时运行：固定 Node/JDK → 安装网站、工作区、旧阶段 4 锁定依赖及 Chromium → 检查旧阶段 4 → 准备 D2/字体 → Astro 检查 → 一次全量构建/冻结包/产物检查 → 四个学习链行为检查 → 上传静态输出 → Pages 发布。任一门禁失败都不会上传发布；部署任务通过 `needs: build` 等待构建成功。
+[工作流](../.github/workflows/deploy.yml) 在 `main` 推送或手动触发时运行：固定 Node/JDK → 安装网站、工作区、旧阶段 4 锁定依赖及 Chromium → 检查旧阶段 4 → Astro 检查 → 一次全量构建/冻结包/产物检查 → 四个学习链行为检查 → 上传静态输出 → Pages 发布。任一门禁失败都不会上传发布；部署任务通过 `needs: build` 等待构建成功。
 
 GitHub 仓库的 Settings → Pages → Source 需要选择 **GitHub Actions**。工作流的构建任务只有读取内容与 Pages 配置的权限，部署任务取得 `pages: write` 和 `id-token: write`；不需要额外的网站部署密钥。
 
-维护时检查 [Actions](https://github.com/socoo123/js_web/actions)、[Pages 设置](https://github.com/socoo123/js_web/settings/pages) 和实际 URL。首页可访问后，还应检查课程深层地址、D2 图、样式/脚本和中文搜索，不能仅凭推送成功就声称部署成功。
+维护时检查 [Actions](https://github.com/socoo123/js_web/actions)、[Pages 设置](https://github.com/socoo123/js_web/settings/pages) 和实际 URL。首页可访问后，还应检查课程深层地址、机制图、样式/脚本和中文搜索，不能仅凭推送成功就声称部署成功。
 
 官方依据：2026-10-29 核查 [npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci)、[Node 文件系统](https://nodejs.org/docs/latest-v24.x/api/fs.html)、[GitHub 自定义 Pages 工作流](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)、[Astro 部署 GitHub Pages](https://docs.astro.build/en/guides/deploy/github/)。Starlight 原有配置参考 [手动配置](https://starlight.astro.build/manual-setup/) 与 [搜索](https://starlight.astro.build/guides/site-search/)；实际验证与线上状态见 [STATUS](STATUS.md)。
