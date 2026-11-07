@@ -1,0 +1,677 @@
+/*
+ * 课程机制图（DiagramFrame + Node / Arrow / Group / Loop）。颜色、圆角、阴影、动效全部取自 tokens.css，
+ * 主题切换即时生效。宽度跟随正文栏；画布宽度 ≥ 34rem 时，带 data-wide 的箭头与各图的横排布局生效。
+ */
+.dg {
+  --dg-canvas: var(--js-surface);
+  --dg-card: var(--js-surface-raised);
+  --dg-ink: color-mix(in srgb, var(--js-color-muted) 78%, var(--js-surface));
+  --dg-dim: 0.36;
+  container: dg / inline-size;
+  margin-block: 1.75rem;
+  border: 1px solid var(--js-border);
+  border-radius: var(--js-radius);
+  background: var(--dg-card);
+  box-shadow: var(--js-shadow);
+  color: var(--js-color-text);
+  font-family: var(--sl-font);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+:root[data-theme='light'] .dg {
+  --dg-canvas: var(--js-surface-raised);
+  --dg-card: var(--js-surface);
+}
+
+.dg [hidden] {
+  display: none !important;
+}
+
+.dg :where(p, ol, ul) {
+  margin: 0;
+}
+
+.dg code {
+  padding: 0.05em 0.35em;
+  border-radius: 5px;
+  background: var(--js-inline-code-bg);
+  color: var(--js-inline-code-fg);
+  font-family: var(--sl-font-mono);
+  font-size: 0.88em;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 外壳 ---------- */
+.dg-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-block-size: 2.25rem;
+  padding: 0.35rem 0.9rem;
+  border-bottom: 1px solid var(--js-border);
+  color: var(--js-color-muted);
+  font-size: 0.8125rem;
+}
+
+.dg-tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--js-color-heading);
+  font-weight: 700;
+}
+
+.dg-tab::before {
+  content: '';
+  inline-size: 0.55rem;
+  block-size: 0.55rem;
+  border-radius: 2px;
+  background: var(--js-color-primary);
+  transform: rotate(45deg);
+}
+
+.dg-title {
+  min-inline-size: 0;
+  color: var(--js-color-text);
+  overflow-wrap: anywhere;
+}
+
+.dg-body {
+  padding: 0.85rem;
+  background-color: var(--dg-canvas);
+  background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--js-color-muted) 20%, transparent) 1px, transparent 0);
+  background-size: 18px 18px;
+}
+
+@container dg (min-width: 34rem) {
+  .dg-body {
+    padding: 1.15rem 1.2rem;
+  }
+}
+
+/* ---------- 节点 ---------- */
+.dg-node {
+  --tone: var(--js-color-heading);
+  --tone-stroke: var(--js-color-muted);
+  position: relative;
+  min-inline-size: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--js-border);
+  border-radius: 10px;
+  background: var(--dg-card);
+  box-shadow: var(--js-shadow);
+  overflow-wrap: anywhere;
+}
+
+.dg-node:not([data-tone='neutral']) {
+  border-color: color-mix(in srgb, var(--tone-stroke) 48%, var(--js-border));
+  background: color-mix(in srgb, var(--tone-stroke) 8%, var(--dg-card));
+}
+
+.dg [data-tone='primary'] { --tone: var(--js-color-primary); --tone-stroke: var(--js-color-primary-solid); }
+.dg [data-tone='amber'] { --tone: var(--js-color-amber); --tone-stroke: var(--js-color-amber-stroke); }
+.dg [data-tone='java'] { --tone: var(--js-color-java); --tone-stroke: var(--js-color-java-stroke); }
+.dg [data-tone='ok'] { --tone: var(--js-color-ok); --tone-stroke: var(--js-color-ok); }
+.dg [data-tone='err'] { --tone: var(--js-color-err); --tone-stroke: var(--js-color-err); }
+.dg [data-tone='remember'] { --tone: var(--js-color-remember); --tone-stroke: var(--js-color-remember); }
+
+.dg-t {
+  display: block;
+  color: var(--js-color-heading);
+  font-size: 0.875rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.dg-s {
+  display: block;
+  margin-top: 0.12rem;
+  color: var(--js-color-muted);
+}
+
+.dg-s + .dg-s {
+  margin-top: 0;
+}
+
+.dg-nowrap {
+  white-space: nowrap;
+}
+
+/* 节点里的状态小标签，例如「拒绝」「已过期」 */
+.dg-chip {
+  display: inline-block;
+  margin-inline-end: 0.35rem;
+  padding: 0 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--tone-stroke) 40%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tone-stroke) 14%, transparent);
+  color: var(--tone);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.45rem;
+  vertical-align: 0.08em;
+  white-space: nowrap;
+}
+
+/* 判断节点：胶囊形 + 菱形记号 */
+.dg-node[data-shape='decision'] {
+  border-style: dashed;
+  border-radius: 999px;
+  text-align: center;
+}
+
+.dg-node[data-shape='decision'] .dg-t::before {
+  content: '';
+  display: inline-block;
+  inline-size: 0.5em;
+  block-size: 0.5em;
+  margin-inline-end: 0.5em;
+  border: 2px solid var(--js-color-primary);
+  transform: rotate(45deg) translateY(-0.12em);
+}
+
+/* 变量名：等宽、像代码里的标识符 */
+.dg-node[data-shape='var'] {
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  background: var(--js-code-bg);
+  border-color: var(--js-code-border);
+  color: var(--js-color-heading);
+  font-family: var(--sl-font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: none;
+}
+
+/* 一行里随步骤高亮的片段，例如 count：0 → 1 → 2 */
+.dg-mark {
+  padding: 0 0.25em;
+  border-radius: 4px;
+}
+
+/* ---------- 分组 ---------- */
+.dg-group {
+  --tone: var(--js-color-muted);
+  --tone-stroke: var(--js-color-muted);
+  min-inline-size: 0;
+  padding: 0.5rem 0.7rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--tone-stroke) 34%, var(--js-border));
+  border-radius: calc(var(--js-radius) + 2px);
+  background: color-mix(in srgb, var(--tone-stroke) 4%, transparent);
+}
+
+.dg-group[data-dashed] {
+  border-style: dashed;
+  border-width: 1.5px;
+}
+
+.dg-group-label {
+  margin-bottom: 0.5rem !important;
+  color: var(--tone);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dg-group[data-tone='neutral'] .dg-group-label {
+  color: var(--js-color-muted);
+}
+
+/* ---------- 箭头 ---------- */
+.dg-arrow {
+  --dg-arrow-color: var(--dg-ink);
+  position: relative;
+  display: grid;
+  min-inline-size: 0;
+  color: var(--dg-arrow-color);
+}
+
+.dg-arrow[data-tone] {
+  --dg-arrow-color: color-mix(in srgb, var(--tone-stroke) 80%, var(--js-surface));
+}
+
+.dg-arrow > .dg-shaft {
+  position: relative;
+  display: block;
+  margin: 0;
+  border: 0 solid currentColor;
+}
+
+.dg-arrow[data-dashed] > .dg-shaft {
+  border-style: dashed;
+}
+
+.dg-arrow > .dg-shaft::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+}
+
+.dg-arrow-label {
+  min-inline-size: 0;
+  color: var(--js-color-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+
+.dg-arrow[data-tone] .dg-arrow-label {
+  color: var(--tone);
+  font-weight: 650;
+}
+
+/* 竖向：标签放在线的右侧，行高随标签增长 */
+.dg-arrow:is([data-dir='down'], [data-dir='up']) {
+  grid-template: auto / minmax(0, 1fr) 2px minmax(0, 1fr);
+  gap: 0 0.5rem;
+  min-block-size: 2.25rem;
+  min-inline-size: 0;
+}
+
+.dg-arrow:is([data-dir='down'], [data-dir='up']) > .dg-shaft {
+  grid-area: 1 / 2;
+  border-width: 0 0 0 2px;
+}
+
+.dg-arrow:is([data-dir='down'], [data-dir='up']) > .dg-arrow-label {
+  grid-area: 1 / 3;
+  align-self: center;
+  justify-self: start;
+  padding-block: 0.2rem;
+  text-align: start;
+}
+
+.dg-arrow[data-dir='down'] > .dg-shaft { margin: 3px 0 11px; }
+.dg-arrow[data-dir='down'] > .dg-shaft::after { inset: 100% auto auto -6px; inline-size: 10px; block-size: 9px; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.dg-arrow[data-dir='up'] > .dg-shaft { margin: 11px 0 3px; }
+.dg-arrow[data-dir='up'] > .dg-shaft::after { inset: auto auto 100% -6px; inline-size: 10px; block-size: 9px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+
+/* 横向：标签放在线的上方 */
+.dg-arrow:is([data-dir='right'], [data-dir='left']) {
+  grid-template: minmax(0, 1fr) 2px minmax(0, 1fr) / minmax(0, 1fr);
+  gap: 0.25rem 0;
+  min-block-size: 0;
+  min-inline-size: 2.75rem;
+}
+
+.dg-arrow:is([data-dir='right'], [data-dir='left']) > .dg-shaft {
+  grid-area: 2 / 1;
+  border-width: 2px 0 0;
+}
+
+/* 竖向标签可以伸进右侧空白，所以中文不拆行；横向标签夹在两个节点之间，必须能换行 */
+.dg-arrow:is([data-dir='right'], [data-dir='left']) > .dg-arrow-label {
+  grid-area: 1 / 1;
+  align-self: end;
+  justify-self: center;
+  min-inline-size: 2.5em;
+  padding: 0 0.25rem;
+  text-align: center;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.dg-arrow[data-dir='right'] > .dg-shaft { margin: 0 11px 0 3px; }
+.dg-arrow[data-dir='right'] > .dg-shaft::after { inset: -6px auto auto 100%; inline-size: 9px; block-size: 10px; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.dg-arrow[data-dir='left'] > .dg-shaft { margin: 0 3px 0 11px; }
+.dg-arrow[data-dir='left'] > .dg-shaft::after { inset: -6px 100% auto auto; inline-size: 9px; block-size: 10px; clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+
+@container dg (min-width: 34rem) {
+  .dg-arrow:is([data-wide='right'], [data-wide='left']) {
+    grid-template: minmax(0, 1fr) 2px minmax(0, 1fr) / minmax(0, 1fr);
+    gap: 0.25rem 0;
+    min-block-size: 0;
+    min-inline-size: 2.75rem;
+  }
+
+  .dg-arrow:is([data-wide='right'], [data-wide='left']) > .dg-shaft {
+    grid-area: 2 / 1;
+    border-width: 2px 0 0;
+  }
+
+  .dg-arrow:is([data-wide='right'], [data-wide='left']) > .dg-arrow-label {
+    grid-area: 1 / 1;
+    align-self: end;
+    justify-self: center;
+    min-inline-size: 2.5em;
+    padding: 0 0.25rem;
+    text-align: center;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .dg-arrow[data-wide='right'] > .dg-shaft { margin: 0 11px 0 3px; }
+  .dg-arrow[data-wide='right'] > .dg-shaft::after { inset: -6px auto auto 100%; inline-size: 9px; block-size: 10px; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+  .dg-arrow[data-wide='left'] > .dg-shaft { margin: 0 3px 0 11px; }
+  .dg-arrow[data-wide='left'] > .dg-shaft::after { inset: -6px 100% auto auto; inline-size: 9px; block-size: 10px; clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+
+  .dg-arrow:is([data-wide='down'], [data-wide='up']) {
+    grid-template: auto / minmax(0, 1fr) 2px minmax(0, 1fr);
+    gap: 0 0.5rem;
+    min-block-size: 2.25rem;
+    min-inline-size: 0;
+  }
+
+  .dg-arrow:is([data-wide='down'], [data-wide='up']) > .dg-shaft {
+    grid-area: 1 / 2;
+    border-width: 0 0 0 2px;
+  }
+
+  .dg-arrow:is([data-wide='down'], [data-wide='up']) > .dg-arrow-label {
+    grid-area: 1 / 3;
+    align-self: center;
+    justify-self: start;
+    min-inline-size: 0;
+    padding: 0.2rem 0;
+    text-align: start;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  .dg-arrow[data-wide='down'] > .dg-shaft { margin: 3px 0 11px; }
+  .dg-arrow[data-wide='down'] > .dg-shaft::after { inset: 100% auto auto -6px; inline-size: 10px; block-size: 9px; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+}
+
+/* ---------- 回环 / 旁路括线 ---------- */
+.dg-loop {
+  --dg-arrow-color: var(--dg-ink);
+  position: relative;
+  min-inline-size: 0.9rem;
+  border: 2px solid var(--dg-arrow-color);
+  color: var(--dg-arrow-color);
+}
+
+.dg-loop[data-dashed] {
+  border-style: dashed;
+}
+
+.dg-loop[data-side='left'] {
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
+}
+
+.dg-loop[data-side='right'] {
+  border-left: 0;
+  border-radius: 0 12px 12px 0;
+}
+
+.dg-loop::after {
+  content: '';
+  position: absolute;
+  inline-size: 9px;
+  block-size: 10px;
+  background: currentColor;
+}
+
+.dg-loop[data-side='left']::after { clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.dg-loop[data-side='right']::after { clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+.dg-loop[data-side='left'][data-head='top']::after { inset: -6px 0 auto auto; }
+.dg-loop[data-side='left'][data-head='bottom']::after { inset: auto 0 -6px auto; }
+.dg-loop[data-side='right'][data-head='top']::after { inset: -6px auto auto 0; }
+.dg-loop[data-side='right'][data-head='bottom']::after { inset: auto auto -6px 0; }
+
+/* 标签是竖排文字，逻辑属性会按竖排解析，这里只能用物理方向 */
+.dg-loop-label {
+  position: absolute;
+  top: 50%;
+  padding: 0.35rem 0.12rem;
+  background: var(--dg-canvas);
+  color: var(--js-color-muted);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+
+.dg-loop[data-side='left'] .dg-loop-label {
+  left: -1px;
+  transform: translate(-50%, -50%);
+}
+
+.dg-loop[data-side='right'] .dg-loop-label {
+  right: -1px;
+  transform: translate(50%, -50%);
+}
+
+/* ---------- 栈 / 队列格子与输出 ---------- */
+.dg-slot {
+  display: grid;
+  gap: 0.3rem;
+  min-inline-size: 0;
+}
+
+.dg-slot-label {
+  color: var(--js-color-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dg-cells {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  min-block-size: 2.1rem;
+  padding: 0.3rem !important;
+  border: 1px dashed var(--js-border);
+  border-radius: 8px;
+  background: var(--dg-card);
+  list-style: none;
+}
+
+.dg-cells:empty::before {
+  content: '空';
+  padding-inline: 0.3rem;
+  color: var(--js-color-muted);
+  font-size: 0.75rem;
+}
+
+.dg-cell {
+  --tone-stroke: var(--js-color-muted);
+  padding: 0.05rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--tone-stroke) 42%, var(--js-border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--tone-stroke) 10%, var(--dg-card));
+  color: var(--js-color-heading);
+  font-family: var(--sl-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.dg-cell + .dg-cell-sep,
+.dg-cell-sep {
+  color: var(--js-color-muted);
+  font-size: 0.75rem;
+}
+
+/* ---------- 逐步播放 ---------- */
+.dg [data-state] {
+  transition:
+    opacity var(--js-motion) var(--js-ease),
+    box-shadow var(--js-motion) var(--js-ease),
+    border-color var(--js-motion) var(--js-ease),
+    background-color var(--js-motion) var(--js-ease),
+    color var(--js-motion) var(--js-ease);
+}
+
+.dg :is([data-state='future'], [data-state='past']) {
+  opacity: var(--dg-dim);
+}
+
+.dg .dg-node[data-state='current'] {
+  border-color: var(--js-color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--js-color-primary) 55%, transparent), 0 10px 24px -14px var(--js-color-primary);
+}
+
+.dg :is(.dg-arrow, .dg-loop)[data-state='current'] {
+  --dg-arrow-color: var(--js-color-primary);
+}
+
+.dg .dg-arrow[data-state='current'] .dg-arrow-label {
+  color: var(--js-color-primary);
+  font-weight: 700;
+}
+
+.dg .dg-group[data-state='current'] {
+  border-color: color-mix(in srgb, var(--js-color-primary) 60%, var(--js-border));
+}
+
+.dg .dg-mark[data-state='current'] {
+  background: var(--js-color-primary-soft);
+  color: var(--js-color-primary);
+  font-weight: 700;
+}
+
+.dg-player {
+  padding: 0.7rem 0.9rem 0.8rem;
+  border-top: 1px solid var(--js-border);
+}
+
+.dg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.dg-buttons,
+.dg-tracks {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.dg-player button {
+  min-block-size: 2rem;
+  padding: 0.2rem 0.85rem;
+  border: 1px solid var(--js-border);
+  border-radius: 999px;
+  background: var(--dg-canvas);
+  color: var(--js-color-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--js-motion) var(--js-ease), background-color var(--js-motion) var(--js-ease), color var(--js-motion) var(--js-ease);
+}
+
+.dg-player button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--js-color-primary) 55%, var(--js-border));
+  color: var(--js-color-primary);
+}
+
+.dg-player button.dg-primary {
+  border-color: transparent;
+  background: var(--js-color-primary-solid);
+  color: var(--js-color-on-primary);
+}
+
+.dg-player button.dg-primary:hover:not(:disabled) {
+  color: var(--js-color-on-primary);
+  background: color-mix(in srgb, var(--js-color-primary-solid) 86%, var(--js-color-heading));
+}
+
+.dg-player button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.dg-player button:focus-visible {
+  outline: var(--js-focus-ring);
+  outline-offset: 2px;
+}
+
+.dg-tracks button[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--js-color-primary) 55%, var(--js-border));
+  background: var(--js-color-primary-soft);
+  color: var(--js-color-primary);
+}
+
+.dg-count {
+  margin-inline-start: auto;
+  color: var(--js-color-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dg-live {
+  min-block-size: 2.6rem;
+  margin-top: 0.65rem !important;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--js-color-primary) 7%, transparent);
+  box-shadow: inset 3px 0 0 var(--js-color-primary);
+  color: var(--js-color-text);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.dg-steps + .dg-steps {
+  margin-top: 0.75rem;
+}
+
+.dg-steps-title {
+  color: var(--js-color-heading);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.dg-steps ol {
+  margin-top: 0.35rem !important;
+  padding-inline-start: 1.4rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+
+.dg-steps li + li {
+  margin-top: 0.15rem;
+}
+
+.dg-steps li::marker {
+  color: var(--js-color-primary);
+  font-weight: 700;
+}
+
+/* ---------- 读图说明 ---------- */
+.dg-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  padding: 0.55rem 0.9rem;
+  border-top: 1px solid var(--js-border);
+  color: var(--js-color-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.dg-legend-title {
+  color: var(--js-color-heading);
+  font-weight: 700;
+}
+
+.dg-legend-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.dg-key {
+  flex: none;
+  inline-size: 1.5rem;
+  border-top: 2px solid var(--dg-ink);
+  transform: translateY(-0.25em);
+}
+
+.dg-key[data-line='dashed'] {
+  border-top-style: dashed;
+}

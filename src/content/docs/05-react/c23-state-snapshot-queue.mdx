@@ -12,6 +12,7 @@ lesson:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import Effect from '../../../components/Effect.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 import Predict from '../../../components/Predict.astro';
@@ -87,9 +88,9 @@ function restockThree() {
 </div>
 </Predict>
 
-![React 状态快照：本次渲染拿到 12，事件排入更新，函数式队列依次计算 13、14、15；新渲染拿到 15，旧回调仍能读到旧绑定。](../../../assets/diagrams/c23-state-snapshot.svg)
+<Diagram name="c23-state-snapshot" />
 
-图从左往右读：旧渲染拿到 12，事件把更新排进队列，新渲染拿到算好的值。旧回调仍然保留旧快照。
+顺着箭头读：旧渲染拿到 12，事件把更新排进队列，新渲染拿到算好的值。旧回调仍然保留旧快照。
 
 **Java 对照：** Java 连续给局部变量赋值，每一行立刻生效；React 的 setter 不会改本次渲染里的 stock。
 

@@ -7,6 +7,7 @@ sidebar:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 1 周 · 第 6 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -49,7 +50,7 @@ console.log(2); // 完整输出：1、2、3、4
 
 输出 1、2、3、4。0 表示满足计时条件后可以排队，不能抢占同步代码。Java CompletableFuture 可以把工作交给线程池；这段 Promise 不增加线程。
 
-![调用栈、任务队列与微任务队列的执行顺序](../../../assets/diagrams/c12-browser-event-loop.svg)
+<Diagram name="c12-browser-event-loop" />
 
 先看当前任务的同步调用，再看微任务检查点，最后看后续任务。浏览器可在任务之间渲染；持续递归排微任务或做大量同步计算都会延迟交互。
 

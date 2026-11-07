@@ -7,6 +7,7 @@ sidebar:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 1 周 · 第 3 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -142,7 +143,7 @@ console.log(original.stock, draft.stock, original.warehouse.city);
 
 第一行身份比较说明：`alias` 和 `original` 是同一个对象，`draft` 是新对象。第二行说明：两个外层的 `warehouse` 仍指向同一个仓库。改 `alias.stock` 就改了原商品库存；改 `draft.warehouse.city` 就改了双方共享的城市。
 
-![对象关系图：original 与 alias 指向同一商品对象，draft 指向新商品对象；两个商品的 warehouse 仍指向同一仓库。independent 和它的新仓库分别独立。](../../../assets/diagrams/c05-alias-copy.svg)
+<Diagram name="c05-alias-copy" />
 
 沿箭头看「哪个名字指向哪个对象」：原商品和浅复制草稿汇入同一仓库，按路径复制的草稿指向新仓库。图展示创建草稿后、修改之前的关系。改数字库存只影响对应外层，改共享仓库会被两个外层同时看到。
 

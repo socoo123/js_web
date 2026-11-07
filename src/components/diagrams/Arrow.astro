@@ -1,0 +1,26 @@
+---
+// 箭头：dir 是默认方向；wide 是画布够宽时改用的方向（窄屏竖排、宽屏横排的流程用它）。
+interface Props {
+  dir?: 'down' | 'up' | 'right' | 'left';
+  wide?: 'down' | 'up' | 'right' | 'left';
+  label?: string;
+  dashed?: boolean;
+  tone?: 'ok' | 'err' | 'amber' | 'primary';
+  step?: string;
+  class?: string;
+  style?: string;
+}
+const { dir = 'down', wide, label, dashed = false, tone, step, class: className, style } = Astro.props;
+---
+<div
+  class:list={['dg-arrow', className]}
+  data-dir={dir}
+  data-wide={wide}
+  data-dashed={dashed ? '' : undefined}
+  data-tone={tone}
+  data-step={step}
+  style={style}
+>
+  <span class="dg-shaft" aria-hidden="true"></span>
+  {label && <span class="dg-arrow-label">{label}</span>}
+</div>

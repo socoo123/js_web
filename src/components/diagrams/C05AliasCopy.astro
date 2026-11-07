@@ -1,0 +1,78 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+
+const legend = [
+  { line: 'solid' as const, text: '实线箭头表示引用关系；图展示创建草稿后的状态，尚未执行修改' },
+];
+---
+<DiagramFrame name="c05-alias-copy" legend={legend}>
+  <div class="c05">
+    <Node class="c05-v1" shape="var">original / alias</Node>
+    <Arrow class="c05-x1" wide="right" />
+    <Node class="c05-o1" tone="primary"><span class="dg-t">原商品对象</span><span class="dg-s"><code>stock = 12</code></span></Node>
+    <Arrow class="c05-r1" dir="right" label="warehouse" />
+
+    <Node class="c05-v2" shape="var">draft</Node>
+    <Arrow class="c05-x2" wide="right" label="只新建外层" />
+    <Node class="c05-o2" tone="amber"><span class="dg-t">新商品对象</span><span class="dg-s"><code>stock = 15</code></span></Node>
+    <Arrow class="c05-r2" dir="right" label="warehouse" />
+
+    <Node class="c05-sh" tone="err"><span class="dg-t">共享仓库对象</span><span class="dg-s"><code>city = 上海</code></span></Node>
+
+    <Node class="c05-v3" shape="var">independent</Node>
+    <Arrow class="c05-x3" wide="right" label="按路径复制" />
+    <Node class="c05-o3" tone="ok"><span class="dg-t">新商品对象</span><span class="dg-s"><code>stock = 15</code></span></Node>
+    <Arrow class="c05-r3" dir="right" label="warehouse" />
+    <Node class="c05-nw" tone="ok"><span class="dg-t">新仓库对象</span><span class="dg-s"><code>city = 杭州</code></span></Node>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c05 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      'v1 . .'
+      'x1 . .'
+      'o1 r1 sh'
+      'v2 . sh'
+      'x2 . sh'
+      'o2 r2 sh'
+      'v3 . .'
+      'x3 . .'
+      'o3 r3 nw';
+    align-items: center;
+    text-align: center;
+  }
+  .c05-v1 { grid-area: v1; }
+  .c05-x1 { grid-area: x1; }
+  .c05-o1 { grid-area: o1; }
+  .c05-r1 { grid-area: r1; }
+  .c05-v2 { grid-area: v2; margin-top: 1rem; }
+  .c05-x2 { grid-area: x2; }
+  .c05-o2 { grid-area: o2; }
+  .c05-r2 { grid-area: r2; }
+  .c05-sh { grid-area: sh; align-self: stretch; display: grid; align-content: center; }
+  .c05-v3 { grid-area: v3; margin-top: 1rem; }
+  .c05-x3 { grid-area: x3; }
+  .c05-o3 { grid-area: o3; }
+  .c05-r3 { grid-area: r3; }
+  .c05-nw { grid-area: nw; }
+  .c05 .dg-arrow[data-dir='right'] .dg-arrow-label { font-family: var(--sl-font-mono); }
+  .c05 .dg-node[data-shape='var'] { justify-self: center; }
+  @container dg (min-width: 34rem) {
+    .c05 {
+      grid-template-columns: minmax(0, 0.85fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+      grid-template-areas:
+        'v1 x1 o1 r1 sh'
+        'v2 x2 o2 r2 sh'
+        'v3 x3 o3 r3 nw';
+      row-gap: 0.75rem;
+    }
+    .c05-v2,
+    .c05-v3 { margin-top: 0; }
+    .c05 .dg-node[data-shape='var'] { justify-self: stretch; }
+  }
+</style>

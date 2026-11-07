@@ -46,8 +46,6 @@ jobs:
           npm run lint
           npm test
           npm run build
-      - name: Prepare D2 and Chinese font
-        run: npm run setup:diagrams
       - name: Check content and types
         run: npm run check
       - name: Build and verify the static site

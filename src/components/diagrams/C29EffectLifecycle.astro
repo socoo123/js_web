@@ -1,0 +1,92 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Group from './Group.astro';
+import Loop from './Loop.astro';
+
+const steps = [
+  '提交 P001 后运行 setup P001，建立监听。',
+  '开发环境里，根 StrictMode 做一次首次检查：先 cleanup P001，移除刚才的监听。',
+  '再 setup P001，重新建立监听。生产环境没有这次检查，直接走右侧的「生产路径」。',
+  '提交 P002，依赖发生变化：先用旧闭包 cleanup P001，清理旧监听。',
+  '再 setup P002，建立新监听。',
+  '组件移除时 cleanup P002，释放最后的监听。',
+  '请求同样按配对规则处理：setup P001 设 ignore = false，启动请求与后续处理。',
+  '切到 P002：cleanup P001 把它自己的 ignore 设为 true，并调用 `abort()`。',
+  'setup P002 有一份新的 ignore = false。',
+  'P002 先完成：检查自己的 ignore，仍是 false，提交结果。',
+  'P001 后完成：检查自己的 ignore，已是 true，忽略这次结果。',
+  '页面保留 P002；旧结果与旧错误都不会更新 state。',
+];
+const legend = [
+  { line: 'solid' as const, text: '箭头表示各栏内的执行先后' },
+  { text: '绿色是当前有效的操作，红色是已经过期的操作；虚线框只在开发环境出现' },
+];
+---
+<DiagramFrame name="c29-effect-lifecycle" steps={steps} legend={legend}>
+  <div class="c29">
+    <Group label="Effect 的启停" bodyClass="c29-life">
+      <Node step="1"><span class="dg-t">提交 P001</span></Node>
+      <Arrow step="1" />
+      <Node class="c29-start" tone="ok" step="1"><span class="dg-t">setup P001</span><span class="dg-s">建立监听</span></Node>
+      <Arrow label="开发检查" step="2" />
+      <Group label="根 StrictMode · 仅开发首次检查" tone="primary" dashed bodyClass="c29-flow">
+        <Node step="2"><span class="dg-t">cleanup P001</span><span class="dg-s">移除刚才的监听</span></Node>
+        <Arrow step="3" />
+        <Node step="3"><span class="dg-t">setup P001</span><span class="dg-s">重新建立监听</span></Node>
+      </Group>
+      <Arrow step="4" />
+      <Node class="c29-change" step="4"><span class="dg-t">提交 P002</span><span class="dg-s">依赖发生变化</span></Node>
+      <Arrow step="4" />
+      <Node step="4"><span class="dg-t">cleanup P001</span><span class="dg-s">清理旧闭包的监听</span></Node>
+      <Arrow step="5" />
+      <Node tone="ok" step="5"><span class="dg-t">setup P002</span><span class="dg-s">建立新监听</span></Node>
+      <Arrow step="6" />
+      <Node step="6"><span class="dg-t">组件移除</span></Node>
+      <Arrow step="6" />
+      <Node step="6"><span class="dg-t">cleanup P002</span><span class="dg-s">释放最后的监听</span></Node>
+      <Loop class="c29-bypass" side="right" head="bottom" label="生产路径" step="3" />
+    </Group>
+    <Group label="请求结果的归属" bodyClass="c29-flow">
+      <Node step="7"><span class="dg-t">setup P001</span><span class="dg-s"><code>ignore = false</code></span><span class="dg-s">启动请求与后续处理</span></Node>
+      <Arrow step="8" />
+      <Node step="8"><span class="dg-t">切到 P002</span></Node>
+      <Arrow step="8" />
+      <Node tone="err" step="8"><span class="dg-t">cleanup P001</span><span class="dg-s"><code>ignore = true</code> · <code>abort()</code></span></Node>
+      <Arrow step="9" />
+      <Node tone="primary" step="9"><span class="dg-t">setup P002</span><span class="dg-s">新的 <code>ignore = false</code></span></Node>
+      <Arrow step="10" />
+      <Node tone="ok" step="10"><span class="dg-t">P002 先完成</span><span class="dg-s">检查自己的 ignore → 提交</span></Node>
+      <Arrow step="11" />
+      <Node tone="err" step="11"><span class="dg-t">P001 后完成</span><span class="dg-s">检查自己的 ignore → 忽略</span></Node>
+      <Arrow step="12" />
+      <Node step="12"><span class="dg-t">页面保留 P002</span><span class="dg-s">旧结果与旧错误都不更新 state</span></Node>
+    </Group>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c29 {
+    display: grid;
+    gap: 0.9rem;
+    text-align: center;
+  }
+  .c29-flow { display: grid; }
+  .c29-life {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1.9rem;
+  }
+  .c29-life > :not(.c29-bypass) { grid-column: 1; }
+  .c29-bypass {
+    grid-column: 2;
+    grid-row: 3 / span 5;
+    margin-block: 1.1rem 1.1rem;
+  }
+  @container dg (min-width: 34rem) {
+    .c29 {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+</style>

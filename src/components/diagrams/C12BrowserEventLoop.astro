@@ -1,0 +1,154 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+import Loop from './Loop.astro';
+import { only } from './text.mjs';
+
+const steps = [
+  '当前任务开始：整段脚本同步执行。`console.log(1)` 进入调用栈，打印 1 后返回。',
+  '`setTimeout` 登记计时器后立即返回；回调要等计时到期，再作为后续任务排队。',
+  '`Promise.resolve().then` 把回调排进微任务队列。',
+  '`console.log(2)` 打印 2。脚本执行完毕，调用栈清空，当前任务返回。',
+  '微任务检查点：执行已排队的 Promise 回调，打印 3；新入队的微任务也会继续执行，直到队列清空。',
+  '到了渲染时机才更新画面（布局、绘制），本轮也可能跳过。',
+  '浏览器选择下一个可运行任务：到期的定时器回调进入调用栈，打印 4，开始下一轮。',
+];
+const timer = '() => console.log(4)';
+const micro = '() => console.log(3)';
+// 每一步的调用栈（栈底在左）、微任务队列、任务队列与 Console 输出；第 0 项是全图时的「回调去向」。
+const states = [
+  { stack: ['console.log(1)', 'console.log(2)'], micro: [micro], task: [timer], out: ['1', '2', '3', '4'] },
+  { stack: ['全局代码', 'console.log(1)'], micro: [], task: [], out: ['1'] },
+  { stack: ['全局代码', 'setTimeout(…)'], micro: [], task: [timer], out: ['1'] },
+  { stack: ['全局代码', 'Promise…then(…)'], micro: [micro], task: [timer], out: ['1'] },
+  { stack: ['全局代码', 'console.log(2)'], micro: [micro], task: [timer], out: ['1', '2'] },
+  { stack: ['微任务回调', 'console.log(3)'], micro: [], task: [timer], out: ['1', '2', '3'] },
+  { stack: [], micro: [], task: [timer], out: ['1', '2', '3'] },
+  { stack: ['定时器回调', 'console.log(4)'], micro: [], task: [], out: ['1', '2', '3', '4'] },
+];
+const legend = [
+  { line: 'solid' as const, text: '简化的浏览器主线程循环：箭头表示处理顺序，最后一步接入下一轮' },
+];
+---
+<DiagramFrame name="c12-browser-event-loop" steps={steps} legend={legend}>
+  <div class="c12">
+    <div class="c12-loop">
+      <Loop class="c12-back" side="left" head="top" label="下一轮" step="7" />
+      <Node tone="primary" step="1 2 3 4 7"><span class="dg-t">当前任务</span><span class="dg-s">同步函数进入调用栈</span><span class="dg-s">执行完毕，逐层返回</span></Node>
+      <Arrow label="当前任务返回" step="4" />
+      <Node tone="amber" step="5"><span class="dg-t">微任务检查点</span><span class="dg-s">执行已排队的 Promise 回调等</span><span class="dg-s">新入队的微任务也继续执行</span></Node>
+      <Arrow label="微任务队列清空" step="6" />
+      <Node tone="ok" step="6"><span class="dg-t">到了渲染时机才更新画面</span><span class="dg-s">布局 · 绘制</span><span class="dg-s">本轮也可能跳过</span></Node>
+      <Arrow step="7" />
+      <Node step="7"><span class="dg-t">浏览器选择下一个可运行任务</span><span class="dg-s">例如到期的定时器回调、用户交互</span><span class="dg-s">进入下一轮同步调用</span></Node>
+    </div>
+    <div class="c12-panel">
+      <p class="c12-panel-title">用上一节的四行代码走一遍</p>
+      <pre class="c12-code" aria-label="示例代码"><code><span data-step="1">console.log(1);</span><span data-step="2 7">setTimeout(() =&gt; console.log(4), 0);</span><span data-step="3 5">Promise.resolve().then(() =&gt; console.log(3));</span><span data-step="4">console.log(2);</span></code></pre>
+      {states.map((state, index) => (
+        <div class="c12-state" {...only(String(index))}>
+          {index === 0 && <p class="c12-hint">各部分分别进入哪里：</p>}
+          <div class="dg-slot">
+            <span class="dg-slot-label">{index === 0 ? '调用栈 · 同步执行' : '调用栈（栈顶在右）'}</span>
+            <ol class="dg-cells">{state.stack.map((item) => <li class="dg-cell" data-tone="primary">{item}</li>)}</ol>
+          </div>
+          <div class="dg-slot">
+            <span class="dg-slot-label">微任务队列</span>
+            <ol class="dg-cells">{state.micro.map((item) => <li class="dg-cell" data-tone="amber">{item}</li>)}</ol>
+          </div>
+          <div class="dg-slot">
+            <span class="dg-slot-label">任务队列（计时到期后排入）</span>
+            <ol class="dg-cells">{state.task.map((item) => <li class="dg-cell">{item}</li>)}</ol>
+          </div>
+          <div class="dg-slot">
+            <span class="dg-slot-label">Console</span>
+            <ol class="dg-cells c12-console">{state.out.map((item) => <li>{item}</li>)}</ol>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c12 {
+    display: grid;
+    gap: 1.1rem;
+  }
+  .c12-loop {
+    display: grid;
+    grid-template-columns: 1.6rem minmax(0, 1fr);
+    text-align: center;
+  }
+  .c12-loop > :not(.c12-back) { grid-column: 2; }
+  .c12-back {
+    grid-column: 1;
+    grid-row: 1 / span 7;
+    margin-block: 1.6rem;
+  }
+  .c12-panel {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    min-inline-size: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--js-border);
+    border-radius: var(--js-radius);
+    background: var(--dg-card);
+  }
+  .c12-panel-title,
+  .c12-hint {
+    color: var(--js-color-heading);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+  .c12-hint { color: var(--js-color-muted); font-weight: 600; }
+  .c12-code {
+    margin: 0;
+    padding: 0.5rem 0;
+    border: 1px solid var(--js-code-border);
+    border-radius: 8px;
+    background: var(--js-code-bg);
+    font-family: var(--sl-font-mono);
+    font-size: 0.75rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .c12-code code { padding: 0; background: none; font-size: inherit; color: var(--js-color-text); }
+  .c12-code span {
+    display: block;
+    padding-inline: 0.65rem;
+    border-inline-start: 3px solid transparent;
+  }
+  .c12-code span[data-state='current'] {
+    border-inline-start-color: var(--js-color-primary);
+    background: var(--js-color-primary-soft);
+    color: var(--js-color-heading);
+  }
+  .c12-state {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .c12-console {
+    background: var(--js-console-bg) !important;
+    border-style: solid !important;
+    border-color: var(--js-console-border) !important;
+    color: var(--js-console-fg);
+    font-family: var(--sl-font-mono);
+    font-size: 0.8rem;
+  }
+  .c12-console li {
+    padding-inline: 0.35rem;
+  }
+  .c12-console li + li {
+    border-inline-start: 1px solid var(--js-console-border);
+  }
+  @container dg (min-width: 34rem) {
+    .c12 {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      align-items: start;
+    }
+  }
+</style>

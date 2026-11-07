@@ -1,0 +1,80 @@
+---
+// 机制图外壳：figure + 标题条 + 画布 + 可选的逐步播放 + 读图说明。
+// 无 JS 时显示完整的图和编号的分步列表；stepper.mjs 加载后才出现播放按钮。
+import './diagram.css';
+import { diagramInfo } from './registry.mjs';
+import { rich } from './text.mjs';
+
+interface Track { id: string; label: string; steps: string[] }
+interface LegendItem { line?: 'solid' | 'dashed'; text: string }
+interface Props {
+  name: string;
+  steps?: string[];
+  tracks?: Track[];
+  legend?: LegendItem[];
+  trackLabel?: string;
+}
+const { name, steps, tracks: given, legend = [], trackLabel = '切换顺序' } = Astro.props;
+const info = diagramInfo(name);
+const tracks: Track[] = given ?? (steps ? [{ id: 'main', label: '', steps }] : []);
+const stepper = tracks.length > 0;
+const id = `dg-${name}`;
+---
+<figure
+  class="dg not-content"
+  data-diagram={name}
+  data-stepper={stepper ? '' : undefined}
+  aria-labelledby={`${id}-title`}
+  aria-describedby={`${id}-desc`}
+>
+  <figcaption class="dg-bar">
+    <span class="dg-tab">图解</span>
+    <span class="dg-title" id={`${id}-title`}>{info.title}</span>
+  </figcaption>
+  <p class="js-visually-hidden" id={`${id}-desc`}>{info.description}</p>
+  <div class="dg-body"><slot /></div>
+  {stepper && (
+    <div class="dg-player">
+      <div class="dg-controls" data-dg-controls hidden>
+        {tracks.length > 1 && (
+          <div class="dg-tracks" role="group" aria-label={trackLabel}>
+            {tracks.map((track, index) => (
+              <button type="button" data-dg-track={track.id} aria-pressed={index === 0 ? 'true' : 'false'}>{track.label}</button>
+            ))}
+          </div>
+        )}
+        <div class="dg-buttons">
+          <button type="button" data-dg-prev><span aria-hidden="true">‹ </span>上一步</button>
+          <button type="button" class="dg-primary" data-dg-next>下一步<span aria-hidden="true"> ›</span></button>
+          <button type="button" data-dg-play>重播</button>
+        </div>
+        <span class="dg-count" data-dg-count aria-hidden="true"></span>
+      </div>
+      <p class="dg-live" data-dg-live aria-live="polite" hidden></p>
+      {tracks.map((track) => (
+        <div class="dg-steps" data-dg-steps>
+          <p class="dg-steps-title">{tracks.length > 1 ? `${track.label} · 分步说明` : '分步说明'}</p>
+          <ol data-track={track.id} data-label={track.label}>
+            {track.steps.map((text) => <li>{rich(text).map((part) => part.code ? <code>{part.text}</code> : part.text)}</li>)}
+          </ol>
+        </div>
+      ))}
+    </div>
+  )}
+  {legend.length > 0 && (
+    <p class="dg-legend">
+      <span class="dg-legend-title">读图</span>
+      {legend.map((item) => (
+        <span class="dg-legend-item">
+          {item.line && <span class="dg-key" data-line={item.line} aria-hidden="true"></span>}
+          {rich(item.text).map((part) => part.code ? <code>{part.text}</code> : part.text)}
+        </span>
+      ))}
+    </p>
+  )}
+</figure>
+
+<script>
+  import { initDiagrams } from './stepper.mjs';
+  initDiagrams();
+</script>

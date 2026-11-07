@@ -5,6 +5,7 @@ sidebar:
   order: 29
 ---
 
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 3 周 · 第 15 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟\
@@ -83,9 +84,9 @@ validateProducts(next); summarize(next);
 
 是 6。传入的是全部 `products.length`，不是筛选后的 `visible.length`。P001 补一件也不会增加商品种类，因此标题仍为 6；新增商品后才变为 7。先选对输入，再讨论 Effect 是否运行。
 
-![左栏展示 setup、StrictMode 的 cleanup 与重新 setup，以及依赖变化和卸载清理；右栏展示请求过期后的响应被拦截。](../../../assets/diagrams/c29-effect-lifecycle.svg)
+<Diagram name="c29-effect-lifecycle" />
 
-从左栏往下读：cleanup 结束的是与自己配对的那次 setup。右栏是同一规则应用于请求的时序。
+先读「Effect 的启停」：cleanup 结束的是与自己配对的那次 setup。「请求结果的归属」是同一规则应用于请求的时序。
 
 ## 2. 依赖由读取的值决定
 

@@ -7,6 +7,7 @@ sidebar:
 
 import CodeCompare from '../../../components/CodeCompare.astro';
 import CodeExcerpt from '../../../components/CodeExcerpt.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 1 周 · 第 4 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -173,7 +174,7 @@ console.log(keyboard.readStock === mouse.readStock);  // → true
 
 普通对象有一个内部的原型链接，用 `Object.getPrototypeOf(obj)` 查看。读取属性时，先找对象自己的属性，再沿原型链逐层找，遇到匹配就停；一路到 `null` 仍没找到，才得到 `undefined`。
 
-![原型链查找图：读取 keyboard.readStock 时先查实例，再找到 ProductStock.prototype 上的函数；后面依次是 Object.prototype 和 null。通过 keyboard 调用方法时，this 仍指向 keyboard，读取它自己的 stock 12。](../../../assets/diagrams/c07-prototype-lookup.svg)
+<Diagram name="c07-prototype-lookup" />
 
 沿实线看原型链接，沿虚线看这次查找与调用。找到 `readStock` 就停止查找；如果整个链都没有所需属性，才会查到终点。
 

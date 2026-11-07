@@ -4,6 +4,7 @@ import remarkMdx from 'remark-mdx';
 import { comparison, snippet } from '../labs/sources.mjs';
 import { readExample, readRunnable } from '../src/lib/examples.mjs';
 import { DEMOS } from '../src/components/demos/registry.mjs';
+import { diagramInfo } from '../src/components/diagrams/registry.mjs';
 import catalog from '../labs/catalog.json' with { type: 'json' };
 
 export function codeLimitIssues(blocks, maximum) {
@@ -13,7 +14,7 @@ export function codeLimitIssues(blocks, maximum) {
   return issues;
 }
 
-const ID_COMPONENTS = { CodeCompare: 'pairId', CodeExcerpt: 'snippetId', LessonTask: 'lessonId', LabOverview: 'labId' };
+const ID_COMPONENTS = { CodeCompare: 'pairId', CodeExcerpt: 'snippetId', LessonTask: 'lessonId', LabOverview: 'labId', Diagram: 'name' };
 // V3 组件：允许的静态字符串属性；question/kind/example 为必填。
 const V3_COMPONENTS = {
   Predict: ['question'],
@@ -111,6 +112,7 @@ export function importedContent(source, mdx = true) {
           if (component === 'CodeExcerpt') {
             const ref = snippet(id); code.push(ref); if (!ref.verified && !ref.reason) throw new Error(`${id} 未运行代码缺少原因标注`);
           }
+          if (component === 'Diagram') prose.push(diagramInfo(id).description);
           if (component === 'LessonTask') {
             const row = catalog.lessons.find((lesson) => lesson.lessonId === id);
             if (!row?.implemented) throw new Error(`任务尚未发行：${id}`);

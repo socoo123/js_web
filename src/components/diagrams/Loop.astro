@@ -1,0 +1,23 @@
+---
+// 回环/旁路括线：放在网格的窄列里跨越多行，三边画线；head 是箭头所在的一端，箭头指向内容一侧。
+interface Props {
+  side?: 'left' | 'right';
+  head?: 'top' | 'bottom';
+  label?: string;
+  dashed?: boolean;
+  step?: string;
+  class?: string;
+  style?: string;
+}
+const { side = 'left', head = 'top', label, dashed = false, step, class: className, style } = Astro.props;
+---
+<div
+  class:list={['dg-loop', className]}
+  data-side={side}
+  data-head={head}
+  data-dashed={dashed ? '' : undefined}
+  data-step={step}
+  style={style}
+>
+  {label && <span class="dg-loop-label">{label}</span>}
+</div>

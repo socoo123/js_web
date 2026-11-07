@@ -1,0 +1,72 @@
+---
+import DiagramFrame from './DiagramFrame.astro';
+import Node from './Node.astro';
+import Arrow from './Arrow.astro';
+
+const steps = [
+  '读取 `keyboard.readStock`：先查实例自身。实例只有 id 和 stock，没有自有的 readStock。',
+  '沿原型链接到 `ProductStock.prototype`，在这里找到 readStock 函数，查找停止。',
+  '调用 `keyboard.readStock()`：this 是 keyboard，函数读取实例自己的 stock，得到 12。',
+  '如果整条链都没有要找的属性，才会继续经过 `Object.prototype`（例如 toString）走到终点 null，结果是 undefined。',
+];
+const legend = [
+  { line: 'solid' as const, text: '实线：对象的原型链接' },
+  { line: 'dashed' as const, text: '虚线：属性查找或方法调用' },
+];
+---
+<DiagramFrame name="c07-prototype-lookup" steps={steps} legend={legend}>
+  <div class="c07">
+    <Node class="c07-lookup" tone="primary" step="1"><span class="dg-t">读取 <code>keyboard.readStock</code></span></Node>
+    <Arrow class="c07-a1" dashed label="先查自身" step="1" />
+    <Node class="c07-inst" tone="primary" step="1 3">
+      <span class="dg-t">keyboard 实例</span>
+      <span class="dg-s">自有属性：<code>id = P001</code> · <code>stock = 12</code></span>
+      <span class="dg-s">没有自有 readStock</span>
+    </Node>
+    <Arrow class="c07-a2" label="原型链接 · 找到方法" step="2" />
+    <Node class="c07-proto" tone="ok" step="2">
+      <span class="dg-t"><code>ProductStock.prototype</code></span>
+      <span class="dg-s">自有属性：readStock 函数</span>
+    </Node>
+    <Arrow class="c07-ac" dir="right" dashed label="方法调用" step="3" />
+    <Node class="c07-call" tone="amber" step="3">
+      <span class="dg-t">调用 <code>keyboard.readStock()</code></span>
+      <span class="dg-s"><code>this = keyboard</code></span>
+      <span class="dg-s">读取实例的 stock，得到 12</span>
+    </Node>
+    <Arrow class="c07-a3" label="原型链接" step="4" />
+    <Node class="c07-obj" step="4"><span class="dg-t"><code>Object.prototype</code></span><span class="dg-s">例如 toString</span></Node>
+    <Arrow class="c07-a4" label="原型链接" step="4" />
+    <Node class="c07-end" step="4"><span class="dg-t"><code>null</code></span><span class="dg-s">原型链终点</span></Node>
+  </div>
+</DiagramFrame>
+
+<style is:global>
+  .c07 {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      'lookup . .'
+      'a1 . .'
+      'inst . .'
+      'a2 . .'
+      'proto ac call'
+      'a3 . .'
+      'obj . .'
+      'a4 . .'
+      'end . .';
+    align-items: center;
+    text-align: center;
+  }
+  .c07-lookup { grid-area: lookup; }
+  .c07-a1 { grid-area: a1; }
+  .c07-inst { grid-area: inst; }
+  .c07-a2 { grid-area: a2; }
+  .c07-proto { grid-area: proto; }
+  .c07-ac { grid-area: ac; }
+  .c07-call { grid-area: call; }
+  .c07-a3 { grid-area: a3; }
+  .c07-obj { grid-area: obj; }
+  .c07-a4 { grid-area: a4; }
+  .c07-end { grid-area: end; border-style: dashed; }
+</style>

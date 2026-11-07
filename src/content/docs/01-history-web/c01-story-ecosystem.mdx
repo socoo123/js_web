@@ -6,6 +6,7 @@ sidebar:
 ---
 
 import CodeCompare from '../../../components/CodeCompare.astro';
+import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 1 周 · 第 1 天** · 阅读跟做约 45 分钟 · 实作约 40 分钟<br />
@@ -117,7 +118,7 @@ console.log("process：" + typeof process);
 
 因此 `stock - sold` 能在两边执行，页面操作需要浏览器。把计算与页面、文件操作分开，就能复用库存逻辑。
 
-![生态关系图：ECMAScript 定义语言规则；库存业务使用变量、函数和 Array，选定浏览器、Node 或 Bun 运行。每种环境组合引擎与不同 API；npm、Yarn、pnpm 管理 React、UI5 等项目依赖。](../../../assets/diagrams/c01-ecosystem.svg)
+<Diagram name="c01-ecosystem" />
 
 沿「规则 → 代码 → 环境」读主线，再看工具怎样提供依赖。箭头标的是职责关系；Bun 这个名字在图里只表示它的运行时角色。
 
