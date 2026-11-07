@@ -84,7 +84,7 @@ const apiScenarios = [
   ['state', async ({ page, sent, apiLog }) => {
     const first = rowFor(page, 'P001');
     await first.getByRole('button', { name: '立即补一件', exact: true }).click();
-    await expect(first).toContainText('库存 13 件');
+    await expect(first, 'P001「立即补一件」后应是 13 件：补货要经 dispatch 发 POST /api/products/P001/restock').toContainText('库存 13 件');
     await expect(page.locator('#summary')).toHaveText('库存 53 / 价值 2674700 分');
     await expect(rowFor(page, 'P004')).toContainText('库存 3 件');
     assert(sent('POST', '/api/products/P001/restock'), 'Network 没有 POST /api/products/P001/restock');
@@ -194,8 +194,8 @@ if (n >= 47) apiScenarios.push(['search', async ({ page }) => {
   const search = page.getByPlaceholder('名称或编号');
   await search.focus();
   await page.keyboard.type('P004');
-  await expect(search).toHaveValue('P004');
-  await expect(page.locator('#list article')).toHaveCount(1);
+  await expect(search, '逐字输入 P004 后搜索框不能丢字').toHaveValue('P004');
+  await expect(page.locator('#list article'), '搜索 P004 应只剩 1 项').toHaveCount(1);
   await expect(rowFor(page, 'P004')).toBeVisible();
   await page.reload();
   await expect(search).toHaveValue('P004');
@@ -221,8 +221,9 @@ if (n >= 47) apiScenarios.push(['search', async ({ page }) => {
 }, { apiErrors: true }]);
 async function lowStock(page) {
   const low = page.getByRole('checkbox', { name: '仅低库存', exact: true });
+  await expect(low, '找不到「仅低库存」复选框').toBeVisible();
   await low.check();
-  await expect(page.locator('#list article')).toHaveCount(2);
+  await expect(page.locator('#list article'), '仅低库存（1–5 件）应只剩 P004、P006').toHaveCount(2);
   await expect(rowFor(page, 'P004')).toBeVisible(); await expect(rowFor(page, 'P006')).toBeVisible();
   await expect(rowFor(page, 'P002')).toHaveCount(0);
   await expect(page.locator('#summary')).toHaveText('库存 8 / 价值 539200 分');
@@ -233,12 +234,12 @@ if (n >= 48) apiScenarios.push(['stock-filter', async ({ page, requests }) => {
   const low = await lowStock(page);
   const lowRequests = requests.filter((request) => request.path === '/api/products' && request.query.get('stock') === 'low');
   assert(lowRequests.length > 0, `仅低库存应请求 GET /api/products?stock=low；实际：${requests.map((request) => `${request.method} ${request.path}?${request.query}`).join('、')}`);
-  await page.reload(); await expect(low).toBeChecked();
+  await page.reload(); await expect(low, '刷新后应从 hash 恢复「仅低库存」').toBeChecked();
   await expect(page.locator('#list article')).toHaveCount(2);
   await page.getByLabel('分类', { exact: true }).selectOption('配件');
-  await expect(page.locator('#list article')).toHaveCount(1);
+  await expect(page.locator('#list article'), '低库存 ∩ 配件应只剩 P004（换条件要换 queryKey 重新请求）').toHaveCount(1);
   await page.getByPlaceholder('名称或编号').fill('P006');
-  await expect(page.locator('#list article')).toHaveCount(0);
+  await expect(page.locator('#list article'), '低库存 ∩ 配件 ∩ 搜索 P006 应为 0 项').toHaveCount(0);
   await page.getByPlaceholder('名称或编号').fill('');
   await page.getByLabel('分类', { exact: true }).selectOption('全部');
   await page.getByRole('button', { name: '编辑 P004', exact: true }).click();
