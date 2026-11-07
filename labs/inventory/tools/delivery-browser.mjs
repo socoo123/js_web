@@ -117,6 +117,31 @@ const apiScenarios = [
     await page.reload();
     await expect(rowFor(page, 'P004')).toContainText('库存 8 件');
   }],
+  ['save-log', async ({ page, apiLog }) => {
+    const patches = () => apiLog().filter((line) => line.startsWith('PATCH /api/products/P004 '));
+    const form = editForm(page);
+    async function save(stock) {
+      await page.getByRole('button', { name: '编辑 P004', exact: true }).click();
+      await form.getByLabel('库存', { exact: true }).fill(stock);
+      await form.getByRole('button', { name: '保存', exact: true }).click();
+    }
+    await save('8');
+    await expect(form).toHaveCount(0);
+    await expect.poll(() => patches().length).toBe(1);
+    assert.match(patches()[0], /^PATCH \/api\/products\/P004 200 \d+ms$/, `正常保存的那行不应标「注入故障」（delay 只在浏览器里等）；api 日志：${patches().join(' | ')}`);
+    await page.getByRole('checkbox', { name: '模拟保存失败', exact: true }).check();
+    await save('9');
+    await expect(form.getByRole('alert')).toContainText('保存失败：HTTP 500：注入的故障：500');
+    await expect(form.getByLabel('库存', { exact: true })).toHaveValue('9');
+    await expect.poll(() => patches().length).toBe(2);
+    assert.match(patches()[1], /^PATCH \/api\/products\/P004 500 \d+ms 注入故障$/, `勾选「模拟保存失败」的那行应是 500 并标「注入故障」；api 日志：${patches().join(' | ')}`);
+    await page.getByRole('checkbox', { name: '模拟保存失败', exact: true }).uncheck();
+    await form.getByRole('button', { name: '保存', exact: true }).click();
+    await expect(form).toHaveCount(0);
+    await expect(page.locator('#summary')).toHaveText('库存 58 / 价值 2814200 分');
+    await expect.poll(() => patches().length).toBe(3);
+    assert.match(patches()[2], /^PATCH \/api\/products\/P004 200 \d+ms$/, `取消模拟失败后的保存不应标「注入故障」；api 日志：${patches().join(' | ')}`);
+  }, { apiErrors: true }],
   ['fields', async ({ page }) => {
     await api.fault({ method: 'PATCH', path: '/api/products/P004', status: 422,
       body: { error: { code: 'VALIDATION', message: '字段校验失败，见 fields', fields: { priceCents: '价格必须是非负安全整数分' } } } });

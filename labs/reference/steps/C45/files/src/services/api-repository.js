@@ -20,14 +20,21 @@ export function createApiRepository({ baseUrl = import.meta.env?.VITE_API_BASE ?
     const data = await response.json().catch(() => null);
     throw new ApiError(response.status, data?.error);
   }
-  // 故障由后端注入，失败请求在 Network 和 api 终端里都看得到。
+  // delay 只在浏览器里等，api 终端只标真正注入的故障；fail 由后端注入 500，Network 里看得到。
+  function wait(ms, signal) {
+    return new Promise((resolve, reject) => {
+      if (signal?.aborted) { reject(new DOMException("已取消", "AbortError")); return; }
+      const abort = () => { clearTimeout(timer); reject(new DOMException("已取消", "AbortError")); };
+      const timer = setTimeout(() => { signal?.removeEventListener("abort", abort); resolve(); }, ms);
+      signal?.addEventListener("abort", abort, { once: true });
+    });
+  }
   async function call(operation, method, suffix, options = {}, init = {}) {
     const url = baseUrl + suffix;
-    const fail = options.fail || failures.delete(operation);
-    if (fail || options.delay) {
+    if (options.delay) await wait(options.delay, options.signal);
+    if (options.fail || failures.delete(operation)) {
       const path = new URL(url, globalThis.location?.href ?? "http://127.0.0.1/").pathname;
-      await send("POST", `${baseUrl}/_lab/faults`, { signal: options.signal,
-        body: { method, path, ...(fail && { status: 500 }), ...(options.delay && { delayMs: options.delay }) } });
+      await send("POST", `${baseUrl}/_lab/faults`, { signal: options.signal, body: { method, path, status: 500 } });
     }
     return send(method, url, { ...init, signal: options.signal });
   }

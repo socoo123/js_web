@@ -357,7 +357,7 @@
     },
     "l5/goal": {
       "checkpoint": "C48",
-      "digest": "c8beb48d0328a328f266d99797a3201e0db51b62364a7f2799a3f439f7d54242",
+      "digest": "21ad37c2d8495add6d481441626b61a8aee7d69fcf388821693f9614dd0a1bf7",
       "capturedAt": "2026-11-07",
       "environment": {
         "playwright": "1.64.1",

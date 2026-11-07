@@ -133,6 +133,11 @@ try {
     execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /保存后列表应重新读取/, extra: { LAB_DELIVERY_CASE: 'fields' } });
   });
   execute(['tools/delivery-browser.mjs', 'C45'], { extra: { LAB_DELIVERY_CASE: 'fields' } });
+  await mutate('src/services/api-repository.js', (text) => text.replace('if (options.delay) await wait(options.delay, options.signal);',
+    'if (options.delay) await send("POST", `${baseUrl}/_lab/faults`, { signal: options.signal, body: { method, path: new URL(url, location.href).pathname, delayMs: options.delay } });'), async () => {
+    execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /正常保存的那行不应标「注入故障」/, extra: { LAB_DELIVERY_CASE: 'save-log' } });
+  });
+  execute(['tools/delivery-browser.mjs', 'C45'], { extra: { LAB_DELIVERY_CASE: 'save-log' } });
   await mutate('src/react/query-options.js', (text) => text.replace('detail: (id) => ["inventory", "detail", id]', 'detail: () => ["inventory", "detail"]'), async () => {
     execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /P002 无线鼠标/, extra: { LAB_DELIVERY_CASE: 'slow' } });
   });
