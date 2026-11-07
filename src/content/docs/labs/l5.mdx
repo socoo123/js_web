@@ -140,7 +140,7 @@ npm run lab -- dev
 - `baseUrl` 默认取 `import.meta.env.VITE_API_BASE`，没设就是 `"/api"`。相对地址让浏览器只和页面所在的 8060 通信，由 Vite 代理转给 8070。
 - 非 2xx 一律抛 `ApiError`，消息写成 `HTTP 状态：错误体的 message`，例如「HTTP 500：注入的故障：500」。断网、CORS 这类没拿到响应的失败保留原来的 `TypeError: Failed to fetch`。
 - `save` 发 `PATCH`，只带可改的五个字段，头里带 `If-Match: "<version>"`。version 用这个 repository 最近一次从服务器拿到的该商品的值，所以每个响应里的商品都要记下 version。
-- `options.signal` 原样交给 `fetch`。`failNext(operation)`、`options.fail` 与 `options.delay` 改成先调用 `POST /api/_lab/faults`，让模拟的失败也出现在 Network 与 api 终端。保存时 App 传了 `delay: 300` 让「正在保存…」看得见，所以每次保存前都多一行 `POST /api/_lab/faults`，PATCH 那一行也带「注入故障」。
+- `options.signal` 原样交给 `fetch`。`failNext(operation)` 与 `options.fail` 改成先调用 `POST /api/_lab/faults` 注入一次 500，让模拟的失败也出现在 Network 与 api 终端。`options.delay` 只在浏览器里等待（App 保存时传 `delay: 300`，让「正在保存…」看得见），不经过后端，所以正常保存的 PATCH 行不带「注入故障」。
 
 完整参考解在本课完成后用 `npm run lab -- compare C45` 对照；接口细节见 [L5 后端接口](/js_web/labs/api/)。
 
@@ -207,10 +207,10 @@ await fetch("/api/_lab/faults", {
 
 **先读**：[C30 HTTP 返回了，不等于商品加载成功](/js_web/05-react/c30-requests-races/#2-http-返回了不等于商品加载成功) · [C32 重试与界面状态](/js_web/05-react/c32-tanstack-query-server-state/#4-重试与界面状态有旧结果时继续显示)
 
-1. **操作**：用上面的 Console 片段注入一次 `GET /api/products` 500，然后刷新页面。
+1. **操作**：用上面的 Console 片段注入 `GET /api/products` 500，并在参数里加上 `times: 2`，然后刷新页面。开发模式的 StrictMode 可能先取消第一次请求再重发，被取消的那次也会用掉一次故障，所以注入两次。
 2. **证据**：Network 一条 500，Response 是 `{"error":{"code":"FAULT","message":"注入的故障：500"}}`；api 终端是 `GET /api/products?page=1&pageSize=50 500 0ms 注入故障`。如果请求函数不看 `response.ok`，错误体会被当成列表结果，页面报的是 `Cannot read properties of undefined (reading 'map')` 之类的错，看不出是后端 500；如果 Provider 没处理 `isError`，页面只剩空列表，也没有重试入口。
 3. **修复**：请求函数先看 `response.ok`，非 2xx 读出错误体后抛 `ApiError`。Provider 在读取失败时显示「读取失败：…」和「重新读取」按钮。
-4. **复验**：页面显示「读取失败：HTTP 500：注入的故障：500」。故障只注入了一次，点「重新读取」后回到 6/52/2634800，api 终端多出一行 200。
+4. **复验**：页面显示「读取失败：HTTP 500：注入的故障：500」。点「重新读取」，两次故障用完后回到 6/52/2634800，api 终端最后一行是 200。
 
 ### 场景 5：慢请求不能覆盖新选择
 

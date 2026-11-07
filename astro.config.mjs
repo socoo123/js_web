@@ -13,6 +13,7 @@ const labGroups = catalog.labs.map((lab) => {
     collapsed: true,
     items: [
       { label: `${lab.labId} Lab 主页`, slug: `labs/${lab.labId.toLowerCase()}` },
+      ...(lab.labId === 'L5' ? [{ label: 'L5 后端接口', slug: 'labs/api' }] : []),
       ...lessons.map((lesson) => ({ slug: lesson.slug })),
     ],
   };

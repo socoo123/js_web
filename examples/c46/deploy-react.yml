@@ -26,7 +26,8 @@ jobs:
           cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npm run lab -- start C46
-      - run: npm run lab -- build
+      # Pages 只发文件、没有后端，所以构建 mock 数据源。
+      - run: VITE_DATA_SOURCE=mock npm run lab -- build
       - run: mkdir -p site/demos/inventory
       - run: cp -R dist/src-react/. site/demos/inventory/
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5

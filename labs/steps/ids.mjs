@@ -69,7 +69,8 @@ export const LAB_STEP_IDS = {
     "l5-finish-3",
     "l5-finish-4",
     "l5-finish-5",
-    "l5-finish-6"
+    "l5-finish-6",
+    "l5-finish-7"
   ]
 };
 export const RETIRED_LAB_STEP_IDS = [];

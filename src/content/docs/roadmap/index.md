@@ -28,7 +28,7 @@ description: 按 6 个 Lab 排列的 4 周 48 课与 8 周慢速路线，最后�
 | [L2 可用的原生库存页](../labs/l2/) | C11–C20 | C10 | 列表、请求、存储、布局与第一批测试 |
 | [L3 React 库存应用](../labs/l3/) | C21–C36 | C20 | 从组件到状态、表单、异步与测试 |
 | [L4 组件库与 UI5 适配](../labs/l4/) | C37–C44 | C36 | 同一规则与编辑场景，四种界面 |
-| [L5 调试与静态交付](../labs/l5/) | C45–C48 | C44 | 从排错到可恢复的静态交付 |
+| [L5 对接后端与交付](../labs/l5/) | C45–C48 | C44 | 接上本地后端，按层排错、构建交付并补风险回归 |
 | [L6 毕业挑战](../labs/l6/) | 学完 C48 后 | 自己的 C48 工程 | 能力自测、Bug 猎人与综合毕业项目 |
 
 起点是前一课的完成参考态，不是本 Lab 的答案。正常跟做沿用自己的目录；L4 保留 React 主应用，L5 回到 src/react 做交付。
@@ -165,7 +165,7 @@ description: 按 6 个 Lab 排列的 4 周 48 课与 8 周慢速路线，最后�
 </ul></li>
 </ol>
 
-## L5 调试与静态交付
+## L5 对接后端与交付
 
 <p class="roadmap-week-meta not-content">
 <span>C45–C48 · 第 23–24 天 · 4 课 · 4 周路线第 4 周 · 8 周路线第 8 周</span>
@@ -173,7 +173,7 @@ description: 按 6 个 Lab 排列的 4 周 48 课与 8 周慢速路线，最后�
 </p>
 
 <ol class="roadmap-timeline not-content">
-<li class="roadmap-milestone"><span class="roadmap-lab-chip">L5</span><a href="../labs/l5/">调试与静态交付 · Lab 主页</a><span>从排错到可恢复的静态交付 · 补课起点 C44</span></li>
+<li class="roadmap-milestone"><span class="roadmap-lab-chip">L5</span><a href="../labs/l5/">对接后端与交付 · Lab 主页</a><span>接上本地后端，按层排错、构建交付并补风险回归 · 补课起点 C44</span></li>
 <li class="roadmap-day"><p class="roadmap-day__label"><strong>第 23 天</strong><span>第 4 周 · 8 周路线：第 45、46 天</span></p><ul class="roadmap-lessons">
 <li class="roadmap-lesson"><a href="../07-project/c45-debug-delivery-checks/"><span class="roadmap-lesson__id">C45</span>全链路 Debug 与交付前检查</a><span class="roadmap-lesson__state"><span class="roadmap-lab-chip">L5</span><span data-lesson-status="C45" hidden></span></span></li>
 <li class="roadmap-lesson"><a href="../07-project/c46-static-build-pages/"><span class="roadmap-lesson__id">C46</span>静态构建与 GitHub Pages</a><span class="roadmap-lesson__state"><span class="roadmap-lab-chip">L5</span><span data-lesson-status="C46" hidden></span></span></li>
