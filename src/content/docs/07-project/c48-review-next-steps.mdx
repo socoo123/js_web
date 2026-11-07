@@ -8,7 +8,7 @@ sidebar:
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 4 周 · 第 24 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
-> 前置：C01–C47 · 运行：Node 24、本地 React、本地后端 · 部分示例未运行，已在对应位置标注
+> 前置：C01–C47 · 运行：Node 24、本地 React、本地后端 · 示例已运行验证
 
 ## 这一课解决什么问题
 
@@ -177,8 +177,6 @@ return products.map((product) => product.id === id ? { ...product, stock } : pro
 
 <details>
 <summary>参考答案</summary>
-
-> 未运行验证：参考答案的代码还没有在本课的工作区里运行。请按步骤自己尝试。
 
 在 `src/react/query-options.js` 的 `inventoryKeys` 里加 `page: (params) => ["inventory", "page", params]`，再在文件末尾加分页查询。条件进query key；换条件时先保留上一份结果，列表不闪空：
 

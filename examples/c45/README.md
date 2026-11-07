@@ -19,7 +19,8 @@
 - 正文改动：页首运行环境加「本地后端」；开头改为两个终端（`npm run lab -- api` + `dev`），每次实验前「恢复固定数据」或 `npm run lab -- api reset`，替代 baseline.json；第 3 节存储实验改在 `VITE_DATA_SOURCE=mock` 模式；第 1 节表格加 `/api` 4xx/5xx 一行、「模拟详情失败」走后端注入、CORS 一段；第 2 节证据加 api 终端；第 3 节加后端坏数据文件一句；第 4 节预览保持 api 运行、断点改在 `api-repository.js`；常见错误、练习、项目进度、小结与自测随之调整。标题、锚点、主错误与 13/53、8/57 等数字未变。
 - 2026-11-07 · macOS 26.3.1 arm64 · Node 24.22.0 / npm 11.19.1：在 `labs/inventory` 用 `LAB_API_PORT=8270 LAB_API_DATA=/tmp/l5docs-api.json` 实际运行 `npm run lab -- api`、`api reset`（在线与离线两种）、坏数据文件拒绝启动（退出码 1）与另存 `.damaged-…`、端口占用提示、Ctrl+C 的「库存后端已停止。」，以及 `startApiServer` 上的 CORS（默认无头、配置来源后放行、预检）、故障注入（500、422 自定义 body、1500ms 延迟）和客户端断开时的 `- … 注入故障 客户端已断开` 日志行。正文与 L5 页、L5 后端接口页里的后端响应和终端行来自这些运行，端口和数据路径换成默认的 8070 与 `.lab/server/products.json`。
 - 前端行为按 `v4-l5app` 分支 `af357e9` 的 C45 参考源码核对：`ApiError` 消息「HTTP 状态：message」、`list()` 请求 `?page=1&pageSize=50`、保存时 App 传 `delay: 300`（每次保存先 `POST /api/_lab/faults`）、「数据源：…」、「恢复固定数据」、422 字段映射与 409 冲突提示。
-- 未运行：浏览器里的五个后端排错场景（页面现象，含 CORS 报错文本、(canceled)）、`check C45` 在 API 模式下的结果、带代理的严格预览与 source map 断点。正文对应位置已标注；这些由参考实现所在分支的检查负责，集成后再核对。L5 后端接口页「常见失败」里 Vite 代理 502 与缺代理 404 两行来自读 Vite 源码，未实际运行（见 C46 记录）。
+- 2026-11-07 同一环境，参考实现实跑：在 /tmp 用 `v4-l5app` `4818e74` 的 `labs/snapshots.mjs` 拼出 C44 起点（`node_modules` 链接到本分支 `labs/inventory/node_modules`，没有安装依赖），复制 `labs/reference/steps/C45`（与 `af357e9` 相同）后运行 `LAB_DELIVERY_PORT=8276 LAB_E2E_PORT=8277 node tools/lab.mjs check C45`：7 组浏览器检查通过（state、editor、fields、retry、slow、storage、cors），85 条工作文件检查通过。cors 一组断言页面「读取失败：Failed to fetch」与 Console 的 CORS 报错，retry 一组断言「读取失败：HTTP 500：注入的故障：500」与「重新读取」，分别是 L5 场景 1 直连 8070 时的故障现象和场景 4 修好后的现象。
+- 未运行：L5 场景 2–5 改坏代码后的页面现象（含 (canceled)）、source map 断点等 DevTools 手工步骤，正文对应位置已标注。L5 后端接口页「常见失败」里 Vite 代理 502 与缺代理 404 两行来自读 Vite 源码，未实际运行（见 C46 记录）。
 
 ## 第一版参考（非 Lab 主线）
 

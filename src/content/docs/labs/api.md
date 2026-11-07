@@ -43,7 +43,7 @@ npm run lab -- api
 | `LAB_API_DATA` | 换一个数据文件，用于独立实验 | `LAB_API_DATA=/tmp/try.json npm run lab -- api` |
 | `LAB_API_CORS_ORIGIN` | 放行一个来源的跨源请求，见 [CORS 与代理](#cors-与代理) | `LAB_API_CORS_ORIGIN=http://127.0.0.1:8060 npm run lab -- api` |
 
-换了端口，`vite.config.js` 里的代理目标要改成同一个端口；`api reset` 和 `shell` 也要带上同样的 `LAB_API_PORT`。设置了 `LAB_API_CORS_ORIGIN` 时，启动行下面多一行「CORS 只放行来源 http://127.0.0.1:8060」。
+换了端口，`vite.config.js` 里的代理目标要改成同一个端口；`api reset` 和 `shell` 也要带上同样的 `LAB_API_PORT`。设置了 `LAB_API_CORS_ORIGIN` 时，启动行下面多一行 `CORS 只放行来源 http://127.0.0.1:8060`。
 
 **数据文件损坏时拒绝启动。** 文件不是合法 JSON，或任何一个商品不合规则，后端不会带着坏数据运行，命令以退出码 1 结束：
 
@@ -130,8 +130,18 @@ GET /api/products/P001 - 204ms 注入故障 客户端已断开
 | 场景 | 谁转发 `/api` | 配置 |
 | --- | --- | --- |
 | 开发（`npm run lab -- dev`） | Vite 开发服务器 | `vite.config.js`：`server: { proxy: { "/api": "http://127.0.0.1:8070" } }` |
-| 严格静态预览（C46） | `tools/static-react-server.mjs` | 转给 `LAB_API_ORIGIN`，默认 `http://127.0.0.1:8070`；后端没启动时返回 502 |
+| 严格静态预览（C46） | `tools/static-react-server.mjs` | 转给 `LAB_API_ORIGIN`，默认 `http://127.0.0.1:8070` |
 | 空白前端壳（`npm run lab -- shell`） | Vite 开发服务器，端口 8061 | 已配置好 |
+
+严格静态预览启动时把转发目标印在同一行，后端没启动时 `/api` 返回 502 和一份中文错误体，不会退回页面：
+
+```text
+严格静态预览：http://127.0.0.1:8068/js_web/demos/inventory/（只读已有产物，不build、不修复base）；/api 转发到 http://127.0.0.1:8070
+```
+
+```json
+{"error":{"code":"BAD_GATEWAY","message":"本地后端没有响应：http://127.0.0.1:8070。先在另一个终端运行 npm run lab -- api。"}}
+```
 
 浏览器看到的始终是同源请求。curl 不是浏览器，不受 CORS 限制，所以下面的 curl 例子可以直接请求 8070。
 
@@ -159,7 +169,7 @@ Vary: Origin
 | `POST /api/_lab/reset` | 恢复固定数据，清空注入的故障 | 204 | — |
 | `POST /api/_lab/faults` | 注入故障 | 204 | 400、422 |
 
-下面的 curl 在任意终端执行。同样的请求也可以在开发页面的 Console 里用 `fetch` 发，地址写相对的 `/api/…`，经代理到达后端：
+下面的 curl 在任意终端执行。同样的请求也可以在开发页面的 Console 里用 [`fetch`](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch) 发，地址写相对的 `/api/…`，经代理到达后端：
 
 ```js
 const response = await fetch("/api/products?stock=low");
@@ -410,7 +420,7 @@ HTTP/1.1 500 Internal Server Error
 | 现象 | 先看哪里 | 原因与处理 |
 | --- | --- | --- |
 | 页面「读取失败：Failed to fetch」，Network 显示 CORS error，api 终端却有 200 | Console 的 CORS 报错、Request URL | 前端直连了 8070。改回相对地址 `/api` 走代理 |
-| Network 里 `/api` 请求 502，api 终端没有记录；dev 终端打印 `http proxy error` 和 `ECONNREFUSED` | api 终端是否还在运行 | 后端没启动，或代理目标的端口不对。运行 `npm run lab -- api`，核对代理目标 |
+| Network 里 `/api` 请求 502，api 终端没有记录；dev 终端打印 `http proxy error` 和 `ECONNREFUSED`，或严格预览的 Response 是 `BAD_GATEWAY` | api 终端是否还在运行 | 后端没启动，或代理目标的端口不对。运行 `npm run lab -- api`，核对代理目标 |
 | `/api` 请求 404 且 Response 为空，api 终端没有记录 | Response 内容 | 请求没经过代理：`vite.config.js` 缺 `server.proxy`，或改完没重启 dev。后端自己的 404 一定带 JSON 错误体和一行日志 |
 | 保存返回 428 | 请求头 | `PATCH` 没带 `If-Match` |
 | 保存返回 409 | Response 的 `current` | 别处先改了这个商品。保留草稿，提示用户载入最新再保存 |

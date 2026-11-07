@@ -8,7 +8,7 @@ sidebar:
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 4 周 · 第 24 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
-> 前置：C35、C36、C45、C46 · 运行：Node 24、本地 React、本地后端 · 部分示例未运行，已在对应位置标注
+> 前置：C35、C36、C45、C46 · 运行：Node 24、本地 React、本地后端 · 示例已运行验证
 
 ## 这一课解决什么问题
 
@@ -107,8 +107,6 @@ test("连续输入保留完整条件，清空后回到原库存", async () => {
 
 后端拒绝这一项新增两条。替身放在repository边界：`vi.spyOn(repository, "save")` 只让第一次保存抛出 `ApiError`，真实的App、编辑器、Provider和Query都参与。先加一个打开编辑器的小函数和422这条：
 
-> 未运行验证：本节的三条后端错误测试还没有在本课的工作区里运行。请按步骤自己尝试。
-
 ```jsx
 async function openEditor(repository, id) {
   const user = userEvent.setup();
@@ -194,8 +192,6 @@ RTL能等待每次事件完成，真实浏览器却可能在路由尚未提交�
 预期：路由位置同步提交，受控搜索值及时更新；刷新后仍从hash查询参数恢复。React的[transition不能控制文本输入](https://react.dev/reference/react/startTransition)，本项目六条商品选择同步导航；大型页面也可把输入草稿与延后结果拆开，当前不再增加第二份状态。Java顺序赋值直觉不等于React/路由更新的调度时机。
 
 写入有没有真的到后端，只有真实浏览器加真实后端能回答。新建 `tests/e2e/api.spec.js`：
-
-> 未运行验证：这条浏览器流程还没有在本课的工作区里运行。请按步骤自己尝试。
 
 ```js
 import { test, expect } from "@playwright/test";

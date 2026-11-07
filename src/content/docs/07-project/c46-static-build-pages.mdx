@@ -59,7 +59,7 @@ LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs
 
 预期：build生成 `dist/src-react/index.html`、assets和products.json；服务器打印 `http://127.0.0.1:8068/js_web/demos/inventory/`。它**只读已有产物，不重新build，也不覆盖base**。改源码后要先重新build，预览才会变化。类似Java重新打包后再部署，不能把旧产物当成新源码。
 
-`server.proxy` 只在 dev 里生效，产物里没有它。预览服务器自己把 `/api/` 开头的请求转给 8070，其余路径仍严格按文件返回；后端没启动时，`/api` 得到 502。
+`server.proxy` 只在 dev 里生效，产物里没有它。预览服务器自己把 `/api/` 开头的请求转给 8070（启动行末尾写着“/api 转发到”哪里），其余路径仍严格按文件返回；后端没启动时，`/api` 得到 502，页面显示 `读取失败：HTTP 502：本地后端没有响应：… 先在另一个终端运行 npm run lab -- api。`
 
 <a id="哪些配置会进入产物"></a>
 
@@ -152,7 +152,7 @@ HashRouter内部的路由从hash开始，不再添加 `/js_web/demos/inventory` 
 | 展开分类报表 | 按需模块成功，配件2种/28件/587200分 |
 | 打开 `products.json` | 六件固定数据的JSON，不是HTML |
 | 打开 `products/P004/` 或 `assets/missing.js` | 真正404，不返回首页HTML |
-| 停掉api后刷新 | `/api/products` 返回502，页面显示读取失败与“重新读取”；启动api后点它恢复 |
+| 停掉api后刷新 | `/api/products` 返回502，页面显示“读取失败：HTTP 502：本地后端没有响应……”与“重新读取”；启动api后点它，回到六商品/52件 |
 
 前三项用浏览器观察行为，接下来两项也可直接看响应正文。课程深层URL则在课程站预览中检查：它应找到真实HTML，禁用JS仍有正文。两种页面的无JS结果不同，是渲染方式不同。
 
