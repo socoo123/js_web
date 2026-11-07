@@ -1,6 +1,6 @@
 ---
-title: L5 调试与静态交付
-description: 从 C44 保留的 React 主应用出发，完成故障证据、严格静态交付、风险回归与现场筛选增量。
+title: L5 对接后端与交付
+description: 从 C44 保留的 React 主应用出发，接上本地后端，按层排错，构建带代理的产物，补风险回归并把低库存筛选交给服务端。
 sidebar:
   order: 5
 ---
@@ -15,29 +15,37 @@ import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
 ## 本 Lab 的任务与规则
 
-继续使用[共用业务规则](/js_web/labs/rules/)，本阶段完成四件事：
+继续使用[共用业务规则](/js_web/labs/rules/)。从这一阶段起，工作区里多了作者写好的本地后端 `server/`：你只写前端，把 React 应用从浏览器内 mock 换成真实的 HTTP 接口，再把它交付出来。每个接口的请求、响应和错误码查 [L5 后端接口](/js_web/labs/api/)。
 
 <LabPoints>
 
-1. **定位故障**
+1. **接上后端**（C45）
 
-   从页面现象出发，找到状态、请求、资源、存储或布局的证据，修复后重做同一个操作。
+   `npm run lab -- api` 启动后端，React 经 Vite 代理读写 `/api`。初始 6 种、52 件、2634800 分来自 `GET /api/products`。
 
-2. **检查生产产物**
+2. **全链路排错**（C45）
 
-   构建后在 `/js_web/demos/inventory/` 静态预览，入口、模块和详情刷新可用；缺失文件返回真正的 404。
+   CORS、422 字段错误、保存后列表不更新、500 后无法重试、慢请求覆盖新选择：每个都从 Network 与 api 终端拿证据，修好后重做同一个操作。
 
-3. **补齐风险回归**
+3. **构建与带代理的预览**（C46）
 
-   选择 3–5 条有价值的测试，覆盖坏快照保护、连续输入、请求失败恢复和必要的路径/键盘操作。
+   产物在 `/js_web/demos/inventory/` 下严格预览，`/api` 由预览服务器转给后端。mock 构建不请求 `/api`，只有它能放上 Pages。
 
-4. **独立完成低库存筛选**
+4. **风险回归**（C47）
 
-   1–5 件算低库存、0 件排除；初始只显示 P004/P006，共 2 种、8 件、539200 分。与搜索和分类取交集，刷新保留条件，清除后恢复六商品。
+   3–5 条回归覆盖坏快照、422、409、失败重试和连续输入，另加 1 条连真实后端的浏览器流程。
+
+5. **现场增量：服务端低库存**（C48）
+
+   勾选「仅低库存」时请求 `stock=low`：只显示 P004/P006，摘要 2 种、8 件、539200 分，全量仍是 6/52/2634800。
+
+6. **选做挑战：两个标签页同时编辑**
+
+   后保存的一方收到 409，草稿保留并提示冲突，载入最新后再保存。
 
 </LabPoints>
 
-交付内容是生产产物，以及运行/恢复说明、故障记录、测试计划和复盘。具体文件与逐课要求在下方四个课程标签里。
+交付内容是生产产物，以及 `notes/` 里的四份记录：排错、交付、测试计划和复盘。具体文件与逐课要求在下方四个课程标签里，操作步骤在后面的「目标」各节。
 
 ## 四课，一次交付
 
@@ -46,12 +54,15 @@ import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 <LabLessonTabs labId="L5">
 <Fragment slot="C45">
 
-先导出并保管个人快照，再按 C45 准备固定数据的 `baseline.json`。每次独立数字实验前导入这份基线，避免上一轮保存的 P004=8 或补货影响下一轮结果；实验后可以导回个人快照。不要清空整个浏览器存储。
+开两个终端：一个运行 `npm run lab -- api`，另一个运行 `npm run lab -- dev`。先按[目标 1](#目标-1接上后端)接上后端，再逐个做[目标 2](#目标-2全链路排错)的五个排错场景。
+
+- 每次独立数字实验前点「恢复固定数据」，或在另一个终端运行 `npm run lab -- api reset`。不用再准备 baseline.json。
+- 坏快照、损坏恢复这类存储实验改在 mock 模式做：`VITE_DATA_SOURCE=mock npm run lab -- dev`，那里仍是原来的四个快照按钮。
 
 </Fragment>
 <Fragment slot="C46">
 
-先按 C46 在现有 `vite.config.js` 的配置对象中加入 `base: "/js_web/demos/inventory/"`，保留原有 source map 与 test 配置。然后在自己的 `inventory/` 预览已经构建的文件：
+在现有 `vite.config.js` 里加 `base: "/js_web/demos/inventory/"`，保留 C45 的 `/api` 代理、source map 与 test 配置。构建后在 api 运行的前提下预览已有产物：
 
 ```sh
 npm run lab -- start C46
@@ -59,14 +70,19 @@ npm run lab -- build
 LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs
 ```
 
-打开 `http://127.0.0.1:8068/js_web/demos/inventory/`。这条命令只读已有 `dist/src-react`，不重新构建、不修正 base，也不将缺文件回退成首页。**保留 `LAB_STATIC_ROOT=dist/src-react`**：省略它会进入旧的重新构建冒烟模式，检查的就不是这一批已有产物。修改源码或配置后，先重新 build 再预览。
+打开 `http://127.0.0.1:8068/js_web/demos/inventory/`。预览服务器只读 `dist/src-react`，不重新构建、不修正 base、没有首页回退；`/api/` 开头的请求转给 8070，后端没启动时返回 502。省略 `LAB_STATIC_ROOT` 会进入旧的重新构建冒烟模式。
 
-P004 的 hash 详情刷新应成功，干净详情路径 `products/P004/` 和缺失模块 `assets/missing.js` 则应返回真正 404。检查当前配置与源码时，先 Ctrl+C 结束手工预览，再运行 `npm run lab -- check C46`；后续 `check C47`、`check C48` 前也先停旧服务，避免占用默认 8068 端口。
+`npm run lab -- check C46` 前先 Ctrl+C 结束手工预览，避免占用 8068。检查器会自己起一个临时数据的后端，不需要你的 api 终端。
 
 </Fragment>
 <Fragment slot="C47">
 
-四项风险是：非法快照覆盖好数据、连续输入丢字、详情/保存失败后不能重试，以及资源路径/键盘/刷新断链。已有请求失败和重试测试继续使用，不复制另一套相同用例。C47 在 App 的 `<HashRouter useTransitions={false}>` 选择同步路由更新，避免受控搜索值因更新时机丢字。
+回归测试用假 fetch 或 mock repository，不需要真实后端。只有 `tests/e2e/api.spec.js` 那一条连真实后端，由 `check C47` 启动临时数据的后端和带代理的页面来跑，不会改动 `.lab/server/products.json`。C47 继续在 App 的 `<HashRouter useTransitions={false}>` 选择同步路由更新。
+
+</Fragment>
+<Fragment slot="C48">
+
+先自己实现，再展开课文里的参考答案。「仅低库存」走 `listPage({ stock: "low", q, category })`；mock repository 也要实现 `listPage`，这样 mock 模式和 Pages 演示照样能用。做完可以接着做本页的[选做挑战](#目标-6选做两个标签页的保存冲突)。
 
 </Fragment>
 </LabLessonTabs>
@@ -76,22 +92,198 @@ P004 的 hash 详情刷新应成功，干净详情路径 `products/P004/` 和缺
 
 | 课程 | 在当前应用做什么 | 留下的产物与证据 |
 | --- | --- | --- |
-| [C45 全链路 Debug](/js_web/07-project/c45-debug-delivery-checks/) | 复现只改 Query 读取结果却未提交 repository 的故障，恢复 dispatch；再按资源、存储、布局排查 | `notes/debug.md`：现象、工具证据、根因、修复与同一操作复测 |
-| [C46 静态构建与 Pages](/js_web/07-project/c46-static-build-pages/) | 在 `vite.config.js` 配置生产 base，只读预览 `dist/src-react`，不用 fallback | `notes/delivery.md`：构建命令、产物/公开路径、hash 与 404 证据、运行及恢复说明 |
-| [C47 测试选择](/js_web/07-project/c47-project-testing-strategy/) | 新增 `tests/react/regression.test.jsx`，设置同步 HashRouter，按四项风险复用与补充回归 | `notes/test-plan.md`：每项风险、测试层级、位置和可观察断言 |
-| [C48 总复盘](/js_web/07-project/c48-review-next-steps/) | 在 App 增加 URL 的 `stock=low` 条件与 `tests/react/final-filter.test.jsx`，定位浅复制故障 | `notes/final-review.md`：十题自测、实现解释、测试和排错记录 |
+| [C45 全链路 Debug](/js_web/07-project/c45-debug-delivery-checks/) | 接上本地后端；复现补货绕开 dispatch 的故障并修复；做五个后端排错场景，再按资源、存储、布局排查 | `notes/debug.md`：现象、Network 与 api 终端证据、根因、修复与同一操作复测 |
+| [C46 静态构建与 Pages](/js_web/07-project/c46-static-build-pages/) | 配置生产 base，严格预览 `dist/src-react`，`/api` 经预览服务器代理；区分 API 构建与 mock 构建 | `notes/delivery.md`：构建命令、公开路径、hash 与 404 证据、两种数据源、运行及恢复说明 |
+| [C47 测试选择](/js_web/07-project/c47-project-testing-strategy/) | 在 `tests/react/regression.test.jsx` 按风险补回归，加 1 条真实后端的浏览器流程，设置同步 HashRouter | `notes/test-plan.md`：每项风险、测试层级、位置和可观察断言 |
+| [C48 总复盘](/js_web/07-project/c48-review-next-steps/) | 「仅低库存」改走服务端 `stock=low`，摘要用 `summary`、全量用 `totals`；定位浅复制故障 | `notes/final-review.md`：十题自测、实现解释、测试和排错记录 |
 
-这里只收尾同一个任务链。Performance 与 Memory 用同样操作的前后证据解释，不能靠一张图断言泄漏。
+Performance 与 Memory 用同样操作的前后证据解释，不能靠一张图断言泄漏。
 
 </details>
 
+## 目标 1：接上后端
+
+**先读**：[C45 第 1 节：先确认失败的是哪一种资源](/js_web/07-project/c45-debug-delivery-checks/#1-先确认失败的是哪一种资源) · [C13 fetch 的响应分两步处理](/js_web/03-async-modules/c13-async-await-fetch/#2-fetch-的响应分两步处理) · [C32 mutation 与失效](/js_web/05-react/c32-tanstack-query-server-state/#5-mutation-与失效先写成功再更新读结果)
+
+后端只监听本机 `127.0.0.1:8070`，数据存在工作区的 `.lab/server/products.json`。第一次启动时它从 `data/products.json` 生成这份文件，所以一开始就是固定数据；浏览器里原来的个人快照不受影响，切回 mock 模式时还在。
+
+**1. 开两个终端，都在库存工作区执行。**
+
+```sh
+# 终端 A：后端，保持运行
+npm run lab -- api
+```
+
+```text
+库存后端：http://127.0.0.1:8070/api（数据 .lab/server/products.json；Ctrl+C 停止）
+```
+
+```sh
+# 终端 B：前端
+npm run lab -- start C45
+npm run lab -- dev
+```
+
+**2. 写四个文件。** 方法名和返回形状与原来的 `inventory-repository.js` 一致，组件和测试因此不用改。
+
+| 文件 | 要做什么 |
+| --- | --- |
+| `src/services/api-repository.js` | 导出 `ApiError`（带 `status`、`code`、`fields`、`current`）和 `createApiRepository({ baseUrl, fetch })`。`list`、`get`、`save`、`create`、`remove`、`restock` 与原 repository 同名同形，另加 `listPage(params)` 与 `reset()` |
+| `src/services/data-source.js` | 按 `import.meta.env.VITE_DATA_SOURCE` 导出 `repository` 与 `dataSource`：`"api"` 是默认，`"mock"` 用原来的 `inventory-repository.js`，其他值直接抛错 |
+| `src/react/InventoryProvider.jsx` | 默认 repository 改从 `data-source.js` 取；测试仍注入 `freshRepository()` |
+| `vite.config.js` | 在配置对象里加 `server: { proxy: { "/api": "http://127.0.0.1:8070" } }` |
+
+`api-repository.js` 的几条规则：
+
+- `baseUrl` 默认取 `import.meta.env.VITE_API_BASE`，没设就是 `"/api"`。相对地址让浏览器只和页面所在的 8060 通信，由 Vite 代理转给 8070。
+- 非 2xx 一律抛 `ApiError`，消息取错误体的 `error.message`。断网、CORS 这类没拿到响应的失败保留原来的 `TypeError: Failed to fetch`。
+- `save` 发 `PATCH`，头里带 `If-Match: "<version>"`。version 用这个 repository 最近一次从服务器拿到的该商品的值，所以每个响应里的商品都要记下 version。
+- `options.signal` 原样交给 `fetch`。`failNext(operation)`、`options.fail` 与 `options.delay` 改成调用 `POST /api/_lab/faults`，让模拟的失败也出现在 Network 与 api 终端。
+
+完整参考解在本课完成后用 `npm run lab -- compare C45` 对照；接口细节见 [L5 后端接口](/js_web/labs/api/)。
+
+**3. 确认接上了。**
+
+| 看哪里 | 应该看到 |
+| --- | --- |
+| 页面 | 标题下有「数据源：本地后端 /api」；汇总为「库存 52 / 价值 2634800 分」；快照区只剩「恢复固定数据」按钮 |
+| Network | `GET /api/products…` 状态 200，Request URL 以 `http://127.0.0.1:8060/api/` 开头（同源，经代理） |
+| api 终端 | 同一请求对应一行，例如 `GET /api/products?page=1&pageSize=50 200 3ms` |
+| 刷新验证 | 给 P001 补一件得到 13/53，api 终端出现 `POST /api/products/P001/restock 200`；刷新后仍是 13 |
+
+最后点「恢复固定数据」回到 52。Network 的一行和 api 终端的一行，是整个 L5 排错的两头证据。
+
+## 目标 2：全链路排错
+
+**先读**：[C45 第 2 节：事件执行了，React 仍需要新的状态](/js_web/07-project/c45-debug-delivery-checks/#2-事件执行了react-仍需要新的状态) · [C45 常见错误](/js_web/07-project/c45-debug-delivery-checks/#补货点了数字一直停在-12)
+
+先做 C45 的主错误：`App.restock` 直接改 Query 读到的商品。点 P001 的补货后，Network 与 api 终端都**没有** `POST /api/products/P001/restock`，刷新后仍是 12。恢复 `await dispatch(...)` 后重做同一操作，得到 13/53 且刷新仍在。
+
+下面五个场景各制造一个故障。每个都从「恢复固定数据」开始，按「操作 → 证据 → 修复 → 复验」做，把证据写进 `notes/debug.md`。需要后端配合出错时用故障注入，在页面的 Console 里执行（经代理发给后端，[参数说明](/js_web/labs/api/#故障注入)）：
+
+```js
+// 例：让下一次 GET /api/products 返回 500
+await fetch("/api/_lab/faults", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ method: "GET", path: "/api/products", status: 500 }),
+});
+```
+
+注入的故障只生效指定次数（默认 1 次）；被它影响的请求在 api 终端的行尾带「注入故障」。「恢复固定数据」会同时清掉没用完的故障。
+
+### 场景 1：直连 8070，被 CORS 拦下
+
+**先读**：[C13 fetch 的响应分两步处理](/js_web/03-async-modules/c13-async-await-fetch/#2-fetch-的响应分两步处理)（同源与 CORS） · [C45 404、断网与错误正文分别判断](/js_web/07-project/c45-debug-delivery-checks/#404断网错误正文分别判断) · [MDN：CORS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Guides/CORS)
+
+1. **操作**：Ctrl+C 停掉终端 B，改用 `VITE_API_BASE=http://127.0.0.1:8070/api npm run lab -- dev` 启动，刷新页面。
+2. **证据**：页面显示「读取失败：Failed to fetch」。Console 报 CORS 错误：响应没有 `Access-Control-Allow-Origin`。Network 里请求发往 `http://127.0.0.1:8070`，状态是 CORS error。api 终端却有这次 `GET` 的 200 记录：后端已经回复，是浏览器不让脚本读。
+3. **修复**：去掉 `VITE_API_BASE`，回到相对地址 `/api` 走 Vite 代理。不要改成 `mode: "no-cors"`，那样拿到的是读不出 JSON 的不透明响应。
+4. **复验**：重启终端 B，Request URL 回到 8060，页面 6/52/2634800。对照实验：用 `LAB_API_CORS_ORIGIN=http://127.0.0.1:8060 npm run lab -- api` 重启后端后，直连也能读，说明放行权在服务器。做完改回默认启动方式。
+
+### 场景 2：422 的字段错误要落到输入框
+
+**先读**：[C25 名称、原因和下一步都要找得到](/js_web/05-react/c25-forms-validation-accessibility/#4-可访问性名称原因和下一步都要找得到) · [C30 HTTP 返回了，不等于商品加载成功](/js_web/05-react/c30-requests-races/#2-http-返回了不等于商品加载成功) · [MDN：422](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Status/422)
+
+1. **操作**：注入 `{"method":"PATCH","path":"/api/products/P004","status":422,"body":{"error":{"code":"VALIDATION","message":"商品字段不合法","fields":{"priceCents":"价格必须是非负安全整数分"}}}}`，然后编辑 P004 并保存。前端校验与后端同源，正常输入很难触发 422，所以用注入模拟服务端拒绝。
+2. **证据**：Network 有 `PATCH /api/products/P004` 422，Response 的 `error.fields.priceCents` 有消息；api 终端那一行带「注入故障」。故障版本只在表单底部显示一句笼统的失败，价格输入框旁没有提示。
+3. **修复**：编辑器捕获 `ApiError`，把 `fields` 按字段名放到对应输入框（`priceCents` 对应价格），并让输入框带上错误说明；没有对应字段的消息放在表单底部。草稿保留。
+4. **复验**：再注入一次，价格输入框旁出现「价格必须是非负安全整数分」，草稿仍是刚填的值；不注入时同样的保存成功。
+
+### 场景 3：保存成功了，列表还是旧的
+
+**先读**：[C32 mutation 与失效：先写成功，再更新读结果](/js_web/05-react/c32-tanstack-query-server-state/#5-mutation-与失效先写成功再更新读结果)
+
+1. **操作**：在 `InventoryProvider.jsx` 的 mutation `onSuccess` 里暂时删掉失效列表的那一句，然后把 P004 编辑为 8 并保存。
+2. **证据**：Network 有 `PATCH /api/products/P004` 200，Response 里 `stock` 已是 8、`version` 变成 2；但后面没有新的 `GET /api/products`，api 终端也只有 PATCH 那一行。列表仍显示 3、汇总仍 52；刷新后才是 8/57。
+3. **修复**：恢复失效。保存、新建、删除、补货成功后失效 `["inventory"]` 前缀下的查询，列表与详情一起重新读取。
+4. **复验**：同样的保存后，PATCH 后面紧跟一条 `GET /api/products…`，列表直接显示 8，汇总 57，P001 仍为 12。
+
+### 场景 4：500 之后要能重试
+
+**先读**：[C30 HTTP 返回了，不等于商品加载成功](/js_web/05-react/c30-requests-races/#2-http-返回了不等于商品加载成功) · [C32 重试与界面状态](/js_web/05-react/c32-tanstack-query-server-state/#4-重试与界面状态有旧结果时继续显示)
+
+1. **操作**：用上面的 Console 片段注入一次 `GET /api/products` 500，然后刷新页面。
+2. **证据**：Network 一条 500，Response 是 `{"error":{"code":"FAULT","message":"注入的故障：500"}}`；api 终端那一行带「注入故障」。故障版本的页面一直停在「正在加载库存」，或者报 `products.filter is not a function`：repository 把错误体当成了商品数组。
+3. **修复**：请求函数先看 `response.ok`，非 2xx 读出错误体后抛 `ApiError`。Provider 在读取失败时显示「读取失败：…」和「重新读取」按钮。
+4. **复验**：页面显示「读取失败：注入的故障：500」。故障只注入了一次，点「重新读取」后回到 6/52/2634800，api 终端多出一行 200。
+
+### 场景 5：慢请求不能覆盖新选择
+
+**先读**：[C30 后发先到：旧结果为什么覆盖新选择](/js_web/05-react/c30-requests-races/#3-后发先到旧结果为什么覆盖新选择) · [C32 query key 和缓存](/js_web/05-react/c32-tanstack-query-server-state/#3-query-key-和缓存先问是不是同一份数据)
+
+1. **操作**：注入 `{"method":"GET","path":"/api/products/P001","delayMs":1500}`，打开 P001 详情，不等它出来就立刻打开 P002。
+2. **证据**：Network 里 P001 的请求要约 1.5 秒，P002 很快返回。故障版本最后显示的是晚到的 P001。
+3. **修复**：详情的 query key 带商品 id，`get(id, { signal })` 把 `signal` 交给 `fetch`。离开 P001 时它的请求被取消，Network 那一行显示 (canceled)。
+4. **复验**：重做同一操作，最终显示「P002 无线鼠标：库存 0」，地址也是 P002。
+
+做完五个场景，再按 C45 课文排查资源 404、存储原文、360px 布局和生产 source map。
+
+## 目标 3：构建与带代理的预览
+
+**先读**：[C46 base 是 URL 的前缀](/js_web/07-project/c46-static-build-pages/#2-base-是-url-的前缀dist-是磁盘上的目录) · [C46 哪些配置会进入产物](/js_web/07-project/c46-static-build-pages/#哪些配置会进入产物) · [C46 用真正的文件边界验收](/js_web/07-project/c46-static-build-pages/#5-用真正的文件边界验收)
+
+步骤见上方 C46 标签。预览时 api 终端保持运行，预览页面的数据仍来自后端。
+
+| 构建命令 | 数据从哪里来 | 能不能放上 Pages |
+| --- | --- | --- |
+| `npm run lab -- build` | 请求 `/api`，预览服务器转给 8070 | 不能：Pages 没有后端 |
+| `VITE_DATA_SOURCE=mock npm run lab -- build` | 浏览器内 mock 与本地存储，不请求 `/api` | 能 |
+
+验收除了 C46 原有的 hash 刷新与真正 404，再看两条：预览首页的 Network 有经代理的 `GET /api/products` 200；停掉 api 后刷新，`/api/products` 返回 502，页面显示「读取失败」和「重新读取」，启动 api 后点重新读取即恢复。
+
+## 目标 4：风险回归
+
+**先读**：[C47 从失败后果开始写测试计划](/js_web/07-project/c47-project-testing-strategy/#1-从失败后果开始写测试计划) · [C47 请求替身放在哪里决定测到了什么](/js_web/07-project/c47-project-testing-strategy/#请求替身放在哪里决定测到了什么) · [C35 一条真实浏览器冒烟贯通静态路由](/js_web/05-react/c35-react-testing/#5-一条真实浏览器冒烟贯通静态路由)
+
+在 `tests/react/regression.test.jsx` 保留坏快照保护，再按风险选 3–5 条：
+
+- **422 映射**：假 fetch 返回 422 和 `fields.priceCents`，断言价格输入框旁出现消息、草稿保留。
+- **409 冲突**：假 fetch 返回 409 和 `current`，断言提示「保存冲突：服务器上的 P004 已被修改（库存 8）。草稿已保留，可载入最新后再保存。」和「载入最新」按钮。
+- **失败后重试**：第一次失败、第二次成功，断言用户点重试后看到新值。
+- **连续输入**：逐字输入 P004，结果完整、可清空。
+
+另加 `tests/e2e/api.spec.js` 一条连真实后端的流程：reset → 编辑 P004 为 8 保存 → 刷新仍 8、总库存 57。`npm run lab -- check C47` 用临时数据文件和空闲端口启动后端来跑它。
+
+## 目标 5：现场增量——服务端低库存
+
+**先读**：[C48 第 2 节的现场需求](/js_web/07-project/c48-review-next-steps/#2-java-经验继续用值与身份重新判断) · [C31 筛选放进 URL，只保留一个来源](/js_web/05-react/c31-custom-hooks-routing/#5-筛选放进-url只保留一个来源) · [C32 mutation 与失效](/js_web/05-react/c32-tanstack-query-server-state/#5-mutation-与失效先写成功再更新读结果)
+
+先不看参考答案。勾选「仅低库存」时：
+
+1. URL 仍写入 `?stock=low`，刷新后恢复。
+2. 用 `listPage({ stock: "low", q, category })` 读取：Network 有 `GET /api/products?stock=low…`，显示返回的 `items`，摘要用 `summary`，另显示全量 `totals`。
+3. 初始只剩 P004/P006，摘要 2 种、8 件、539200 分，全量仍 6/52/2634800。与搜索、分类取交集。
+4. 在低库存结果里把 P004 保存为 8：它离开结果，焦点回标题；清除条件后全量 57，P001 仍为 12。
+
+mock repository 也要实现同形的 `listPage`，在浏览器里算出同样的结果。用 `VITE_DATA_SOURCE=mock npm run lab -- dev` 勾选一次，数字应完全相同，只是没有 `/api` 请求。
+
+## 目标 6（选做）：两个标签页的保存冲突
+
+**先读**：[L5 后端接口：version、ETag 与 If-Match](/js_web/labs/api/#version-etag-与-if-match) · [C33 草稿、等待和失败各有归属](/js_web/05-react/c33-modern-react-actions/#2-草稿等待和失败各有归属)
+
+1. **操作**：恢复固定数据，开两个标签页，都打开 P004 的编辑。标签页 A 改为 8 并保存；标签页 B 不刷新，改为 9 并保存。
+2. **证据**：B 的 `PATCH /api/products/P004` 返回 409，请求头 `If-Match: "1"`；Response 的 `error.current` 是服务器上的 P004（库存 8，version 2）。
+3. **目标行为**：B 显示「保存冲突：服务器上的 P004 已被修改（库存 8）。草稿已保留，可载入最新后再保存。」，草稿仍是 9，并有「载入最新」按钮。
+4. **复验**：点「载入最新」后再保存 9，这次 200，两个标签页刷新后都是 9。`check C48` 不强制这一项。
+
+## 选做：从零写前端
+
+想不看现有代码、只按接口文档写一个前端，可以用作者提供的空白前端壳：
+
+```sh
+npm run lab -- shell
+```
+
+它用 Vite 和 React 插件启动 `shell/`，地址 `http://127.0.0.1:8061`，同样把 `/api` 代理到 8070；api 终端要保持运行。只按 [L5 后端接口](/js_web/labs/api/) 写列表、补货和编辑，不要从 `src/` 复制。它和 8060 的主应用可以同时开，因为端口不同。
+
 ## 收尾：能交付，也能说明为什么
 
-每个数据场景从独立固定数据开始：初始 6 种商品、52 件、2634800 分。逐项核对后勾选：
+每个数据场景从独立固定数据开始：点「恢复固定数据」或运行 `npm run lab -- api reset`，初始 6 种商品、52 件、2634800 分。逐项核对后勾选：
 
 <LabFinish labId="L5" />
 
-站点路径是 `/js_web/`，库存应用的默认生产目标是 `/js_web/demos/inventory/`，磁盘工作区则是自己的 `inventory/`。课程网站与学习包在线发布；Lab 应用按 C46 在本地构建和预览，只有自己实际部署后才有对应在线演示。Pages 不提供 Node 服务、真实 SAP 后端或账号同步。
+站点路径是 `/js_web/`，库存应用的默认生产目标是 `/js_web/demos/inventory/`，磁盘工作区则是自己的 `inventory/`。本地后端只在你的电脑上运行，Pages 只发静态文件：上面能放的只有 mock 构建，不提供 Node 服务、真实 SAP 后端或账号同步。
 
 ## 起点、暂停与恢复
 
@@ -100,7 +292,9 @@ P004 的 hash 详情刷新应成功，干净详情路径 `products/P004/` 和缺
 
 继续 L4 自己完成的 C44 工程，**回到保留的 `src/react/` 主应用**，不把 UI5 React adapter 当成交付课的强制基础。公共 core、repository 与四个 adapter 都保留，不再新建一个最终项目。
 
-需要补课或恢复时，将 <WorkspaceDownload checkpoint="C44" label="C44 起点包" />解压到新的空目录，执行一次 `npm ci`；也可在本发行版工作区执行 `npm run lab -- restore C44 ../inventory-delivery`，非空目标会被拒绝。旧版工程先按[升级说明](/js_web/labs/#从较早发行版继续)合并自己的源码与笔记，不搬旧依赖目录。
+工作区根目录应有作者提供的 `server/`（本地后端）和 `shell/`（空白前端壳）。没有它们，说明这是 2026.10-v2.5 或更早发行版的工作区，先按下面的「从旧发行版升级」处理。
+
+需要补课或恢复时，将 <WorkspaceDownload checkpoint="C44" label="C44 起点包" />解压到新的空目录，执行一次 `npm ci`；也可在本发行版工作区执行 `npm run lab -- restore C44 ../inventory-delivery`，非空目标会被拒绝。
 
 在工作区执行：
 
@@ -109,14 +303,28 @@ npm run lab -- start C45
 npm run lab -- dev
 ```
 
-`start` 只选任务，不改源码；这次入口应是 `src/react/index.html`。若仍看到 UI5 adapter，先 Ctrl+C 停止旧服务，再启动当前任务。安装、下载校验与恢复保护见[工作区入口](/js_web/labs/)。
+`start` 只选任务，不改源码；这次入口应是 `src/react/index.html`。若仍看到 UI5 adapter，先 Ctrl+C 停止旧服务，再启动当前任务。后端在另一个终端用 `npm run lab -- api` 启动。安装、下载校验与恢复保护见[工作区入口](/js_web/labs/)。
+
+</details>
+
+<details id="从旧发行版升级">
+<summary>从旧发行版升级：工作区里没有 server/</summary>
+
+本地后端从 2026.11-v4.0 的 C44 起点包开始提供。旧工作区里运行 `npm run lab -- api` 会提示去取新工作区；旧工作区的 `restore` 取的也是旧版的包，同样没有 `server/`。
+
+1. 旧目录完整保留。下载本页的 <WorkspaceDownload checkpoint="C44" label="C44 起点包" />，解压到新的空目录，例如 `inventory-backend/`，执行一次 `npm ci`。
+2. 保留新版的 `tools/`、`server/`、`shell/`、`data/`、依赖清单与锁。从旧目录迁入自己的 `src/`、`notes/`、`tests/` 与 `vite.config.js`，先比较再合并；自己加的 package.json scripts 逐项合并进新清单。
+3. 不搬 `node_modules` 与 `.lab`。浏览器里的个人快照不受影响，mock 模式下照样能读到。
+4. 在新目录执行 `npm run lab -- start C45`，再运行 `npm run lab -- api`，终端打印「库存后端：…」就说明升级好了。
+
+完整的跨发行版说明见总览的[从较早发行版继续](/js_web/labs/#从较早发行版继续)。
 
 </details>
 
 <details id="暂停恢复与完成">
 <summary>暂停、恢复与完成</summary>
 
-源码与 notes 自行备份；已保存商品从应用导出，未提交草稿另存。用 `notes/next.md` 记录暂停点；网页的课程完成标记和本地检查分别管理。
+源码与 notes 自行备份。后端数据在 `.lab/server/products.json`，想保留就复制一份；`npm run lab -- api reset` 会把它恢复为固定数据，损坏的文件会另存，不会删除。未提交的草稿另存。用 `notes/next.md` 记录暂停点；网页的课程完成标记和本地检查分别管理。
 
 需要对照时运行 `npm run lab -- compare C48`，或将 <WorkspaceDownload checkpoint="C48" label="C48 完成参考解" />另存到新目录；不覆盖自己的工程。课程学习后按 C48 的自测结果复习，不用先完成额外选修才算交付。
 
