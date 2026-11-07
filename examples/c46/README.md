@@ -13,6 +13,15 @@
 - 2026-10-30 · 个人模板权限定点修正：锁定configure-pages用默认GITHUB_TOKEN读取Pages配置，build显式授予contents:read/pages:read，deploy原权限不变。本次只核对官方源码/权限表并检查本地YAML与最小差异；个人Actions/Pages云端仍未执行，不能记作发布通过。
 - 未运行：个人GitHub Settings/Actions/线上、Windows、Firefox/Safari、真机；本地成功不是在线演示已部署。课程最终发布由主 agent 负责。
 
+## 2026.11-v4.0：接上本地后端
+
+上面的记录属于浏览器内 mock 时期（2026.10-v2.5），不能当作下面新内容的证据。
+
+- 正文改动：页首运行环境加「本地后端」；固定数据改为「恢复固定数据」/`api reset`，预览期间 api 保持运行；完整 `vite.config.js` 加 `server.proxy`（与 `v4-l5app` `af357e9` 的 C46 参考文件一致）；新增一段说明 `server.proxy` 只管 dev、严格预览服务器转发 `/api/`、后端没启动时 502；「哪些配置会进入产物」加构建时数据源与 `VITE_DATA_SOURCE=mock npm run lab -- build`；Pages 只用 mock 构建，YAML 片段的构建步骤同步；第 5 节验收表加经代理的 `GET /api/products` 200 与停掉 api 后 502 两行。标题、锚点、base、hash 与 404 的验收数字未变。
+- 2026-11-07 · macOS 26.3.1 arm64 · Node 24.22.0 / npm 11.19.1：只读了已安装的 Vite 8.3.4 源码，没有实际运行：dev 代理目标连不上时 `writeHead(502)`、空响应体并打印 `http proxy error`；Lab 的 dev 用 `appType: 'mpa'`，没有首页回退，缺代理时 `/api` 请求应得到 404 而不是首页 HTML。
+- 按 SPEC 写、未核对代码：`tools/static-react-server.mjs` 转发 `/api/` 到 `LAB_API_ORIGIN`（默认 8070）与后端没启动时的 502 中文说明。写稿时 `v4-l5app` 分支上这个文件还是旧版本，改动尚未提交。
+- 未运行：API 构建与 mock 构建的严格预览、停掉 api 后的 502 与「重新读取」、`check C46` 在 API 模式下的结果、`examples/c46/deploy-react.yml` 的 mock 构建步骤（文件本身未改，见交接清单）。
+
 ## 第一版参考（非 Lab 主线）
 
 下表除已更新的个人模板外保留第一版脚本；旧阶段工程的路径不作为本轮必做步骤。

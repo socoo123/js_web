@@ -10,6 +10,15 @@
 - `npm run examples -- c48` 8/8；新增delivery-review.js对应当前正文预测。原七个例子只作参考，不再切到七阶段工程完成主线。
 - 主agent已从公开C44起点独立完成四课，C48先实现再对照答案；记录见阶段C。未运行：真实手机/输入法、屏幕阅读器、Firefox/Safari、Windows、个人Pages发布；全站及线上结果另记。
 
+## 2026.11-v4.0：接上本地后端
+
+上面的记录属于浏览器内 mock 时期（2026.10-v2.5），不能当作下面新内容的证据。
+
+- 正文改动：页首运行环境加「本地后端」，验证状态改为「部分示例未运行」；开头列出 `query-options.js` 与 mock `listPage`；固定数据改为「恢复固定数据」/`api reset`，替代 baseline.json；第 2 节需求改为服务端低库存：`listPage({ stock: "low", q, category })`、条件进 query key、摘要用 `summary`、另显示 `totals`、保存后失效 `["inventory"]` 前缀、mock 同形；第 5 节路线表「连接后端」一行改为读 `server/` 或按同一份接口用 Java/Spring 重写；练习、提示、参考答案与小结随之调整，练习末尾链到 L5 的选做两标签页冲突。标题、锚点、「低库存 1–5、排除 0」、P004/P006、8/539200、6/52/2634800、57、浅复制主错误与十题自测未变。
+- 参考答案代码逐字取自 `v4-l5app` `af357e9` 的 C48 `App.jsx`、`query-options.js`、`inventory-repository.js` 与 `tests/react/final-filter.test.jsx`（只截取相关几行）。本分支没有运行，正文就近标了「未运行验证」。
+- 2026-11-07 · macOS 26.3.1 arm64 · Node 24.22.0：实际请求后端 `GET /api/products?stock=low`，返回 P004、P006，`summary` 2 种、8 件、539200 分，`totals` 6 种、52 件、2634800 分；`?stock=out` 只有 P002。
+- 未运行：上述 RTL、`check C48` 在 API 模式下的结果、mock 模式下勾选低库存的页面、两个标签页的 409 选做挑战（它依赖的 409 响应已在 C47 记录中实际请求过）。
+
 ## 第一版参考（非 Lab 主线）
 
 | 文件 | 运行 | 说明 |
