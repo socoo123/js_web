@@ -210,6 +210,8 @@ test('所有已实现快照相邻重建；五个Lab起点不预置后段答案',
       for (const [name, text] of Object.entries(checkpoints.get('C36'))) if (/^src\/(core|react|services)\//.test(name)) assert.equal(c44[name], text, `C44应保留C36：${name}`);
       for (const name of ['notes/debug.md', 'notes/test-plan.md', 'notes/final-review.md']) assert(!c44[name], `C44不含未来学习记录：${name}`);
       for (const adapter of ['antd', 'openui5', 'web-components', 'ui5-react']) assert(Object.keys(c44).some((name) => name.startsWith(`adapters/${adapter}/`)));
+      for (const name of ['server/app.mjs', 'server/rules.generated.mjs', 'shell/index.html']) assert(c44[name], `C44起附带作者后端与前端壳：${name}`);
+      assert(!Object.keys(checkpoints.get('C43')).some((name) => /^(server|shell)\//.test(name)), 'C43不应附带后端');
     }
     assert.equal(entryFor('C44'), 'adapters/ui5-react');
     for (const id of ['C45', 'C46', 'C47', 'C48']) assert.equal(entryFor(id), 'src/react');

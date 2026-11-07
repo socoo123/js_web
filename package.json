@@ -16,7 +16,7 @@
     "examples": "node scripts/run-examples.mjs",
     "test:progress": "node --test tests/progress.test.mjs tests/lab-steps.test.mjs",
     "test:progress:browser": "node tests/progress.browser.mjs",
-    "build": "npm run build:labs && npm run test:labs && npm run test:comparisons && npm run lint:lessons && npm run examples && npm run check:capstone && npm run test:progress && npm run check:previews && npm run sync:roadmap && npm run build:demos && astro build && npm run check:build && npm run check:steps",
+    "build": "npm run build:labs && npm run test:labs && npm run test:api && npm run test:comparisons && npm run lint:lessons && npm run examples && npm run check:capstone && npm run test:progress && npm run check:previews && npm run sync:roadmap && npm run build:demos && astro build && npm run check:build && npm run check:steps",
     "check:build": "node scripts/check-build.mjs",
     "preview": "astro preview",
     "test:labs": "node --test tests/labs.test.mjs tests/lesson-sources.test.mjs tests/lint-lessons.test.mjs tests/reveal-rules.test.mjs",
@@ -33,7 +33,8 @@
     "build:demos": "node scripts/build-demos.mjs",
     "test:demos": "node scripts/build-demos.mjs --verify",
     "test:reveal:browser": "node tests/reveal.browser.mjs",
-    "check:capstone": "node scripts/check-capstone.mjs"
+    "check:capstone": "node scripts/check-capstone.mjs",
+    "test:api": "node scripts/build-server-rules.mjs --check && node --test labs/inventory/server/test/"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "7.3.2",

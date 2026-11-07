@@ -107,11 +107,13 @@ labs/inventory/          学员工作区；package.json + 独立 package-lock.js
   adapters/              antd / openui5 / web-components / ui5-react
   tests/                 按真实风险组织的检查
   tools/                 已有 CLI 与作者提供的检查；不是学员必读框架
+  server/                作者提供的本地后端（C44 起）；学员不改
+  shell/                 空白 Vite + React 前端壳（C44 起，选做）
   notes/                 暂停、决策、故障与交付记录
   .lab/                  本地状态/隔离实验/缓存，不放权威业务源码
 ```
 
-已有核心命令在工作区执行：`npm ci`、`npm run lab -- status`、`start Cnn`、`dev`、`check Cnn`、`compare Cnn`、`restore Cnn 新目录`、`report`、`build`（后七项同样接在 `npm run lab --` 后）。不要凭设计编造尚未实现的子命令；具体以 CLI/README 为准。
+已有核心命令在工作区执行：`npm ci`、`npm run lab -- status`、`start Cnn`、`dev`、`check Cnn`、`compare Cnn`、`restore Cnn 新目录`、`report`、`build`，以及 C44 起的 `api`、`api reset`、`shell`（这些同样接在 `npm run lab --` 后）。不要凭设计编造尚未实现的子命令；具体以 CLI/README 为准。
 
 - `start` 只选择任务，不安装答案、不升级或改写源码；`check` 检查当前实际文件，必要时打印输入/预期/实际；`compare` 只读。
 - `restore C20 ../inventory-react` 恢复的是 **C20 完成态**，作为 C21 的起点。目标非空拒绝；已有代码可继续使用，无需恢复。发行版必须已包含该快照。
