@@ -5,26 +5,50 @@ sidebar:
   order: 3
 ---
 
-import LabGoal from '../../../components/LabGoal.astro';
-import LabSteps from '../../../components/LabSteps.astro';
+import LabHero from '../../../components/LabHero.astro';
+import LabPoints from '../../../components/LabPoints.astro';
+import LabLessonTabs from '../../../components/LabLessonTabs.astro';
 import LabFinish from '../../../components/LabFinish.astro';
-import LabOverview from '../../../components/LabOverview.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
+
+<LabHero labId="L3" />
 
 ## 本 Lab 的任务与规则
 
-<LabGoal labId="L3" />
+继续遵守[字段、草稿与保存规则](/js_web/labs/rules/)，本阶段完成四件事：
 
-你要把同一个库存业务做成 React 应用。继续遵守[字段、草稿与保存规则](/js_web/labs/rules/)，本阶段完成：
+<LabPoints>
 
-1. **增删改与统计**：渲染六件商品，支持补货、新建、编辑、删除；编号保持稳定，列表和统计随已提交数据一起更新。
-2. **独立编辑草稿**：P001 的修改取消后不影响原数据，再打开 P002 显示库存 0；排序或删除其他行时，编辑身份不串行。
-3. **异步详情与提交**：快速切换商品时只保留当前详情；提交中防重复，失败保留草稿并能重试，乐观预览能回滚。
-4. **路由与恢复**：P004 详情可刷新、返回，筛选条件可保留；商品能导出、导入和从有效备份恢复，非法数据被拒绝。
+1. **增删改与统计**
+
+   渲染六件商品，支持补货、新建、编辑、删除；编号保持稳定，列表和统计随已提交数据一起更新。
+
+2. **独立编辑草稿**
+
+   P001 的修改取消后不影响原数据，再打开 P002 显示库存 0；排序或删除其他行时，编辑身份不串行。
+
+3. **异步详情与提交**
+
+   快速切换商品时只保留当前详情；提交中防重复，失败保留草稿并能重试，乐观预览能回滚。
+
+4. **路由与恢复**
+
+   P004 详情可刷新、返回，筛选条件可保留；商品能导出、导入和从有效备份恢复，非法数据被拒绝。
+
+</LabPoints>
 
 你在 `src/react/` 逐步加入组件，复用已有库存规则；后续课程再接 repository 与 Query。课内测试检查这些用户操作，本页收尾清单给出具体数据和预期结果。
 
+数据归属在 C32 明确迁移：repository 管商品和持久化，Query 管缓存，组件管筛选界面与编辑草稿。列表、详情、汇总不能各维护一份可写商品。
+
 ## 在同一个应用里推进
+
+每课一个标签，标签里按步骤推进：先点「先读」看对应小节，读完用课页底部的「返回 L3」浮标回到这一步；然后在自己的 `inventory/` 里动手，对照「应该看到」与「验收」，最后运行检查命令。
+
+<LabLessonTabs labId="L3" />
+
+<details>
+<summary>按学习段看全貌</summary>
 
 | 学习段 | 你增加的能力 | 看得到的结果 |
 | --- | --- | --- |
@@ -33,24 +57,20 @@ import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 | C29–C32 | Effect、竞态、Hook/hash 路由、Query | 一次快捷键一次动作；慢旧请求不覆盖新选择；P004 刷新可直达；缓存按 id 隔离 |
 | C33–C36 | Action、性能/加载边界、测试、复盘 | pending 防重复；失败回滚预览并留草稿；统计不旧；三故障有证据与重放 |
 
-数据归属在 C32 明确迁移：repository 管商品和持久化，Query 管缓存，组件管筛选界面与编辑草稿。列表、详情、汇总不能各维护一份可写商品。
-
-每一步先点「先读」看对应小节，读完用课页底部的「返回 L3」浮标或 Lab 标签回到这一步；然后在自己的 `inventory/` 里动手，对照「应该看到」与「验收」，最后运行检查命令。
-
-<LabSteps labId="L3" />
+</details>
 
 ## 收尾：一次可观察的业务交付
 
-在独立固定数据中按 [C36](/js_web/05-react/c36-react-project-debugging/) 完成：
+在独立固定数据中按 [C36](/js_web/05-react/c36-react-project-debugging/) 完成，逐项核对后勾选：
 
 <LabFinish labId="L3" />
 
 这里包含 RTL 行为测试与一条 `/js_web/demos/inventory/` 严格静态浏览器冒烟。学习包与课程网页是静态发布；应用生产构建按课内步骤在本地检查。
 
-## 从哪里开始
+## 起点、暂停与恢复
 
-<details>
-<summary>起点、补课与从旧发行版升级</summary>
+<details id="从哪里开始">
+<summary>从哪里开始：起点、补课与从旧发行版升级</summary>
 
 继续你在 L2 完成的 `inventory/`；不用再新建 React 工程。需要补课时，下载 <WorkspaceDownload checkpoint="C20" label="本发行版的 C20 起点包" />，解压到**新的空目录**，在其中执行一次 `npm ci`，然后 `npm run lab -- start C21`、`npm run lab -- dev`。
 
@@ -60,15 +80,11 @@ C20 只包含前一阶段的原生库存与规则，React 组件由你从 C21 �
 
 </details>
 
-## 暂停与继续
-
-<details>
-<summary>暂停记录、对照参考解与进入 L4</summary>
+<details id="暂停与继续">
+<summary>暂停与继续：暂停记录、对照参考解与进入 L4</summary>
 
 在 `notes/next.md` 写当前课、已改文件、观察结果、下一步。导出的是已保存商品，未提交草稿要另存。`start` 不安装答案，`compare` 只读；网页完成标记与你的本地检查分别管理。
 
 完成后直接从自己的 C36 继续 [L4](/js_web/labs/l4/)。需要对照时再用 <WorkspaceDownload checkpoint="C36" label="本发行版的 C36 完成参考解" />另存到新目录，不要覆盖现有工程。
 
 </details>
-
-<LabOverview labId="L3" />

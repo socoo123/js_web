@@ -1,6 +1,6 @@
 ---
 import catalog from '../../labs/catalog.json';
-import { stepsForLesson, returnsForLesson, labHref, stepAnchor } from '../lib/lab-steps.mjs';
+import { stepsForLesson, returnsForLesson, lessonTabHref } from '../lib/lab-steps.mjs';
 import './lab-ui.css';
 interface Props { lessonId: string }
 const row = catalog.lessons.find((lesson) => lesson.lessonId === Astro.props.lessonId);
@@ -11,7 +11,8 @@ const own = stepsForLesson(row.lessonId);
 const first = own?.steps[0];
 const last = own?.steps.at(-1);
 const range = own && first && last ? (first === last ? `第 ${first.number} 步` : `第 ${first.number}–${last.number} 步`) : '';
-const href = first ? labHref(base, lab.labId, stepAnchor(first.stepId)) : labHref(base, lab.labId);
+// 「返回 Lab」直接打开 Lab 页里本课的标签；从「先读」进入时，返回浮标仍回到具体步骤。
+const href = lessonTabHref(base, lab.labId, row.lessonId);
 const returns = returnsForLesson(row.lessonId, base);
 ---
 <nav class="lab-bar lab-ui not-content" data-lab-bar={row.lessonId} aria-label="所属 Lab">

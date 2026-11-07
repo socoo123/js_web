@@ -1,8 +1,10 @@
-// Lab 步骤页与课页往返：先读 → 返回浮标 → 回到步骤 → 勾选、刷新、跨标签 → LabNext 下一步；真实截图与目标演示、LessonTask 抽查、链接配色、无 JS 阅读与 360/768/1280 × 亮暗截图。
+// Lab 页课程标签与课页往返：标签键盘与 hash 深链、默认下一课、收尾勾选；先读 → 返回浮标 → 回到步骤 → 勾选、刷新、跨标签 → LabNext 下一步；
+// 真实截图与目标演示、LessonTask 抽查、链接配色、无 JS 阅读与 360/768/1280 × 亮暗截图。
 import { chromium, expect } from '../labs/inventory/node_modules/@playwright/test/index.mjs';
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import catalog from '../labs/catalog.json' with { type: 'json' };
 
 const base = process.env.PROGRESS_BASE_URL ?? 'http://127.0.0.1:8751/js_web/';
 const qa = path.resolve(process.env.LAB_QA_DIR ?? process.env.PROGRESS_QA_DIR ?? '.cache/qa/lab-steps');
@@ -32,6 +34,9 @@ const capture = async (page, name, options = {}) => {
     .map((animation) => animation.finished.catch(() => {}))));
   await page.screenshot({ path: path.join(qa, name), ...options }); evidence.screenshots.push(name);
 };
+const PROGRESS_KEY = 'js_web:progress:v1';
+const catalogIds = Object.groupBy(catalog.lessons, (row) => row.labId);
+for (const id of Object.keys(catalogIds)) catalogIds[id] = catalogIds[id].map((row) => row.lessonId);
 const theme = (page, value) => page.locator('starlight-theme-select select').first().selectOption(value, { force: true });
 const noOverflow = async (page) => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `横向溢出：${page.url()}`);
 const loaded = async (img) => {
@@ -56,16 +61,20 @@ try {
   assert.equal((await page.goto(base + lab3)).status(), 200);
   await expect(page.locator('[data-lab-goal="L3"]')).toBeVisible();
   await expect(page.locator('[data-lab-goal] a', { hasText: '打开在线目标演示' })).toHaveAttribute('href', '/js_web/demos/l3/');
+  await expect(page.locator('[data-lab-tabs="L3"] [role="tab"]')).toHaveCount(16);
+  await expect(page.locator('[data-lab-tabs="L3"] [role="tabpanel"]:visible')).toHaveCount(1);
   await expect(page.locator('li.step')).toHaveCount(35);
   await expect(page.locator('[data-lab-finish] li')).toHaveCount(5);
   for (const id of ['本-lab-的任务与规则', '从哪里开始', '在同一个应用里推进', '收尾一次可观察的业务交付', '暂停与继续', 'l3']) {
     await expect(page.locator(`[id="${id}"]`)).toHaveCount(1);
   }
   await expect(page.locator('main details:has(> summary:text("起点、补课与从旧发行版升级"))')).not.toHaveAttribute('open', '');
-  evidence.checks.push('L3 page: goal card + demo link, 35 steps, 5 finish items, preserved anchors, start/pause folded');
+  evidence.checks.push('L3 page: hero + demo link, 16 lesson tabs with one visible panel, 35 steps, 5 finish items, preserved anchors, start/pause folded');
 
   await expect(page.locator('[data-missing-preview]')).toHaveCount(0);
   assert.match(await loaded(page.locator('[data-lab-goal] [data-shot="l3/goal"] img:visible')), /^goal-1280-/);
+  await page.locator('#tab-c23').click();
+  assert.equal(new URL(page.url()).hash, '#c23');
   assert.match(await loaded(page.locator('#step-l3-c23-1 [data-shot="c23/actions"] img:visible')), /^actions-/);
   await page.setViewportSize({ width: 360, height: 900 });
   await page.reload();
@@ -81,7 +90,7 @@ try {
   await expect(demoPage.locator('#root')).not.toBeEmpty();
   await capture(demoPage, 'demo-l3-1280.png');
   if (demoPage !== page) await demoPage.close();
-  await page.goto(base + lab3);
+  await page.goto(base + lab3 + '#c23');
   const labColors = await linkColors(page);
   assert.deepEqual(labColors.defaults, []);
   evidence.checks.push('real shots: l3/goal switches 1280/360 variants, c23/actions loads, no missing-preview placeholder; demo link opens /js_web/demos/l3/ with the React app; no default link colors');
@@ -152,20 +161,24 @@ try {
   await expect(floater).toBeHidden();
   await page.goto(base + '02-language-data/c06-functions-closures/?from=l3-c23-1#4-闭包函数返回以后绑定仍然可用');
   await expect(page.locator('[data-lab-return] [data-lab-return-text]')).toHaveText('返回 L3 第 5 步');
-  await expect(page.locator('[data-lab-bar] a')).toHaveAttribute('href', '/js_web/labs/l1/');
+  await expect(page.locator('[data-lab-bar] a')).toHaveAttribute('href', '/js_web/labs/l1/#c06');
   evidence.checks.push('close button and Escape hide floater, drop ?from and return focus; unknown from ignored; backlink lesson in another Lab shows floater');
 
   await page.goto(base + c23);
   await expect(page.locator('[data-lab-bar] a')).toHaveText(/L3\s*第 5–6 步 \/ 共 35 步\s*返回 Lab/);
-  await expect(page.locator('[data-lab-bar] a')).toHaveAttribute('href', '/js_web/labs/l3/#step-l3-c23-1');
+  await expect(page.locator('[data-lab-bar] a')).toHaveAttribute('href', '/js_web/labs/l3/#c23');
   await expect(page.locator('[data-lab-next-step] .go')).toHaveAttribute('href', '/js_web/labs/l3/#step-l3-c24-1');
   await expect(page.locator('[data-lab-next-step] .go-title')).toHaveText('第 7 步 · C24 商品集合提升到 App');
   await expect(page.locator('[data-progress]')).toHaveCount(1);
   await page.goto(base + c36);
   await expect(page.locator('[data-lab-next-step] .go')).toHaveAttribute('href', '/js_web/labs/l3/#l3-finish');
   await page.goto(base + spot.C03);
-  await expect(page.locator('[data-lab-next-step] .go')).toHaveAttribute('href', '/js_web/labs/l1/');
-  evidence.checks.push('LabBar range + first-step link, LabNext next step / finish list / static Lab link, one progress panel');
+  await expect(page.locator('[data-lab-next-step] .go')).toHaveAttribute('href', '/js_web/labs/l1/#c04');
+  await expect(page.locator('[data-lab-next-step] .where a')).toHaveAttribute('href', '/js_web/labs/l1/#c03');
+  await expect(page.locator('[data-lesson-task="C03"] a[href="/js_web/labs/l1/#c03"]')).toHaveCount(1);
+  await page.goto(base + '02-language-data/c10-stacks-queues-trees/');
+  await expect(page.locator('[data-lab-next-step] .go')).toHaveAttribute('href', '/js_web/labs/l1/#l1-finish');
+  evidence.checks.push('LabBar range + lesson-tab link, LabNext next step / finish list, step-less Lab LabNext to next lesson tab or finish, one progress panel');
 
   for (const [id, route] of Object.entries(spot)) {
     await page.goto(base + route);
@@ -187,12 +200,100 @@ try {
   }
   evidence.checks.push('LessonTask spot check C03/C15/C23/C40/C46: files, command, acceptance visible; start/answer folded; 360/1280 without overflow');
 
+  const tabs = await context.newPage(); track(tabs);
+  const selected = (id) => expect(tabs.locator(`#tab-${id}`)).toHaveAttribute('aria-selected', 'true');
+  await tabs.goto(base + 'labs/l1/#c06');
+  await selected('c06');
+  await expect(tabs.locator('#c06')).toBeVisible();
+  await expect(tabs.locator('#c05')).toBeHidden();
+  await expect(tabs.locator('[role="tablist"]')).toHaveAttribute('aria-label', 'L1 的 10 课');
+  await tabs.locator('#tab-c06').focus();
+  for (const [key, id] of [['ArrowRight', 'c07'], ['End', 'c10'], ['ArrowRight', 'c01'], ['ArrowLeft', 'c10'], ['Home', 'c01']]) {
+    await tabs.keyboard.press(key);
+    await expect(tabs.locator(`#tab-${id}`)).toBeFocused();
+    await selected(id);
+    await expect(tabs.locator(`#${id}`)).toBeVisible();
+    assert.equal(new URL(tabs.url()).hash, `#${id}`);
+  }
+  assert.deepEqual(await tabs.locator('[role="tab"]').evaluateAll((nodes) => nodes.map((node) => node.tabIndex).filter((value) => value === 0)), [0]);
+  await tabs.keyboard.press('Tab');
+  await expect(tabs.locator('#c01')).toBeFocused();
+  await tabs.locator('#c01 .pager-link.next').click();
+  await selected('c02');
+  await expect(tabs.locator('#tab-c02')).toBeFocused();
+  await tabs.locator('#c02 .open').click();
+  await tabs.waitForURL(/c02-web-debugging\/$/);
+  await expect(tabs.locator('[data-lab-bar] a')).toHaveAttribute('href', '/js_web/labs/l1/#c02');
+  await tabs.locator('[data-lab-bar] a').click();
+  await tabs.waitForURL(/labs\/l1\/#c02$/);
+  await selected('c02');
+  await expect(tabs.locator('#c02')).toBeInViewport();
+  evidence.checks.push('tabs: #c06 deep link, Arrow/Home/End roving focus with wrap and hash update, one tab stop, Tab into panel, pager and lesson link, LabBar back to the same tab');
+
+  await tabs.goto(base + 'labs/l1/#从哪里开始');
+  await expect(tabs.locator('details[id="从哪里开始"]')).toHaveAttribute('open', '');
+  await tabs.goto(base + 'labs/l4/#从阶段-a-的旧发行版继续');
+  await expect(tabs.locator('details[id="从阶段-a-的旧发行版继续"]')).toHaveAttribute('open', '');
+  await tabs.goto(base + 'labs/l4/#c37');
+  await tabs.locator('#c37 .extra a').click();
+  await expect(tabs.locator('details[id="从阶段-a-的旧发行版继续"]')).toHaveAttribute('open', '');
+  await tabs.goto(base + lab3 + '#l3-c25-1');
+  await selected('c25');
+  await expect(tabs.locator('#step-l3-c25-1')).toBeInViewport();
+  await tabs.goto(base + lab3 + '#l3');
+  await expect(tabs.locator('[data-lab-tabs="L3"]')).toBeInViewport();
+  evidence.checks.push('anchors: #从哪里开始 and L4 upgrade fold open from hash and from an in-panel link; legacy #l3-c25-1 opens C25 and scrolls to the step; old #l3 lands on the lesson tabs');
+
+  await tabs.evaluate((key) => localStorage.setItem(key, JSON.stringify({ version: 2, completed: ['C01', 'C02', 'C03'], labSteps: [] })), PROGRESS_KEY);
+  await tabs.goto(base + 'labs/l1/');
+  await selected('c04');
+  await expect(tabs.locator('#tab-c04')).toHaveAttribute('data-next', '');
+  await expect(tabs.locator('#tab-c03')).toHaveAttribute('data-done', '');
+  await expect(tabs.locator('#c03 [data-panel-done]')).toBeAttached();
+  await expect(tabs.locator('[data-hero-ratio]')).toHaveText('3/10');
+  const cta = tabs.locator('[data-lab-hero] [data-hero-next]');
+  await expect(cta).toHaveAttribute('href', '#c04');
+  await expect(cta).toContainText('继续：C04');
+  await tabs.locator('#tab-c08').click();
+  await cta.click();
+  await selected('c04');
+  await expect(tabs.locator('#tab-c04')).toBeFocused();
+  const tick = tabs.locator('[data-lab-step-toggle="l1-finish-2"]');
+  await tick.check();
+  await tabs.reload();
+  await expect(tick).toBeChecked();
+  await expect(tabs.locator('[data-lab-finish] [data-lab-progress-count]')).toHaveText('已勾选 1 / 4 项');
+  assert.deepEqual(JSON.parse(await tabs.evaluate((key) => localStorage.getItem(key), PROGRESS_KEY)), { version: 2, completed: ['C01', 'C02', 'C03'], labSteps: ['l1-finish-2'] });
+  await tick.uncheck();
+  await tabs.evaluate(([key, completed]) => localStorage.setItem(key, JSON.stringify({ version: 2, completed, labSteps: [] })), [PROGRESS_KEY, catalogIds.L1]);
+  await tabs.goto(base + 'labs/l1/');
+  await selected('c01');
+  await expect(cta).toHaveAttribute('href', '#l1-finish');
+  await expect(cta).toContainText('回顾：L1 收尾清单');
+  await tabs.evaluate((key) => localStorage.removeItem(key), PROGRESS_KEY);
+  evidence.checks.push('default tab = first lesson not marked done; hero ring/CTA follow progress and select the tab; L1 finish tick persists as v2 labSteps; all done → first tab and CTA to finish');
+
+  const lessonLinks = new Set();
+  for (const lab of ['l1', 'l2', 'l3', 'l4', 'l5']) {
+    await tabs.goto(base + `labs/${lab}/`);
+    for (const href of await tabs.locator('[data-lesson-panel] a.open').evaluateAll((nodes) => nodes.map((node) => node.href))) lessonLinks.add(href);
+    await tabs.setViewportSize({ width: 360, height: 800 });
+    await noOverflow(tabs);
+    assert(await tabs.locator('[data-tab-list]').evaluate((list) => list.scrollWidth > list.clientWidth), `${lab} 窄屏标签没有横向滚动`);
+    await tabs.setViewportSize({ width: 1280, height: 900 });
+  }
+  assert.equal(lessonLinks.size, 48);
+  for (const href of lessonLinks) assert.equal((await context.request.get(href)).status(), 200, href);
+  await tabs.close();
+  evidence.checks.push('48 「打开课文」 links across L1–L5 return 200; 360px tab row scrolls horizontally without page overflow');
+
   for (const width of [360, 768, 1280]) for (const value of ['light', 'dark']) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(base + lab3);
     await theme(page, value);
     await noOverflow(page);
     await capture(page, `l3-goal-${width}-${value}.png`);
+    await page.locator('#tab-c23').click();
     await loaded(page.locator('#step-l3-c23-1 [data-shot="c23/actions"] img:visible'));
     await page.locator('#step-l3-c23-1').scrollIntoViewIfNeeded();
     await capture(page, `l3-step5-${width}-${value}.png`);
@@ -216,7 +317,11 @@ try {
   const nojs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 360, height: 900 } });
   const raw = await nojs.newPage(); track(raw);
   assert.equal((await raw.goto(base + lab3)).status(), 200);
-  await expect(raw.locator('li.step h3')).toHaveCount(35);
+  await expect(raw.locator('li.step h4')).toHaveCount(35);
+  await expect(raw.locator('[data-lesson-panel]:visible')).toHaveCount(16);
+  await expect(raw.locator('[data-tab-nav] a[href="#c23"]')).toBeVisible();
+  await expect(raw.locator('[data-tabs-js]').first()).toBeHidden();
+  await expect(raw.locator('[data-lab-hero] [data-hero-next]')).toHaveAttribute('href', '#c21');
   await expect(raw.locator('#step-l3-c23-1 .read a').first()).toBeVisible();
   await expect(raw.locator('[data-lab-step-toggle]').first()).toBeHidden();
   await expect(raw.locator('[data-lab-finish] li label').first()).toBeVisible();
@@ -228,7 +333,14 @@ try {
   await expect(raw.locator('[data-lesson-task="C23"] .lab-files')).toBeVisible();
   await expect(raw.locator('[data-lab-next-step] .go')).toBeVisible();
   await capture(raw, 'nojs-c23-360.png');
-  evidence.checks.push('no JavaScript: L3 steps readable, checkboxes and ring hidden; lesson LabBar/LessonTask/LabNext readable, floater hidden');
+  for (const lab of ['l1', 'l2', 'l4', 'l5']) {
+    await raw.goto(base + `labs/${lab}/`);
+    const panels = await raw.locator('[data-lesson-panel]').count();
+    await expect(raw.locator('[data-lesson-panel]:visible')).toHaveCount(panels);
+    await expect(raw.locator('[data-lab-finish] li label').first()).toBeVisible();
+    await noOverflow(raw);
+  }
+  evidence.checks.push('no JavaScript: every lesson panel shown with the tab row as in-page TOC, L3 steps readable, checkboxes and rings hidden; lesson LabBar/LessonTask/LabNext readable, floater hidden');
 
   const calm = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
   const still = await calm.newPage(); track(still);
@@ -236,10 +348,12 @@ try {
   await expect(still.locator('[data-lab-return]')).toBeVisible();
   assert.equal(await still.locator('[data-lab-return]').evaluate((node) => getComputedStyle(node).animationDuration), '0s');
   await still.goto(base + lab3);
-  const durations = await still.locator('.step-card, .step-number, [data-lab-next-step], .lab-fold').evaluateAll((nodes) => nodes.flatMap((node) => getComputedStyle(node).transitionDuration.split(',').map(parseFloat)));
+  await still.locator('#tab-c24').click();
+  assert.equal(await still.locator('#c24').evaluate((node) => getComputedStyle(node).animationName), 'none');
+  const durations = await still.locator('.step-card, .step-number, [data-lab-next-step], .lab-fold, [data-tab]').evaluateAll((nodes) => nodes.flatMap((node) => getComputedStyle(node).transitionDuration.split(',').map(parseFloat)));
   assert(durations.length > 0 && durations.every((value) => value === 0), '减少动效时仍有过渡');
   await calm.close();
-  evidence.checks.push('prefers-reduced-motion: floater entrance and card/step/fold transitions take 0s');
+  evidence.checks.push('prefers-reduced-motion: floater entrance, tab panel entrance and card/step/fold/tab transitions take 0s');
 
   assert.deepEqual(errors, []);
   evidence.status = 'passed';

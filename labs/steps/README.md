@@ -1,10 +1,11 @@
 # Lab 步骤数据
 
-`lN.json` 把一个 Lab 拆成按课排列的小步骤：每步先读哪几节、改哪些文件、做什么、应该看到什么、怎样验收。Lab 页（`LabGoal` / `LabSteps` / `LabFinish`）、课页顶部 `LabBar`、课末 `LabNext` 和学习进度都从这里取数据。课程、文件和命令仍以 `labs/catalog.json` 为准，这里只补「怎样一步步做」。
+`lN.json` 写一个 Lab 的目标、收尾清单，以及（已拆好时）按课排列的小步骤：每步先读哪几节、改哪些文件、做什么、应该看到什么、怎样验收。Lab 页（`LabHero` / `LabLessonTabs` / `LabSteps` / `LabFinish`）、课页顶部 `LabBar`、课末 `LabNext` 和学习进度都从这里取数据。课程、文件和命令仍以 `labs/catalog.json` 为准，这里只补「目标、收尾与怎样一步步做」。
 
 | 文件 | 作用 |
 | --- | --- |
 | `l3.json` | L3（C21–C36）的目标、步骤与收尾清单 |
+| `l1.json`、`l2.json`、`l4.json`、`l5.json` | 只有目标与收尾清单；课程标签的面板内容来自 catalog |
 | `model.mjs` | 校验、补默认值、生成锚点与链接；组件和检查脚本共用，不读文件 |
 | `ids.mjs` | 由检查脚本生成的 id 清单，供浏览器端进度校验；不要手改 |
 
@@ -21,9 +22,10 @@
 ```
 
 - `labId`：必须在 `labs/catalog.json` 的 `labs` 里；文件名为 `l<编号>.json`。
-- `goal.summary`：一句话说明完成后的样子。`goal.outcomes`：1–6 条可观察结果。
+- `goal.summary`：一句话说明完成后的样子，显示在 Lab 页头部。`goal.outcomes`：可选，1–6 条可观察结果。
 - `goal.shot`：可选，目标截图 id。`goal.demo`：可选，`labs/demos.json` 里的演示 id，Lab 页据此链接 `/js_web/demos/<id>/`。
 - `finish.items`：收尾清单，id 依次为 `l3-finish-1`、`l3-finish-2`……
+- `steps`：可选。还没有步骤时**省略**这个字段（不要写空数组），Lab 页每个课程标签只显示 catalog 的任务、文件、验收、命令与主错误。写了 `steps` 就必须覆盖本 Lab 每一课。
 - `retired`：删掉的步骤或收尾 id 移到这里（见「id 规则」）。
 
 ## 每一步
@@ -80,8 +82,9 @@ node scripts/check-lab-steps.mjs                    # 再对 dist 检查锚点�
 不带 `--source` 时，脚本还会检查 `dist`：
 
 - 每个 `read` 锚点是否落在目标页的标题上。
+- Lab 页是否每课都有课程标签（`href="#cNN"`）和面板（`id="cNN"`、`data-lesson-panel="CNN"`）。
 - Lab 页是否有全部 `step-*` 锚点、先读链接、收尾锚点和勾选框。
-- 本 Lab 每个课页是否有指向本课第一步的 `LabBar`。
+- 本 Lab 每个课页的 `LabBar` 是否指向本课标签 `/js_web/labs/lN/#cNN`。
 
 `ids.mjs` 与数据不一致时，不带 `--write` 会报错。
 
@@ -92,5 +95,7 @@ node scripts/check-lab-steps.mjs                    # 再对 dist 检查锚点�
   - `nextAfterLesson`：Lab 的下一步或收尾。
   - `returnsForLesson`：哪些步骤链接到本课，供返回浮标使用。
   - `readLabel`：先读链接的文字。
-- 每步根元素 `id="step-<stepId>"`；收尾清单 `id="l3-finish"`。
+- `labView(labId)`：Lab 页头部和课程标签用的整页数据（每课带短标签、天数、本课步骤）。课程标签的短标签在 `TAB_LABELS`，新增课程时要补。
+- 课程标签 `id="cNN"`（`lessonTabId`），链接用 `lessonTabHref`，如 `/js_web/labs/l1/#c06`。`src/scripts/lab-tabs.mjs` 按 hash 选中标签；hash 指向面板内的元素（如 `#step-l3-c23-1`，或不带前缀的 `#l3-c23-1`）时先选中所在课再滚动；指向折叠区（如 `#从哪里开始`）时先展开。没有 hash 时选中第一门未标记完成的课。
+- 每步根元素 `id="step-<stepId>"`；收尾清单 `id="lN-finish"`；课程标签区 `id="lN"`。
 - 勾选框 `data-lab-step-toggle="<id>"` 由 `src/scripts/lab-progress.mjs` 写入进度（`markLabStep`）。勾选只表示学员自己确认，不代表检查命令通过。

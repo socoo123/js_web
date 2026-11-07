@@ -5,21 +5,98 @@ sidebar:
   order: 5
 ---
 
-import LabOverview from '../../../components/LabOverview.astro';
+import LabHero from '../../../components/LabHero.astro';
+import LabPoints from '../../../components/LabPoints.astro';
+import LabLessonTabs from '../../../components/LabLessonTabs.astro';
+import LabFinish from '../../../components/LabFinish.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
+
+<LabHero labId="L5" />
 
 ## 本 Lab 的任务与规则
 
-你要把已完成的库存应用整理成能运行、能恢复、能排错的交付物。继续使用[共用业务规则](/js_web/labs/rules/)，本阶段完成：
+继续使用[共用业务规则](/js_web/labs/rules/)，本阶段完成四件事：
 
-1. **定位故障**：从页面现象出发，找到状态、请求、资源、存储或布局的证据，修复后重做同一个操作。
-2. **检查生产产物**：构建后在 `/js_web/demos/inventory/` 静态预览，入口、模块和详情刷新可用；缺失文件返回真正的 404。
-3. **补齐风险回归**：选择 3–5 条有价值的测试，覆盖坏快照保护、连续输入、请求失败恢复和必要的路径/键盘操作。
-4. **独立完成低库存筛选**：1–5 件算低库存、0 件排除；初始只显示 P004/P006，共 2 种、8 件、539200 分。与搜索和分类取交集，刷新保留条件，清除后恢复六商品。
+<LabPoints>
 
-交付内容是生产产物，以及运行/恢复说明、故障记录、测试计划和复盘。具体文件与逐课要求列在下方“四课，一次交付”。
+1. **定位故障**
 
-## 从哪里开始
+   从页面现象出发，找到状态、请求、资源、存储或布局的证据，修复后重做同一个操作。
+
+2. **检查生产产物**
+
+   构建后在 `/js_web/demos/inventory/` 静态预览，入口、模块和详情刷新可用；缺失文件返回真正的 404。
+
+3. **补齐风险回归**
+
+   选择 3–5 条有价值的测试，覆盖坏快照保护、连续输入、请求失败恢复和必要的路径/键盘操作。
+
+4. **独立完成低库存筛选**
+
+   1–5 件算低库存、0 件排除；初始只显示 P004/P006，共 2 种、8 件、539200 分。与搜索和分类取交集，刷新保留条件，清除后恢复六商品。
+
+</LabPoints>
+
+交付内容是生产产物，以及运行/恢复说明、故障记录、测试计划和复盘。具体文件与逐课要求在下方四个课程标签里。
+
+## 四课，一次交付
+
+每课一个标签：要做什么、留下哪份 notes、怎样验收都在标签里。读完课文，用课页顶部的「返回 Lab」回到本课标签。
+
+<LabLessonTabs labId="L5">
+<Fragment slot="C45">
+
+先导出并保管个人快照，再按 C45 准备固定数据的 `baseline.json`。每次独立数字实验前导入这份基线，避免上一轮保存的 P004=8 或补货影响下一轮结果；实验后可以导回个人快照。不要清空整个浏览器存储。
+
+</Fragment>
+<Fragment slot="C46">
+
+先按 C46 在现有 `vite.config.js` 的配置对象中加入 `base: "/js_web/demos/inventory/"`，保留原有 source map 与 test 配置。然后在自己的 `inventory/` 预览已经构建的文件：
+
+```sh
+npm run lab -- start C46
+npm run lab -- build
+LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs
+```
+
+打开 `http://127.0.0.1:8068/js_web/demos/inventory/`。这条命令只读已有 `dist/src-react`，不重新构建、不修正 base，也不将缺文件回退成首页。**保留 `LAB_STATIC_ROOT=dist/src-react`**：省略它会进入旧的重新构建冒烟模式，检查的就不是这一批已有产物。修改源码或配置后，先重新 build 再预览。
+
+P004 的 hash 详情刷新应成功，干净详情路径 `products/P004/` 和缺失模块 `assets/missing.js` 则应返回真正 404。检查当前配置与源码时，先 Ctrl+C 结束手工预览，再运行 `npm run lab -- check C46`；后续 `check C47`、`check C48` 前也先停旧服务，避免占用默认 8068 端口。
+
+</Fragment>
+<Fragment slot="C47">
+
+四项风险是：非法快照覆盖好数据、连续输入丢字、详情/保存失败后不能重试，以及资源路径/键盘/刷新断链。已有请求失败和重试测试继续使用，不复制另一套相同用例。C47 在 App 的 `<HashRouter useTransitions={false}>` 选择同步路由更新，避免受控搜索值因更新时机丢字。
+
+</Fragment>
+</LabLessonTabs>
+
+<details>
+<summary>四课一览：做什么、留下什么</summary>
+
+| 课程 | 在当前应用做什么 | 留下的产物与证据 |
+| --- | --- | --- |
+| [C45 全链路 Debug](/js_web/07-project/c45-debug-delivery-checks/) | 复现只改 Query 读取结果却未提交 repository 的故障，恢复 dispatch；再按资源、存储、布局排查 | `notes/debug.md`：现象、工具证据、根因、修复与同一操作复测 |
+| [C46 静态构建与 Pages](/js_web/07-project/c46-static-build-pages/) | 在 `vite.config.js` 配置生产 base，只读预览 `dist/src-react`，不用 fallback | `notes/delivery.md`：构建命令、产物/公开路径、hash 与 404 证据、运行及恢复说明 |
+| [C47 测试选择](/js_web/07-project/c47-project-testing-strategy/) | 新增 `tests/react/regression.test.jsx`，设置同步 HashRouter，按四项风险复用与补充回归 | `notes/test-plan.md`：每项风险、测试层级、位置和可观察断言 |
+| [C48 总复盘](/js_web/07-project/c48-review-next-steps/) | 在 App 增加 URL 的 `stock=low` 条件与 `tests/react/final-filter.test.jsx`，定位浅复制故障 | `notes/final-review.md`：十题自测、实现解释、测试和排错记录 |
+
+这里只收尾同一个任务链。Performance 与 Memory 用同样操作的前后证据解释，不能靠一张图断言泄漏。
+
+</details>
+
+## 收尾：能交付，也能说明为什么
+
+每个数据场景从独立固定数据开始：初始 6 种商品、52 件、2634800 分。逐项核对后勾选：
+
+<LabFinish labId="L5" />
+
+站点路径是 `/js_web/`，库存应用的默认生产目标是 `/js_web/demos/inventory/`，磁盘工作区则是自己的 `inventory/`。课程网站与学习包在线发布；Lab 应用按 C46 在本地构建和预览，只有自己实际部署后才有对应在线演示。Pages 不提供 Node 服务、真实 SAP 后端或账号同步。
+
+## 起点、暂停与恢复
+
+<details id="从哪里开始">
+<summary>从哪里开始：回到 C44 保留的 React 主应用</summary>
 
 继续 L4 自己完成的 C44 工程，**回到保留的 `src/react/` 主应用**，不把 UI5 React adapter 当成交付课的强制基础。公共 core、repository 与四个 adapter 都保留，不再新建一个最终项目。
 
@@ -34,52 +111,13 @@ npm run lab -- dev
 
 `start` 只选任务，不改源码；这次入口应是 `src/react/index.html`。若仍看到 UI5 adapter，先 Ctrl+C 停止旧服务，再启动当前任务。安装、下载校验与恢复保护见[工作区入口](/js_web/labs/)。
 
-先导出并保管个人快照，再按 C45 准备固定数据的 `baseline.json`。每次独立数字实验前导入这份基线，避免上一轮保存的 P004=8 或补货影响下一轮结果；实验后可以导回个人快照。不要清空整个浏览器存储。
+</details>
 
-## 四课，一次交付
-
-| 课程 | 在当前应用做什么 | 留下的产物与证据 |
-| --- | --- | --- |
-| [C45 全链路 Debug](/js_web/07-project/c45-debug-delivery-checks/) | 复现只改 Query 读取结果却未提交 repository 的故障，恢复 dispatch；再按资源、存储、布局排查 | `notes/debug.md`：现象、工具证据、根因、修复与同一操作复测 |
-| [C46 静态构建与 Pages](/js_web/07-project/c46-static-build-pages/) | 在 `vite.config.js` 配置生产 base，只读预览 `dist/src-react`，不用 fallback | `notes/delivery.md`：构建命令、产物/公开路径、hash 与 404 证据、运行及恢复说明 |
-| [C47 测试选择](/js_web/07-project/c47-project-testing-strategy/) | 新增 `tests/react/regression.test.jsx`，设置同步 HashRouter，按四项风险复用与补充回归 | `notes/test-plan.md`：每项风险、测试层级、位置和可观察断言 |
-| [C48 总复盘](/js_web/07-project/c48-review-next-steps/) | 在 App 增加 URL 的 `stock=low` 条件与 `tests/react/final-filter.test.jsx`，定位浅复制故障 | `notes/final-review.md`：十题自测、实现解释、测试和排错记录 |
-
-四项风险是：非法快照覆盖好数据、连续输入丢字、详情/保存失败后不能重试，以及资源路径/键盘/刷新断链。已有请求失败和重试测试继续使用，不复制另一套相同用例。C47 在 App 的 `<HashRouter useTransitions={false}>` 选择同步路由更新，避免受控搜索值因更新时机丢字。
-
-这里只收尾同一个任务链。Performance 与 Memory 用同样操作的前后证据解释，不能靠一张图断言泄漏。
-
-## C46：预览已经构建的文件
-
-先按 C46 在现有 `vite.config.js` 的配置对象中加入 `base: "/js_web/demos/inventory/"`，保留原有 source map 与 test 配置。然后在自己的 `inventory/` 执行：
-
-```sh
-npm run lab -- start C46
-npm run lab -- build
-LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs
-```
-
-打开 `http://127.0.0.1:8068/js_web/demos/inventory/`。这条命令只读已有 `dist/src-react`，不重新构建、不修正 base，也不将缺文件回退成首页。**保留 `LAB_STATIC_ROOT=dist/src-react`**：省略它会进入旧的重新构建冒烟模式，检查的就不是这一批已有产物。修改源码或配置后，先重新 build 再预览。
-
-P004 的 hash 详情刷新应成功，干净详情路径 `products/P004/` 和缺失模块 `assets/missing.js` 则应返回真正 404。检查当前配置与源码时，先 Ctrl+C 结束手工预览，再运行 `npm run lab -- check C46`；后续 `check C47`、`check C48` 前也先停旧服务，避免占用默认 8068 端口。
-
-## 收尾：能交付，也能说明为什么
-
-每个数据场景从独立固定数据开始：初始 6 种商品、52 件、2634800 分。
-
-1. P004 草稿 8 后取消，它仍为 3，清除筛选后全量总库存 52；保存 8 后只有它改变，清除筛选后全量 57，P001 仍为 12。筛选中的摘要统计可见结果。
-2. 非法快照被拒绝，好数据原文不变；连续交互结果正确，提交失败后保留草稿并可重试。空白库存拒绝，0 合法。
-3. 生产构建的 `/js_web/demos/inventory/` 下，入口、模块与静态数据可用，P004 hash 详情刷新成功；故意访问缺失资源应返回 404，而不是 HTML 200。
-4. 从初始固定数据勾选“仅低库存”，URL 写入 `stock=low`，只显示 P004/P006，共 2 种、8 件、539200 分；1–5 件才算低库存，售罄 0 排除。条件与搜索/分类取交集，刷新保留，清除全部条件恢复 6/52/2634800；筛选本身不保存商品。P004 保存 8 后离开低库存结果，焦点回标题。
-5. 只用键盘完成筛选、打开、输入、取消和保存；360/768/1280px 可读。现场增量有行为断言，浅复制故障的修复同时保护旧商品值与对象身份。
-6. 按各课运行 `npm run lab -- check C45` 至 `npm run lab -- check C48`；四份 notes：`debug.md`、`delivery.md`、`test-plan.md`、`final-review.md` 写明实际证据、操作和结论。
-
-站点路径是 `/js_web/`，库存应用的默认生产目标是 `/js_web/demos/inventory/`，磁盘工作区则是自己的 `inventory/`。课程网站与学习包在线发布；Lab 应用按 C46 在本地构建和预览，只有自己实际部署后才有对应在线演示。Pages 不提供 Node 服务、真实 SAP 后端或账号同步。
-
-## 暂停、恢复与完成
+<details id="暂停恢复与完成">
+<summary>暂停、恢复与完成</summary>
 
 源码与 notes 自行备份；已保存商品从应用导出，未提交草稿另存。用 `notes/next.md` 记录暂停点；网页的课程完成标记和本地检查分别管理。
 
 需要对照时运行 `npm run lab -- compare C48`，或将 <WorkspaceDownload checkpoint="C48" label="C48 完成参考解" />另存到新目录；不覆盖自己的工程。课程学习后按 C48 的自测结果复习，不用先完成额外选修才算交付。
 
-<LabOverview labId="L5" />
+</details>

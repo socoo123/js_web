@@ -1,7 +1,7 @@
 ---
 import catalog from '../../labs/catalog.json';
 import LearningProgress from './LearningProgress.astro';
-import { stepsForLesson, nextAfterLesson, labHref, stepAnchor, finishAnchor } from '../lib/lab-steps.mjs';
+import { stepsForLesson, nextAfterLesson, labHref, stepAnchor, finishAnchor, lessonTabHref } from '../lib/lab-steps.mjs';
 import './lab-ui.css';
 interface Props { lessonId: string }
 const { lessonId } = Astro.props;
@@ -14,6 +14,12 @@ const next = nextAfterLesson(lessonId);
 const first = own?.steps[0];
 const last = own?.steps.at(-1);
 const range = first && last ? (first === last ? `第 ${first.number} 步` : `第 ${first.number}–${last.number} 步`) : '';
+// 没有步骤数据的 Lab：回到 Lab 页下一课的标签；本课是最后一课时去收尾清单。
+const siblings = catalog.lessons.filter((lesson) => lesson.labId === row.labId);
+const following = siblings[siblings.indexOf(row) + 1];
+const back = following
+  ? { href: lessonTabHref(base, lab.labId, following.lessonId), label: '回到 Lab 下一课', title: `${following.lessonId} ${following.title}` }
+  : { href: labHref(base, lab.labId, finishAnchor(lab.labId)), label: '回到 Lab 收尾', title: `${lab.labId} 收尾清单 · 逐项核对后勾选` };
 ---
 <nav class="lab-next lab-ui not-content js-card" data-lab-next-step={lessonId} aria-label="回到 Lab">
   {own && first && next ? (
@@ -27,7 +33,10 @@ const range = first && last ? (first === last ? `第 ${first.number} 步` : `第
         : <a class="go" href={labHref(base, lab.labId, finishAnchor(lab.labId))}><span class="go-label">回到 Lab 收尾</span><span class="go-title">{lab.labId} 收尾清单 · 逐项核对后勾选</span></a>}
     </>
   ) : (
-    <a class="go" href={labHref(base, lab.labId)}><span class="go-label">回到 Lab</span><span class="go-title">{lab.labId} {lab.title}</span></a>
+    <>
+      <p class="where">本课属于 <a href={lessonTabHref(base, lab.labId, row.lessonId)}>{lab.labId} {lab.title}</a></p>
+      <a class="go" href={back.href}><span class="go-label">{back.label}</span><span class="go-title">{back.title}</span></a>
+    </>
   )}
 </nav>
 <LearningProgress lessonId={lessonId} />

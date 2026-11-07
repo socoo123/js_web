@@ -33,6 +33,11 @@ function render() {
     const unit = summary.dataset.unit ?? '步';
     const countText = summary.querySelector('[data-lab-progress-count]');
     if (countText) countText.textContent = ready ? `已勾选 ${count} / ${ids.length} ${unit}` : '进度暂不可用';
+    const short = summary.querySelector('[data-lab-progress-short]');
+    if (short) short.textContent = ready ? `${count}/${ids.length}` : '—';
+    summary.toggleAttribute('data-lab-progress-done', ready && ids.length > 0 && count === ids.length);
+    const bar = summary.querySelector('[data-lab-progress-bar]');
+    if (bar) bar.style.setProperty('--done', String(ids.length ? count / ids.length : 0));
     const ring = summary.querySelector('[data-lab-progress-ring]');
     if (ring) {
       ring.style.setProperty('--done', String(ids.length ? count / ids.length : 0));

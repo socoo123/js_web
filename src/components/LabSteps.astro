@@ -1,48 +1,68 @@
 ---
+// Lab 步骤：不带 lessonId 时渲染整套（进度头 + 全部步骤）；带 lessonId 时只渲染这一课的步骤列表，
+// 由 LabLessonTabs 放进本课标签面板，进度头与 data-lab-root 在标签组件上。
 import { getEntry, render } from 'astro:content';
 import { Code } from '@astrojs/starlight/components';
 import LabShot from './LabShot.astro';
 import { labFor, stepAnchor, finishAnchor, readLabel } from '../lib/lab-steps.mjs';
 import { inlineHtml, readHref } from '../../labs/steps/model.mjs';
 import './lab-ui.css';
-interface Props { labId: string }
+interface Props {
+  labId: string;
+  lessonId?: string;
+  /** 「先读」目标页的标题，键为 slug；不传时自己读取。 */
+  headings?: Map<string, { slug: string; text: string }[]>;
+}
 const lab = labFor(Astro.props.labId);
-if (!lab) throw new Error(`没有 ${Astro.props.labId} 的步骤数据`);
+if (!lab?.steps.length) throw new Error(`没有 ${Astro.props.labId} 的步骤数据`);
+const { lessonId } = Astro.props;
+const steps = lessonId ? lab.steps.filter((step) => step.lessonId === lessonId) : lab.steps;
 const base = import.meta.env.BASE_URL;
 const html = (text: string) => inlineHtml(text, base);
-const slugs = [...new Set(lab.steps.flatMap((step) => step.read.map((item) => item.slug)))];
-const headings = new Map(await Promise.all(slugs.map(async (slug) => {
-  const entry = await getEntry('docs', slug);
-  if (!entry) throw new Error(`「先读」页面不存在：${slug}`);
-  return [slug, (await render(entry)).headings] as const;
-})));
+const headings = Astro.props.headings ?? new Map(await Promise.all(
+  [...new Set(steps.flatMap((step) => step.read.map((item) => item.slug)))].map(async (slug) => {
+    const entry = await getEntry('docs', slug);
+    if (!entry) throw new Error(`「先读」页面不存在：${slug}`);
+    return [slug, (await render(entry)).headings] as const;
+  }),
+));
 const ids = lab.steps.map((step) => step.stepId);
 const targets = Object.fromEntries(lab.steps.map((step) => [step.stepId, { href: `#${stepAnchor(step.stepId)}`, text: `继续第 ${step.number} 步：${step.title}` }]));
-const lastOf = (lessonId: string) => lab.steps.filter((step) => step.lessonId === lessonId).at(-1)!.number;
+const lastOf = (id: string) => lab.steps.filter((step) => step.lessonId === id).at(-1)!.number;
+const Root = lessonId ? 'div' : 'section';
+const StepHeading = lessonId ? 'h4' : 'h3';
 ---
-<section class="lab-steps lab-ui not-content" data-lab-steps={lab.labId} data-lab-root aria-label={`${lab.labId} 步骤`}>
-  <div class="steps-head" data-lab-progress data-ids={ids.join(' ')} data-unit="步">
-    <div class="ring" data-lab-progress-ring data-lab-js hidden aria-hidden="true"><span data-lab-progress-ratio>0/{ids.length}</span></div>
-    <div class="steps-head-text">
-      <p class="steps-total"><strong>{lab.steps.length} 步</strong> · {lab.lessons.length} 课（{lab.lessons[0]}–{lab.lessons.at(-1)}） · 每课 1–3 步</p>
-      <p data-lab-js hidden>
-        <span data-lab-progress-count></span> ·{' '}
-        <a data-lab-progress-next data-targets={JSON.stringify(targets)} data-done-href={`#${finishAnchor(lab.labId)}`} data-done-text="步骤都已勾选，去收尾清单" href={`#${stepAnchor(ids[0])}`}>从第 1 步开始</a>
-      </p>
-      <p class="lab-note">勾选「我已完成这一步」只记录你自己的确认，保存在当前浏览器，不代表本地检查已通过；检查是否通过以终端输出为准。</p>
-      <p data-lab-progress-state hidden></p>
+<Root
+  class:list={['lab-steps', 'lab-ui', 'not-content', { 'lab-steps--lesson': lessonId }]}
+  data-lab-steps={lessonId ? undefined : lab.labId}
+  data-lab-step-list={lessonId}
+  data-lab-root={lessonId ? undefined : ''}
+  aria-label={lessonId ? undefined : `${lab.labId} 步骤`}
+>
+  {!lessonId && (
+    <div class="steps-head" data-lab-progress data-ids={ids.join(' ')} data-unit="步">
+      <div class="ring" data-lab-progress-ring data-lab-js hidden aria-hidden="true"><span data-lab-progress-ratio>0/{ids.length}</span></div>
+      <div class="steps-head-text">
+        <p class="steps-total"><strong>{lab.steps.length} 步</strong> · {lab.lessons.length} 课（{lab.lessons[0]}–{lab.lessons.at(-1)}） · 每课 1–3 步</p>
+        <p data-lab-js hidden>
+          <span data-lab-progress-count></span> ·{' '}
+          <a data-lab-progress-next data-targets={JSON.stringify(targets)} data-done-href={`#${finishAnchor(lab.labId)}`} data-done-text="步骤都已勾选，去收尾清单" href={`#${stepAnchor(ids[0])}`}>从第 1 步开始</a>
+        </p>
+        <p class="lab-note">勾选「我已完成这一步」只记录你自己的确认，保存在当前浏览器，不代表本地检查已通过；检查是否通过以终端输出为准。</p>
+        <p data-lab-progress-state hidden></p>
+      </div>
     </div>
-  </div>
+  )}
 
   <ol class="steps">
-    {lab.steps.map((step) => {
+    {steps.map((step) => {
       const anchor = stepAnchor(step.stepId);
       return (
         <li class="step" id={anchor} data-lab-step-item>
           <span class="step-number" aria-hidden="true">{step.number}</span>
           <article class="step-card" data-lab-scope aria-labelledby={`${anchor}-title`}>
             <p class="step-meta"><a href={`${base}${step.lesson.slug}/`}>{step.lessonId} {step.lesson.title}</a><span> · 本课第 {step.lessonStep} / {step.lessonSteps} 步</span></p>
-            <h3 id={`${anchor}-title`}>第 {step.number} 步 · {step.title}</h3>
+            <StepHeading class="step-title" id={`${anchor}-title`}>第 {step.number} 步 · {step.title}</StepHeading>
             <p class="step-goal" set:html={html(step.goal)} />
 
             <div class="block">
@@ -97,15 +117,17 @@ const lastOf = (lessonId: string) => lab.steps.filter((step) => step.lessonId ==
       );
     })}
   </ol>
-  <noscript><p class="lab-note">启用 JavaScript 后可以勾选步骤并保存进度；步骤内容不受影响。</p></noscript>
-</section>
+  {!lessonId && <noscript><p class="lab-note">启用 JavaScript 后可以勾选步骤并保存进度；步骤内容不受影响。</p></noscript>}
+</Root>
 
 <script>
   import '../scripts/lab-progress.mjs';
 </script>
 
 <style>
-  .lab-steps { max-width: calc(var(--js-prose-width) + 3rem); margin-block: 1.5rem 2.5rem; }
+  .lab-steps { margin-block: 1.5rem 2.5rem; }
+  .lab-steps--lesson { margin-block: 0; }
+  .lab-steps--lesson .steps { margin-top: 0; }
   .steps-head {
     display: flex; gap: 1rem; align-items: center; padding: 1rem 1.25rem;
     border: 1px solid var(--js-border); border-radius: var(--js-radius);
@@ -158,7 +180,7 @@ const lastOf = (lessonId: string) => lab.steps.filter((step) => step.lessonId ==
   }
   .step.is-done .step-card { border-color: color-mix(in srgb, var(--js-color-ok) 55%, var(--js-border)); }
   .step-meta { font-size: var(--sl-text-sm); color: var(--js-color-muted); }
-  h3 { margin: 0.25rem 0 0.5rem; color: var(--js-color-heading); font-size: var(--sl-text-h4); font-weight: 650; line-height: 1.35; }
+  .step-title { margin: 0.25rem 0 0.5rem; color: var(--js-color-heading); font-size: var(--sl-text-h4); font-weight: 650; line-height: 1.35; }
   .block { margin-top: 0.9rem; }
   .read { list-style: none; padding: 0; display: grid; gap: 0.35rem; }
   .read li {
@@ -196,7 +218,7 @@ const lastOf = (lessonId: string) => lab.steps.filter((step) => step.lessonId ==
     .step::before { display: none; }
     .step-number { position: absolute; inset-block-start: 0.85rem; inset-inline-end: 0.85rem; width: 1.9rem; height: 1.9rem; }
     .step-card { padding: 0.9rem 1rem; }
-    .step-card h3 { padding-inline-end: 2.25rem; }
+    .step-card .step-title { padding-inline-end: 2.25rem; }
     .steps-head { align-items: flex-start; }
     .ring { width: 3.5rem; }
     .ring span { width: 2.7rem; font-size: var(--sl-text-xs); }

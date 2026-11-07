@@ -1,0 +1,32 @@
+---
+// 「本 Lab 的任务与规则」要点卡：插槽里放一个有序列表，每项先写一段加粗标题，再空一行写说明。
+// 内容仍写在 MDX 里，这里只负责排版；禁用 CSS 时就是普通编号列表。
+import './lab-ui.css';
+---
+<div class="lab-points lab-ui not-content"><slot /></div>
+
+<style>
+  .lab-points { container-type: inline-size; margin-block: 1rem 1.25rem; }
+  .lab-points :global(ol) {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 0.65rem;
+    margin: 0; padding: 0; list-style: none; counter-reset: lab-point;
+  }
+  @container (min-width: 32rem) {
+    .lab-points :global(ol:has(> li:nth-child(4):last-child)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  .lab-points :global(ol > li) {
+    position: relative; margin: 0; padding: 0.85rem 1rem 0.9rem 3.1rem;
+    border: 1px solid var(--js-border); border-radius: var(--js-radius);
+    background: var(--js-surface-raised); counter-increment: lab-point;
+    transition: border-color var(--js-motion) var(--js-ease);
+  }
+  .lab-points :global(ol > li:hover) { border-color: color-mix(in srgb, var(--js-color-primary) 45%, var(--js-border)); }
+  .lab-points :global(ol > li::before) {
+    content: counter(lab-point); position: absolute; inset-inline-start: 0.95rem; top: 0.85rem;
+    display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 8px;
+    background: var(--js-color-primary-soft); color: var(--js-color-primary);
+    font-size: 0.8125rem; font-weight: 800; font-variant-numeric: tabular-nums;
+  }
+  .lab-points :global(li > p:first-child) { color: var(--js-color-heading); font-weight: 700; line-height: 1.6; }
+  .lab-points :global(li > p + p) { margin-top: 0.3rem; font-size: var(--sl-text-sm); color: var(--js-color-text); }
+</style>

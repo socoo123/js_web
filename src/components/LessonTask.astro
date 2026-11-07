@@ -1,7 +1,7 @@
 ---
 import catalog from '../../labs/catalog.json';
 import { Code } from '@astrojs/starlight/components';
-import { stepsForLesson, labHref, stepAnchor } from '../lib/lab-steps.mjs';
+import { stepsForLesson, lessonTabHref } from '../lib/lab-steps.mjs';
 import './lab-ui.css';
 interface Props { lessonId: string }
 const lesson = catalog.lessons.find((row) => row.lessonId === Astro.props.lessonId);
@@ -14,7 +14,7 @@ const own = stepsForLesson(lesson.lessonId);
 const first = own?.steps[0];
 const last = own?.steps.at(-1);
 const range = first && last ? (first === last ? `第 ${first.number} 步` : `第 ${first.number}–${last.number} 步`) : '';
-const labLink = first ? labHref(base, lesson.labId, stepAnchor(first.stepId)) : labHref(base, lesson.labId);
+const labLink = lessonTabHref(base, lesson.labId, lesson.lessonId);
 const titleId = `lesson-task-${lesson.lessonId.toLowerCase()}`;
 ---
 <aside class="lesson-task lab-ui not-content" aria-labelledby={titleId} data-lesson-task={lesson.lessonId}>
@@ -52,7 +52,6 @@ const titleId = `lesson-task-${lesson.lessonId.toLowerCase()}`;
 
 <style>
   .lesson-task {
-    max-width: var(--js-prose-width);
     margin-block: 1.5rem; padding: 1rem 1.25rem;
     border: 1px solid color-mix(in srgb, var(--js-color-primary) 35%, var(--js-border));
     border-radius: var(--js-radius);

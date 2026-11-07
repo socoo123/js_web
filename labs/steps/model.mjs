@@ -9,13 +9,13 @@ const LINK = /\[([^\]]+)\]\(([^)\s]+)\)/g;
 /**
  * @typedef {{ lessonId: string, anchor: string, why: string }} ReadItem
  * @typedef {{ output?: string, shot?: string, caption?: string }} Preview
- * @typedef {{ summary: string, outcomes: string[], shot?: string, demo?: string }} Goal
+ * @typedef {{ summary: string, outcomes?: string[], shot?: string, demo?: string }} Goal
  * @typedef {{ id: string, text: string }} FinishItem
  * @typedef {{
  *   stepId: string, lessonId: string, title: string, goal: string, read: ReadItem[], files?: string[],
  *   actions: string[], preview: Preview, acceptance: string[], check?: string | string[], hint?: string, answer?: string,
  * }} StepData
- * @typedef {{ labId: string, goal: Goal, steps: StepData[], finish: { items: FinishItem[] }, retired?: string[] }} LabData
+ * @typedef {{ labId: string, goal: Goal, steps?: StepData[], finish: { items: FinishItem[] }, retired?: string[] }} LabData
  * @typedef {Omit<StepData, 'read' | 'files' | 'check'> & {
  *   number: number, files: string[], check: string[], defaultCheck: boolean,
  *   lessonStep: number, lessonSteps: number, lastOfLesson: boolean,
@@ -78,14 +78,15 @@ export function validateLab(data, { catalog, demos = [], file }) {
     unknownKeys(goal, GOAL_KEYS, 'goal', errors);
     if (!isText(goal.summary)) errors.push('goal.summary 必须是非空文字');
     else lintText(goal.summary, 'goal.summary', errors);
-    textList(goal.outcomes, 'goal.outcomes', errors, { max: 6 }).forEach((text, i) => lintText(text, `goal.outcomes[${i}]`, errors));
+    if (goal.outcomes !== undefined) textList(goal.outcomes, 'goal.outcomes', errors, { max: 6 }).forEach((text, i) => lintText(text, `goal.outcomes[${i}]`, errors));
     if (goal.shot !== undefined && !SHOT_ID.test(goal.shot)) errors.push(`goal.shot 截图 id 格式不对：${goal.shot}`);
     if (goal.demo !== undefined && !demos.some((demo) => demo.id === goal.demo)) errors.push(`goal.demo 不在 labs/demos.json：${goal.demo}`);
   }
 
+  // 还没写步骤的 Lab 省略 steps，只提供目标与收尾清单；一旦写了 steps，就要覆盖本 Lab 每一课。
+  const hasSteps = data.steps !== undefined;
   const steps = Array.isArray(data.steps) ? data.steps : [];
-  if (!steps.length) errors.push('steps 不能为空');
-  const seen = new Set();
+  if (hasSteps && !steps.length) errors.push('steps 不能为空；还没有步骤时省略 steps');  const seen = new Set();
   const perLesson = new Map();
   const referenced = new Set();
   let lastOrder = -1;
@@ -160,7 +161,7 @@ export function validateLab(data, { catalog, demos = [], file }) {
     }
   });
 
-  for (const row of lessons) {
+  for (const row of hasSteps ? lessons : []) {
     if (!perLesson.has(row.lessonId)) errors.push(`${row.lessonId} 没有步骤`);
     if (perLesson.get(row.lessonId) > 3) errors.push(`${row.lessonId} 超过 3 步`);
     if (!referenced.has(row.lessonId)) errors.push(`${row.lessonId} 没有被任何「先读」引用`);
@@ -210,9 +211,10 @@ export function normalizeLab(data, context) {
   const { catalog } = context;
   const lab = catalog.labs.find((row) => row.labId === data.labId);
   const rows = new Map(catalog.lessons.map((row) => [row.lessonId, row]));
-  const steps = data.steps.map((step, index) => {
+  const source = data.steps ?? [];
+  const steps = source.map((step, index) => {
     const row = rows.get(step.lessonId);
-    const own = data.steps.filter((item) => item.lessonId === step.lessonId);
+    const own = source.filter((item) => item.lessonId === step.lessonId);
     return {
       ...step,
       number: index + 1,
@@ -231,7 +233,7 @@ export function normalizeLab(data, context) {
     labId: data.labId,
     title: lab.title,
     lessons,
-    goal: data.goal,
+    goal: { ...data.goal, outcomes: data.goal.outcomes ?? [] },
     steps,
     finish: data.finish.items,
     retired: data.retired ?? [],
@@ -262,6 +264,16 @@ export function finishAnchor(labId) {
 /** @param {string} base @param {string} labId @param {string} [hash] */
 export function labHref(base, labId, hash = '') {
   return `${base}labs/${labId.toLowerCase()}/${hash ? `#${hash}` : ''}`;
+}
+
+/** Lab 页上每课一个标签面板，id 为小写课号，如 `c06`。 @param {string} lessonId */
+export function lessonTabId(lessonId) {
+  return lessonId.toLowerCase();
+}
+
+/** @param {string} base @param {string} labId @param {string} lessonId */
+export function lessonTabHref(base, labId, lessonId) {
+  return labHref(base, labId, lessonTabId(lessonId));
 }
 
 /** @param {string} base @param {{ slug: string, anchor: string }} item @param {string} stepId */
