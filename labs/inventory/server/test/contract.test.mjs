@@ -6,13 +6,16 @@ import { mkdir, mkdtemp, readdir, readFile, rm, rmdir, stat, writeFile } from 'n
 import { existsSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
+import { createServer } from 'node:net';
+import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import { createApiServer, DataFileError, resetDataFile, startApiServer } from '../app.mjs';
 
 const serverDir = fileURLToPath(new URL('../', import.meta.url));
 const seedFile = fileURLToPath(new URL('../../data/products.json', import.meta.url));
 const rulesScript = fileURLToPath(new URL('../../../../scripts/build-server-rules.mjs', import.meta.url));
+const workspace = fileURLToPath(new URL('../../', import.meta.url));
 const initialTotals = { count: 6, stock: 52, valueCents: 2634800, soldOut: 1, lowStock: 2 };
 const adapter = { name: '随身转接头', category: '配件', stock: 3, priceCents: 29, tags: [] };
 
@@ -397,6 +400,76 @@ test('服务端只 import 生成的规则，不 import 工作区 src/core', asyn
     const text = await readFile(path.join(serverDir, name), 'utf8');
     assert.doesNotMatch(text, /(from|import\()\s*['"][^'"]*src\/core/, name);
   }
+});
+
+async function closedPort() {
+  const probe = createServer().listen(0, '127.0.0.1');
+  await once(probe, 'listening');
+  const { port } = probe.address();
+  probe.close();
+  await once(probe, 'close');
+  return port;
+}
+
+function labEnv(extra) {
+  const env = { ...process.env, ...extra };
+  delete env.LAB_API_CORS_ORIGIN;
+  return env;
+}
+
+const lab = (args, env) => spawnSync(process.execPath, ['tools/lab.mjs', ...args], { cwd: workspace, env, encoding: 'utf8', timeout: 30000 });
+
+test('lab api reset 离线路径：后端没运行时直接恢复数据文件，损坏文件另存', async (t) => {
+  const dir = await tempDir(t);
+  const dataFile = path.join(dir, 'products.json');
+  const env = labEnv({ LAB_API_DATA: dataFile, LAB_API_PORT: String(await closedPort()) });
+  await writeFile(dataFile, '{坏');
+
+  const refused = lab(['api'], env);
+  assert.equal(refused.status, 1);
+  assert.match(refused.stderr, /^数据文件损坏：.*（不是合法 JSON.*）。运行 npm run lab -- api reset 恢复固定数据；损坏文件会另存，不会删除。/);
+
+  const reset = lab(['api', 'reset'], env);
+  assert.equal(reset.status, 0, reset.stderr);
+  assert.match(reset.stdout, /后端没有运行，已离线恢复固定数据：.*products\.json（6 个商品，version 全为 1）/);
+  assert.match(reset.stdout, /原文件已损坏，另存为 .*products\.json\.damaged-/);
+  const copies = (await readdir(dir)).filter((name) => name.startsWith('products.json.damaged-'));
+  assert.equal(copies.length, 1);
+  assert.equal(await readFile(path.join(dir, copies[0]), 'utf8'), '{坏');
+  assert((await readData(dataFile)).products.every((product) => product.version === 1));
+});
+
+test('lab api reset 在线路径：端口上有后端时调用 POST /api/_lab/reset', async (t) => {
+  const { call, server, dataFile } = await startApi(t);
+  await call('PATCH', '/api/products/P004', { headers: { 'If-Match': '1' }, body: { stock: 8 } });
+  // 后端就在本进程里，必须异步等待子进程，不能用 spawnSync 卡住事件循环。
+  const child = spawn(process.execPath, ['tools/lab.mjs', 'api', 'reset'], { cwd: workspace, env: labEnv({ LAB_API_DATA: dataFile, LAB_API_PORT: String(server.address().port) }) });
+  let stdout = '';
+  child.stdout.setEncoding('utf8').on('data', (text) => { stdout += text; });
+  const [code] = await once(child, 'exit');
+  assert.equal(code, 0);
+  assert.match(stdout, /已通过运行中的后端/);
+  assert.deepEqual((await call('GET', '/api/products')).body.totals, initialTotals);
+});
+
+test('lab api：打印启动行与逐行日志，Ctrl+C 停止', async (t) => {
+  const dir = await tempDir(t);
+  const child = spawn(process.execPath, ['tools/lab.mjs', 'api'], { cwd: workspace, env: labEnv({ LAB_API_DATA: path.join(dir, 'products.json'), LAB_API_PORT: '0' }) });
+  t.after(() => child.kill('SIGKILL'));
+  let output = '';
+  child.stdout.setEncoding('utf8').on('data', (text) => { output += text; });
+  const waitFor = async (pattern) => {
+    for (let i = 0; i < 200 && !pattern.test(output); i++) await new Promise((resolve) => setTimeout(resolve, 25));
+    assert.match(output, pattern);
+  };
+  await waitFor(/库存后端：http:\/\/127\.0\.0\.1:\d+\/api（数据 .*products\.json；Ctrl\+C 停止）\n/);
+  const origin = /库存后端：(http:\/\/127\.0\.0\.1:\d+)\/api/.exec(output)[1];
+  assert.equal((await fetch(`${origin}/api/products?stock=low`)).status, 200);
+  await waitFor(/\nGET \/api\/products\?stock=low 200 \d+ms\n/);
+  child.kill('SIGINT');
+  const [code] = await once(child, 'exit');
+  assert.equal(code, 0);
+  assert.match(output, /库存后端已停止。/);
 });
 
 test('服务端规则生成物与参考 core 同步', { skip: !existsSync(rulesScript) && '工作区快照里没有仓库脚本' }, () => {
