@@ -9,7 +9,7 @@ if (choices !== undefined) {
   if (!Array.isArray(choices) || choices.length < 2 || choices.length > KEYS.length || choices.some((choice) => typeof choice !== 'string' || !choice.trim())) {
     throw new Error(`Predict「${question}」的 choices 应是 2–${KEYS.length} 个非空字符串`);
   }
-  if (!Number.isInteger(correct) || correct < 0 || correct >= choices.length) {
+  if (correct === undefined || !Number.isInteger(correct) || correct < 0 || correct >= choices.length) {
     throw new Error(`Predict「${question}」的 correct 应是 choices 中正确选项的下标（0–${choices.length - 1}），收到 ${JSON.stringify(correct)}`);
   }
 } else if (correct !== undefined) {
