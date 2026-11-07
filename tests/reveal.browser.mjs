@@ -18,7 +18,7 @@ const INSERTED = '.reveal-bar, .reveal-chip, .practice-head, [data-step-kind="tr
 // 揭晓前允许被脚本隐藏的元素。
 const MASKED = '.reveal-value, [data-reveal-explain], .reveal-inline, .reveal-result, .practice-badge, .reveal-again, .practice-message';
 // 效果图切换与可运行片段组件自带的隐藏节点。
-const OTHER_HIDDEN = 'img, [data-shot-switch], [data-run-editor], [data-run-result], [data-run-actions]';
+const OTHER_HIDDEN = 'img, [data-shot-switch], [data-run-editor], [data-run-result], [data-run-actions], figure[data-diagram] *';
 const REVEAL_PARTS = '[data-reveal-q], [data-reveal-code], [data-reveal-explain], [data-predict], details[data-disclosure]';
 
 await mkdir(qa, { recursive: true });
@@ -36,7 +36,7 @@ function firstDifference(actual, expected) {
 const snapshot = (page) => page.evaluate((inserted) => {
   const content = document.querySelector('.sl-markdown-content');
   const clone = content.cloneNode(true);
-  for (const node of clone.querySelectorAll(`${inserted}, noscript`)) node.remove();
+  for (const node of clone.querySelectorAll(`${inserted}, noscript, figure[data-diagram]`)) node.remove();
   return {
     text: clone.textContent.replace(/\s+/g, ''),
     copies: [...content.querySelectorAll('.expressive-code .copy button')].map((button) => button.dataset.code),

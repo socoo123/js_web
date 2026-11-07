@@ -73,9 +73,7 @@ const returns = returnsForLesson(row.lessonId, base);
     animation: lab-return-in var(--js-motion) var(--js-ease);
   }
   @keyframes lab-return-in { from { opacity: 0; transform: translateY(0.5rem); } }
-  @media (min-width: 72rem) {
-    .lab-return { inset-inline: auto 1.5rem; margin-inline: 0; }
-  }
+  /* 所有宽度都在底部居中：右侧目录是 fixed 且在主栏的层叠上下文之外，靠右放会被它挡住关闭按钮 */
   .lab-return a, .lab-return a:visited {
     flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.6rem;
     min-height: 2.75rem; padding: 0.25rem 0.9rem; border-radius: 10px;

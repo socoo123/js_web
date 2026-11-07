@@ -17,7 +17,7 @@ await mkdir(qa, { recursive: true });
 const requestedRoutes = process.env.REVISION_ROUTES?.split(',').filter(Boolean);
 const routes = globSync('**/*.html', { cwd: dist }).filter((route) => !route.startsWith('demos/')).map((route) => route.replace(/index\.html$/, '')).filter((route) => !requestedRoutes || requestedRoutes.includes(route)).sort();
 if (requestedRoutes) assert.deepEqual([...routes].sort(), [...requestedRoutes].sort(), '请求验收的页面必须全部存在');
-else assert.equal(routes.length, 62, '全站验收必须包含 62 个静态页面（含 Lab 规则页）');
+else assert.equal(routes.length, 63, '全站验收必须包含 63 个静态页面（含 Lab 规则页与 L6）');
 // 固定第一版公开地址；不能随 catalog 改名而静默跳过旧 URL。
 const legacyGroups = {
   '01-history-web': ['c01-story-ecosystem', 'c02-web-debugging'],
@@ -41,7 +41,7 @@ const cardCounts = new Map(catalog.lessons.filter((row) => row.migrated).map((ro
 const copyRoute = '02-language-data/c03-values-types/';
 const sampleRoutes = new Set([
   ...(requestedRoutes ?? []),
-  '', 'roadmap/', 'labs/', 'labs/l5/',
+  '', 'roadmap/', 'labs/', 'labs/l5/', 'labs/l6/',
   '03-async-modules/c15-css-layout-responsive/',
   '05-react/c21-react-jsx-components/',
   '05-react/c26-state-ownership-reset/',
@@ -145,7 +145,8 @@ try {
           const sides = target.locator('.compare-side');
           const left = await sides.nth(0).boundingBox(); const right = await sides.nth(1).boundingBox();
           assert(left && right, `对照两侧可见 ${route}`);
-          assert(width === 1280 ? Math.abs(left.y - right.y) < 2 : right.y > left.y + left.height - 2, `双栏响应式 ${route} ${width}`);
+          // V4：Java 在上、JS 在下，两段与正文栏同宽、左右对齐。
+          assert(right.y > left.y + left.height - 2 && Math.abs(left.x - right.x) < 2 && Math.abs(left.width - right.width) < 2, `对照纵向对齐 ${route} ${width}`);
           if (sampleRoutes.has(route)) {
             await target.scrollIntoViewIfNeeded();
             await screenshot(target, `${slug}-compare-${index}-${width}-${theme}.png`, { style: 'header.header, .mobile-preferences { visibility: hidden !important; }' });
@@ -225,16 +226,23 @@ try {
     const home = await marks.newPage();
     home.on('pageerror', (error) => errors.push(error.message));
     await home.goto(base);
-    await expect(home.locator('[data-lab-card]')).toHaveCount(5);
-    await expect(home.locator('[data-missing-preview]')).toHaveCount(0);
+    await expect(home.locator('[data-home-labs] [role="tab"]')).toHaveCount(6);
     await expect(home.locator('[data-continue]')).toBeVisible();
     await expect(home.locator('[data-continue-lesson]')).toHaveAttribute('href', /\/c01-story-ecosystem\/$/);
     await seed(home, ['C01', 'C02', 'C03']);
     await expect(home.locator('[data-continue-lesson]')).toHaveAttribute('href', /\/c04-scope-control\/$/);
-    await expect(home.locator('[data-lab-card="L1"]')).toHaveAttribute('data-lab-state', 'active');
-    await expect(home.locator('[data-lab-card="L2"]')).toHaveAttribute('data-lab-state', 'new');
-    await expect(home.locator('[data-lab-card="L1"] [data-lab-ring-text]')).toHaveText('3/10');
+    await expect(home.locator('[data-tab="l1"] [data-tab-count]')).toHaveText('3/10');
+    await expect(home.locator('[data-tab="l1"]')).toHaveAttribute('aria-selected', 'true');
+    await expect(home.locator('[data-next-lesson="l1"]')).toHaveText('继续 C04');
     await screenshot(home, 'home-progress-1280.png');
+    const cards = await marks.newPage();
+    cards.on('pageerror', (error) => errors.push(error.message));
+    await cards.goto(base + 'labs/');
+    await expect(cards.locator('[data-lab-card]')).toHaveCount(5);
+    await expect(cards.locator('[data-missing-preview]')).toHaveCount(0);
+    await expect(cards.locator('[data-lab-card="L1"]')).toHaveAttribute('data-lab-state', 'active');
+    await expect(cards.locator('[data-lab-card="L2"]')).toHaveAttribute('data-lab-state', 'new');
+    await expect(cards.locator('[data-lab-card="L1"] [data-lab-ring-text]')).toHaveText('3/10');
     const lesson = await marks.newPage();
     lesson.on('pageerror', (error) => errors.push(error.message));
     await lesson.goto(base + '02-language-data/c08-arrays-processing/');
@@ -265,7 +273,12 @@ try {
       await expect(back).toBeVisible();
       await expect(back.locator('a[href^="/js_web/labs/l"]').first()).toBeVisible();
     }
-    if (route === '') await expect(plain.locator('[data-lab-card] a[href^="/js_web/labs/l"]')).toHaveCount(5);
+    if (route === '') {
+      await expect(plain.locator('[data-home-labs] [data-panel]')).toHaveCount(6);
+      for (const panel of await plain.locator('[data-home-labs] [data-panel]').all()) await expect(panel).toBeVisible();
+      await expect(plain.locator('[data-home-labs] [data-panel] a.js-button[href^="/js_web/labs/l"]')).toHaveCount(6);
+    }
+    if (route === 'labs/') await expect(plain.locator('[data-lab-card] a[href^="/js_web/labs/l"]')).toHaveCount(5);
     if (trials.includes(route)) {
       await expect(plain.locator('[data-lesson-task]')).toBeVisible();
       await expect(plain.locator('.compare-side')).toHaveCount(cardCounts.get(route) * 2);
