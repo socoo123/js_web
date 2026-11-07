@@ -4,7 +4,7 @@
 
 48 课必修正文、四张速查页、14 张机制图与本地阅读进度保留。站点以 Lab 为主线：侧栏按 Lab 分组，首页与 Lab 主页用标签进入课程，学完以 L6 毕业挑战收尾；阶段内连续修改，阶段间可用固定快照补课。C23/C41 分别接正式 C22/C40，L4 保留 React 主应用并提供四种并列适配，L5 回到 React 主应用交付。实际发布版本、验证范围与维护状态以 [STATUS](docs/STATUS.md) 和 [阶段记录](labs/records/)为准。
 
-**V4「Lab 优先」改版进行中：批次 1（Lab 优先与交互）见 [V4-1 记录](labs/records/V4-1.md)；批次 2（L5 本地后端，发行版 `2026.11-v4.0`）见 [V4-2 记录](labs/records/V4-2.md)；下一批为勘误与全站终验。** C44 起的学习包附带作者提供的本地后端 `server/`（`npm run lab -- api`），学员只写前端；接口见 [L5 后端接口](https://socoo123.github.io/js_web/labs/api/)。V2 的 `2026.10-v2.5` 等历史包保留，证据见 [C 记录](labs/records/C.md)。
+**V4 完成，下一步：无。** 批次 1（Lab 优先与交互）见 [V4-1](labs/records/V4-1.md)；批次 2（L5 本地后端，发行版 `2026.11-v4.0`）见 [V4-2](labs/records/V4-2.md)；批次 3（勘误、全站终验与 Pages 核验）见 [V4-3](labs/records/V4-3.md)。C44 起的学习包附带作者提供的本地后端 `server/`（`npm run lab -- api`），学员只写前端；接口见 [L5 后端接口](https://socoo123.github.io/js_web/labs/api/)。V2 的 `2026.10-v2.5` 等历史包保留，证据见 [C 记录](labs/records/C.md)。
 
 **[从 Lab 开始跟做](https://socoo123.github.io/js_web/labs/) · [Lab 规则与验收](https://socoo123.github.io/js_web/labs/rules/) · [48 课学习路线](https://socoo123.github.io/js_web/roadmap/) · [在线阅读](https://socoo123.github.io/js_web/) · [C48 自测与复盘](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/)**
 
@@ -226,7 +226,7 @@ docs/                   计划、规范、架构、来源与状态
 
 推送 `main` 或手动触发[工作流](.github/workflows/deploy.yml)后，Actions 安装锁定依赖、执行相应门禁并发布 `dist/`；具体命令以工作流与 [DEPLOYMENT](docs/DEPLOYMENT.md)为准。发布地址为 `https://socoo123.github.io/js_web/`，资源和链接必须保留 `/js_web/` 子路径。对应提交的 Pages 成功后还要核验课程、Lab 与下载校验值，实际结果见 [Actions](https://github.com/socoo123/js_web/actions)和阶段记录。当前工作流未配置 PR 自动触发。
 
-恢复工作时发送 **`JS_WEB_START`**，先读 STATUS 的真实下一步。V4 三批的执行与交接协议见 PLAN §6–8；批次 3 完成后关闭计划，下一步为无，只按用户提出的具体维护需求行动。
+恢复工作时发送 **`JS_WEB_START`**，先读 STATUS。**V4 已完成并关闭，下一步：无**；只按用户提出的具体维护需求行动，不自动开启新一轮。已执行的三批契约与接续文本见 PLAN §6–8。
 
 ## 当前范围与待办
 

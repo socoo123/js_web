@@ -127,7 +127,7 @@ ES2026 查询所见新增组为 Map/WeakMap Upsert、JSON 源文本访问、Iter
 - 历史依据使用 [设计者与标准工作者的论文全文](https://www.wirfs-brock.com/allen/jshopl.pdf)，核对原型、命名、兼容背景及 Node/CommonJS 转折；正文原创讲解。
 - Node、Bun、npm、Yarn、pnpm、React、UI5 家族定位使用对应官方文档核对；本课没有新增其安装命令或第三方依赖。
 - 实际执行环境：Chrome 155.0.8059.40、Node 23.11.0、JDK 21.0.2。Node 23 是本机验证环境，不改动后续工程选择 Node 24 LTS 的计划。执行项和命令见 [C01 练习记录](../examples/c01/README.md)。
-- 固定并实际运行 [D2 0.9.0](https://github.com/d2lang/d2/releases/tag/v0.9.0)，使用 Dagre。中文字体固定到 [Google Fonts Noto Sans SC 提交](https://github.com/google/fonts/tree/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc)，原始 TTF 的 SHA-256、许可和重建方法见 [图说明](../diagrams/README.md)。SVG 内嵌字形和许可，无在线字体依赖。
+- 固定并实际运行 [D2 0.9.0](https://github.com/d2lang/d2/releases/tag/v0.9.0)，使用 Dagre。中文字体固定到 [Google Fonts Noto Sans SC 提交](https://github.com/google/fonts/tree/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc)，原始 TTF 的 SHA-256、许可和重建方法见 [历史图说明](https://github.com/socoo123/js_web/blob/ba2c814/diagrams/README.md)。SVG 内嵌字形和许可，无在线字体依赖；该管线已由 V4 图组件替代。
 - 静态 Markdown 预览及图渲染通过；未执行 Astro 构建、Pages 子路径或部署验证。
 
 ## 网站与提前 Pages 部署的核查
