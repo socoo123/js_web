@@ -23,7 +23,7 @@ export default function App({ inventoryRepository }) {
 }
 // endregion profiler
 function InventoryView() {
-  const { products, dispatch, snapshot } = useInventory();
+  const { products, dispatch, snapshot, dataSource } = useInventory();
   const trigger = useRef(null);
   const heading = useRef(null);
   function openEditor(id, button) { trigger.current = button; setSelectedId(id); }
@@ -86,6 +86,7 @@ function InventoryView() {
   </>;
 // endregion report-view
   return <main><h1 ref={heading} tabIndex={-1}>React 库存工作台</h1>
+    <p>数据源：{dataSource === "api" ? "本地后端 /api" : "浏览器 mock"}</p>
     <Toolbar count={visible.length}>
       <label>搜索 <input placeholder="名称或编号" value={query} onChange={(event) => changeFilter("q", event.target.value)} /></label>
       <label>分类 <select aria-label="分类" value={category} onChange={(event) => changeFilter("category", event.target.value)}>
@@ -109,7 +110,10 @@ function InventoryView() {
       <Route path="/products/:id" element={<DetailRoute />} />
       <Route path="*" element={<p>未找到页面</p>} />
     </Routes>
-    <section aria-label="本地库存快照">
+    {dataSource === "api" ? <section aria-label="后端固定数据">
+      <button onClick={snapshot.reset}>恢复固定数据</button>
+      <p role="status">{snapshot.message}</p>
+    </section> : <section aria-label="本地库存快照">
       <button onClick={snapshot.save}>保存本地快照</button><button onClick={snapshot.recover}>恢复备份</button>
       <button onClick={async () => {
         try { download(await snapshot.exportText()); }
@@ -122,7 +126,7 @@ function InventoryView() {
         finally { input.value = ""; }
       }} /></label>
       <p role="status">{snapshot.message}</p>
-    </section>
+    </section>}
     <label><input type="checkbox" checked={failSave} onChange={(event) => setFailSave(event.target.checked)} />模拟保存失败</label>
     {selected && <ProductEditor key={selectedId} product={selected} onSave={saveProduct} onCancel={() => closeEditor()} />}
   </main>;

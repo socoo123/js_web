@@ -1,4 +1,12 @@
 {
   "previous": "C44",
-  "files": ["notes/debug.md"]
+  "files": [
+    "src/services/api-repository.js",
+    "src/services/data-source.js",
+    "src/react/InventoryProvider.jsx",
+    "src/react/App.jsx",
+    "src/react/ProductEditor.jsx",
+    "vite.config.js",
+    "notes/debug.md"
+  ]
 }

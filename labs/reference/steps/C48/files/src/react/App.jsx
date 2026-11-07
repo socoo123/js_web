@@ -7,7 +7,9 @@ function recordRender(id, phase, actualDuration, baseDuration) {
   console.info("库存渲染", JSON.stringify({ id, phase, actualDuration, baseDuration }));
 }
 // endregion report-imports
+import { useQuery } from "@tanstack/react-query";
 import { InventoryProvider, useInventory } from "./InventoryProvider.jsx";
+import { pageOptions } from "./query-options.js";
 import { selectProducts, sortByStock, summarize, nextProductId } from "../core/inventory.js";
 import ProductList from "./ProductList.jsx";
 import Toolbar from "./Toolbar.jsx";
@@ -23,7 +25,7 @@ export default function App({ inventoryRepository }) {
 }
 // endregion profiler
 function InventoryView() {
-  const { products, dispatch, snapshot } = useInventory();
+  const { products, dispatch, snapshot, dataSource, repository } = useInventory();
   const trigger = useRef(null);
   const heading = useRef(null);
   function openEditor(id, button) { trigger.current = button; setSelectedId(id); }
@@ -44,6 +46,8 @@ function InventoryView() {
 // region stock-filter
   const lowOnly = searchParams.get("stock") === "low";
   const matchesStock = (product) => !lowOnly || (product.stock >= 1 && product.stock <= 5);
+  const lowParams = { stock: "low", q: query, category: category === "全部" ? "" : category };
+  const low = useQuery({ ...pageOptions(repository, lowParams), enabled: lowOnly });
 // endregion stock-filter
   function changeFilter(key, value) {
     const next = new URLSearchParams(searchParams);
@@ -52,9 +56,9 @@ function InventoryView() {
     setSearchParams(next, { replace: key === "q" });
   }
 // region derived
-  const filtered = selectProducts(products, { query, category }).filter(matchesStock);
+  const filtered = lowOnly ? low.data?.items ?? [] : selectProducts(products, { query, category });
   const visible = order === "stock" ? sortByStock(filtered) : filtered;
-  const summary = summarize(visible);
+  const summary = lowOnly && low.data ? low.data.summary : summarize(visible);
 // endregion derived
   useInventoryShortcuts(products.length, restock);
   const [failSave, setFailSave] = useState(false);
@@ -89,6 +93,7 @@ function InventoryView() {
   </>;
 // endregion report-view
   return <main><h1 ref={heading} tabIndex={-1}>React 库存工作台</h1>
+    <p>数据源：{dataSource === "api" ? "本地后端 /api" : "浏览器 mock"}</p>
     <Toolbar count={visible.length}>
       <label>搜索 <input placeholder="名称或编号" value={query} onChange={(event) => changeFilter("q", event.target.value)} /></label>
       <label>分类 <select aria-label="分类" value={category} onChange={(event) => changeFilter("category", event.target.value)}>
@@ -99,6 +104,9 @@ function InventoryView() {
       <button onClick={(event) => openEditor("new", event.currentTarget)} disabled={nextProductId(products) === null}>新建商品</button>
     </Toolbar>
     <p id="summary">库存 {summary.stock} / 价值 {summary.valueCents} 分</p>
+    {lowOnly && low.isPending && <p role="status">正在读取低库存</p>}
+    {lowOnly && low.isError && <p role="alert">低库存读取失败：{low.error.message}</p>}
+    {lowOnly && low.data && <p id="totals">全量 {low.data.totals.count} 种 / 库存 {low.data.totals.stock} / 价值 {low.data.totals.valueCents} 分</p>}
     <p role="alert">{operationMessage}</p>
     <ProductList products={visible} renderActions={(product) => <>
       <StockActions product={product} onRestock={restock} />
@@ -113,7 +121,10 @@ function InventoryView() {
       <Route path="/products/:id" element={<DetailRoute />} />
       <Route path="*" element={<p>未找到页面</p>} />
     </Routes>
-    <section aria-label="本地库存快照">
+    {dataSource === "api" ? <section aria-label="后端固定数据">
+      <button onClick={snapshot.reset}>恢复固定数据</button>
+      <p role="status">{snapshot.message}</p>
+    </section> : <section aria-label="本地库存快照">
       <button onClick={snapshot.save}>保存本地快照</button><button onClick={snapshot.recover}>恢复备份</button>
       <button onClick={async () => {
         try { download(await snapshot.exportText()); }
@@ -126,7 +137,7 @@ function InventoryView() {
         finally { input.value = ""; }
       }} /></label>
       <p role="status">{snapshot.message}</p>
-    </section>
+    </section>}
     <label><input type="checkbox" checked={failSave} onChange={(event) => setFailSave(event.target.checked)} />模拟保存失败</label>
     {selected && <ProductEditor key={selectedId} product={selected} onSave={saveProduct} onCancel={() => closeEditor()} />}
   </main>;
