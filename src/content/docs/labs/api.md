@@ -5,7 +5,7 @@ description: 本地库存后端的启动与恢复、日志、通用约定、每�
 
 L5 的工作区自带作者写好的本地后端 `server/`。它只用 Node 24 内置模块，只监听本机 `127.0.0.1:8070`，数据存在工作区的 `.lab/server/products.json`。你只写前端，这一页是写前端时查的接口说明；任务步骤在 [L5 主页](/js_web/labs/l5/)。
 
-下面的响应都是在固定数据上实际请求得到的。为了好读，长 JSON 换行缩进，响应头只留与本页有关的几行，省略了 `Date`、`Connection` 等。
+下面的响应和终端输出都来自实际运行。每一节的请求都从固定数据开始，同一节里按顺序发出。为了好读，长 JSON 换行缩进，响应头只留与本页有关的几行，省略了 `Date`、`Connection` 等。
 
 ## 启动、停止与恢复数据
 
@@ -19,10 +19,21 @@ npm run lab -- api
 库存后端：http://127.0.0.1:8070/api（数据 .lab/server/products.json；Ctrl+C 停止）
 ```
 
-- **停止**：在这个终端按 Ctrl+C。
+- **停止**：在这个终端按 Ctrl+C，终端打印「库存后端已停止。」
 - **第一次启动**：数据文件不存在时，后端从 `data/products.json` 生成它，每个商品的 `version` 是 1。之后的修改都写进这份文件，重启后还在。
-- **恢复固定数据**：运行 `npm run lab -- api reset`。8070 上有后端在跑时，它调用 `POST /api/_lab/reset`；没在跑时，直接改写数据文件。页面里的「恢复固定数据」按钮做的是同一件事。
+- **恢复固定数据**：在另一个终端运行 `npm run lab -- api reset`。页面里的「恢复固定数据」按钮做的是同一件事。
 - **端口被占用**：启动失败并提示「8070 已被占用：可能已有一个 api 在运行。先在那个终端按 Ctrl+C 停止，或设置 LAB_API_PORT 换端口。」
+- **工作区里没有 `server/`**：提示「本地后端从 2026.11-v4.0 的 C44 起提供；按 Lab 总览的升级说明取得新工作区。」，处理见 [L5 的升级说明](/js_web/labs/l5/#从旧发行版升级)。
+
+`api reset` 先看 8070 上有没有后端在跑，两种情况的输出不同：
+
+```text
+已通过运行中的后端（127.0.0.1:8070）恢复固定数据，并清空注入的故障。
+```
+
+```text
+后端没有运行，已离线恢复固定数据：.lab/server/products.json（6 个商品，version 全为 1）。
+```
 
 三个环境变量写在命令前面，只影响这一次启动：
 
@@ -32,15 +43,22 @@ npm run lab -- api
 | `LAB_API_DATA` | 换一个数据文件，用于独立实验 | `LAB_API_DATA=/tmp/try.json npm run lab -- api` |
 | `LAB_API_CORS_ORIGIN` | 放行一个来源的跨源请求，见 [CORS 与代理](#cors-与代理) | `LAB_API_CORS_ORIGIN=http://127.0.0.1:8060 npm run lab -- api` |
 
-换了端口，`vite.config.js` 里的代理目标也要跟着改。
+换了端口，`vite.config.js` 里的代理目标和 `api reset` 都要用同一个 `LAB_API_PORT`。设置了 `LAB_API_CORS_ORIGIN` 时，启动行下面多一行「CORS 只放行来源 http://127.0.0.1:8060」。
 
-**数据文件损坏时拒绝启动。** 文件不是合法 JSON，或任何一个商品不合规则，后端不会带着坏数据运行：
+**数据文件损坏时拒绝启动。** 文件不是合法 JSON，或任何一个商品不合规则，后端不会带着坏数据运行，命令以退出码 1 结束：
 
 ```text
-数据文件损坏：.lab/server/products.json（不是合法 JSON：Expected ',' or '}' after property value in JSON at position 36 (line 1 column 37)）。运行 npm run lab -- api reset 恢复固定数据；损坏文件会另存，不会删除。
+数据文件损坏：.lab/server/products.json（不是合法 JSON：Expected ',' or '}' after property value in JSON at position 37 (line 2 column 1)）。运行 npm run lab -- api reset 恢复固定数据；损坏文件会另存，不会删除。
 ```
 
-reset 先把坏文件复制成 `products.json.damaged-2026-11-07T071210.105Z` 这样带时间的名字，再写入固定数据。和 C14 的本地快照一样，先保留现场，再恢复。
+这时运行 `npm run lab -- api reset`，它先把坏文件复制一份带时间的副本，再写入固定数据：
+
+```text
+后端没有运行，已离线恢复固定数据：.lab/server/products.json（6 个商品，version 全为 1）。
+原文件已损坏，另存为 .lab/server/products.json.damaged-2026-11-07T071820.029Z，没有删除。
+```
+
+和 C14 的本地快照一样，先保留现场，再恢复。
 
 ## 读懂 api 终端
 
@@ -56,7 +74,7 @@ GET /api/products/P001 - 204ms 注入故障 客户端已断开
 ```
 
 - 前端每个 `/api` 请求在 Network 里有一行，在这里也应有一行。Network 有、终端没有，说明请求没到后端，例如被 CORS 预检拦下或代理目标写错。
-- 行尾的「注入故障」表示这次响应由[故障注入](#故障注入)决定。
+- 行尾的「注入故障」表示这次响应由[故障注入](#故障注入)决定。参考实现保存商品时会先注入 300ms 延迟，让「正在保存…」看得见，所以每次保存前多一行 `POST /api/_lab/faults 204`，PATCH 那一行也带「注入故障」。
 - 状态写成 `-` 并带「客户端已断开」：浏览器在响应前取消了请求，例如 `AbortController` 生效。
 - 服务器内部出错（500 `INTERNAL`）时，下一行以「原因：」开头写出具体原因。
 
@@ -316,9 +334,11 @@ ETag: "2"
 {"id":"P001","name":"机械键盘","category":"外设","stock":15,"priceCents":39900,"tags":["热销"],"version":2}
 ```
 
-`{"quantity":0}` 返回 422，`fields.quantity` 是「补货数量必须是 1–99999 的整数」。补货不需要 `If-Match`：它是在当前库存上增加，不是用你看到的值覆盖。
+全部商品变为 6 种、55 件、2754500 分。`{"quantity":0}` 返回 422，`fields.quantity` 是「补货数量必须是 1–99999 的整数」。补货不需要 `If-Match`：它是在当前库存上增加，不是用你看到的值覆盖。
 
 ### 删除商品
+
+接着新建商品那一节，删除刚建的 P007：
 
 ```sh
 curl -i -X DELETE http://127.0.0.1:8070/api/products/P007
@@ -328,7 +348,7 @@ curl -i -X DELETE http://127.0.0.1:8070/api/products/P007
 HTTP/1.1 204 No Content
 ```
 
-再删一次，或再读取它，都是 404 `商品 P007 不存在`。
+全部商品回到 6 种、52 件、2634800 分。再删一次，或再读取它，都是 404「商品 P007 不存在」。编号按现有最大编号加 1 分配，所以删掉最大的 P007 后再新建，得到的仍是 P007。
 
 ### 恢复固定数据
 
@@ -397,7 +417,7 @@ HTTP/1.1 500 Internal Server Error
 | 422 的消息只出现在表单底部 | Response 的 `fields` | 把 `fields` 的键对应到输入框；`priceCents` 对应价格输入框 |
 | 数字和预期对不上，例如总库存 55 不是 52 | api 终端的历史记录 | 上一个实验的修改还在数据文件里。点「恢复固定数据」或运行 `npm run lab -- api reset` |
 | `npm run lab -- api` 报「数据文件损坏」 | 提示里的文件路径 | 运行 `npm run lab -- api reset`；坏文件会另存为 `.damaged-…` |
-| 运行 `npm run lab -- api` 提示去取新工作区 | 工作区里有没有 `server/` | 2026.10-v2.5 及更早的工作区没有后端，按 [L5 的升级说明](/js_web/labs/l5/#从旧发行版升级) 处理 |
+| `npm run lab -- api` 只列出「命令：status \| start Cnn \| …」，里面没有 `api`；或提示「本地后端从 2026.11-v4.0 的 C44 起提供…」 | 工作区里有没有 `server/` | 2026.10-v2.5 及更早的工作区没有后端，按 [L5 的升级说明](/js_web/labs/l5/#从旧发行版升级) 处理 |
 
 ## Pages 上没有后端
 

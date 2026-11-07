@@ -77,7 +77,7 @@ LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs
 </Fragment>
 <Fragment slot="C47">
 
-回归测试用假 fetch 或 mock repository，不需要真实后端。只有 `tests/e2e/api.spec.js` 那一条连真实后端，由 `check C47` 启动临时数据的后端和带代理的页面来跑，不会改动 `.lab/server/products.json`。C47 继续在 App 的 `<HashRouter useTransitions={false}>` 选择同步路由更新。
+RTL 回归用 mock repository，在 repository 边界用替身抛 `ApiError` 模拟 422、409 和 500，不需要真实后端。只有 `tests/e2e/api.spec.js` 那一条连真实后端，由 `check C47` 启动临时数据的后端和带代理的严格预览来跑，不会改动 `.lab/server/products.json`。C47 继续在 App 的 `<HashRouter useTransitions={false}>` 选择同步路由更新。
 
 </Fragment>
 <Fragment slot="C48">
@@ -124,21 +124,23 @@ npm run lab -- start C45
 npm run lab -- dev
 ```
 
-**2. 写四个文件。** 方法名和返回形状与原来的 `inventory-repository.js` 一致，组件和测试因此不用改。
+**2. 改六个文件。** 方法名和返回形状与原来的 `inventory-repository.js` 一致，其他组件和已有测试因此不用改。
 
 | 文件 | 要做什么 |
 | --- | --- |
 | `src/services/api-repository.js` | 导出 `ApiError`（带 `status`、`code`、`fields`、`current`）和 `createApiRepository({ baseUrl, fetch })`。`list`、`get`、`save`、`create`、`remove`、`restock` 与原 repository 同名同形，另加 `listPage(params)` 与 `reset()` |
 | `src/services/data-source.js` | 按 `import.meta.env.VITE_DATA_SOURCE` 导出 `repository` 与 `dataSource`：`"api"` 是默认，`"mock"` 用原来的 `inventory-repository.js`，其他值直接抛错 |
-| `src/react/InventoryProvider.jsx` | 默认 repository 改从 `data-source.js` 取；测试仍注入 `freshRepository()` |
+| `src/react/InventoryProvider.jsx` | 默认 repository 和 `dataSource` 改从 `data-source.js` 取；测试仍注入 `freshRepository()`。读取失败时显示「读取失败：…」和「重新读取」 |
+| `src/react/App.jsx` | 标题下显示「数据源：本地后端 /api」或「数据源：浏览器 mock」；API 模式下四个快照按钮换成一个「恢复固定数据」 |
+| `src/react/ProductEditor.jsx` | 422 的 `fields` 放到对应输入框（`priceCents` 对应价格）；409 显示冲突提示和「载入最新」，草稿保留。目标 2 的场景 2 和目标 6 检查这两项 |
 | `vite.config.js` | 在配置对象里加 `server: { proxy: { "/api": "http://127.0.0.1:8070" } }` |
 
 `api-repository.js` 的几条规则：
 
 - `baseUrl` 默认取 `import.meta.env.VITE_API_BASE`，没设就是 `"/api"`。相对地址让浏览器只和页面所在的 8060 通信，由 Vite 代理转给 8070。
-- 非 2xx 一律抛 `ApiError`，消息取错误体的 `error.message`。断网、CORS 这类没拿到响应的失败保留原来的 `TypeError: Failed to fetch`。
-- `save` 发 `PATCH`，头里带 `If-Match: "<version>"`。version 用这个 repository 最近一次从服务器拿到的该商品的值，所以每个响应里的商品都要记下 version。
-- `options.signal` 原样交给 `fetch`。`failNext(operation)`、`options.fail` 与 `options.delay` 改成调用 `POST /api/_lab/faults`，让模拟的失败也出现在 Network 与 api 终端。
+- 非 2xx 一律抛 `ApiError`，消息写成 `HTTP 状态：错误体的 message`，例如「HTTP 500：注入的故障：500」。断网、CORS 这类没拿到响应的失败保留原来的 `TypeError: Failed to fetch`。
+- `save` 发 `PATCH`，只带可改的五个字段，头里带 `If-Match: "<version>"`。version 用这个 repository 最近一次从服务器拿到的该商品的值，所以每个响应里的商品都要记下 version。
+- `options.signal` 原样交给 `fetch`。`failNext(operation)`、`options.fail` 与 `options.delay` 改成先调用 `POST /api/_lab/faults`，让模拟的失败也出现在 Network 与 api 终端。保存时 App 传了 `delay: 300` 让「正在保存…」看得见，所以每次保存前都多一行 `POST /api/_lab/faults`，PATCH 那一行也带「注入故障」。
 
 完整参考解在本课完成后用 `npm run lab -- compare C45` 对照；接口细节见 [L5 后端接口](/js_web/labs/api/)。
 
@@ -172,6 +174,8 @@ await fetch("/api/_lab/faults", {
 
 注入的故障只生效指定次数（默认 1 次）；被它影响的请求在 api 终端的行尾带「注入故障」。「恢复固定数据」会同时清掉没用完的故障。
 
+> 未运行验证：五个场景在页面上的现象按参考实现写出，还没有在浏览器里逐步走过；后端响应与 api 终端的行是实际请求的结果。请按步骤自己尝试。
+
 ### 场景 1：直连 8070，被 CORS 拦下
 
 **先读**：[C13 fetch 的响应分两步处理](/js_web/03-async-modules/c13-async-await-fetch/#2-fetch-的响应分两步处理)（同源与 CORS） · [C45 404、断网与错误正文分别判断](/js_web/07-project/c45-debug-delivery-checks/#404断网错误正文分别判断) · [MDN：CORS](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Guides/CORS)
@@ -185,17 +189,17 @@ await fetch("/api/_lab/faults", {
 
 **先读**：[C25 名称、原因和下一步都要找得到](/js_web/05-react/c25-forms-validation-accessibility/#4-可访问性名称原因和下一步都要找得到) · [C30 HTTP 返回了，不等于商品加载成功](/js_web/05-react/c30-requests-races/#2-http-返回了不等于商品加载成功) · [MDN：422](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Status/422)
 
-1. **操作**：注入 `{"method":"PATCH","path":"/api/products/P004","status":422,"body":{"error":{"code":"VALIDATION","message":"商品字段不合法","fields":{"priceCents":"价格必须是非负安全整数分"}}}}`，然后编辑 P004 并保存。前端校验与后端同源，正常输入很难触发 422，所以用注入模拟服务端拒绝。
-2. **证据**：Network 有 `PATCH /api/products/P004` 422，Response 的 `error.fields.priceCents` 有消息；api 终端那一行带「注入故障」。故障版本只在表单底部显示一句笼统的失败，价格输入框旁没有提示。
-3. **修复**：编辑器捕获 `ApiError`，把 `fields` 按字段名放到对应输入框（`priceCents` 对应价格），并让输入框带上错误说明；没有对应字段的消息放在表单底部。草稿保留。
-4. **复验**：再注入一次，价格输入框旁出现「价格必须是非负安全整数分」，草稿仍是刚填的值；不注入时同样的保存成功。
+1. **操作**：注入 `{"method":"PATCH","path":"/api/products/P004","status":422,"body":{"error":{"code":"VALIDATION","message":"字段校验失败，见 fields","fields":{"priceCents":"价格必须是非负安全整数分"}}}}`，然后编辑 P004 并保存。前端校验与后端同源，正常输入很难触发 422，所以用注入模拟服务端拒绝。
+2. **证据**：Network 有 `PATCH /api/products/P004` 422，Response 是上面注入的错误体；api 终端那一行是 `PATCH /api/products/P004 422 0ms 注入故障`。还没处理 `fields` 的编辑器只在表单底部显示「保存失败：HTTP 422：字段校验失败，见 fields」，价格输入框旁没有提示。
+3. **修复**：编辑器捕获 `ApiError`，把 `fields` 按字段名放到对应输入框（`priceCents` 对应价格），让输入框带上 `aria-invalid` 和错误说明，并把焦点放到第一个出错的输入框；没有对应输入框的消息放在表单底部。草稿保留。
+4. **复验**：再注入一次，价格输入框旁出现「价格必须是非负安全整数分」并获得焦点，草稿仍是刚填的值；不注入时同样的保存成功。
 
 ### 场景 3：保存成功了，列表还是旧的
 
 **先读**：[C32 mutation 与失效：先写成功，再更新读结果](/js_web/05-react/c32-tanstack-query-server-state/#5-mutation-与失效先写成功再更新读结果)
 
 1. **操作**：在 `InventoryProvider.jsx` 的 mutation `onSuccess` 里暂时删掉失效列表的那一句，然后把 P004 编辑为 8 并保存。
-2. **证据**：Network 有 `PATCH /api/products/P004` 200，Response 里 `stock` 已是 8、`version` 变成 2；但后面没有新的 `GET /api/products`，api 终端也只有 PATCH 那一行。列表仍显示 3、汇总仍 52；刷新后才是 8/57。
+2. **证据**：Network 有 `PATCH /api/products/P004` 200，Response 里 `stock` 已是 8、`version` 变成 2；但 PATCH 后面没有新的 `GET /api/products`，api 终端也一样。列表仍显示 3、汇总仍 52；刷新后才是 8/57。
 3. **修复**：恢复失效。保存、新建、删除、补货成功后失效 `["inventory"]` 前缀下的查询，列表与详情一起重新读取。
 4. **复验**：同样的保存后，PATCH 后面紧跟一条 `GET /api/products…`，列表直接显示 8，汇总 57，P001 仍为 12。
 
@@ -204,17 +208,17 @@ await fetch("/api/_lab/faults", {
 **先读**：[C30 HTTP 返回了，不等于商品加载成功](/js_web/05-react/c30-requests-races/#2-http-返回了不等于商品加载成功) · [C32 重试与界面状态](/js_web/05-react/c32-tanstack-query-server-state/#4-重试与界面状态有旧结果时继续显示)
 
 1. **操作**：用上面的 Console 片段注入一次 `GET /api/products` 500，然后刷新页面。
-2. **证据**：Network 一条 500，Response 是 `{"error":{"code":"FAULT","message":"注入的故障：500"}}`；api 终端那一行带「注入故障」。故障版本的页面一直停在「正在加载库存」，或者报 `products.filter is not a function`：repository 把错误体当成了商品数组。
+2. **证据**：Network 一条 500，Response 是 `{"error":{"code":"FAULT","message":"注入的故障：500"}}`；api 终端是 `GET /api/products?page=1&pageSize=50 500 0ms 注入故障`。如果请求函数不看 `response.ok`，错误体会被当成列表结果，页面报的是 `Cannot read properties of undefined (reading 'map')` 之类的错，看不出是后端 500；如果 Provider 没处理 `isError`，页面只剩空列表，也没有重试入口。
 3. **修复**：请求函数先看 `response.ok`，非 2xx 读出错误体后抛 `ApiError`。Provider 在读取失败时显示「读取失败：…」和「重新读取」按钮。
-4. **复验**：页面显示「读取失败：注入的故障：500」。故障只注入了一次，点「重新读取」后回到 6/52/2634800，api 终端多出一行 200。
+4. **复验**：页面显示「读取失败：HTTP 500：注入的故障：500」。故障只注入了一次，点「重新读取」后回到 6/52/2634800，api 终端多出一行 200。
 
 ### 场景 5：慢请求不能覆盖新选择
 
 **先读**：[C30 后发先到：旧结果为什么覆盖新选择](/js_web/05-react/c30-requests-races/#3-后发先到旧结果为什么覆盖新选择) · [C32 query key 和缓存](/js_web/05-react/c32-tanstack-query-server-state/#3-query-key-和缓存先问是不是同一份数据)
 
 1. **操作**：注入 `{"method":"GET","path":"/api/products/P001","delayMs":1500}`，打开 P001 详情，不等它出来就立刻打开 P002。
-2. **证据**：Network 里 P001 的请求要约 1.5 秒，P002 很快返回。故障版本最后显示的是晚到的 P001。
-3. **修复**：详情的 query key 带商品 id，`get(id, { signal })` 把 `signal` 交给 `fetch`。离开 P001 时它的请求被取消，Network 那一行显示 (canceled)。
+2. **证据**：Network 里 P001 的请求要约 1.5 秒，P002 很快返回，api 终端记下 `GET /api/products/P001 200 1504ms 注入故障`。如果详情的 query key 不带商品 id，最后显示的是晚到的 P001。
+3. **修复**：详情的 query key 带商品 id，`get(id, { signal })` 把 `signal` 交给 `fetch`。离开 P001 时它的请求被取消：Network 那一行显示 (canceled)，api 终端是 `GET /api/products/P001 - 204ms 注入故障 客户端已断开` 这样的一行，状态写成 `-`。
 4. **复验**：重做同一操作，最终显示「P002 无线鼠标：库存 0」，地址也是 P002。
 
 做完五个场景，再按 C45 课文排查资源 404、存储原文、360px 布局和生产 source map。
@@ -238,12 +242,14 @@ await fetch("/api/_lab/faults", {
 
 在 `tests/react/regression.test.jsx` 保留坏快照保护，再按风险选 3–5 条：
 
-- **422 映射**：假 fetch 返回 422 和 `fields.priceCents`，断言价格输入框旁出现消息、草稿保留。
-- **409 冲突**：假 fetch 返回 409 和 `current`，断言提示「保存冲突：服务器上的 P004 已被修改（库存 8）。草稿已保留，可载入最新后再保存。」和「载入最新」按钮。
-- **失败后重试**：第一次失败、第二次成功，断言用户点重试后看到新值。
+- **422 映射**：`vi.spyOn(repository, "save")` 让保存抛出带 `fields.priceCents` 的 `ApiError(422, …)`，断言价格输入框的可访问说明是这条消息、`aria-invalid` 为 true、获得焦点，汇总仍 52。
+- **409 冲突**：同样抛出带 `current` 的 `ApiError(409, …)`，断言提示里有服务器上的库存、草稿保留；点「载入最新」后再保存才成功。
+- **读取失败后重试**：列表第一次抛 `ApiError(500, …)`，断言显示「读取失败：HTTP 500：…」而不是停在加载中，点「重新读取」后回到六种商品。
 - **连续输入**：逐字输入 P004，结果完整、可清空。
 
-另加 `tests/e2e/api.spec.js` 一条连真实后端的流程：reset → 编辑 P004 为 8 保存 → 刷新仍 8、总库存 57。`npm run lab -- check C47` 用临时数据文件和空闲端口启动后端来跑它。
+替身放在 repository 边界：真实的表单、Provider 和 Query 都参与，HTTP 状态、`If-Match` 和持久化交给下面这条真实后端流程。
+
+另加 `tests/e2e/api.spec.js`：先 `POST /api/_lab/reset`，编辑 P004 为 8 保存，刷新后仍 8、汇总「库存 57 / 价值 2784300 分」，`GET /api/products/P004` 是 version 2。`npm run lab -- check C47` 用临时数据文件启动后端和带代理的严格预览来跑它，不碰 `.lab/server/products.json`。
 
 ## 目标 5：现场增量——服务端低库存
 
@@ -252,20 +258,24 @@ await fetch("/api/_lab/faults", {
 先不看参考答案。勾选「仅低库存」时：
 
 1. URL 仍写入 `?stock=low`，刷新后恢复。
-2. 用 `listPage({ stock: "low", q, category })` 读取：Network 有 `GET /api/products?stock=low…`，显示返回的 `items`，摘要用 `summary`，另显示全量 `totals`。
-3. 初始只剩 P004/P006，摘要 2 种、8 件、539200 分，全量仍 6/52/2634800。与搜索、分类取交集。
-4. 在低库存结果里把 P004 保存为 8：它离开结果，焦点回标题；清除条件后全量 57，P001 仍为 12。
+2. 用 `listPage({ stock: "low", q, category })` 读取：Network 有 `GET /api/products?stock=low`，选了分类或输入搜索时再带上 `category`、`q`。显示返回的 `items`，摘要用 `summary`，另显示全量 `totals`。查询条件写进 query key，条件变了才是另一份服务器结果。
+3. 初始只剩 P004/P006，摘要「库存 8 / 价值 539200 分」，另一行「全量 6 种 / 库存 52 / 价值 2634800 分」。与搜索、分类取交集。
+4. 在低库存结果里把 P004 保存为 8：它离开结果，焦点回标题，全量那一行变成 57；保存成功后失效的是 `["inventory"]` 前缀，所以低库存结果也会重新读取。清除条件后汇总 57，P001 仍为 12。
 
 mock repository 也要实现同形的 `listPage`，在浏览器里算出同样的结果。用 `VITE_DATA_SOURCE=mock npm run lab -- dev` 勾选一次，数字应完全相同，只是没有 `/api` 请求。
 
 ## 目标 6（选做）：两个标签页的保存冲突
 
-**先读**：[L5 后端接口：version、ETag 与 If-Match](/js_web/labs/api/#version-etag-与-if-match) · [C33 草稿、等待和失败各有归属](/js_web/05-react/c33-modern-react-actions/#2-草稿等待和失败各有归属)
+**先读**：[L5 后端接口：version 与 If-Match](/js_web/labs/api/#version-与-if-match) · [C33 草稿、等待和失败各有归属](/js_web/05-react/c33-modern-react-actions/#2-草稿等待和失败各有归属)
+
+C45 的编辑器已经处理 409，C47 用替身测过它。这里用两个真实的标签页再看一次，把结果记进 `notes/final-review.md`。
+
+> 未运行验证：两个标签页的步骤按参考实现写出，409 响应体是实际请求的结果。请按步骤自己尝试。
 
 1. **操作**：恢复固定数据，开两个标签页，都打开 P004 的编辑。标签页 A 改为 8 并保存；标签页 B 不刷新，改为 9 并保存。
 2. **证据**：B 的 `PATCH /api/products/P004` 返回 409，请求头 `If-Match: "1"`；Response 的 `error.current` 是服务器上的 P004（库存 8，version 2）。
 3. **目标行为**：B 显示「保存冲突：服务器上的 P004 已被修改（库存 8）。草稿已保留，可载入最新后再保存。」，草稿仍是 9，并有「载入最新」按钮。
-4. **复验**：点「载入最新」后再保存 9，这次 200，两个标签页刷新后都是 9。`check C48` 不强制这一项。
+4. **复验**：点「载入最新」，草稿换成服务器上的 8；再改为 9 保存，这次请求头是 `If-Match: "2"`，返回 200。两个标签页刷新后都是 9。`check C48` 不检查这一项。
 
 ## 选做：从零写前端
 
@@ -310,7 +320,7 @@ npm run lab -- dev
 <details id="从旧发行版升级">
 <summary>从旧发行版升级：工作区里没有 server/</summary>
 
-本地后端从 2026.11-v4.0 的 C44 起点包开始提供。旧工作区里运行 `npm run lab -- api` 会提示去取新工作区；旧工作区的 `restore` 取的也是旧版的包，同样没有 `server/`。
+本地后端从 2026.11-v4.0 的 C44 起点包开始提供。旧工作区的 lab 命令不认识 `api`，运行 `npm run lab -- api` 只会列出可用命令；旧工作区的 `restore` 取的也是旧版的包，同样没有 `server/`。
 
 1. 旧目录完整保留。下载本页的 <WorkspaceDownload checkpoint="C44" label="C44 起点包" />，解压到新的空目录，例如 `inventory-backend/`，执行一次 `npm ci`。
 2. 保留新版的 `tools/`、`server/`、`shell/`、`data/`、依赖清单与锁。从旧目录迁入自己的 `src/`、`notes/`、`tests/` 与 `vite.config.js`，先比较再合并；自己加的 package.json scripts 逐项合并进新清单。
