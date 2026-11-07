@@ -163,8 +163,8 @@ save.setAttribute("disabled", String(busy));
 ```
 
 1. **现象**：打开 P004，输入合法的 8，保存却一直灰着。
-2. **工具**：Elements 选中 `#save`；Console 读取 `$0.getAttribute("disabled")`、`$0.disabled`。Sources 在这行设断点。
-3. **证据**：busy 为 false，但 attribute 值是字符串 false，property 为 true。
+2. **工具**：Elements 选中 `#save`；Console 读取 `$0.hasAttribute("disabled")`、`$0.disabled`。Sources 在这行设断点。
+3. **证据**：busy 为 false，但 `disabled` attribute 仍然存在（组件随即把值改写成空字符串），`hasAttribute` 与 property 都是 true。
 4. **原因**：attribute 存在即禁用，字符串内容没有改变布尔规则。
 5. **修复**：恢复 `save.disabled = busy`；不需要删除合法的输入校验。
 6. **确认**：重复输入，保存恢复可用，P004 保存成 8，总库存 57。运行 `npm run lab -- check C43`；浏览器回归会检查实际按钮可用性与保存结果，错误写法应先失败，修复后通过。

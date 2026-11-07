@@ -7,7 +7,7 @@ import LabNext from './LabNext.astro';
 
 const { id, entry } = Astro.locals.starlightRoute;
 const lessonId = entry.data.title.match(/^(C\d{2})\s/)?.[1];
-const labPage = /^labs(?:\/l[1-5])?$/.test(id);
+const labPage = /^labs(?:\/l[1-6])?$/.test(id);
 // 课页、Lab 页和速查页放宽到 --js-wide-width；base.css 通过 html:has([data-page-kind]) 读取。
 const pageKind = lessonId ? 'lesson' : labPage ? 'lab' : id.startsWith('reference/') ? 'reference' : id === '404' ? 'not-found' : undefined;
 ---

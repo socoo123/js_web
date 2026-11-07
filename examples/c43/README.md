@@ -39,3 +39,4 @@
 - 首轮 `npm run check` 33文件、0诊断；本轮未再次运行。修订后 `node delivery/verify-anchors.mjs` 20个旧节锚点静态匹配。首轮Astro check 默认向依赖软链目标的 `.vite/.astro` 写了生成缓存；未编辑依赖源码，未删除/回滚共享缓存。最终站点门禁由主 agent 重建缓存后执行。
 - 真实v2.4接续补验：从主agent提供的C42副本只应用本课三文件，共享check85条+开发5/5、严格静态5/5；最终C44副本也实际85条+开发5/5、严格静态5/5。29个src文件未改，26个C43运行输入在两者哈希一致。无必要实现修复，见 [B记录](../../labs/records/B.md)（作者接续回归，非独立正文验收）。
 - 主agent公开C40→C41→C42后仅按本课正文完成三文件：85条、开发5/5、布尔attribute故障先红、修复后静态5/5通过；最终门禁/发行见B记录。未运行：DevTools手动点选与断点、屏幕阅读器、Firefox/Safari/Windows、真实SAP服务。
+- 勘误（2026-11-07）：调试节第 2–3 步原写「`getAttribute` 得到字符串 false」。L6 题目核对时在 Chromium 实测：已渲染的 `ui5-button` 执行 `setAttribute("disabled","false")` 后会把值改写成空字符串，`hasAttribute` 与 `disabled` property 都是 true。正文改为读 `hasAttribute`，结论（attribute 存在即禁用）不变。验证脚本见 `scripts/verify-capstone-workspace.mjs`。
