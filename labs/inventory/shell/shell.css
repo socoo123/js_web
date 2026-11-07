@@ -1,0 +1,25 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 48rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.health {
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid gray;
+  border-radius: 4px;
+}
+
+.health.online {
+  border-color: seagreen;
+}
+
+.health.offline {
+  border-color: firebrick;
+}
