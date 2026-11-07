@@ -20,7 +20,7 @@ export function optionsFromEnv(env = process.env) {
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error(`LAB_API_PORT 必须是 0–65535 的整数：${env.LAB_API_PORT}`);
   return {
     port,
-    dataFile: env.LAB_API_DATA ? path.resolve(env.LAB_API_DATA) : defaultDataFile,
+    dataFile: env.LAB_API_DATA ? path.resolve(workspace, env.LAB_API_DATA) : defaultDataFile,
     seedFile: defaultSeedFile,
     corsOrigin: env.LAB_API_CORS_ORIGIN || undefined,
   };
