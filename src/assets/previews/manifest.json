@@ -357,8 +357,8 @@
     },
     "l5/goal": {
       "checkpoint": "C48",
-      "digest": "2fb462e8d13f1b4da772ce2e584ab71d0a2e0d332551e34eaa25f7da6256697d",
-      "capturedAt": "2026-11-06",
+      "digest": "21ad37c2d8495add6d481441626b61a8aee7d69fcf388821693f9614dd0a1bf7",
+      "capturedAt": "2026-11-07",
       "environment": {
         "playwright": "1.64.1",
         "node": "24.22.0",
@@ -374,8 +374,8 @@
             1280,
             720
           ],
-          "bytes": 19242,
-          "sha256": "ea602382ce1a1916e98abb47fe16827c45ec287023abc5bf48312129fc651137"
+          "bytes": 19808,
+          "sha256": "2b286d2a8c50210785346f9c64df3ad086a3ed0df8e389e385a10c0220caca3b"
         }
       ]
     }

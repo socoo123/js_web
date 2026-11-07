@@ -1,4 +1,4 @@
 {
   "previous": "C46",
-  "files": ["src/react/App.jsx", "tests/react/regression.test.jsx", "notes/test-plan.md"]
+  "files": ["src/react/App.jsx", "tests/react/regression.test.jsx", "tests/e2e/api.spec.js", "notes/test-plan.md"]
 }

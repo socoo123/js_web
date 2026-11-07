@@ -1,4 +1,10 @@
 {
   "previous": "C47",
-  "files": ["src/react/App.jsx", "tests/react/final-filter.test.jsx", "notes/final-review.md"]
+  "files": [
+    "src/react/App.jsx",
+    "src/react/query-options.js",
+    "src/services/inventory-repository.js",
+    "tests/react/final-filter.test.jsx",
+    "notes/final-review.md"
+  ]
 }

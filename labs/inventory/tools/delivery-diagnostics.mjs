@@ -4,15 +4,19 @@ import path from 'node:path';
 import { createServer } from 'vite';
 import { chromium, expect } from '@playwright/test';
 import { workspace, viteConfig } from './lab.mjs';
+import { startApiFixture, proxyTo } from './api-fixture.mjs';
 
 // Author diagnostic on actual C45 files, using a disposable context and CDP.
 // Does not stand in for the learner interpreting Performance/Memory in DevTools.
+const api = await startApiFixture();
 const config = await viteConfig('C45');
+config.server.proxy = proxyTo(config.server.proxy, api.origin);
 config.server.port = Number(process.env.LAB_DELIVERY_PORT ?? 8068);
 config.server.hmr = false;
-const server = await createServer(config);
+let server;
 let browser;
 try {
+  server = await createServer(config);
   await server.listen();
   browser = await chromium.launch();
   const context = await browser.newContext();
@@ -86,4 +90,4 @@ try {
   assert.equal(firstModuleRequests, 1, '报表首次展开应按需加载一次');
   assert.equal(modules.length, 1, '再次展开不应重新下载同一报表模块');
   await context.close();
-} finally { await browser?.close(); await server.close(); }
+} finally { await browser?.close(); await server?.close(); await api.close(); }

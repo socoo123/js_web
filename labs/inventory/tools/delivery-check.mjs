@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { workspace, run } from './lab.mjs';
 
@@ -8,12 +9,17 @@ assert(/^C4[5-8]$/.test(id ?? ''), '交付检查需要 C45..C48');
 const n = Number(id.slice(1));
 for (const [from, file] of [[45, 'debug.md'], [46, 'delivery.md'], [47, 'test-plan.md'], [48, 'final-review.md']]) {
   if (n < from) continue;
-  const text = await readFile(path.join(workspace, 'notes', file), 'utf8');
+  const text = await readFile(path.join(workspace, 'notes', file), 'utf8').catch((error) => {
+    if (error.code === 'ENOENT') throw new Error(`缺少 notes/${file}：C${from} 要把排查证据写在这里。`);
+    throw error;
+  });
   assert(text.trim().length >= 80, `请填写 notes/${file}；记录实际证据和待完成项。`);
 }
 if (n >= 47) {
   const files = ['tests/react/regression.test.jsx', 'tests/react/inventory.test.jsx', 'tests/react/review.test.jsx'];
   if (n >= 48) files.push('tests/react/final-filter.test.jsx');
+  // Vitest 会静默跳过不存在的文件，所以先确认测试都写了。
+  for (const file of [...files, 'tests/e2e/api.spec.js']) assert(existsSync(path.join(workspace, file)), `缺少 ${file}：本课的测试要写在这个文件里。`);
   await run(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', 'tools/delivery.config.mjs', ...files]);
 }
 await run(process.execPath, ['tools/delivery-browser.mjs', id]);

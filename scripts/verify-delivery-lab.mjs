@@ -3,6 +3,7 @@ import { cp, mkdtemp, readFile, rm, symlink, mkdir, writeFile } from 'node:fs/pr
 import path from 'node:path';
 import os from 'node:os';
 import { spawn, spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 import { repo, materialize, filesIn, hash, safePath } from '../labs/snapshots.mjs';
 
 // Teacher assembly + actual-source mutation regression. Not an independent reader walkthrough.
@@ -20,7 +21,7 @@ function execute(args, { red, includes, extra = {}, cwd = root } = {}) {
     assert.equal(result.error, undefined, `红测执行器失败：${result.error?.message}`);
     assert.notEqual(result.status, 0, '故障版本意外通过，回归没有捕获风险');
     assert(includes.test(output), `红测不是预期的行为失败：\n${output}`);
-    console.log(output.split('\n').filter((line) => /Expected|Received|库存 13|库存 12|前缀错误|AssertionError|expected|received|P004|P002|1 failed|tests failed|Timeout|"before"|"after"|Closures|keydown|mian\.jsx|404/.test(line)).slice(0, 18).join('\n'));
+    console.log(output.split('\n').filter((line) => /Expected|Received|库存 13|库存 12|前缀错误|AssertionError|expected|received|P004|P002|1 failed|tests failed|Timeout|"before"|"after"|Closures|keydown|mian\.jsx|404|缺少|冲突|读取|数据源|输入框/.test(line)).slice(0, 18).join('\n'));
   } else {
     if (result.status !== 0) console.error(output);
     assert.equal(result.status, 0, `绿测失败：${result.error?.message ?? result.signal ?? result.status}`);
@@ -51,11 +52,11 @@ async function digestFiles(prefix) {
   for (const file of await filesIn(path.join(root, prefix))) result[file] = hash(await readFile(path.join(root, prefix, file)));
   return result;
 }
-async function probeStaticCLI(wrongBase) {
+async function probeStaticCLI(wrongBase, apiOrigin) {
   const before = await digestFiles('dist/src-react');
   const html = await readFile(path.join(root, 'dist/src-react/index.html'), 'utf8');
   const child = spawn(process.execPath, ['tools/static-react-server.mjs'], {
-    cwd: root, env: { ...env, LAB_STATIC_ROOT: 'dist/src-react', LAB_E2E_PORT: env.LAB_DELIVERY_PORT },
+    cwd: root, env: { ...env, LAB_STATIC_ROOT: 'dist/src-react', LAB_E2E_PORT: env.LAB_DELIVERY_PORT, LAB_API_ORIGIN: apiOrigin },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let output = '';
@@ -81,8 +82,16 @@ async function probeStaticCLI(wrongBase) {
     const response = await fetch(new URL(entry, base));
     assert.equal(response.status, wrongBase ? 404 : 200, '已有产物模式掩盖了实际入口URL');
     assert.equal((await fetch(base + 'assets/missing.js', { headers: { Accept: 'text/html' } })).status, 404);
+    const products = await fetch(`${origin}/api/products?stock=low`);
+    if (apiOrigin.endsWith(':1')) {
+      assert.equal(products.status, 502, '后端未启动时 /api 应返回 502');
+      assert.match((await products.json()).error.message, /本地后端没有响应.*npm run lab -- api/);
+    } else {
+      assert.equal(products.status, 200, `/api 没有转发到 ${apiOrigin}`);
+      assert.deepEqual((await products.json()).items.map((product) => product.id), ['P004', 'P006']);
+    }
     assert.deepEqual(await digestFiles('dist/src-react'), before, '已有产物模式重新构建或更改了产物字节');
-    console.log(`已有产物CLI：${Object.keys(before).length}文件SHA未变；${wrongBase ? '错误base的/assets入口真实404' : '正确嵌套入口真实200'}，缺失JS真404；未build或修复base。`);
+    console.log(`已有产物CLI：${Object.keys(before).length}文件SHA未变；${wrongBase ? '错误base的/assets入口真实404' : '正确嵌套入口真实200'}，缺失JS真404；/api ${apiOrigin.endsWith(':1') ? '后端未启动时 502 + 中文说明' : '经代理读到 P004/P006'}；未build或修复base。`);
   } finally {
     if (child.exitCode === null && child.signalCode === null) {
       const ended = new Promise((resolve) => child.once('exit', resolve));
@@ -97,15 +106,42 @@ try {
   const adapters = await digestFiles('adapters');
   const originalCore = await digestFiles('src/core');
   const startFiles = await filesIn(root);
-  for (const file of ['notes/debug.md', 'notes/delivery.md', 'notes/test-plan.md', 'notes/final-review.md', 'tests/react/regression.test.jsx', 'tests/react/final-filter.test.jsx']) assert(!startFiles.includes(file), `答案倒灌C44：${file}`);
-  assert(!(await readFile(path.join(root, 'vite.config.js'), 'utf8')).includes('/js_web/demos/inventory/'), 'C46 base 已倒灌 C44');
+  for (const file of ['notes/debug.md', 'notes/delivery.md', 'notes/test-plan.md', 'notes/final-review.md', 'tests/react/regression.test.jsx', 'tests/react/final-filter.test.jsx', 'tests/e2e/api.spec.js', 'src/services/api-repository.js', 'src/services/data-source.js']) assert(!startFiles.includes(file), `答案倒灌C44：${file}`);
+  const startVite = await readFile(path.join(root, 'vite.config.js'), 'utf8');
+  assert(!startVite.includes('/js_web/demos/inventory/'), 'C46 base 已倒灌 C44');
+  assert(!startVite.includes('"/api"'), 'C45 代理已倒灌 C44');
   assert(!(await readFile(path.join(root, 'src/react/App.jsx'), 'utf8')).includes('仅低库存'), 'C48 筛选已倒灌 C44');
-  console.log(`C44真实起点：React ${Object.keys(originalReact).length}文件、四个adapter保留；无C45–C48答案。`);
+  assert(startFiles.includes('server/app.mjs'), 'C44 起点缺少本地后端 server/');
+  console.log(`C44真实起点：React ${Object.keys(originalReact).length}文件、四个adapter保留、server/ 已就位；无C45–C48答案。`);
 
   await step('C45');
-  assert.deepEqual(await digestFiles('src/react'), originalReact, 'C45 排错记录不应改最终业务实现');
+  assert.deepEqual(Object.keys(await digestFiles('src/react')).sort(), Object.keys(originalReact).sort(), 'C45 只改已有 React 文件，不增删');
+  assert.deepEqual(await digestFiles('adapters'), adapters, 'C45 不应改 adapter');
   execute(['tools/lab.mjs', 'start', 'C45']);
   execute(['tools/lab.mjs', 'check', 'C45']);
+  await mutate('vite.config.js', (text) => text.replace(/\n\s*server: \{ proxy: \{ "\/api": "http:\/\/127\.0\.0\.1:8070" \} \},/, ''), async () => {
+    execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /缺少 server\.proxy\["\/api"\]/, extra: { LAB_DELIVERY_CASE: 'state' } });
+  });
+  await mutate('src/react/query-options.js', (text) => text.replace('repository.list({ signal }), staleTime: 60000, retry: false', 'repository.list({ signal }), staleTime: 60000'), async () => {
+    execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /列表 500 后应显示原因/, extra: { LAB_DELIVERY_CASE: 'retry' } });
+  });
+  execute(['tools/delivery-browser.mjs', 'C45'], { extra: { LAB_DELIVERY_CASE: 'retry' } });
+  await mutate('src/react/ProductEditor.jsx', (text) => text.replace('priceCents: "price"', 'priceCents: "priceCents"'), async () => {
+    execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /422 的 fields\.priceCents 应显示在价格输入框/, extra: { LAB_DELIVERY_CASE: 'fields' } });
+  });
+  await mutate('src/react/InventoryProvider.jsx', (text) => text.replace('    onSuccess: refresh,\n', ''), async () => {
+    execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /保存后列表应重新读取/, extra: { LAB_DELIVERY_CASE: 'fields' } });
+  });
+  execute(['tools/delivery-browser.mjs', 'C45'], { extra: { LAB_DELIVERY_CASE: 'fields' } });
+  await mutate('src/services/api-repository.js', (text) => text.replace('if (options.delay) await wait(options.delay, options.signal);',
+    'if (options.delay) await send("POST", `${baseUrl}/_lab/faults`, { signal: options.signal, body: { method, path: new URL(url, location.href).pathname, delayMs: options.delay } });'), async () => {
+    execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /正常保存的那行不应标「注入故障」/, extra: { LAB_DELIVERY_CASE: 'save-log' } });
+  });
+  execute(['tools/delivery-browser.mjs', 'C45'], { extra: { LAB_DELIVERY_CASE: 'save-log' } });
+  await mutate('src/react/query-options.js', (text) => text.replace('detail: (id) => ["inventory", "detail", id]', 'detail: () => ["inventory", "detail"]'), async () => {
+    execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /P002 无线鼠标/, extra: { LAB_DELIVERY_CASE: 'slow' } });
+  });
+  execute(['tools/delivery-browser.mjs', 'C45'], { extra: { LAB_DELIVERY_CASE: 'slow' } });
   await mutate('src/react/App.jsx', (text) => text.replace('await dispatch({ type: "restocked", id, amount });', 'products.find((product) => product.id === id).stock += amount;'), async () => {
     execute(['tools/delivery-browser.mjs', 'C45'], { red: true, includes: /库存 13 件/, extra: { LAB_DELIVERY_CASE: 'state' } });
   });
@@ -129,10 +165,17 @@ try {
   execute(['tools/lab.mjs', 'check', 'C46']);
   await mutate('vite.config.js', (text) => text.replace('base: "/js_web/demos/inventory/"', 'base: "/"'), async () => {
     execute(['tools/delivery-browser.mjs', 'C46'], { red: true, includes: /生产入口前缀错误/, extra: { LAB_DELIVERY_CASE: 'static' } });
-    await probeStaticCLI(true);
+    await probeStaticCLI(true, 'http://127.0.0.1:1');
   });
   execute(['tools/delivery-browser.mjs', 'C46'], { extra: { LAB_DELIVERY_CASE: 'static' } });
-  await probeStaticCLI(false);
+  const { startApiFixture } = await import(pathToFileURL(path.join(root, 'tools/api-fixture.mjs')));
+  const fixture = await startApiFixture({ root });
+  try { await probeStaticCLI(false, fixture.origin); } finally { await fixture.close(); }
+  await probeStaticCLI(false, 'http://127.0.0.1:1');
+  await mutate('src/services/data-source.js', (text) => text.replace('import.meta.env?.VITE_DATA_SOURCE ?? "api"', '"api"'), async () => {
+    execute(['tools/delivery-browser.mjs', 'C46'], { red: true, includes: /数据源：浏览器 mock/, extra: { LAB_DELIVERY_CASE: 'storage' } });
+  });
+  execute(['tools/delivery-browser.mjs', 'C46'], { extra: { LAB_DELIVERY_CASE: 'storage' } });
 
   await step('C47');
   execute(['tools/lab.mjs', 'start', 'C47']);
@@ -150,6 +193,10 @@ try {
     execute([...vitest, 'tests/react/inventory.test.jsx', '-t', '详情失败后点击重试恢复'], { red: true, includes: /Unable to find|模拟断网/ });
   });
   execute([...vitest, 'tests/react/inventory.test.jsx', '-t', '详情失败后点击重试恢复']);
+  await mutate('src/react/ProductEditor.jsx', (text) => text.replace('if (error.status === 409) {', 'if (false) {'), async () => {
+    execute(['tools/delivery-browser.mjs', 'C47'], { red: true, includes: /保存冲突/, extra: { LAB_DELIVERY_CASE: 'conflict' } });
+  });
+  execute(['tools/delivery-browser.mjs', 'C47'], { extra: { LAB_DELIVERY_CASE: 'conflict' } });
 
   await step('C48');
   execute(['tools/lab.mjs', 'start', 'C48']);
@@ -158,8 +205,11 @@ try {
     execute([...vitest, 'tests/react/final-filter.test.jsx', '-t', '浅复制故障'], { red: true, includes: /expected 1 to be \+?0|expected 1 to be 0|AssertionError/ });
   });
   execute([...vitest, 'tests/react/final-filter.test.jsx']);
-  await mutate('src/react/App.jsx', (text) => text.replace('product.stock >= 1 && product.stock <= 5', 'product.stock >= 0 && product.stock <= 5'), async () => {
-    execute(['tools/delivery-browser.mjs', 'C48'], { red: true, includes: /Expected.*2|Received.*3|resolved to 3 elements/, extra: { LAB_DELIVERY_CASE: 'stock-filter' } });
+  await mutate('src/services/inventory-repository.js', (text) => text.replace('low: (product) => product.stock >= 1 && product.stock <= 5', 'low: (product) => product.stock >= 0 && product.stock <= 5'), async () => {
+    execute([...vitest, 'tests/react/final-filter.test.jsx', '-t', '低库存'], { red: true, includes: /expected.*length.*2|length of 2|AssertionError/i });
+  });
+  await mutate('src/react/query-options.js', (text) => text.replace('page: (params) => ["inventory", "page", params]', 'page: () => ["inventory", "page"]'), async () => {
+    execute(['tools/delivery-browser.mjs', 'C48'], { red: true, includes: /Expected.*1|Received.*2|resolved to 2 elements/, extra: { LAB_DELIVERY_CASE: 'stock-filter' } });
   });
   execute(['tools/delivery-browser.mjs', 'C48'], { extra: { LAB_DELIVERY_CASE: 'stock-filter' } });
   assert.deepEqual(await digestFiles('adapters'), adapters, 'L5 意外改写既有adapter');
@@ -170,7 +220,7 @@ try {
   execute(['node_modules/@playwright/test/cli.js', 'test', '--config', 'tools/playwright.config.mjs'], {
     cwd: compatibility, extra: { LAB_E2E_PORT: env.LAB_DELIVERY_PORT, LAB_STATIC_ROOT: '' },
   });
-  console.log(`\n交付链 C44→C48：4课当前文件门禁、10组真实源码红→绿通过，四个adapter原字节保留。仅自动组装/行为回归，不等同主agent的独立正文跟做。\n${JSON.stringify(results, null, 2)}`);
+  console.log(`\n交付链 C44→C48：4课当前文件门禁、${results.filter((result) => result.expected === 'red').length}组真实源码红→绿通过（检查器用临时数据后端），四个adapter原字节保留。仅自动组装/行为回归，不等同主agent的独立正文跟做。\n${JSON.stringify(results, null, 2)}`);
 } finally {
   if (process.env.LAB_KEEP_DELIVERY === '1') console.log(`保留本次隔离证据：${parent}`);
   else await rm(parent, { recursive: true, force: true });
