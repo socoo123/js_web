@@ -1,15 +1,36 @@
 ---
 // 「先猜一猜」：问题 + 代码 + 点击揭晓的答案。答案区 summary 固定为「揭晓答案」，「提示」「参考答案」留给练习。
-interface Props { question: string }
-const { question } = Astro.props;
+// 浏览器里由 src/scripts/reveal.mjs 增强：写猜测再揭晓、可重置；给了 choices 与 correct（正确选项下标，从 0 开始）时改为点选即判。
+// 下标不能叫 answer：同名的 slot="answer" 会让同名 prop 传不进来。禁用 JavaScript 时，选项照常列出，答案区里先写出正确选项。
+interface Props { question: string; choices?: string[]; correct?: number }
+const { question, choices, correct } = Astro.props;
+const KEYS = 'ABCDEF';
+if (choices !== undefined) {
+  if (!Array.isArray(choices) || choices.length < 2 || choices.length > KEYS.length || choices.some((choice) => typeof choice !== 'string' || !choice.trim())) {
+    throw new Error(`Predict「${question}」的 choices 应是 2–${KEYS.length} 个非空字符串`);
+  }
+  if (!Number.isInteger(correct) || correct < 0 || correct >= choices.length) {
+    throw new Error(`Predict「${question}」的 correct 应是 choices 中正确选项的下标（0–${choices.length - 1}），收到 ${JSON.stringify(correct)}`);
+  }
+} else if (correct !== undefined) {
+  throw new Error(`Predict「${question}」给了 correct，却没有 choices`);
+}
 ---
 <section class="js-callout predict" data-callout="predict" data-predict aria-label={`先猜一猜：${question}`}>
   <p class="js-callout__label predict-label">先猜一猜</p>
   <p class="predict-question">{question}</p>
   <div class="predict-body"><slot /></div>
+  {choices && (
+    <ol class="predict-choices" data-predict-choices data-answer={correct} aria-label="选项">
+      {choices.map((choice, index) => <li data-choice={index}><span class="predict-choice-key">{KEYS[index]}</span><span class="predict-choice-text">{choice}</span></li>)}
+    </ol>
+  )}
   <details class="predict-answer">
     <summary><span class="when-closed">揭晓答案</span><span class="when-open">收起答案</span></summary>
-    <div class="predict-answer-body"><slot name="answer" /></div>
+    <div class="predict-answer-body">
+      {choices && correct !== undefined && <p class="predict-correct">正确答案：<strong>{KEYS[correct]}. {choices[correct]}</strong></p>}
+      <slot name="answer" />
+    </div>
   </details>
 </section>
 
@@ -30,6 +51,13 @@ const { question } = Astro.props;
   .predict-answer[open] .when-closed, .predict-answer:not([open]) .when-open { display: none; }
   .predict-answer[open] .predict-answer-body { animation: predict-reveal var(--js-motion, 200ms) ease-out; }
   .predict-answer-body > :global(* + *) { margin-top: .6rem; }
+  .predict-choices { display: grid; gap: .5rem; margin: .85rem 0 0; padding: 0; list-style: none; }
+  .predict-choices li { display: flex; gap: .6rem; align-items: baseline; margin: 0; }
+  .predict-choice-key {
+    flex: none; display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 999px;
+    background: var(--callout-soft); color: var(--callout-accent); font-size: .8125rem; font-weight: 750;
+  }
+  .predict-correct strong { color: var(--js-color-ok); }
   @keyframes predict-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) {
     .predict-answer[open] .predict-answer-body { animation: none; }

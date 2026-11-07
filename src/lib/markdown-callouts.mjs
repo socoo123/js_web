@@ -7,10 +7,15 @@
  * - 旧课段首 `**先猜一猜：**` 的问题段 → data-callout="predict"、data-callout-scope="question"
  * - summary 为「提示」「参考答案」的 details → data-disclosure="hint|answer"
  * - 正文开头「第 N 周 · 第 D 天」引用块 → class="lesson-meta-legacy"
+ * - 旧课每处「先猜一猜」（含写在段落中间的）→ 问题段 data-reveal-q="序号"；答案写在同一段时加 data-reveal-inline；
+ *   紧跟的代码块（允许隔一句以冒号结尾的引导语）data-reveal-code，其后第一段说明（或表格）data-reveal-explain。
+ *   浏览器脚本 src/scripts/reveal.mjs 只遮这些带标记的位置；判定规则见 reveal-rules.mjs。
  *
  * Astro 7 默认用 Sätteri 处理 Markdown/MDX，`markdown.rehypePlugins` 会把整站切回旧的 unified 管线，
  * 所以这里写成 Sätteri hast 插件，由同文件导出的集成挂到当前处理器上。
  */
+
+import { inlineAnswerRange } from './reveal-rules.mjs';
 
 const PARAGRAPH_LABELS = new Map([
   ['记住', 'remember'],
@@ -47,11 +52,19 @@ function tagParagraph(node, ctx) {
   const first = firstMeaningful(node.children);
   if (isElement(first, 'strong')) {
     const match = LABEL_PATTERN.exec(ctx.textContent(first));
-    if (!match) return;
-    const kind = PARAGRAPH_LABELS.get(match[1]);
-    addClass(node, ctx, 'js-callout');
-    ctx.setProperty(node, 'data-callout', kind);
-    if (kind === 'predict') ctx.setProperty(node, 'data-callout-scope', 'question');
+    if (match) {
+      const kind = PARAGRAPH_LABELS.get(match[1]);
+      addClass(node, ctx, 'js-callout');
+      ctx.setProperty(node, 'data-callout', kind);
+      if (kind === 'predict') {
+        ctx.setProperty(node, 'data-callout-scope', 'question');
+        tagPredictParts(node, ctx);
+      }
+      return;
+    }
+  }
+  if ((node.children ?? []).some((child) => isElement(child, 'strong') && PREDICT_LABEL.test(ctx.textContent(child)))) {
+    tagPredictParts(node, ctx);
     return;
   }
   if (first?.type === 'text' && /^\s*Java 对照[：:]/.test(first.value)) {
@@ -59,6 +72,44 @@ function tagParagraph(node, ctx) {
     ctx.setProperty(node, 'data-callout', 'java');
     ctx.setProperty(node, 'data-callout-label', 'plain');
   }
+}
+
+const PREDICT_LABEL = /^\s*先猜一猜\s*[：:]\s*$/;
+
+const isCodeBlock = (node) => isElement(node, 'div') && classList(node).includes('expressive-code');
+
+/** 普通说明段：不是另一个提示块，也不是只放一张图的段落。 */
+function isProse(node, ctx) {
+  if (!isElement(node, 'p') || classList(node).includes('js-callout')) return false;
+  const lead = firstMeaningful(node.children);
+  if (isElement(lead, 'strong') && LABEL_PATTERN.test(ctx.textContent(lead))) return false;
+  if ((node.children ?? []).every((child) => isBlank(child) || isElement(child, 'img'))) return false;
+  return Boolean(ctx.textContent(node).trim());
+}
+
+/** 「在 Console 执行：」这类引出代码的短句。 */
+const isLeadIn = (node, ctx) => isProse(node, ctx) && /[：:]\s*$/.test(ctx.textContent(node)) && ctx.textContent(node).trim().length <= 60;
+
+function tagPredictParts(node, ctx) {
+  const group = String((ctx.data.revealGroups = (ctx.data.revealGroups ?? 0) + 1));
+  ctx.setProperty(node, 'data-reveal-q', group);
+  if (inlineAnswerRange(ctx.textContent(node))) {
+    ctx.setProperty(node, 'data-reveal-inline', '');
+    return;
+  }
+  const siblings = ctx.parent(node)?.children ?? [];
+  const following = siblings.slice((ctx.indexOf(node) ?? siblings.length) + 1).filter((child) => !isBlank(child));
+  let [next, after] = following;
+  let rest = following.slice(1);
+  if (isLeadIn(next, ctx)) {
+    if (!isCodeBlock(after)) return;
+    [next, rest] = [after, following.slice(2)];
+  }
+  if (isCodeBlock(next)) {
+    ctx.setProperty(next, 'data-reveal-code', group);
+    next = rest[0];
+  }
+  if (isProse(next, ctx) || isElement(next, 'table')) ctx.setProperty(next, 'data-reveal-explain', group);
 }
 
 function tagAside(node, ctx) {
