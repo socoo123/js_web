@@ -78,11 +78,12 @@ async function api(subcommand) {
   const options = backend.optionsFromEnv();
   if (subcommand === 'reset') { await resetApi(backend, options); return; }
   if (subcommand) throw new Error('用法：npm run lab -- api 或 npm run lab -- api reset');
-  const { origin, close } = await backend.startApiServer(options);
+  const { origin } = await backend.startApiServer(options);
   console.log(`库存后端：${origin}/api（数据 ${shown(options.dataFile)}；Ctrl+C 停止）`);
   if (options.corsOrigin) console.log(`CORS 只放行来源 ${options.corsOrigin}`);
-  const stop = async () => { await close(); console.log('库存后端已停止。'); process.exit(0); };
-  process.once('SIGINT', stop); process.once('SIGTERM', stop);
+  // npm run 会把 Ctrl+C 再转发一次；写盘都是同步的，收到信号时不会停在半次写入中，可以直接退出。
+  const stop = () => { console.log('库存后端已停止。'); process.exit(0); };
+  process.on('SIGINT', stop); process.on('SIGTERM', stop);
 }
 async function shell() {
   const root = path.join(workspace, 'shell');
