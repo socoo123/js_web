@@ -36,25 +36,7 @@ body {
   }
 }
 
-/* ---------- 宽度：课页与 Lab 页放宽到 64rem，正文段落仍是 46rem ---------- */
-
-html:has([data-page-kind]) {
-  --sl-content-width: var(--js-wide-width);
-}
-
-/* 72–90rem 之间放不下右侧目录和 64rem 正文：收起右栏，改用页内导航。 */
-@media (min-width: 72rem) and (max-width: 89.9375rem) {
-  html:has([data-page-kind]) {
-    --__toc-width: 0rem;
-  }
-  html:has([data-page-kind]) .right-sidebar-container {
-    display: none;
-  }
-  html[data-has-sidebar][data-has-toc]:has([data-page-kind]) .main-pane {
-    width: 100%;
-    --sl-content-margin-inline: auto;
-  }
-}
+/* ---------- 宽度：正文栏统一为 --js-prose-width，块级组件一律占满栏宽 ---------- */
 
 .sl-markdown-content > :is(
     p, ul, ol, dl, blockquote, details, hr, h2, h3, h4, h5, h6,
@@ -138,10 +120,24 @@ html:has([data-page-kind]) {
 
 .sidebar-content summary .large,
 .sidebar-content .top-level > li > a.large {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--js-color-muted);
+  letter-spacing: 0.01em;
+  color: var(--js-color-heading);
+}
+
+/* 组标题是 Lab：当前页所在的组加琥珀色条，折叠的组保持安静 */
+.sidebar-content .top-level > li > details > summary {
+  padding-block: 0.35rem;
+}
+
+.sidebar-content .top-level > li > details:has(a[aria-current='page']) > summary {
+  box-shadow: inset 3px 0 0 var(--js-color-amber-stroke);
+}
+
+.sidebar-content .top-level > li > details:not([open]) > summary .large {
+  color: var(--js-color-text);
+  font-weight: 650;
 }
 
 .sidebar-content .top-level > li > a.large {

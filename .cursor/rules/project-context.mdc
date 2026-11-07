@@ -10,10 +10,9 @@ alwaysApply: true
 - 续做关键词为 JS_WEB_START。依次读 docs/STATUS.md → docs/PLAN.md → docs/CONTENT_GUIDE.md → docs/CURRICULUM.md 中本课那一行。
 - 写或改任何课程前必须读完 docs/CONTENT_GUIDE.md，遵守其中的篇幅上限、模板和禁用写法；`npm run lint:lessons` 报 error 不能发布。
 - 正文写给学员：验证过程、作者环境、补丁版本号、内部编号不进正文，明细写在 examples/cNN/README.md。
-- 库存数据用 PLAN §3.1，五个 Lab 的起点与验收见 labs/README.md，V3 的 Lab 步骤式结构与 L5 后端见 PLAN §3.2–3.3；保留已完成成果。
-- 改写课文时核心内容不变（PLAN §2.1），按 PLAN §4 多展示效果、降低密度；交稿附核心对照清单。
+- 库存数据用 PLAN §3.3；六个 Lab（L1–L5 跟课、L6 毕业挑战）的设计见 PLAN §3 与 labs/README.md；L5 后端见 PLAN §3.4；保留已完成成果。
+- 课文正文默认不改，只做勘误（PLAN §5）；站点以 Lab 为主线：侧栏按 Lab 分组，首页与 Lab 主页用标签进入课程（PLAN §2）。
 - 读者会 Java、初学前端；中文教学，可运行代码、Java 对照、练习与答案；需要动手的内容标「自己尝试」；必须覆盖调试工具与 UT。
-- 图只用 D2；静态站发布到 GitHub Pages 的 /js_web/ 子路径。
-- 当前阶段以 docs/STATUS.md 为准；不要把未完成、未验证或未上线的工作标为完成。
-- 唯一队列是 V3 五阶段：1 设计系统与范例课 → 2 L1–L2 → 3 L3 → 4 L4 与 L5 后端 → 5 L5 与全站终验；V2 A/B/C 已完成，仅为历史。每窗口完成一个阶段，主 agent 按 PLAN §7 同时启动 4 个后台子 agent（全部用 Opus 5.5 1M Extra High，Cursor 中为 claude-opus-5-5-xhigh，先核验），按 §7.1 四路表分工、隔离副本工作。
-- 四路全部交稿及返修结束后，主 agent 集成、独立验收、按 PLAN §6 发布并核验 Pages，再统一返回四路结果和下一窗口接续文本，用户清理上下文后继续。不得提前交接；失败继续同阶段，阶段 5 完成后结束改版。
+- 机制图用站内图形组件（HTML/CSS + 主题变量，PLAN §4.3），不再用 D2；所有块级组件占满统一的正文栏宽度（PLAN §4.1）；静态站发布到 GitHub Pages 的 /js_web/ 子路径。
+- 当前批次以 docs/STATUS.md 为准；不要把未完成、未验证或未上线的工作标为完成。
+- 队列是 V4 三批：1 Lab 优先与交互改版 → 2 L5 后端 → 3 勘误与全站终验。每窗口完成一批并发布；能干净拆开时同时最多 4 个后台子 agent（Opus 5.5 Extra High，Cursor 中为 claude-opus-5-5-xhigh，先核验），各自 worktree 与分支，主 agent 合并、验收、发布并核验 Pages 后返回结果与接续文本（PLAN §6–8）。

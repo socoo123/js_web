@@ -42,7 +42,7 @@ const cards = catalog.labs.map((lab, index) => {
 });
 ---
 
-<ol class:list={['lab-cards', 'not-content', `lab-cards--${variant}`]} aria-label="五个 Lab">
+<ol class:list={['lab-cards', 'not-content', `lab-cards--${variant}`]} aria-label="六个 Lab">
   {cards.map((card) => (
     <li class="lab-card" data-lab-card={card.lab.labId} data-lab-lessons={card.ids.join(' ')}>
       <div class="lab-card__thumb" data-art={card.lab.labId}>
@@ -91,6 +91,33 @@ const cards = catalog.labs.map((lab, index) => {
       </div>
     </li>
   ))}
+  <li class="lab-card lab-card--finale">
+    <div class="lab-card__thumb" data-art="L6">
+      <div class="lab-card__bar" aria-hidden="true">
+        <span class="lab-card__step">{cards.length + 1}</span>
+        <i></i><i></i><i></i>
+        <span class="lab-card__url">l6 · 毕业挑战</span>
+      </div>
+      <div class="lab-art" aria-hidden="true">
+        <div class="lab-art__body">
+          <svg viewBox="0 0 48 48"><path d="M15 8h18v10a9 9 0 0 1-18 0z" /><path d="M15 12H9a5 5 0 0 0 6 7M33 12h6a5 5 0 0 1-6 7M24 27v7M17 40h14M19 34h10v6H19z" /></svg>
+          <span class="lab-art__lines"><b></b><b></b><b></b></span>
+        </div>
+      </div>
+    </div>
+    <div class="lab-card__body">
+      <p class="lab-card__meta">
+        <span class="lab-card__id">L6</span>
+        <span>学完 C48 之后 · 3 关</span>
+      </p>
+      <Heading class="lab-card__title">毕业挑战</Heading>
+      <p class="lab-card__desc">{outcomes.L6 ?? '能力自测、Bug 猎人和一个跨全部层次的毕业项目，答错的地方直接链回课文'}</p>
+      <p class="lab-card__facts">没有新课 · 约 1–2 天</p>
+      <div class="lab-card__foot">
+        <a class="js-button lab-card__action" data-variant="amber" href={`${base}labs/l6/`}>进入 L6<span class="js-visually-hidden">：毕业挑战</span></a>
+      </div>
+    </div>
+  </li>
 </ol>
 <LessonIndexData />
 
@@ -118,7 +145,7 @@ const cards = catalog.labs.map((lab, index) => {
 
   @media (min-width: 72rem) {
     .lab-cards--map {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 1.25rem;
     }
 

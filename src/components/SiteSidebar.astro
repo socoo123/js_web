@@ -1,5 +1,5 @@
 ---
-// 在 Starlight 默认侧栏上加课号、Lab 标记与「本课所属」徽标；完成标记由 progress-marks.mjs 在浏览器里补上。
+// 在 Starlight 默认侧栏（按 Lab 分组，见 astro.config.mjs）上加课号、Lab 进度与「本课所属」标记；完成标记由 progress-marks.mjs 在浏览器里补上。
 import Default from '@astrojs/starlight/components/Sidebar.astro';
 import catalog from '../../labs/catalog.json';
 
@@ -9,7 +9,7 @@ const route = Astro.locals.starlightRoute;
 const lessonLab = new Map(catalog.lessons.map((row) => [row.lessonId, row.labId]));
 const labLessons = new Map(catalog.labs.map((lab) => [lab.labId, catalog.lessons.filter((row) => row.labId === lab.labId).map((row) => row.lessonId)]));
 const pageLesson = /^(C\d{2})\s/.exec(route.entry.data.title)?.[1];
-const pageLab = pageLesson ? lessonLab.get(pageLesson) : /^labs\/(l[1-5])$/.exec(route.id)?.[1]?.toUpperCase();
+const pageLab = pageLesson ? lessonLab.get(pageLesson) : /^labs\/(l[1-6])$/.exec(route.id)?.[1]?.toUpperCase();
 
 function decorate(entries: SidebarEntry[]): SidebarEntry[] {
   return entries.map((entry) => {

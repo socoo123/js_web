@@ -2,17 +2,21 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 import markdownCallouts from './src/lib/markdown-callouts.mjs';
-import { existsSync } from 'node:fs';
+import catalog from './labs/catalog.json' with { type: 'json' };
 
-const courseSections = [
-  ['01-history-web', '历史、Web 与语言基础'],
-  ['02-language-data', '语言与数据结构'],
-  ['03-async-modules', '浏览器、异步与模块'],
-  ['04-runtime-tooling', '运行时与工程工具'],
-  ['05-react', 'React'],
-  ['06-components-ui5', '组件生态与 UI5'],
-  ['07-project', '项目交付'],
-];
+// 侧栏以 Lab 为主线：每个 Lab 一组，组内先是 Lab 主页，再是它的课；课的 URL 不变。
+// 当前页所在的组自动展开，其余组折叠，打开站点时先看到 L1–L6 六个入口。
+const labGroups = catalog.labs.map((lab) => {
+  const lessons = catalog.lessons.filter((lesson) => lesson.labId === lab.labId);
+  return {
+    label: `${lab.labId} · ${lab.title}`,
+    collapsed: true,
+    items: [
+      { label: `${lab.labId} Lab 主页`, slug: `labs/${lab.labId.toLowerCase()}` },
+      ...lessons.map((lesson) => ({ slug: lesson.slug })),
+    ],
+  };
+});
 
 export default defineConfig({
   site: 'https://socoo123.github.io',
@@ -37,23 +41,20 @@ export default defineConfig({
       },
       sidebar: [
         {
-          label: 'Lab 实验',
-          collapsed: false,
+          label: '开始',
           items: [
-            { label: '开始：工作区与学习包', slug: 'labs' },
+            { label: '工作区与 6 个 Lab', slug: 'labs' },
             { label: 'Lab 规则与验收', slug: 'labs/rules' },
-            { slug: 'labs/l1' },
-            { slug: 'labs/l2' },
-            { slug: 'labs/l3' },
-            { slug: 'labs/l4' },
-            { slug: 'labs/l5' },
+            { label: '学习路线（按天）', slug: 'roadmap' },
           ],
         },
-        { label: '学习路线与课程目录', slug: 'roadmap' },
-        ...courseSections
-          .filter(([directory]) => existsSync(new URL(`./src/content/docs/${directory}`, import.meta.url)))
-          .map(([directory, label]) => ({ label, items: [{ autogenerate: { directory } }] })),
-        { label: '速查手册', items: [{ autogenerate: { directory: 'reference' } }] },
+        ...labGroups,
+        {
+          label: 'L6 · 毕业挑战',
+          collapsed: true,
+          items: [{ label: 'L6 综合能力检验', slug: 'labs/l6' }],
+        },
+        { label: '速查手册', collapsed: true, items: [{ autogenerate: { directory: 'reference' } }] },
       ],
     }),
     markdownCallouts(),

@@ -1,13 +1,13 @@
 ---
-title: 库存工作区与 5 个 Lab
-description: 一次下载，在同一个库存工作区按课程持续修改，按需对照参考快照。
+title: 库存工作区与 6 个 Lab
+description: 一次下载，在同一个库存工作区按 Lab 持续修改；每个 Lab 主页用课程标签进入课文，最后以 L6 毕业挑战收尾。
 ---
 
 import LabCards from '../../../components/LabCards.astro';
 import LabOverview from '../../../components/LabOverview.astro';
 import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
-**48 课、5 个 Lab、一个长期工作区。** 从商品卡片到静态交付，每课接续自己的修改，共用数据、规则和依赖。先准备工程，再从 [C01](/js_web/01-history-web/c01-story-ecosystem/)开始；每日安排见[学习路线](/js_web/roadmap/)。
+**6 个 Lab、48 课、一个长期工作区。** L1–L5 把同一个库存应用从商品卡片做到静态交付，L6 毕业挑战检验你学到的全部能力。先准备工程，再进入 [L1](/js_web/labs/l1/)；按天排列的课表见[学习路线](/js_web/roadmap/)。
 
 <LabCards variant="grid" headingLevel={2} />
 
@@ -15,9 +15,9 @@ import WorkspaceDownload from '../../../components/WorkspaceDownload.astro';
 
 先读 [Lab 规则与验收](/js_web/labs/rules/)：那里列出六件固定商品、字段限制、补货与编辑的区别、取消/保存/恢复的要求，以及各阶段应该看到的结果。
 
-然后打开当前阶段的任务页：[L1 库存规则](/js_web/labs/l1/) → [L2 原生页面](/js_web/labs/l2/) → [L3 React 应用](/js_web/labs/l3/) → [L4 组件库与 UI5](/js_web/labs/l4/) → [L5 静态交付](/js_web/labs/l5/)。每页都有起点、任务和收尾验收，具体实现随对应课程推进。
+然后按顺序进入 Lab 主页：[L1 库存规则](/js_web/labs/l1/) → [L2 原生页面](/js_web/labs/l2/) → [L3 React 应用](/js_web/labs/l3/) → [L4 组件库与 UI5](/js_web/labs/l4/) → [L5 静态交付](/js_web/labs/l5/) → [L6 毕业挑战](/js_web/labs/l6/)。每个 Lab 主页上方是目标与效果，下方的课程标签逐课列出要改的文件、验收标准和「打开课文」入口。
 
-网站侧栏的 **Lab 实验** 分组可直接进入这些页面；手机上先打开顶部“菜单”。学习时按“网页读需求 → 本地改代码 → 对照网页验收”的顺序进行。
+侧栏也按 Lab 分组：展开一个 Lab，先是它的主页，再是它的课；手机上先打开顶部“菜单”。学习时按「Lab 主页选课 → 读课文 → 本地改代码 → 回 Lab 对照验收」的顺序进行。
 
 ## 第一次开始
 
@@ -52,7 +52,7 @@ npm run lab -- check C03
 
 课程网页的“标记完成”保存在当前浏览器，与 `.lab/` 中的任务位置和本地检查分别管理。换浏览器前到[学习路线](/js_web/roadmap/)导出阅读进度；网站不会自动同步工作区源码或商品数据。
 
-## 五个 Lab 与固定起点
+## 六个 Lab 与固定起点
 
 | Lab / 课程 | 补课或恢复起点 | 同一工程的阶段交付 |
 | --- | --- | --- |
@@ -61,8 +61,9 @@ npm run lab -- check C03
 | [L3 React 库存应用](/js_web/labs/l3/) · C21–C36 | <WorkspaceDownload checkpoint="C20" label="C20 起点" /> | 从 JSX 到状态、表单、路由、缓存、测试与恢复 |
 | [L4 组件库与 UI5 适配](/js_web/labs/l4/) · C37–C44 | <WorkspaceDownload checkpoint="C36" label="C36 起点" /> | 四种并列界面适配，复用公共规则 |
 | [L5 调试与静态交付](/js_web/labs/l5/) · C45–C48 | <WorkspaceDownload checkpoint="C44" label="C44 起点" /> | 回到保留的 React 主应用，排错、风险回归、生产交付与复盘 |
+| [L6 毕业挑战](/js_web/labs/l6/) · 学完 C48 后 | 你自己的 C48 工程 | 能力自测、Bug 猎人和一个跨全部层次的毕业项目 |
 
-五次收尾包含在 48 课里，不另加一套作业。正常跟做不用下载这些起点；先用自己的上一课完成态继续。
+L1–L5 的收尾包含在 48 课里，不另加一套作业；L6 是学完之后的综合检验。正常跟做不用下载这些起点；先用自己的上一课完成态继续。
 
 ## 补课或恢复
 

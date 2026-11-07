@@ -19,8 +19,9 @@
   --js-radius: 12px;
   --js-shadow: 0 1px 2px rgb(0 0 0 / 0.28);
   --js-motion: 200ms;
-  --js-prose-width: 46rem;
-  --js-wide-width: 64rem;
+  /* 正文栏只有一个宽度：段落、代码、对照卡、提示框、效果和图都按它左右对齐 */
+  --js-prose-width: 48rem;
+  --js-wide-width: var(--js-prose-width);
   --js-code-size: 14px;
 
   /* 补充：文字层级与实心按钮。深色下实心按钮用浅靛蓝 + 深色字，与 Starlight 和各组件填充 --js-color-primary 的写法一致 */

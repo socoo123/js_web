@@ -1,0 +1,572 @@
+---
+// 首页的 Lab 主线：L1–L6 六个标签，每个面板给出目标、效果截图和本 Lab 的课（按学习日分组，点击直达课文）。
+// 禁用 JS 时标签是页内锚点，六个面板依次全部显示；启用后变成 ARIA tabs，默认选中第一个没学完的 Lab。
+import { Image } from 'astro:assets';
+import catalog from '../../labs/catalog.json';
+import { getShot } from '../lib/previews.mjs';
+import LessonIndexData from './LessonIndexData.astro';
+
+interface Props { outcomes?: Record<string, string> }
+const { outcomes = {} } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+const labs = catalog.labs.map((lab) => {
+  const rows = catalog.lessons.filter((row) => row.labId === lab.labId);
+  const days = [...new Set(rows.map((row) => row.day))].map((day) => ({ day, lessons: rows.filter((row) => row.day === day) }));
+  const weeks = [...new Set(rows.map((row) => Math.ceil(row.day / 6)))];
+  const shot = getShot(`${lab.labId.toLowerCase()}/goal`);
+  const pick = (theme: 'light' | 'dark') => shot?.images.filter((image) => image.theme === theme).sort((a, b) => b.width - a.width)[0];
+  const light = pick('light');
+  const dark = pick('dark');
+  return {
+    id: lab.labId,
+    key: lab.labId.toLowerCase(),
+    title: lab.title,
+    text: outcomes[lab.labId] ?? lab.description,
+    range: `${rows[0].lessonId}–${rows.at(-1)!.lessonId}`,
+    ids: rows.map((row) => row.lessonId),
+    meta: `第 ${weeks.length > 1 ? `${weeks[0]}–${weeks.at(-1)}` : weeks[0]} 周 · ${days.length} 个学习日 · ${rows.length} 课`,
+    first: rows[0],
+    days,
+    shot,
+    images: light && dark
+      ? [{ image: dark, className: 'light:sl-hidden' }, { image: light, className: 'dark:sl-hidden' }]
+      : [light ?? dark].filter((image) => image !== undefined).map((image) => ({ image, className: '' })),
+  };
+});
+
+const finale = [
+  ['能力自测', '覆盖语言、浏览器、工具链、React、UI5 与交付的自动判分题，做完按能力区给出薄弱项和回看链接'],
+  ['Bug 猎人', '在一段段有问题的代码里点出出错的行，再看现象、原因和修法'],
+  ['毕业项目', '在自己的工作区独立做一个跨全部层次的新功能，按必做、进阶、挑战三级自评'],
+];
+---
+
+<section class="home-labs not-content" data-home-labs aria-label="六个 Lab">
+  <nav class="home-labs__tabs" data-tab-list aria-label="选择 Lab">
+    {labs.map((lab, index) => (
+      <a class="home-labs__tab" id={`home-tab-${lab.key}`} href={`#lab-${lab.key}`} data-tab={lab.key} data-lab-lessons={lab.ids.join(' ')}>
+        <span class="home-labs__num">{index + 1}</span>
+        <span class="home-labs__tab-text">
+          <span class="home-labs__tab-id">{lab.id} · {lab.range}</span>
+          <span class="home-labs__tab-title">{lab.title}</span>
+        </span>
+        <span class="home-labs__count" data-tab-count hidden></span>
+      </a>
+    ))}
+    <a class="home-labs__tab home-labs__tab--finale" id="home-tab-l6" href="#lab-l6" data-tab="l6">
+      <span class="home-labs__num">6</span>
+      <span class="home-labs__tab-text">
+        <span class="home-labs__tab-id">L6 · 学完之后</span>
+        <span class="home-labs__tab-title">毕业挑战</span>
+      </span>
+    </a>
+  </nav>
+
+  {labs.map((lab) => (
+    <section class="home-labs__panel" id={`lab-${lab.key}`} data-panel={lab.key} aria-labelledby={`home-tab-${lab.key}`}>
+      <div class="home-labs__intro">
+        <div class="home-labs__shot" aria-hidden={lab.shot ? undefined : 'true'}>
+          <div class="home-labs__bar" aria-hidden="true"><i></i><i></i><i></i><span>{lab.key} · inventory</span></div>
+          {lab.shot && lab.images.length > 0 ? (
+            lab.images.map(({ image, className }) => (
+              <Image src={image.src} alt={lab.shot!.alt} widths={[480, 960]} sizes="(min-width: 56rem) 26rem, 100vw" class={className} loading="lazy" decoding="async" />
+            ))
+          ) : (
+            <p class="home-labs__placeholder">{lab.id}</p>
+          )}
+        </div>
+        <div class="home-labs__copy">
+          <p class="home-labs__meta">{lab.meta}</p>
+          <h3>{lab.id} {lab.title}</h3>
+          <p>{lab.text}</p>
+          {lab.shot?.caption && <p class="home-labs__caption">{lab.shot.caption}</p>}
+          <div class="home-labs__actions">
+            <a class="js-button" data-variant="primary" href={`${base}labs/${lab.key}/`}>进入 {lab.id} Lab 主页</a>
+            <a class="js-button" data-variant="secondary" href={`${base}${lab.first.slug}/`} data-next-lesson={lab.key}>从 {lab.first.lessonId} 开始</a>
+          </div>
+        </div>
+      </div>
+      <h4 class="home-labs__subhead">本 Lab 的课 · 点课号直接进入课文</h4>
+      <ol class="home-labs__days">
+        {lab.days.map(({ day, lessons }) => (
+          <li>
+            <span class="home-labs__day">第 {day} 天</span>
+            <span class="home-labs__lessons">
+              {lessons.map((lesson) => (
+                <a href={`${base}${lesson.slug}/`} data-sidebar-lesson={lesson.lessonId}>
+                  <span class="home-labs__lesson-id">{lesson.lessonId}</span>
+                  <span class="home-labs__lesson-title">{lesson.title}</span>
+                </a>
+              ))}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  ))}
+
+  <section class="home-labs__panel home-labs__panel--finale" id="lab-l6" data-panel="l6" aria-labelledby="home-tab-l6">
+    <div class="home-labs__copy">
+      <p class="home-labs__meta">学完 C48 之后 · 约 1–2 天</p>
+      <h3>L6 毕业挑战：综合能力检验</h3>
+      <p>没有新课。三关把前五个 Lab 的能力串起来考一遍，答错的地方直接链回对应课文。</p>
+    </div>
+    <ol class="home-labs__finale">
+      {finale.map(([title, text], index) => (
+        <li><span class="home-labs__finale-num">第 {index + 1} 关</span><strong>{title}</strong><span>{text}</span></li>
+      ))}
+    </ol>
+    <div class="home-labs__actions">
+      <a class="js-button" data-variant="amber" href={`${base}labs/l6/`}>进入 L6 毕业挑战</a>
+    </div>
+  </section>
+</section>
+<LessonIndexData />
+
+<script>
+  import '../scripts/progress-marks.mjs';
+  import { PROGRESS_EVENT, readProgress } from '../lib/progress.mjs';
+
+  function completed(): Set<string> | null {
+    let storage: Storage | undefined;
+    try { storage = window.localStorage; } catch { /* 存储不可用时不显示进度 */ }
+    const state = readProgress(storage);
+    return state.status === 'ready' ? new Set<string>(state.progress.completed) : null;
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-home-labs]')) {
+    const list = root.querySelector<HTMLElement>('[data-tab-list]')!;
+    const tabs = [...list.querySelectorAll<HTMLAnchorElement>('[data-tab]')];
+    const panels = new Map([...root.querySelectorAll<HTMLElement>('[data-panel]')].map((panel) => [panel.dataset.panel!, panel]));
+
+    list.setAttribute('role', 'tablist');
+    root.dataset.enhanced = '';
+    for (const tab of tabs) {
+      const panel = panels.get(tab.dataset.tab!)!;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', panel.id);
+      panel.setAttribute('role', 'tabpanel');
+      panel.tabIndex = 0;
+    }
+
+    const select = (key: string, focus = false) => {
+      for (const tab of tabs) {
+        const active = tab.dataset.tab === key;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        panels.get(tab.dataset.tab!)!.hidden = !active;
+        if (active && focus) tab.focus();
+        if (active) tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }
+    };
+
+    const refresh = () => {
+      const done = completed();
+      for (const tab of tabs) {
+        const ids = (tab.dataset.labLessons ?? '').split(' ').filter(Boolean);
+        const count = tab.querySelector<HTMLElement>('[data-tab-count]');
+        if (!count || !ids.length) continue;
+        const finished = done ? ids.filter((id) => done.has(id)).length : 0;
+        count.hidden = !done || finished === 0;
+        count.textContent = `${finished}/${ids.length}`;
+        tab.toggleAttribute('data-lab-complete', finished === ids.length);
+        const next = root.querySelector<HTMLAnchorElement>(`[data-next-lesson="${tab.dataset.tab}"]`);
+        const pending = ids.find((id) => !done?.has(id));
+        const link = pending ? root.querySelector<HTMLAnchorElement>(`[data-panel="${tab.dataset.tab}"] a[data-sidebar-lesson="${pending}"]`) : null;
+        if (next && link && finished > 0) {
+          next.href = link.href;
+          next.textContent = `继续 ${pending}`;
+        }
+      }
+      return done;
+    };
+
+    const done = refresh();
+    const fromHash = /^#lab-(l[1-6])$/.exec(location.hash)?.[1];
+    const firstOpen = tabs.find((tab) => {
+      const ids = (tab.dataset.labLessons ?? '').split(' ').filter(Boolean);
+      return ids.length && ids.some((id) => !done?.has(id));
+    });
+    select(fromHash ?? firstOpen?.dataset.tab ?? 'l6');
+
+    list.addEventListener('click', (event) => {
+      const tab = (event.target as Element).closest<HTMLAnchorElement>('[data-tab]');
+      if (!tab) return;
+      event.preventDefault();
+      select(tab.dataset.tab!);
+      history.replaceState(null, '', `#lab-${tab.dataset.tab}`);
+    });
+    list.addEventListener('keydown', (event) => {
+      const index = tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+      const moves: Record<string, number> = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabs.length - 1 };
+      if (!(event.key in moves)) return;
+      event.preventDefault();
+      const target = tabs[(moves[event.key] + tabs.length) % tabs.length];
+      select(target.dataset.tab!, true);
+    });
+    window.addEventListener(PROGRESS_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+  }
+</script>
+
+<style>
+  .home-labs {
+    margin: 1.5rem 0 2.5rem;
+  }
+
+  .home-labs__tabs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(11rem, 1fr);
+    gap: 0.6rem;
+    overflow-x: auto;
+    padding: 0.25rem 0.1rem 0.6rem;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .home-labs__tab {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.75rem 0.8rem;
+    border: 1px solid var(--js-border);
+    border-radius: var(--js-radius);
+    background: var(--js-surface-raised);
+    color: var(--js-color-text);
+    text-decoration: none;
+    scroll-snap-align: start;
+    transition: border-color var(--js-motion) var(--js-ease), background-color var(--js-motion) var(--js-ease), transform var(--js-motion) var(--js-ease);
+  }
+
+  .home-labs__tab:hover {
+    border-color: color-mix(in srgb, var(--js-color-primary) 55%, var(--js-border));
+    transform: translateY(-1px);
+  }
+
+  .home-labs__tab[aria-selected='true'] {
+    border-color: var(--js-color-primary);
+    background: var(--js-color-primary-soft);
+    box-shadow: inset 0 -3px 0 var(--js-color-primary);
+  }
+
+  .home-labs__tab--finale[aria-selected='true'] {
+    border-color: var(--js-color-amber-stroke);
+    background: var(--js-color-amber-soft);
+    box-shadow: inset 0 -3px 0 var(--js-color-amber-stroke);
+  }
+
+  .home-labs__num {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--js-color-primary-soft);
+    color: var(--js-color-primary);
+    font-size: 0.875rem;
+    font-weight: 800;
+  }
+
+  .home-labs__tab[aria-selected='true'] .home-labs__num {
+    background: var(--js-color-primary-solid);
+    color: var(--js-color-on-primary);
+  }
+
+  .home-labs__tab--finale .home-labs__num,
+  .home-labs__tab--finale[aria-selected='true'] .home-labs__num {
+    background: var(--js-color-amber-stroke);
+    color: #1c1300;
+  }
+
+  .home-labs__tab[data-lab-complete] .home-labs__num {
+    background: var(--js-color-ok);
+    color: var(--js-surface);
+  }
+
+  .home-labs__tab-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.4;
+  }
+
+  .home-labs__tab-id {
+    color: var(--js-color-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .home-labs__tab-title {
+    color: var(--js-color-heading);
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  .home-labs__count {
+    position: absolute;
+    top: 0.5rem;
+    inset-inline-end: 0.55rem;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: var(--js-color-ok-soft);
+    color: var(--js-color-ok);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.3rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .home-labs__panel {
+    margin-top: 1rem;
+    padding: 1.25rem;
+    border: 1px solid var(--js-border);
+    border-radius: calc(var(--js-radius) + 4px);
+    background:
+      radial-gradient(90% 70% at 100% 0%, var(--js-color-primary-soft), transparent 65%),
+      var(--js-surface-raised);
+    box-shadow: var(--js-shadow);
+  }
+
+  .home-labs__panel--finale {
+    background:
+      radial-gradient(90% 70% at 100% 0%, var(--js-color-amber-soft), transparent 65%),
+      var(--js-surface-raised);
+  }
+
+  [data-enhanced] .home-labs__panel:not([hidden]) {
+    animation: home-labs-in var(--js-motion) var(--js-ease);
+  }
+
+  @keyframes home-labs-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .home-labs__panel:focus-visible {
+    outline: var(--js-focus-ring);
+    outline-offset: 3px;
+  }
+
+  .home-labs__intro {
+    display: grid;
+    gap: 1.25rem;
+    align-items: center;
+  }
+
+  @media (min-width: 56rem) {
+    .home-labs__intro {
+      grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+      gap: 1.75rem;
+    }
+  }
+
+  .home-labs__shot {
+    overflow: hidden;
+    border: 1px solid var(--js-frame-border);
+    border-radius: 10px;
+    background: var(--js-surface);
+  }
+
+  .home-labs__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.65rem;
+    background: var(--js-frame-bar);
+  }
+
+  .home-labs__bar i {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--js-frame-dot-close);
+  }
+
+  .home-labs__bar i:nth-child(2) { background: var(--js-frame-dot-min); }
+  .home-labs__bar i:nth-child(3) { background: var(--js-frame-dot-max); }
+
+  .home-labs__bar span {
+    margin-inline-start: 0.4rem;
+    color: var(--js-frame-url-fg);
+    font-family: var(--sl-font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .home-labs__shot :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .home-labs__placeholder {
+    display: grid;
+    place-items: center;
+    margin: 0;
+    aspect-ratio: 16 / 9;
+    color: var(--js-color-primary);
+    font-size: 2.5rem;
+    font-weight: 800;
+  }
+
+  .home-labs__copy > * {
+    margin: 0;
+  }
+
+  .home-labs__copy > * + * {
+    margin-top: 0.6rem;
+  }
+
+  .home-labs__meta {
+    color: var(--js-color-muted);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .home-labs__copy h3 {
+    color: var(--js-color-heading);
+    font-size: 1.375rem;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .home-labs__copy p {
+    color: var(--js-color-text);
+    line-height: 1.75;
+  }
+
+  .home-labs__caption {
+    color: var(--js-color-muted) !important;
+    font-size: 0.875rem;
+  }
+
+  .home-labs__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem !important;
+  }
+
+  .home-labs__subhead {
+    margin: 1.5rem 0 0.6rem;
+    color: var(--js-color-muted);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  .home-labs__days {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .home-labs__days > li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0.6rem 0.7rem 0.7rem;
+    border: 1px solid var(--js-border);
+    border-radius: 10px;
+    background: var(--js-surface);
+  }
+
+  .home-labs__day {
+    color: var(--js-color-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .home-labs__lessons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .home-labs__lessons a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    padding: 0.3rem 0.45rem;
+    border-radius: 8px;
+    color: var(--js-color-heading);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.45;
+    text-decoration: none;
+    transition: background-color var(--js-motion) var(--js-ease);
+  }
+
+  .home-labs__lessons a:hover {
+    background: var(--js-color-primary-soft);
+    color: var(--js-color-primary);
+  }
+
+  .home-labs__lesson-id {
+    flex: none;
+    color: var(--js-color-primary);
+    font-size: 0.8125rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .home-labs__lessons a[data-done] .home-labs__lesson-id::after {
+    content: ' ✓';
+    color: var(--js-color-ok);
+  }
+
+  .home-labs__lessons a[data-done] .home-labs__lesson-title {
+    color: var(--js-color-muted);
+  }
+
+  .home-labs__finale {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 0.75rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .home-labs__finale li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--js-color-amber-stroke) 35%, var(--js-border));
+    border-radius: var(--js-radius);
+    background: var(--js-surface);
+    line-height: 1.65;
+  }
+
+  .home-labs__finale-num {
+    color: var(--js-color-amber);
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  .home-labs__finale strong {
+    color: var(--js-color-heading);
+    font-size: 1.0625rem;
+  }
+
+  .home-labs__finale li > span:last-child {
+    color: var(--js-color-text);
+    font-size: 0.9375rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-enhanced] .home-labs__panel:not([hidden]) { animation: none; }
+    .home-labs__tab:hover { transform: none; }
+  }
+</style>

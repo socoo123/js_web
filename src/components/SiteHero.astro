@@ -13,7 +13,7 @@ const { data } = Astro.locals.starlightRoute.entry;
 const { title = data.title, tagline, actions = [] } = data.hero || {};
 const facts = [
   [String(catalog.lessons.length), '课主线'],
-  [String(catalog.labs.length), '个 Lab，同一个工作区'],
+  [String(catalog.labs.length + 1), '个 Lab，含毕业挑战'],
   ['4 / 8', '周两种节奏'],
 ];
 ---

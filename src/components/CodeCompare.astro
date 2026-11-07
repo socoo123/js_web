@@ -4,19 +4,28 @@ import { comparison } from '../../labs/sources.mjs';
 interface Props { pairId: string }
 const { pairId } = Astro.props;
 const pair = comparison(pairId);
+const sides = [pair.left, pair.right];
 ---
 <section class="code-compare" data-comparison={pairId} aria-label={pair.title}>
-  <p class="compare-title"><strong>{pair.title}</strong></p>
-  <p class="compare-input">共同输入：{pair.input}</p>
-  <div class="compare-columns">
-    {[pair.left, pair.right].map((side) => <section class="compare-side" aria-label={side.label}>
-      <p class="side-label"><strong>{side.label}</strong> · {side.caption}</p>
-      {!side.verified && <p>未运行验证：{side.reason}。请按步骤自己尝试。</p>}
+  <header class="compare-head">
+    <p class="compare-title"><strong>{pair.title}</strong></p>
+    <p class="compare-input">共同输入：{pair.input}</p>
+  </header>
+  {sides.map((side, index) => <>
+    {index === 1 && (
+      <p class="compare-bridge" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 4v16M6 14l6 6 6-6" /></svg>
+        同一件事，换成 {side.label}
+      </p>
+    )}
+    <section class="compare-side" aria-label={side.label}>
+      <p class="side-label"><strong>{side.label}</strong> {side.caption}</p>
+      {!side.verified && <p class="side-unverified">未运行验证：{side.reason}。请按步骤自己尝试。</p>}
       <Code code={side.code} lang={side.lang} title={side.file ?? side.source.split('/').at(-1)} />
       <p class="compare-output"><strong>{side.resultLabel ?? (side.lang === 'jsx' || side.lang === 'xml' ? '页面结果' : '输出')}：</strong>{side.output}</p>
       <p class="copy-feedback" data-copy-feedback role="status" aria-live="polite"></p>
-    </section>)}
-  </div>
+    </section>
+  </>)}
   <p class="compare-difference">{pair.difference}</p>
 </section>
 <script>
@@ -39,26 +48,29 @@ const pair = comparison(pairId);
 </script>
 <noscript><style is:inline>.expressive-code .copy { display: none !important; }</style></noscript>
 <style>
-  /* 左侧固定是 Java（或 Java 经验类比），右侧是 JS/React/UI5：用咖啡橙与琥珀标签区分，输出做成 Console 面板。 */
-  .code-compare { container-type: inline-size; margin-block: 1.75rem; padding: 1rem 1.1rem 1.1rem; border: 1px solid var(--js-border); border-radius: var(--js-radius); background: var(--js-surface-raised); box-shadow: var(--js-shadow); }
+  /* 上面是 Java（或 Java 经验类比），下面是 JS/React/UI5：两段都占满正文栏，和代码块、提示框左右对齐。 */
+  .code-compare { margin-block: 1.75rem; padding: 1rem 1.1rem 1.1rem; border: 1px solid var(--js-border); border-radius: var(--js-radius); background: var(--js-surface-raised); box-shadow: var(--js-shadow); }
   .code-compare p { margin-block: .45rem; }
-  .compare-title { margin-top: 0 !important; font-size: 1.0625rem; line-height: 1.5; }
+  .compare-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .35rem .75rem; }
+  .compare-head p { margin: 0 !important; }
+  .compare-title { font-size: 1.0625rem; line-height: 1.5; }
   .compare-title strong { color: var(--js-color-heading); }
-  .compare-input { display: inline-block; padding: .15rem .65rem; border-radius: 999px; background: color-mix(in srgb, var(--js-color-muted) 12%, transparent); color: var(--js-color-text); font-size: .875rem; }
-  .compare-columns { display: grid; gap: 1rem; margin-top: .6rem; }
-  .compare-side { --side-accent: var(--js-color-amber); --side-stroke: var(--js-color-amber-stroke); --side-soft: var(--js-color-amber-soft); min-width: 0; margin: 0; }
-  .compare-side:first-child { --side-accent: var(--js-color-java); --side-stroke: var(--js-color-java-stroke); --side-soft: var(--js-color-java-soft); }
+  .compare-input { padding: .15rem .65rem; border-radius: 999px; background: color-mix(in srgb, var(--js-color-muted) 12%, transparent); color: var(--js-color-text); font-size: .875rem; }
+  .compare-side { --side-accent: var(--js-color-amber); --side-stroke: var(--js-color-amber-stroke); --side-soft: var(--js-color-amber-soft); min-width: 0; margin: .85rem 0 0; }
+  .compare-side:nth-of-type(1) { --side-accent: var(--js-color-java); --side-stroke: var(--js-color-java-stroke); --side-soft: var(--js-color-java-soft); }
   .side-label { color: var(--js-color-muted); font-size: .875rem; line-height: 1.6; }
-  .side-label strong { display: inline-block; margin-inline-end: .2rem; padding: 0 .55rem; border: 1px solid color-mix(in srgb, var(--side-stroke) 45%, transparent); border-radius: 999px; background: var(--side-soft); color: var(--side-accent); font-size: .8125rem; font-weight: 750; line-height: 1.5rem; }
+  .side-label strong { display: inline-block; margin-inline-end: .35rem; padding: 0 .55rem; border: 1px solid color-mix(in srgb, var(--side-stroke) 45%, transparent); border-radius: 999px; background: var(--side-soft); color: var(--side-accent); font-size: .8125rem; font-weight: 750; line-height: 1.5rem; }
+  .side-unverified { color: var(--js-color-amber); font-size: .875rem; }
   .compare-side :global(.expressive-code) { --ec-codeFontSize: var(--js-code-size); }
   .compare-side :global(pre) { max-width: 100%; }
   .compare-output { position: relative; margin-top: .6rem !important; padding: .6rem .8rem .6rem 2rem; border: 1px solid var(--js-console-border); border-inline-start: 3px solid var(--side-stroke); border-radius: 10px; background: var(--js-console-bg); color: var(--js-console-fg); font-family: var(--sl-font-mono); font-size: .8125rem; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
   .compare-output::before { content: '›'; position: absolute; inset-inline-start: .75rem; top: .55rem; color: var(--side-accent); font-weight: 800; }
   .compare-output strong { color: var(--side-accent); font-family: var(--sl-font); font-weight: 700; }
-  .compare-difference { display: flex; gap: .6rem; align-items: baseline; margin-bottom: 0 !important; padding-top: .85rem; border-top: 1px solid var(--js-border); color: var(--js-color-text); line-height: 1.75; }
+  .compare-bridge { display: flex; align-items: center; justify-content: center; gap: .4rem; margin: .9rem 0 -.2rem !important; color: var(--js-color-muted); font-size: .8125rem; font-weight: 600; }
+  .compare-bridge svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: var(--js-color-primary); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .compare-difference { display: flex; gap: .6rem; align-items: baseline; margin: 1rem 0 0 !important; padding-top: .85rem; border-top: 1px solid var(--js-border); color: var(--js-color-text); line-height: 1.75; }
   .compare-difference::before { content: '差异'; flex: none; padding: 0 .5rem; border-radius: 999px; background: var(--js-color-primary-soft); color: var(--js-color-primary); font-size: .75rem; font-weight: 750; line-height: 1.45rem; }
   .copy-feedback { color: var(--js-color-text); font-size: .85rem; font-weight: 600; }
   .copy-feedback:empty { display: none; }
   .code-compare :focus-visible { outline: var(--js-focus-ring); outline-offset: 3px; }
-  @container (min-width: 760px) { .compare-columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 </style>

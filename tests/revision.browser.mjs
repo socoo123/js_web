@@ -224,7 +224,7 @@ try {
     await expect(lesson.locator('a[data-sidebar-lesson="C04"][data-done]')).toHaveCount(1);
     await expect(lesson.locator('a[data-sidebar-lab="L1"] .sidebar-lab-progress')).toHaveText('4/10');
     await lesson.goto(base + 'roadmap/');
-    await expect(lesson.locator('[data-done-count]').first()).toHaveText('已完成 4 / 12 课');
+    await expect(lesson.locator('[data-done-count]').first()).toHaveText('已完成 4 / 10 课');
     await expect(lesson.locator('.lesson-completed')).toHaveCount(4);
     const stored = JSON.parse(await lesson.evaluate(() => localStorage.getItem('js_web:progress:v1')));
     assert.equal(stored.version, 2);
