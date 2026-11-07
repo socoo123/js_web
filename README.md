@@ -4,7 +4,7 @@
 
 48 课必修正文、四张速查页、14 张机制图与本地阅读进度保留。站点以 Lab 为主线：侧栏按 Lab 分组，首页与 Lab 主页用标签进入课程，学完以 L6 毕业挑战收尾；阶段内连续修改，阶段间可用固定快照补课。C23/C41 分别接正式 C22/C40，L4 保留 React 主应用并提供四种并列适配，L5 回到 React 主应用交付。实际发布版本、验证范围与维护状态以 [STATUS](docs/STATUS.md) 和 [阶段记录](labs/records/)为准。
 
-**V2 改版已完成，V3 改版进行中：阶段 1 已发布，下一阶段为 V3 阶段 2「L1–L2（C01–C20）」。** `2026.10-v2.5` 已发布，L1–L5 与 C00–C48 快照齐全，证据见 [C 记录](labs/records/C.md)；V3 阶段 1 的设计系统、交互组件、L3 步骤页与 C03/C15/C23 改写见 [V3-1 记录](labs/records/V3-1.md)。
+**V4「Lab 优先」改版进行中：批次 1（Lab 优先与交互）见 [V4-1 记录](labs/records/V4-1.md)；批次 2（L5 本地后端，发行版 `2026.11-v4.0`）见 [V4-2 记录](labs/records/V4-2.md)；下一批为勘误与全站终验。** C44 起的学习包附带作者提供的本地后端 `server/`（`npm run lab -- api`），学员只写前端；接口见 [L5 后端接口](https://socoo123.github.io/js_web/labs/api/)。V2 的 `2026.10-v2.5` 等历史包保留，证据见 [C 记录](labs/records/C.md)。
 
 **[从 Lab 开始跟做](https://socoo123.github.io/js_web/labs/) · [Lab 规则与验收](https://socoo123.github.io/js_web/labs/rules/) · [48 课学习路线](https://socoo123.github.io/js_web/roadmap/) · [在线阅读](https://socoo123.github.io/js_web/) · [C48 自测与复盘](https://socoo123.github.io/js_web/07-project/c48-review-next-steps/)**
 
@@ -22,15 +22,15 @@ npm run lab -- dev
 
 ### 五个 Lab 与固定起点
 
-| Lab / 课程 | 补课起点（2026.10-v2.5） | 阶段交付 |
+| Lab / 课程 | 补课起点（2026.11-v4.0） | 阶段交付 |
 | --- | --- | --- |
-| [L1 库存规则与数据](https://socoo123.github.io/js_web/labs/l1/) · C01–C10 | [C00](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.5/C00.tar.gz) | 校验、草稿、筛选统计、集合与撤销 |
-| [L2 可用的原生库存页](https://socoo123.github.io/js_web/labs/l2/) · C11–C20 | [C10](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.5/C10.tar.gz) | 列表、请求、存储、CSS、模块、Node 报表与 UT |
-| [L3 React 库存应用](https://socoo123.github.io/js_web/labs/l3/) · C21–C36 | [C20](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.5/C20.tar.gz) | 从 JSX 到状态、表单、路由、缓存、测试与恢复 |
-| [L4 组件库与 UI5 适配](https://socoo123.github.io/js_web/labs/l4/) · C37–C44 | [C36](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.5/C36.tar.gz) | 四个并列 adapter，共用业务规则与 P004 编辑场景 |
-| [L5 调试与静态交付](https://socoo123.github.io/js_web/labs/l5/) · C45–C48 | [C44](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.5/C44.tar.gz) | 保留的 React 主应用：排错、生产路径、风险回归与现场增量 |
+| [L1 库存规则与数据](https://socoo123.github.io/js_web/labs/l1/) · C01–C10 | [C00](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/C00.tar.gz) | 校验、草稿、筛选统计、集合与撤销 |
+| [L2 可用的原生库存页](https://socoo123.github.io/js_web/labs/l2/) · C11–C20 | [C10](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/C10.tar.gz) | 列表、请求、存储、CSS、模块、Node 报表与 UT |
+| [L3 React 库存应用](https://socoo123.github.io/js_web/labs/l3/) · C21–C36 | [C20](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/C20.tar.gz) | 从 JSX 到状态、表单、路由、缓存、测试与恢复 |
+| [L4 组件库与 UI5 适配](https://socoo123.github.io/js_web/labs/l4/) · C37–C44 | [C36](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/C36.tar.gz) | 四个并列 adapter，共用业务规则与 P004 编辑场景 |
+| [L5 对接后端与交付](https://socoo123.github.io/js_web/labs/l5/) · C45–C48 | [C44](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/C44.tar.gz) | 保留的 React 主应用接上本地后端：全链路排错、带代理的生产预览、风险回归与服务端低库存筛选 |
 
-该发行格式提供 C00–C48 快照及 [SHA-256 清单](https://socoo123.github.io/js_web/downloads/inventory/2026.10-v2.5/manifest.json)。C00 是初始工程，Cnn 是该课完成参考态；例如 C20 是 C21 的起点，不是 L3 答案。正常跟做一直用自己的目录，不每天下载完成解。历史包和 48 个课程 URL 保留。
+该发行格式提供 C00–C48 快照及 [SHA-256 清单](https://socoo123.github.io/js_web/downloads/inventory/2026.11-v4.0/manifest.json)。C00 是初始工程，Cnn 是该课完成参考态；例如 C20 是 C21 的起点，不是 L3 答案。正常跟做一直用自己的目录，不每天下载完成解。历史包和 48 个课程 URL 保留。
 
 ### 暂停与恢复
 
