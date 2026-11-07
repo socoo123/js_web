@@ -1,6 +1,6 @@
 import { mkdir, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { createServer as createNetServer } from 'node:net';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { pathToFileURL } from 'node:url';
@@ -14,7 +14,7 @@ const inventory = path.join(repo, 'labs/inventory');
 const { createServer } = await import(pathToFileURL(path.join(inventory, 'node_modules/vite/dist/node/index.js')));
 const { chromium, expect } = await import(pathToFileURL(path.join(inventory, 'node_modules/@playwright/test/index.mjs')));
 const playwrightVersion = JSON.parse(readFileSync(path.join(inventory, 'node_modules/@playwright/test/package.json'), 'utf8')).version;
-const PORTS = [4341, 4342, 4343, 4344, 4345, 4346, 4347, 4348, 4349];
+const PORTS = process.env.PREVIEW_PORT ? [Number(process.env.PREVIEW_PORT)] : [4341, 4342, 4343, 4344, 4345, 4346, 4347, 4348, 4349];
 const TIMEOUT = 20000;
 // 界面截图色块平整，无损 WebP 比有损更小，也不会在文字周围出现压缩噪点。
 const WEBP = { lossless: true, effort: 6 };
@@ -115,6 +115,13 @@ async function shoot(browser, origin, shot, viewport, theme) {
 async function startServer(root, checkpoint) {
   const { viteConfig } = await import(pathToFileURL(path.join(root, 'tools/lab.mjs')));
   const config = await viteConfig(checkpoint);
+  // 快照带本地后端时（C44 起）用临时数据、随机端口的后端，并把 /api 代理改指向它。
+  let api = null;
+  if (existsSync(path.join(root, 'server/app.mjs')) && config.server.proxy?.['/api']) {
+    const { startApiFixture, proxyTo } = await import(pathToFileURL(path.join(root, 'tools/api-fixture.mjs')));
+    api = await startApiFixture({ root });
+    config.server.proxy = proxyTo(config.server.proxy, api.origin);
+  }
   const port = await freePort();
   // node_modules 是指向 labs/inventory 的链接，UI5 字体按真实路径请求，需加入允许列表。
   const allow = [...(config.server.fs?.allow ?? []), path.join(inventory, 'node_modules')];
@@ -122,7 +129,7 @@ async function startServer(root, checkpoint) {
   config.logLevel = 'error';
   const server = await createServer(config);
   await server.listen();
-  return { server, origin: `http://127.0.0.1:${port}/` };
+  return { server, api, origin: `http://127.0.0.1:${port}/` };
 }
 
 const manifest = readManifest();
@@ -135,7 +142,7 @@ await withSnapshots(shots.map((shot) => shot.checkpoint), async (roots) => {
     for (const checkpoint of Object.keys(roots)) {
       const root = roots[checkpoint];
       await symlink(path.join(inventory, 'node_modules'), path.join(root, 'node_modules'), 'dir');
-      const { server, origin } = await startServer(root, checkpoint);
+      const { server, api, origin } = await startServer(root, checkpoint);
       try {
         // 预热：让 Vite 先完成依赖预构建，避免拍摄中途整页重载。
         const warm = await browser.newPage();
@@ -146,6 +153,7 @@ await withSnapshots(shots.map((shot) => shot.checkpoint), async (roots) => {
           const digest = await snapshotDigest(shot, root);
           const images = [];
           for (const { viewport, theme, file } of expectedImages(shot)) {
+            await api?.reset();
             const data = await shoot(browser, origin, shot, viewport, theme);
             const { width, height } = await sharp(data).metadata();
             await mkdir(path.dirname(path.join(assetsDir, file)), { recursive: true });
@@ -160,7 +168,7 @@ await withSnapshots(shots.map((shot) => shot.checkpoint), async (roots) => {
           }
           manifest.shots[shot.id] = { checkpoint, digest, capturedAt: new Date().toISOString().slice(0, 10), environment, images };
         }
-      } finally { await server.close(); }
+      } finally { await server.close(); await api?.close(); }
     }
   } finally { await browser.close(); }
 });
