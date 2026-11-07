@@ -1,0 +1,34 @@
+---
+// 页首三关总览：静态时是三张入口卡；脚本读取本页记录后显示每关进度。
+import { BUGS, LEVELS, QUESTIONS } from '../../lib/capstone.mjs';
+import '../lab-ui.css';
+import './capstone.css';
+
+const checks = LEVELS.reduce((sum, level) => sum + level.goals.reduce((count, goal) => count + goal.checks.length, 0), 0);
+const stages = [
+  { key: 'quiz', number: 1, title: '能力自测', href: '#第一关能力自测', text: `${QUESTIONS.length} 道题覆盖六个领域：单选、多选和预测输出。答完立即判分，错题直接链回课文。`, total: QUESTIONS.length, unit: '题' },
+  { key: 'bugs', number: 2, title: 'Bug 猎人', href: '#第二关bug-猎人', text: `${BUGS.length} 段有问题的代码，都来自课文的「常见错误与调试」。点出造成现象的那一行。`, total: BUGS.length, unit: '个' },
+  { key: 'project', number: 3, title: '毕业项目', href: '#第三关毕业项目', text: '在自己的库存工作区实现「补货计划」：core、UT、命令行、React 页面，再到交付。', total: checks, unit: '项验收' },
+];
+---
+
+<ol class="cap cap-overview lab-ui not-content" data-cap-overview aria-label="三关总览">
+  {stages.map((stage) => (
+    <li>
+      <div class="cap-stage js-card" data-ov={stage.key}>
+        <span class="cap-stage-num" aria-hidden="true">{stage.number}</span>
+        <h3>第{['一', '二', '三'][stage.number - 1]}关 · {stage.title}</h3>
+        <p>{stage.text}</p>
+        <div class="cap-stage-foot">
+          <span class="cap-stage-status" data-ov-status>共 {stage.total} {stage.unit}</span>
+          <div class="cap-bar cap-js-only" aria-hidden="true"><span></span></div>
+          <a href={stage.href}>进入第{['一', '二', '三'][stage.number - 1]}关</a>
+        </div>
+      </div>
+    </li>
+  ))}
+</ol>
+
+<script>
+  import '../../scripts/capstone.mjs';
+</script>

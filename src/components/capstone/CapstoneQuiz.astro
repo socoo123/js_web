@@ -1,0 +1,124 @@
+---
+// 第一关：能力自测。没有 JS 时是一份带折叠答案的试卷；脚本把选项升级成按钮，即时判分并记入 localStorage。
+import { Code } from '@astrojs/starlight/components';
+import { AREAS, QUESTIONS, KEYS, TYPE_LABEL, answerText, inline, review } from '../../lib/capstone.mjs';
+import '../lab-ui.css';
+import './capstone.css';
+
+const ids = new Set();
+for (const question of QUESTIONS) {
+  if (ids.has(question.id)) throw new Error(`L6：题目 id 重复 ${question.id}`);
+  ids.add(question.id);
+  if (!(question.type in TYPE_LABEL)) throw new Error(`L6：${question.id} 的题型无效`);
+  if (!AREAS.some((area) => area.id === question.area)) throw new Error(`L6：${question.id} 的领域无效`);
+  if (question.options.length < 2 || question.options.length > KEYS.length) throw new Error(`L6：${question.id} 的选项数量无效`);
+  if (!question.answer.length || question.answer.some((index) => !(index >= 0 && index < question.options.length))) throw new Error(`L6：${question.id} 的答案越界`);
+  if (question.type !== 'multi' && question.answer.length !== 1) throw new Error(`L6：${question.id} 不是多选题，只能有一个答案`);
+  if (question.type === 'predict' && !question.code) throw new Error(`L6：预测题 ${question.id} 缺少代码`);
+}
+
+const reviews = await Promise.all(QUESTIONS.map((question) => review(question.lesson, question.anchor)));
+const numbered = QUESTIONS.map((question, index) => ({ question, number: index + 1, review: reviews[index] }));
+const groups = AREAS.map((area, index) => ({ area, index, items: numbered.filter((item) => item.question.area === area.id) }));
+const total = QUESTIONS.length;
+---
+
+<section class="cap lab-ui not-content" data-cap-quiz aria-label="第一关：能力自测题目">
+  <div class="cap-quiz-top cap-js-only" data-quiz-progress>
+    <span>已答 <strong data-answered>0</strong> / {total}</span>
+    <span>答对 <strong data-correct>0</strong></span>
+    <div class="cap-bar" aria-hidden="true"><span></span></div>
+    <a href="#cap-score">看成绩单</a>
+  </div>
+  <p class="cap-nojs cap-muted">每题下面的「答案与解析」可以直接展开核对。启用 JavaScript 后，点选项即可判分，并记录成绩。</p>
+
+  {groups.map(({ area, index, items }) => (
+    <section class="cap-area" data-area={area.id} aria-labelledby={`cap-area-${area.id}`}>
+      <header class="cap-area-head">
+        <span class="cap-area-mark" aria-hidden="true">{index + 1}</span>
+        <h3 id={`cap-area-${area.id}`}>{area.label}</h3>
+        <span class="js-chip">{area.range}</span>
+        <span class="cap-muted">{items.length} 题</span>
+      </header>
+      {items.map(({ question, number, review }) => (
+        <article
+          class="cap-q js-card"
+          id={`q-${question.id}`}
+          data-qid={question.id}
+          data-number={number}
+          data-area={question.area}
+          data-type={question.type}
+          data-answer={question.answer.join(',')}
+          aria-labelledby={`q-${question.id}-title`}
+        >
+          <div class="cap-q-head">
+            <h4 class="cap-q-num" id={`q-${question.id}-title`}>第 {number} 题</h4>
+            <span class="js-chip">{TYPE_LABEL[question.type]}</span>
+            <span class="js-chip">{question.lesson}</span>
+            <span class="cap-q-state" data-q-state></span>
+          </div>
+          <p class="cap-q-prompt" data-prompt set:html={inline(question.prompt)} />
+          {question.code && <Code code={question.code} lang={question.lang} />}
+          <ol class="cap-options" data-options aria-label={question.type === 'multi' ? '选项（多选）' : '选项'}>
+            {question.options.map((option, key) => (
+              <li>
+                <span class="cap-opt" data-option={key}>
+                  <span class="cap-opt-key" aria-hidden="true">{KEYS[key]}</span>
+                  <span class="js-visually-hidden">选项 {KEYS[key]}：</span>
+                  {question.type === 'predict'
+                    ? <span class="cap-opt-text cap-opt-output">{option}</span>
+                    : <span class="cap-opt-text" set:html={inline(option)} />}
+                  <span class="cap-opt-mark" data-mark></span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <div class="cap-q-actions cap-js-only">
+            {question.type === 'multi' && <button type="button" class="js-button" data-variant="primary" data-submit disabled>提交答案</button>}
+            <button type="button" class="js-button" data-variant="secondary" data-giveup>不会，直接看答案</button>
+          </div>
+          <div class="cap-feedback" data-feedback hidden></div>
+          <details class="lab-fold cap-explain" data-disclosure="answer" data-explain>
+            <summary>答案与解析</summary>
+            <p class="cap-answer-line">答案：{answerText(question)}</p>
+            <p set:html={inline(question.explain)} />
+            <p class="cap-review">
+              <span class="cap-review-label">回看</span>
+              <a href={review.href} data-review><span class="cap-lesson-id">{review.lessonId}</span>{review.label}</a>
+            </p>
+          </details>
+        </article>
+      ))}
+    </section>
+  ))}
+
+  <section class="cap-score js-card cap-js-only" id="cap-score" aria-labelledby="cap-score-title" data-quiz-score>
+    <div class="cap-score-head">
+      <h3 id="cap-score-title">成绩单</h3>
+      <span class="cap-score-total" data-score-total>0 / {total}</span>
+      <span class="cap-muted" data-score-note>还没有作答</span>
+    </div>
+    <ul class="cap-areas" aria-label="六个领域的答对题数">
+      {groups.map(({ area, items }) => (
+        <li data-area-row={area.id} data-total={items.length}>
+          <span>{area.label}</span>
+          <div class="cap-bar" aria-hidden="true"><span></span></div>
+          <span class="cap-area-count" data-count>0 / {items.length}</span>
+        </li>
+      ))}
+    </ul>
+    <div data-wrong-wrap hidden>
+      <h4>错题本</h4>
+      <ul class="cap-wrong" data-wrong></ul>
+    </div>
+    <div class="cap-actions">
+      <button type="button" class="js-button" data-variant="primary" data-redo-wrong disabled>重做错题</button>
+      <button type="button" class="js-button" data-variant="secondary" data-redo-all disabled>全部重做</button>
+    </div>
+  </section>
+  <p class="js-visually-hidden" aria-live="polite" data-live></p>
+</section>
+
+<script>
+  import '../../scripts/capstone.mjs';
+</script>

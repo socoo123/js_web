@@ -1,0 +1,124 @@
+---
+title: L6 毕业挑战：综合能力检验
+description: 用 44 道自测题、8 个真实 bug 和一个跨层的补货计划项目检验整门课，找出需要回看的 Lab 和课。
+sidebar:
+  order: 6
+---
+
+import Effect from '../../../components/Effect.astro';
+import CapstoneOverview from '../../../components/capstone/CapstoneOverview.astro';
+import CapstoneQuiz from '../../../components/capstone/CapstoneQuiz.astro';
+import BugHunt from '../../../components/capstone/BugHunt.astro';
+import CapstoneCases from '../../../components/capstone/CapstoneCases.astro';
+import CapstoneLevel from '../../../components/capstone/CapstoneLevel.astro';
+import CapstoneRubric from '../../../components/capstone/CapstoneRubric.astro';
+import CapstoneSummary from '../../../components/capstone/CapstoneSummary.astro';
+
+学完 48 课、做完五个 Lab，用这一页检验自己。先做一套覆盖全课程的自测，再找出八段代码里的 bug，最后在自己的库存工作区完成一个跨层的新功能。
+
+<CapstoneOverview />
+
+## 这一关怎么用
+
+- 三关可以按顺序做，也可以只做其中一关。答题、勾选和自评都保存在当前浏览器里，刷新或关掉页面后还在。
+- 每道题、每个 bug 都链到对应课文的小节。答错时先回看，再回来点「重做错题」。
+- 网站**不会检查你本地的代码**。第三关的验收由你自己运行命令、对照预期结果后勾选。
+- 页面最后的「毕业报告」按领域汇总三关结果，列出先回看哪个 Lab、哪几课。
+
+## 第一关：能力自测
+
+44 道题按课程顺序分成六个领域。题型有三种：
+
+- **单选**：点一个选项，立即判分。
+- **多选**：选出所有正确的选项，再点「提交答案」。
+- **预测输出**：先读代码，选出运行后会看到的内容。
+
+不会的题可以点「不会，直接看答案」，它会记为未答对并进入错题本。
+
+:::tip[自己尝试 · Node 24 或浏览器]
+预测题都可以自己运行核对。普通片段存成 `.mjs` 文件，用 `node 文件名.mjs` 运行；题目写明浏览器、两个模块文件或 TypeScript 的，按题目里的环境运行。先写下预测，再运行。
+:::
+
+<CapstoneQuiz />
+
+## 第二关：Bug 猎人
+
+八段代码都来自课文「常见错误与调试」里的故障，每段不超过 15 行。读完现象，点击造成问题的那一行：
+
+- 点中后显示现象与证据、原因和修复后的代码。
+- 点错会说明为什么不是这一行。
+- 「看提示」和直接展开答案都能用，只是不计入「独立找到」。
+
+<BugHunt />
+
+## 第三关：毕业项目
+
+库存主管想在补货前先看一张**补货计划**：哪些商品库存偏低、各补多少件、要花多少钱，确认后一次补齐。你要在自己的库存工作区里，从 core 一直做到交付。
+
+:::tip[自己尝试 · 本地工作区]
+从 L5 完成的 C48 工程继续，不新建项目。先执行 `npm run lab -- start C48`，确认 `npm test` 和 `npm run lab -- check C48` 都通过，再写新代码。
+
+手边没有这份工程时，在工作区执行 `npm run lab -- restore C48 ../inventory-restock`，进入新目录后执行一次 `npm ci`，再从上面的 `start C48` 开始。
+:::
+
+### 补货规则
+
+继续使用[共用业务规则](/js_web/labs/rules/)，补货计划另加下面几条：
+
+| 规则 | 说明 |
+| --- | --- |
+| 哪些商品进计划 | 库存 **≤ 阈值** 的商品。售罄的 P002（库存 0）一定在内，这和 L5 排除 0 的「低库存 1–5」筛选不同。 |
+| 补多少 | 补到目标库存：数量 = 目标 − 当前库存。 |
+| 参数 | 阈值和目标都是 0–99999 的整数，目标必须大于阈值，否则抛 `RangeError`。页面和命令行拿到的是文本，先交给已有的 `parseStock`。 |
+| 金额 | 数量 × `priceCents`，全程用整数分。 |
+| 输入与顺序 | 保持商品原顺序，不修改传入的数组和商品对象。 |
+| 写入 | 确认补货时逐项调用已有的 `restocked` 操作，不另开保存通道。 |
+
+### 固定数据的预期结果
+
+起点是固定的六件商品，页面汇总为「库存 52 / 价值 2634800 分」。每次做数字实验前，先导入 C45 准备的固定数据基线，结果才对得上。
+
+<CapstoneCases />
+
+命令行报告的输出应该和下面一致：
+
+<Effect kind="terminal" title="补货计划命令行" caption="第二条命令的目标不大于阈值，错误写到 stderr，退出状态为 1">
+
+```text
+$ node src/cli/restock.js 5 10
+补货计划：库存 ≤ 5 的商品补到 10 件
+P002 无线鼠标 0 → 10，补 10 件，129000 分
+P004 USB-C 扩展坞 3 → 10，补 7 件，209300 分
+P006 降噪耳机 5 → 10，补 5 件，449500 分
+合计 3 种、22 件、787800 分
+$ node src/cli/restock.js 5 5
+无法生成补货计划：目标库存必须大于阈值
+$ echo $?
+1
+```
+
+</Effect>
+
+### 必做：一条规则，三个入口
+
+<CapstoneLevel level="must" />
+
+### 进阶：用测试和真实浏览器证明它能交付
+
+<CapstoneLevel level="advanced" />
+
+### 挑战：失败、换框架、自己制造故障
+
+<CapstoneLevel level="challenge" />
+
+### 自评量表
+
+做完一个级别，给六个领域各打一分。分数只用来决定先回看什么，不是考试成绩。
+
+<CapstoneRubric />
+
+## 收尾：你的毕业报告
+
+这里汇总本页三关的记录。标为「建议回看」的领域，先读列出的 Lab 和课，再回到对应的关重做。
+
+<CapstoneSummary />

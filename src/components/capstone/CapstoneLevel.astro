@@ -1,0 +1,72 @@
+---
+// 第三关的一个级别：每个目标有「先读」、可勾选的验收项和折叠的参考思路。勾选结果存在本页记录里。
+import { LEVELS, checkId, inline, review } from '../../lib/capstone.mjs';
+import '../lab-ui.css';
+import './capstone.css';
+
+interface Props {
+  level: 'must' | 'advanced' | 'challenge';
+}
+const level = LEVELS.find((item) => item.id === Astro.props.level);
+if (!level) throw new Error(`L6：未知级别 ${Astro.props.level}`);
+
+const goals = await Promise.all(level.goals.map(async (goal) => ({
+  goal,
+  reads: await Promise.all(goal.read.map((item) => review(item.lesson, item.anchor, item.label))),
+})));
+const total = level.goals.reduce((sum, goal) => sum + goal.checks.length, 0);
+---
+
+<section class="cap cap-level lab-ui not-content" data-cap-level={level.id} data-level={level.id} aria-label={`${level.label}：${level.title}`}>
+  <div class="cap-level-head">
+    <span class="cap-level-tag">{level.label}</span>
+    <span class="cap-level-count" data-level-count>{total} 项验收</span>
+    <div class="cap-bar cap-js-only" data-tone="ok" aria-hidden="true"><span></span></div>
+  </div>
+  <p>{level.intro}</p>
+  {goals.map(({ goal, reads }) => (
+    <article class="cap-goal js-card" data-goal={`${level.id}.${goal.id}`} aria-labelledby={`goal-${level.id}-${goal.id}`}>
+      <div class="cap-goal-title">
+        <h4 id={`goal-${level.id}-${goal.id}`} set:html={inline(goal.title)} />
+        <span class="cap-goal-done js-status" data-tone="ok" data-goal-done hidden>验收全部勾完</span>
+      </div>
+      <ul class="cap-files" aria-label="涉及的文件">
+        {goal.files.map((file) => <li><code>{file}</code></li>)}
+      </ul>
+      <div class="cap-goal-body">
+        {goal.body.map((text) => <p set:html={inline(text)} />)}
+      </div>
+      <div class="cap-read">
+        <span class="cap-review-label">先读</span>
+        <ul>
+          {reads.map((item) => (
+            <li><a href={item.href}><span class="cap-lesson-id">{item.lessonId}</span>{item.label}</a></li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <p class="lab-label">验收（自己核对后勾选）</p>
+        <ul class="cap-checks">
+          {goal.checks.map((check) => (
+            <li>
+              <label class="cap-check">
+                <input type="checkbox" data-check={checkId(level, goal, check)} data-level={level.id} />
+                <span set:html={inline(check.text)} />
+              </label>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {goal.hint && (
+        <details class="lab-fold" data-disclosure="hint">
+          <summary>参考思路</summary>
+          <ul>{goal.hint.map((text) => <li set:html={inline(text)} />)}</ul>
+        </details>
+      )}
+    </article>
+  ))}
+</section>
+
+<script>
+  import '../../scripts/capstone.mjs';
+</script>

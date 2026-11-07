@@ -1,0 +1,99 @@
+---
+// 第二关：Bug 猎人。代码逐行高亮成静态 HTML；脚本把每行升级成可聚焦的按钮（方向键移动，Enter 选中）。
+import { Code } from '@astrojs/starlight/components';
+import { BUGS, areaFor, inline, review } from '../../lib/capstone.mjs';
+import { highlightLines } from '../../lib/capstone-code.mjs';
+import '../lab-ui.css';
+import './capstone.css';
+
+const items = await Promise.all(BUGS.map(async (bug, index) => {
+  const rows = await highlightLines(bug.code, bug.lang);
+  if (rows.length > 15) throw new Error(`L6：${bug.id} 超过 15 行`);
+  const outOfRange = [...bug.lines, ...Object.keys(bug.decoys ?? {}).map(Number)].filter((line) => !(line >= 1 && line <= rows.length));
+  if (outOfRange.length) throw new Error(`L6：${bug.id} 的行号越界：${outOfRange.join('、')}`);
+  if (Object.keys(bug.decoys ?? {}).some((line) => bug.lines.includes(Number(line)))) throw new Error(`L6：${bug.id} 的干扰行与答案行重叠`);
+  const decoys = Object.fromEntries(Object.entries(bug.decoys ?? {}).map(([line, text]) => [line, inline(text)]));
+  return { bug, index, rows, decoys, area: areaFor(bug.area), review: await review(bug.lesson, bug.anchor) };
+}));
+---
+
+<section class="cap lab-ui not-content" data-cap-bugs aria-label="第二关：Bug 猎人">
+  <p class="cap-nojs cap-muted">先读代码，自己判断是哪一行造成了现象，再展开「答案与解析」核对。启用 JavaScript 后可以直接点击代码行作答。</p>
+
+  {items.map(({ bug, index, rows, decoys, area, review }) => (
+    <article
+      class="cap-bug js-card"
+      id={bug.id}
+      data-bug={bug.id}
+      data-number={index + 1}
+      data-area={bug.area}
+      data-lines={bug.lines.join(',')}
+      data-decoys={JSON.stringify(decoys)}
+      aria-labelledby={`${bug.id}-title`}
+    >
+      <div class="cap-q-head">
+        <span class="cap-q-num">Bug {index + 1}</span>
+        <span class="js-chip">{area.short}</span>
+        <span class="js-chip">{bug.lesson}</span>
+        <span class="cap-q-state" data-bug-state></span>
+      </div>
+      <h3 id={`${bug.id}-title`}>{bug.title}</h3>
+      <p class="cap-bug-scenario"><strong>现象：</strong><span set:html={inline(bug.scenario)} /></p>
+      <p class="cap-js-only cap-muted">点击造成问题的那一行；也可以 Tab 到代码上，用 ↑ ↓ 移动、Enter 选中。</p>
+      <div class="cap-code">
+        <div class="cap-code-file">{bug.file}</div>
+        <div class="cap-code-scroll">
+          <div class="cap-code-body" data-code-lines role="group" aria-label={`${bug.file}，共 ${rows.length} 行`}>
+            {rows.map((row, line) => (
+              <span class="cap-line" data-line={line + 1}>
+                <span class="cap-ln" aria-hidden="true">{line + 1}</span>
+                <span class="cap-lc">{row.length ? row.map((token) => <span style={token.style}>{token.text}</span>) : ' '}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div class="cap-bug-tools cap-js-only">
+        <button type="button" class="js-button" data-variant="secondary" data-hint-button>看提示</button>
+        <span class="cap-muted" data-attempts></span>
+      </div>
+      <p class="cap-bug-hint" data-hint hidden><strong>提示：</strong><span set:html={inline(bug.hint)} /></p>
+      <div class="cap-feedback" data-feedback hidden></div>
+      <details class="lab-fold cap-nojs" data-disclosure="hint">
+        <summary>提示</summary>
+        <p set:html={inline(bug.hint)} />
+      </details>
+      <details class="lab-fold cap-explain" data-disclosure="answer" data-explain>
+        <summary>答案与解析</summary>
+        <p class="cap-answer-line">出问题的是第 {bug.lines.join('、')} 行。</p>
+        <dl class="cap-dl">
+          <div><dt>现象与证据</dt><dd set:html={inline(bug.symptom)} /></div>
+          <div><dt>原因</dt><dd set:html={inline(bug.cause)} /></div>
+          <div>
+            <dt>修复后</dt>
+            <dd>
+              <Code code={bug.fix} lang={bug.fixLang} />
+              <p set:html={inline(bug.fixNote)} />
+            </dd>
+          </div>
+        </dl>
+        <p class="cap-review">
+          <span class="cap-review-label">回看</span>
+          <a href={review.href} data-review><span class="cap-lesson-id">{review.lessonId}</span>{review.label}</a>
+        </p>
+      </details>
+    </article>
+  ))}
+
+  <div class="cap-bug-tally cap-js-only" data-bug-tally>
+    <span>找到 <strong data-found>0</strong> / {items.length}</span>
+    <span class="cap-muted" data-bug-note>还没有开始</span>
+    <div class="cap-bar" aria-hidden="true"><span></span></div>
+    <button type="button" class="js-button" data-variant="secondary" data-bugs-reset disabled>重新开始</button>
+  </div>
+  <p class="js-visually-hidden" aria-live="polite" data-live></p>
+</section>
+
+<script>
+  import '../../scripts/capstone.mjs';
+</script>
