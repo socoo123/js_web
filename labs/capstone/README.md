@@ -94,6 +94,8 @@ LAB_DEPENDENCIES=<已安装依赖的 labs/inventory/node_modules> node scripts/v
 
 参考实现只在临时 C48 副本里写过、没有提交（页面只给参考思路）。在副本里：`npm test` 7 个文件 35 条通过；`npm run lab -- check C48` 通过；`node src/cli/restock.js 5 10` 输出与页面终端块一致，`5 5` 退出码 1；`npm run lab -- build` 后用严格静态服务器运行补货 Playwright 用例 1 条通过（子路径下带条件刷新、失败后重试到 74 件）。挑战档的 UI5 指引核对了 `npm run lab -- start C43` 切换到 `adapters/web-components`、`npm run lab -- dev` 能打开含 `ui5-input`/`ui5-button` 的页面、`start C48` 能切回；UI5 版补货区本身没有写参考实现。
 
+2026-11-07（2026.11-v4.0）：L5 起 C48 完成态默认连本地后端。页面上的固定数据说明从「导入 C45 基线」改为「恢复固定数据 / `npm run lab -- api reset`」；进阶档的交付目标补了「预览时保持 api 运行」和 e2e 开头先 `POST /api/_lab/reset`。挑战档新增可选目标 `api`（补货计划的数据改由本地后端提供，4 项验收），`check-capstone` 通过，项目验收由 31 项变为 35 项（挑战 6 → 10）。上面那份临时参考实现是浏览器内 mock 时期写的，没有在 API 模式下重跑；`api` 目标没有参考实现，验收项未运行验证。只核对了它依赖的后端行为：在临时数据文件上恢复固定数据后，给 `POST /api/products/P004/restock` 注入一次 500，依次补 P002+10 得 200、P004+7 得 500（`{"error":{"code":"FAULT","message":"注入的故障：500"}}`，日志行尾「注入故障」），再补 P004+7、P006+5 均 200，`GET /api/products?pageSize=50` 的 `totals` 为 6 种、74 件、3422600 分。
+
 ### 页面交互
 
 Playwright 脚本（不在仓库内）在 dev server 上点击作答、Bug 选行、勾选与自评，检查计分、领域条、错题本、刷新后保留、重做错题与焦点、键盘作答、方向键选行、`aria-live` 文本、毕业报告排序与原因、两次确认的清除、`js_web:progress:v1` 不被改动、1280/360 × 浅色/深色无横向滚动，以及禁用 JS 时题目、代码和折叠答案可读；75 项全部通过。
