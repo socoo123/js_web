@@ -9,7 +9,7 @@ import Diagram from '../../../components/Diagram.astro';
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 4 周 · 第 23 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
-> 前置：C20、C31、C45 · 运行：Node 24、本地 React · 部分示例未运行，已在对应位置标注
+> 前置：C20、C31、C45 · 运行：Node 24、本地 React、本地后端 · 部分示例未运行，已在对应位置标注
 
 ## 这一课解决什么问题
 
@@ -21,7 +21,7 @@ import LessonTask from '../../../components/LessonTask.astro';
 
 本课不需要换工程或重装依赖。先完成配置，再停旧服务、选择C46并build；严格预览用下面的专用命令，而不是dev。你将交出能在真实文件边界下运行的产物、路径证据和恢复说明。
 
-固定数值验收前，先按上一课的方法保管个人快照，再导入自己的baseline.json；每个独立流程都从同一份初始数据开始。
+固定数值验收前，点“恢复固定数据”或运行 `npm run lab -- api reset`；每个独立流程都从同一份初始数据开始。构建与预览期间，另一个终端的 `npm run lab -- api` 保持运行。
 
 ## Java 程序员先看这里
 
@@ -37,12 +37,13 @@ Java打包和静态前端构建都先生成可交付物，但运行位置不同�
 
 顺着实线读一次构建与发布，再沿虚线读一次访问。课程HTML与库存hash详情走不同入口，库存演示使用更深的公开前缀。
 
-在 `inventory/vite.config.js` 的配置对象内，紧接 `defineConfig({` 增加base，保留原来的build与test配置。完整文件是：
+在 `inventory/vite.config.js` 的配置对象内，紧接 `defineConfig({` 增加base，保留 C45 的 `/api` 代理和原来的build与test配置。完整文件是：
 
 ```js
 import { defineConfig } from "vitest/config";
 export default defineConfig({
   base: "/js_web/demos/inventory/",
+  server: { proxy: { "/api": "http://127.0.0.1:8070" } },
   build: { sourcemap: true },
   test: { environment: "node", include: ["tests/**/*.test.{js,jsx}"] },
 });
@@ -58,9 +59,13 @@ LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs
 
 预期：build生成 `dist/src-react/index.html`、assets和products.json；服务器打印 `http://127.0.0.1:8068/js_web/demos/inventory/`。它**只读已有产物，不重新build，也不覆盖base**。改源码后要先重新build，预览才会变化。类似Java重新打包后再部署，不能把旧产物当成新源码。
 
+`server.proxy` 只在 dev 里生效，产物里没有它。预览服务器自己把 `/api/` 开头的请求转给 8070（启动行末尾写着“/api 转发到”哪里），其余路径仍严格按文件返回；后端没启动时，`/api` 得到 502，页面显示 `读取失败：HTTP 502：本地后端没有响应：… 先在另一个终端运行 npm run lab -- api。`
+
 <a id="哪些配置会进入产物"></a>
 
-[`import.meta.env.BASE_URL`](https://vite.dev/guide/build.html#public-base-path)由构建写入产物。动态拼公开资源时用它；`VITE_`环境值也会进入客户端，不能放密钥。repository仍是浏览器内mock与本地存储，不会因为用了Actions就变成服务器API。
+[`import.meta.env.BASE_URL`](https://vite.dev/guide/build.html#public-base-path)由构建写入产物。动态拼公开资源时用它；`VITE_`环境值也会进入客户端，不能放密钥。
+
+数据源也是这样在构建时选定的。默认构建请求 `/api`，需要后端；`VITE_DATA_SOURCE=mock npm run lab -- build` 得到只用浏览器内mock与本地存储的产物，不发 `/api` 请求。Pages 只返回文件，没有后端，能放上去的只有 mock 产物。
 
 ## 2. base是URL的前缀，dist是磁盘上的目录
 
@@ -115,7 +120,7 @@ HashRouter内部的路由从hash开始，不再添加 `/js_web/demos/inventory` 
 
 <a id="4-actions-构建的是文件pages-发布的是产物"></a>
 
-这份课程仓库的Pages工作流发布教程与学习包。本地运行成功的Lab没有因此成为线上演示。个人若想发布库存，可把完整工作区放在自己的Git仓库根目录，保留package与锁、data、src、tools和adapters；不用复制node_modules、个人快照或 `.lab`。
+这份课程仓库的Pages工作流发布教程与学习包。本地运行成功的Lab没有因此成为线上演示。个人若想发布库存，可把完整工作区放在自己的Git仓库根目录，保留package与锁、data、src、tools和adapters；不用复制node_modules、个人快照或 `.lab`。Pages 上没有后端，发布时用 mock 构建。
 
 > 未运行验证：下列个人仓库的GitHub Actions上传、Pages发布及线上检查，请在自己的仓库执行。
 
@@ -124,7 +129,7 @@ HashRouter内部的路由从hash开始，不再添加 `/js_web/demos/inventory` 
 ```yaml
 # 个人工作流的build job中；前面先checkout、配置Node和npm ci
 - run: npm run lab -- start C46
-- run: npm run lab -- build
+- run: VITE_DATA_SOURCE=mock npm run lab -- build
 - run: mkdir -p site/demos/inventory
 - run: cp -R dist/src-react/. site/demos/inventory/
 # upload-pages-artifact的with.path指向site，而不是源码目录
@@ -142,15 +147,16 @@ HashRouter内部的路由从hash开始，不再添加 `/js_web/demos/inventory` 
 
 | 操作 | 预期 |
 | --- | --- |
-| 打开首页 | 六商品、52件、2634800分；个人数据起点另记 |
+| 打开首页 | 六商品、52件、2634800分；Network有经预览服务器代理的 `GET /api/products` 200 |
 | 直接打开 `#/products/P004` 并刷新 | Document仍请求演示首页，显示P004/库存3 |
 | 展开分类报表 | 按需模块成功，配件2种/28件/587200分 |
 | 打开 `products.json` | 六件固定数据的JSON，不是HTML |
 | 打开 `products/P004/` 或 `assets/missing.js` | 真正404，不返回首页HTML |
+| 停掉api后刷新 | `/api/products` 返回502，页面显示“读取失败：HTTP 502：本地后端没有响应……”与“重新读取”；启动api后点它，回到六商品/52件 |
 
-前三项用浏览器观察行为，后两项也可直接看响应正文。课程深层URL则在课程站预览中检查：它应找到真实HTML，禁用JS仍有正文。两种页面的无JS结果不同，是渲染方式不同。
+前三项用浏览器观察行为，接下来两项也可直接看响应正文。课程深层URL则在课程站预览中检查：它应找到真实HTML，禁用JS仍有正文。两种页面的无JS结果不同，是渲染方式不同。
 
-结束手工预览后，在工作区执行 `npm run lab -- check C46`。检查会根据**当前配置与源码**build，再验证文件和独立浏览器；不会修复错误base。预览与检查默认共用8068端口，先Ctrl+C结束旧预览。
+结束手工预览后，在工作区执行 `npm run lab -- check C46`。检查会根据**当前配置与源码**build，自己起一个临时数据的后端，再验证文件和独立浏览器；不会修复错误base。预览与检查默认共用8068端口，先Ctrl+C结束旧预览。
 
 ## 常见错误与调试
 
@@ -166,7 +172,7 @@ HashRouter内部的路由从hash开始，不再添加 `/js_web/demos/inventory` 
 <a id="练习-2修好个人部署的上传目录"></a>
 
 :::tip[自己尝试 · 本地 React]
-完成base改动，走一次错误base→路径证据→恢复正确base的实验。新建 `notes/delivery.md`，写出构建命令、输出目录、公开前缀、严格预览地址、hash与缺文件的实际响应，以及库存备份/导入恢复方式。
+完成base改动，走一次错误base→路径证据→恢复正确base的实验。新建 `notes/delivery.md`，写出构建命令、输出目录、公开前缀、严格预览地址、hash与缺文件的实际响应，以及两种数据源的构建命令和恢复固定数据的方式。
 
 验收：无需dev服务器也能打开产物，入口和按需资源没有404；直接hash刷新成功，缺失JS和干净详情路径返回404。个人发布若尚未执行，就在笔记留待办。
 :::
@@ -181,7 +187,7 @@ HashRouter内部的路由从hash开始，不再添加 `/js_web/demos/inventory` 
 <details>
 <summary>参考答案</summary>
 
-工作区base是/js_web/demos/inventory/，构建根是dist/src-react，严格预览只把二者映射。hash详情请求现有index.html；products/P004/没有对应文件。个人模板为了保留嵌套URL，将产物复制到site/demos/inventory并上传site；课程仓库则继续上传它自己的根dist。恢复使用repository备份或自己导出的有效快照，保留损坏原文。
+工作区base是/js_web/demos/inventory/，构建根是dist/src-react，严格预览只把二者映射，另把/api转给后端。hash详情请求现有index.html；products/P004/没有对应文件。个人模板为了保留嵌套URL，用mock构建后将产物复制到site/demos/inventory并上传site；课程仓库则继续上传它自己的根dist。API模式用“恢复固定数据”或api reset回到初始数据，坏数据文件会另存；mock产物仍用repository备份或自己导出的有效快照恢复。
 
 </details>
 
@@ -196,9 +202,10 @@ HashRouter内部的路由从hash开始，不再添加 `/js_web/demos/inventory` 
 - Node构建、静态托管、浏览器运行各有边界。
 - base决定公开资源前缀，不等于磁盘目录或hash路由。
 - 严格文件服务暴露缺文件，不能靠dev回退验收。
+- 数据源在构建时选定：默认请求/api，Pages只能放mock产物。
 - 发布完整产物，并把Actions结果与线上结果分别记录。
 
-自测：修改base后为什么必须重建？hash详情的Document请求是什么？哪个目录包含当前库存的首页？为什么Action的path不能只照抄run的工作目录？下一课按失败风险选择少量有价值的回归。
+自测：修改base后为什么必须重建？hash详情的Document请求是什么？哪个目录包含当前库存的首页？为什么Action的path不能只照抄run的工作目录？为什么放上Pages的必须是mock构建？下一课按失败风险选择少量有价值的回归。
 
 ## 延伸阅读
 

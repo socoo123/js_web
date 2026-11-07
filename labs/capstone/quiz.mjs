@@ -27,7 +27,7 @@ export const AREAS = [
   },
   {
     id: 'delivery', label: '调试、测试、交付与标准', short: '交付', range: 'C01、C45–C48',
-    review: [{ text: 'L5 调试与静态交付', href: '/js_web/labs/l5/' }, { text: 'C01 历史与生态', href: '/js_web/01-history-web/c01-story-ecosystem/' }],
+    review: [{ text: 'L5 对接后端与交付', href: '/js_web/labs/l5/' }, { text: 'C01 历史与生态', href: '/js_web/01-history-web/c01-story-ecosystem/' }],
   },
 ];
 

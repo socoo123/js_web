@@ -10,6 +10,16 @@
 - 禁用真实ProductDetail重试按钮的refetch，既有RTL在P002恢复断言红；还原后绿。Map/独立repository/独立浏览器隔离数据，不触碰个人localStorage。
 - `npm run examples -- c47` 3/3（旧固定输出仍有效参考）。未运行：真机、输入法、屏幕阅读器、Firefox/Safari、Windows；最终整合视觉和发布由主 agent 负责。
 
+## 2026.11-v4.0：接上本地后端
+
+上面的记录属于浏览器内 mock 时期（2026.10-v2.5），不能当作下面新内容的证据。
+
+- 正文改动：页首运行环境加「本地后端」；风险由四项变为五项，与 `v4-l5app` `af357e9` 的 C47 参考 `notes/test-plan.md` 一致，新增「后端拒绝时不知道改哪里」，「失败后不能重试」加列表 500，「路径、键盘、刷新」一行并入真实后端写入；导入块加 `vi`、`within`、`ApiError`；`#请求替身放在哪里决定测到了什么` 下新增 422、409、列表 500 三条 RTL；第 4 节新增 `tests/e2e/api.spec.js` 与 `check C47` 用临时后端的说明；第 5 节改为 API 模式写入后端、损坏恢复在 mock 模式检查；Java 对照、练习、提示、参考答案、项目进度、小结与自测随之调整。原有标题、锚点、主错误（先 setItem 再校验）、连续输入与 HashRouter 内容、6/52/2634800 与 57 未变。
+- 新增的四段测试代码逐字取自 `v4-l5app` `af357e9` 的 `tests/react/regression.test.jsx` 与 `tests/e2e/api.spec.js`（e2e 去掉了注释与 region 标记）；逐行比对，正文每个非空代码行都出现在参考文件里。409 测试的消息「版本已变化」与 422 的「商品字段不合法」是参考测试里替身的文字，不是后端真实消息。
+- 2026-11-07 · macOS 26.3.1 arm64 · Node 24.22.0：在临时数据文件上实际请求后端，恢复固定数据后 `PATCH /api/products/P004`（`If-Match: "1"`，`{"stock":8}`）得 200、`ETag: "2"`，全部商品 6 种、57 件、2784300 分；再用 `If-Match: "1"` 得 409，`current.stock` 为 8、`version` 为 2。这与 api.spec.js 断言的数字一致。
+- 2026-11-07 同一环境，参考实现实跑（拼装方式见 C45 记录，`v4-l5app` `4818e74`，C45–C47 参考步骤，与 `af357e9` 相同）：`LAB_DELIVERY_PORT=8276 LAB_E2E_PORT=8277 node tools/lab.mjs check C47` 中 Vitest 3 个文件 12 条通过（含上面三条后端错误测试），10 组浏览器检查通过（state、editor、fields、retry、slow、static、search、conflict、storage，以及 `tests/e2e/api.spec.js` 在临时数据后端上 1 passed），85 条工作文件检查通过。因此页首恢复「示例已运行验证」，去掉了两处「未运行验证」。
+- 未运行：带代理的严格预览上的手工键盘与窄屏检查（正文写成学员自己做的步骤）。
+
 ## 第一版参考（非 Lab 主线）
 
 | 文件 | 运行 | 说明 |

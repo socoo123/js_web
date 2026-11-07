@@ -8,19 +8,19 @@ sidebar:
 import LessonTask from '../../../components/LessonTask.astro';
 
 > **第 4 周 · 第 24 天** · 阅读跟做约 45 分钟 · 练习约 40 分钟\
-> 前置：C01–C47 · 运行：Node 24、本地 React · 示例已运行验证
+> 前置：C01–C47 · 运行：Node 24、本地 React、本地后端 · 示例已运行验证
 
 ## 这一课解决什么问题
 
 关掉答案，你能给现有应用加一个小条件，解释旧状态为什么必须保留，再拿测试证明没有破坏已有行为吗？最后一课用同一个工作区回答，而不是再下载一份完整项目。
 
-从自己的C47完成态继续：给 `src/react/App.jsx` 加“仅低库存”，新建 `tests/react/final-filter.test.jsx` 和 `notes/final-review.md`。先只读需求、自己实现；完成后再展开下方参考答案。还要在已有规则里复现一次浅复制故障，修复并补回归。
+从自己的C47完成态继续：给 `src/react/App.jsx` 加“仅低库存”，让它向后端要筛选结果；`src/react/query-options.js` 加一个分页查询，`src/services/inventory-repository.js` 给mock补上同形的 `listPage`。新建 `tests/react/final-filter.test.jsx` 和 `notes/final-review.md`。先只读需求、自己实现；完成后再展开下方参考答案。还要在已有规则里复现一次浅复制故障，修复并补回归。
 
 <LessonTask lessonId="C48" />
 
 增量、排错、测试和十题自测共同完成[L5](/js_web/labs/l5/)。自动检查提供行为结果，网站完成标记仍由你决定；能运行参考解和能独立解释是两件事。
 
-现场数值从固定数据开始：先导出当前个人快照，再导入C45保留的baseline.json。不要让上课已经保存的P004=8影响本课“初始低库存”的验收；完成后可导入个人快照恢复。
+现场数值从固定数据开始：保持 `npm run lab -- api` 运行，点「恢复固定数据」或运行 `npm run lab -- api reset`。上课保存的P004=8还在后端数据里，不要让它影响本课“初始低库存”的验收。
 
 ## Java 程序员先看这里
 
@@ -47,14 +47,15 @@ SAPUI5、OpenUI5、UI5 Web Components与React包装库分别保留在[UI5家族�
 
 <a id="2-java-经验继续用值与身份重新判断"></a>
 
-现场需求只增加一个已学过的条件：**低库存为1–5件，售罄0不算**。不新增框架、不增加第二份商品state，也不改公共业务数据。
+现场需求只增加一个已学过的条件：**低库存为1–5件，售罄0不算**。不新增框架、不增加第二份商品state，也不改公共业务数据。筛选交给后端：浏览器只说条件，结果和统计由服务器算。
 
 具体约定：
 
 - 在App的Toolbar内加原生checkbox，label为“仅低库存”；选中写入hash查询参数 `stock=low`，取消删除该参数。
-- 在InventoryView里，从searchParams派生条件；接在现有名称/分类筛选之后、排序之前，与它们取交集。未知stock值按未选中处理。
-- 可见摘要仍由visible计算。初始选中只显示P004/P006，8件、539200分；清除后恢复六种、52件、2634800分。
-- 条件随hash刷新恢复；筛选不能调用repository保存。低库存内把P004保存为8，它应离开结果，焦点回标题；清除筛选看到它仍是8、全量57，P001仍12。
+- 在InventoryView里，从searchParams派生条件。选中时用 `repository.listPage({ stock: "low", q, category })` 读取，名称和分类作为参数一起发出，与低库存取交集；Network里是 `GET /api/products?stock=low`，选了分类或输入搜索时再带上 `category`、`q`。条件写进query key，排序仍在前端对返回的 `items` 做。未知stock值按未选中处理。
+- 选中时摘要用响应的 `summary`（筛选后的全部结果），另起一行用 `totals` 显示「全量 6 种 / 库存 52 / 价值 2634800 分」。初始选中只显示P004/P006，8件、539200分；清除后恢复六种、52件、2634800分。
+- 条件随hash刷新恢复；筛选不能调用repository保存。低库存内把P004保存为8，它应离开结果，焦点回标题，全量那一行变成57；保存成功后失效的是 `["inventory"]` 前缀，低库存结果也跟着重读。清除筛选看到它仍是8、全量57，P001仍12。
+- mock repository也实现同形的 `listPage`，在浏览器里算出同样的 `items`、`summary`、`totals`。用 `VITE_DATA_SOURCE=mock npm run lab -- dev` 勾选一次，数字相同，只是没有 `/api` 请求。
 
 **先猜一猜：** 新数组能保证修改后旧商品不变吗？
 
@@ -126,7 +127,7 @@ Stage4是完成的提案，具体进入哪一年度再看正式收录；更早�
 | --- | --- | --- |
 | 写稳界面 | CSS/可访问性，再补TypeScript桥接 | 键盘可编辑；类型检查与JSON校验分开 |
 | 深入React | 复杂表单、性能、框架边界 | 先测量再优化，保留前后证据 |
-| 连接后端 | Node I/O或自己的Java服务 | 一个校验过的分页读取与失败恢复 |
+| 连接后端 | 读懂 `server/` 的Node实现，或用Java/Spring按同一份[接口](/js_web/labs/api/)重写 | 前端不改，把代理指向自己的服务，C47的真实后端流程照样通过 |
 | 面向SAP | OData/CAP/Fiori Elements | 有metadata的本地服务，区分mock和真实写入 |
 | 测试工程 | 依赖治理与测试深化 | 可复现安装，能抓住一个实际回归 |
 
@@ -162,34 +163,68 @@ return products.map((product) => product.id === id ? { ...product, stock } : pro
 <a id="练习-3演示项目交一张个人补缺表"></a>
 
 :::tip[自己尝试 · 本地 React]
-先关闭下面的参考答案，按第2节需求完成App、测试与notes/final-review.md。修改位置是InventoryView的筛选变量、filtered表达式、Toolbar、saveProduct的可见性判断；现有changeFilter、useSearchParams、summary与repository继续复用。
+先关闭下面的参考答案，按第2节需求完成App、查询、mock的 `listPage`、测试与notes/final-review.md。修改位置是query-options.js的分页查询、InventoryView的筛选变量、filtered与summary表达式、Toolbar、saveProduct的可见性判断；现有changeFilter、useSearchParams与repository其他方法继续复用。
 
-验收：低库存1–5排除0，与名称/分类相交；刷新恢复；保存8后离开结果且焦点可达。浅复制错误必须让“旧值仍0”的断言失败，修复后通过。最后运行 `npm run lab -- check C48`，展示C45排错、C46交付和C47风险计划。
+验收：低库存1–5排除0，与名称/分类相交；Network有 `stock=low` 请求，mock模式数字相同；刷新恢复；保存8后离开结果且焦点可达。浅复制错误必须让“旧值仍0”的断言失败，修复后通过。最后运行 `npm run lab -- check C48`，展示C45排错、C46交付和C47风险计划。做完还可以试L5的[选做挑战：两个标签页的保存冲突](/js_web/labs/l5/#目标-6选做两个标签页的保存冲突)。
 :::
 
 <details>
 <summary>提示</summary>
 
-不存过滤结果state；先派生一个判断商品是否满足库存条件的函数，再复用到filtered和保存后的可见性判断。修改可能让触发编辑的按钮消失，此时把焦点交给已有heading。测试从独立repository开始，期望8/539200来自固定数据。
+不存过滤结果state；低库存结果放在Query缓存里，条件进query key。判断商品是否满足库存条件的函数仍要有：保存后的可见性判断要用它，不能等服务器下一次返回。修改可能让触发编辑的按钮消失，此时把焦点交给已有heading。测试从独立mock repository开始，期望8/539200来自固定数据。
 
 </details>
 
 <details>
 <summary>参考答案</summary>
 
-在App中，紧接order变量后加入前两行；把原来的filtered行替换成第三行。visible与summary保持原样：
+在 `src/react/query-options.js` 的 `inventoryKeys` 里加 `page: (params) => ["inventory", "page", params]`，再在文件末尾加分页查询。条件进query key；换条件时先保留上一份结果，列表不闪空：
+
+```js
+export function pageOptions(repository, params) {
+  return {
+    queryKey: inventoryKeys.page(params),
+    queryFn: ({ signal }) => repository.listPage(params, { signal }),
+    staleTime: 60000, retry: false, placeholderData: keepPreviousData,
+  };
+}
+```
+
+`keepPreviousData` 从 `@tanstack/react-query` 导入。在App里导入 `useQuery` 和 `pageOptions`，`useInventory()` 多取一个 `repository`。紧接order变量后加入下面四行；把原来的filtered与summary两行换成后面那组，visible保持原样：
 
 ```js
 const lowOnly = searchParams.get("stock") === "low";
 const matchesStock = (product) => !lowOnly || (product.stock >= 1 && product.stock <= 5);
-const filtered = selectProducts(products, { query, category }).filter(matchesStock);
+const lowParams = { stock: "low", q: query, category: category === "全部" ? "" : category };
+const low = useQuery({ ...pageOptions(repository, lowParams), enabled: lowOnly });
+
+const filtered = lowOnly ? low.data?.items ?? [] : selectProducts(products, { query, category });
+const visible = order === "stock" ? sortByStock(filtered) : filtered;
+const summary = lowOnly && low.data ? low.data.summary : summarize(visible);
 ```
 
-在Toolbar内、排序后新建按钮前插入：
+在Toolbar内、排序后新建按钮前插入checkbox；在 `#summary` 那一行后面加等待、失败和全量三行：
 
 ```jsx
 <label><input type="checkbox" checked={lowOnly}
   onChange={(event) => changeFilter("stock", event.target.checked ? "low" : "")} />仅低库存</label>
+
+{lowOnly && low.isPending && <p role="status">正在读取低库存</p>}
+{lowOnly && low.isError && <p role="alert">低库存读取失败：{low.error.message}</p>}
+{lowOnly && low.data && <p id="totals">全量 {low.data.totals.count} 种 / 库存 {low.data.totals.stock} / 价值 {low.data.totals.valueCents} 分</p>}
+```
+
+mock repository的 `listPage` 和后端同形，放在 `src/services/inventory-repository.js` 返回的对象里。文件顶部从 `../core/inventory.js` 多导入 `selectProducts` 与 `summarize`：
+
+```js
+async listPage({ q = "", category = "", stock, page = 1, pageSize = 20 } = {}, options) {
+  await before("listPage", options);
+  const stockFilters = { low: (product) => product.stock >= 1 && product.stock <= 5, out: (product) => product.stock === 0 };
+  const matched = selectProducts(current(), { query: q, category: category || "全部" }).filter(stockFilters[stock] ?? (() => true));
+  const start = (page - 1) * pageSize;
+  return structuredClone({ items: matched.slice(start, start + pageSize), page, pageSize,
+    total: matched.length, summary: summarize(matched), totals: summarize(current()) });
+},
 ```
 
 saveProduct中，把原有staysVisible声明替换为下面这行，target及后续dispatch不变：
@@ -203,7 +238,7 @@ const staysVisible = selectProducts([value], { query, category }).length > 0 && 
 ```jsx
 // @vitest-environment happy-dom
 import React from "react";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { freshRepository } from "./support.jsx";
@@ -225,20 +260,23 @@ test("浅复制故障：新库存正确之外，还必须保留旧值与身份",
 ```
 
 ```jsx
-test("低库存排除0，与分类和搜索取交集；筛选不写业务库存", async () => {
+test("低库存交给 listPage：排除0，与分类和搜索取交集；筛选不写业务库存", async () => {
   const user = userEvent.setup();
   const repository = freshRepository();
+  const listPage = vi.spyOn(repository, "listPage");
   render(<App inventoryRepository={repository} />);
   await screen.findByRole("heading", { name: "P001 机械键盘", exact: true });
   const before = await repository.exportText();
   await user.click(screen.getByRole("checkbox", { name: "仅低库存", exact: true }));
+  expect(await screen.findByText("全量 6 种 / 库存 52 / 价值 2634800 分")).toBeInTheDocument();
+  expect(listPage).toHaveBeenLastCalledWith(expect.objectContaining({ stock: "low" }), expect.anything());
   expect(screen.getAllByRole("article")).toHaveLength(2);
   expect(screen.queryByRole("heading", { name: "P002 无线鼠标", exact: true })).not.toBeInTheDocument();
   expect(screen.getByText("库存 8 / 价值 539200 分")).toBeInTheDocument();
   await user.selectOptions(screen.getByRole("combobox", { name: "分类", exact: true }), "配件");
-  expect(screen.getAllByRole("article")).toHaveLength(1);
+  await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(1));
   await user.type(screen.getByRole("textbox", { name: "搜索", exact: true }), "P006");
-  expect(screen.queryAllByRole("article")).toHaveLength(0);
+  await waitFor(() => expect(screen.queryAllByRole("article")).toHaveLength(0));
   expect(await repository.exportText()).toBe(before);
 });
 ```
@@ -247,10 +285,9 @@ test("低库存排除0，与分类和搜索取交集；筛选不写业务库存"
 test("保存8后离开低库存结果，焦点回标题；清除筛选能见已保存值", async () => {
   const user = userEvent.setup();
   render(<App inventoryRepository={freshRepository()} />);
-  await screen.findByRole("heading", { name: "P004 USB-C 扩展坞", exact: true });
-  const low = screen.getByRole("checkbox", { name: "仅低库存", exact: true });
+  const low = await screen.findByRole("checkbox", { name: "仅低库存", exact: true });
   await user.click(low);
-  await user.click(screen.getByRole("button", { name: "编辑 P004", exact: true }));
+  await user.click(await screen.findByRole("button", { name: "编辑 P004", exact: true }));
   const form = screen.getByRole("form", { name: "商品编辑", exact: true });
   const stock = within(form).getByLabelText("库存", { exact: true });
   await user.clear(stock); await user.type(stock, "8");
@@ -258,13 +295,14 @@ test("保存8后离开低库存结果，焦点回标题；清除筛选能见已�
   await waitFor(() => expect(screen.queryByRole("form", { name: "商品编辑" })).not.toBeInTheDocument());
   expect(screen.queryByRole("heading", { name: "P004 USB-C 扩展坞", exact: true })).not.toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "React 库存工作台", exact: true })).toHaveFocus();
+  expect(screen.getByText("全量 6 种 / 库存 57 / 价值 2784300 分")).toBeInTheDocument();
   await user.click(low);
   expect(screen.getByText("库存 57 / 价值 2784300 分")).toBeInTheDocument();
   expect(screen.getAllByRole("article")).toHaveLength(6);
 });
 ```
 
-预期三条通过；错误复制版本的第一条会在旧值比较处红。实际库存由repository写入，筛选只管理URL；保存后目标不再可见就聚焦标题，清除条件仍能看到已确认的8。
+预期三条通过；错误复制版本的第一条会在旧值比较处红。测试注入的是mock repository，`listPage` 在浏览器里算出与后端同形的结果，所以不需要后端；真实的 `stock=low` 请求在页面的Network里看。实际库存由repository写入，筛选只管理URL；筛选结果是异步读回来的，所以分类和搜索之后用 `waitFor`。保存后目标不再可见就聚焦标题，清除条件仍能看到已确认的8。
 
 </details>
 
@@ -277,7 +315,7 @@ test("保存8后离开低库存结果，焦点回标题；清除筛选能见已�
 ## 小结
 
 - 用已有工具独立完成小增量，比重跑答案更能检查理解。
-- 过滤是派生视图，正式修改仍走repository；浅复制要检查内部身份。
+- 过滤是派生视图：条件放URL，结果由服务器算好放进Query缓存，正式修改仍走repository；浅复制要检查内部身份。
 - 标准状态、环境支持与项目升级分别核对。
 - 排错、测试与交付记录共同说明你能做什么，后续先补最弱机制。
 

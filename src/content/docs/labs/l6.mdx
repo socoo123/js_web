@@ -56,7 +56,7 @@ import CapstoneSummary from '../../../components/capstone/CapstoneSummary.astro'
 库存主管想在补货前先看一张**补货计划**：哪些商品库存偏低、各补多少件、要花多少钱，确认后一次补齐。你要在自己的库存工作区里，从 core 一直做到交付。
 
 :::tip[自己尝试 · 本地工作区]
-从 L5 完成的 C48 工程继续，不新建项目。先执行 `npm run lab -- start C48`，确认 `npm test` 和 `npm run lab -- check C48` 都通过，再写新代码。
+从 L5 完成的 C48 工程继续，不新建项目。先执行 `npm run lab -- start C48`，确认 `npm test` 和 `npm run lab -- check C48` 都通过，再写新代码。页面默认连本地后端，开发时开两个终端：一个运行 `npm run lab -- api`，一个运行 `npm run lab -- dev`。
 
 手边没有这份工程时，在工作区执行 `npm run lab -- restore C48 ../inventory-restock`，进入新目录后执行一次 `npm ci`，再从上面的 `start C48` 开始。
 :::
@@ -76,7 +76,7 @@ import CapstoneSummary from '../../../components/capstone/CapstoneSummary.astro'
 
 ### 固定数据的预期结果
 
-起点是固定的六件商品，页面汇总为「库存 52 / 价值 2634800 分」。每次做数字实验前，先导入 C45 准备的固定数据基线，结果才对得上。
+起点是固定的六件商品，页面汇总为「库存 52 / 价值 2634800 分」。确认补货会写进后端的数据文件，每次做数字实验前先点「恢复固定数据」或运行 `npm run lab -- api reset`，结果才对得上。命令行读的是 `data/products.json`，不受后端数据影响。
 
 <CapstoneCases />
 

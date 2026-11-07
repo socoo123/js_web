@@ -174,7 +174,7 @@ export const LEVELS = [
         id: 'delivery', title: '生产构建与浏览器冒烟',
         files: ['tests/e2e/restock.spec.js', 'notes/restock.md'],
         body: [
-          '先构建，再用严格静态服务器预览：`npm run lab -- build`，然后 `LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs`，打开 `http://127.0.0.1:8068/js_web/demos/inventory/#/?threshold=5&target=10`。',
+          '先构建，再用严格静态服务器预览：`npm run lab -- build`，然后 `LAB_STATIC_ROOT=dist/src-react node tools/static-react-server.mjs`，打开 `http://127.0.0.1:8068/js_web/demos/inventory/#/?threshold=5&target=10`。预览期间另一个终端保持 `npm run lab -- api` 运行，`/api` 由预览服务器转给它。',
           '再写一条 Playwright 冒烟：打开带条件的地址、刷新、确认补货、断言汇总。用 `node node_modules/@playwright/test/cli.js test --config tools/playwright.config.mjs` 运行。',
         ],
         read: [
@@ -189,6 +189,7 @@ export const LEVELS = [
         ],
         hint: [
           'e2e 里用相对地址 `./#/?threshold=5&target=10` 打开，baseURL 已经带上子路径。',
+          '确认补货会写进后端，e2e 开头先 `request.post("/api/_lab/reset")`，和 C47 的 `tests/e2e/api.spec.js` 一样，每次都从固定数据开始。',
           '测试计划按「失败后果 → 最小合适层级」写：规则边界放 UT，保存与重试放 RTL，子路径与刷新放浏览器冒烟。',
         ],
       },
@@ -234,6 +235,31 @@ export const LEVELS = [
         ],
         hint: [
           '输入事件里读 `event.target.value`（字符串），交给 `parseStock`；业务计算仍在 core，组件只负责显示和通知。',
+        ],
+      },
+      {
+        id: 'api', title: '可选：补货计划的数据改由本地后端提供',
+        files: ['src/cli/restock.js', 'src/react/RestockPlanner.jsx', 'notes/restock.md'],
+        body: [
+          '页面在 API 模式下已经经 `/api` 读写。开两个终端运行 `npm run lab -- api` 和 `npm run lab -- dev`，先 `npm run lab -- api reset`，再按 5 和 10 确认补货，把 Network 和 api 终端的记录对上。',
+          '命令行目前读的是 `data/products.json`。给它加 `--api`：`node src/cli/restock.js 5 10 --api` 用 `fetch` 读 `http://127.0.0.1:8070/api/products?pageSize=50`，用同一个 `planRestock` 算计划。接口与错误体见 [L5 后端接口](/js_web/labs/api/)。',
+          '用[故障注入](/js_web/labs/api/#故障注入)复现部分失败：给 `POST /api/products/P004/restock` 注入一次 500，再确认补货。',
+        ],
+        read: [
+          { lesson: 'C13', anchor: '2-fetch-的响应分两步处理', label: 'fetch 的响应分两步处理' },
+          { lesson: 'C17', anchor: '3-参数环境变量与退出状态都是接口', label: '参数与退出状态都是接口' },
+          { lesson: 'C45', anchor: '1-先确认失败的是哪一种资源', label: '先确认失败的是哪一种资源' },
+        ],
+        checks: [
+          { id: 'api-page', text: '确认补货后 api 终端有三条 `POST /api/products/…/restock` 200；刷新页面仍是「库存 74 / 价值 3422600 分」' },
+          { id: 'api-cli', text: '补货后运行 `--api` 版本，计划里没有商品；不带 `--api` 仍按固定数据列出三项' },
+          { id: 'api-offline', text: '停掉后端再运行 `--api` 版本：stderr 说明连不上后端，`echo $?` 得到 1' },
+          { id: 'api-partial', text: '注入 P004 的 500 后只有 P002 补上；重试只补 P004 和 P006，最终仍是 74 / 3422600，P002 不变成 20' },
+        ],
+        hint: [
+          'Node 24 自带 `fetch`，命令行和浏览器处理响应的方式相同：先看 `response.ok`，再读 JSON；连不上时 `fetch` 本身会拒绝。',
+          '列表响应的商品在 `items` 里，`pageSize` 最大 50；六件商品一页就够，用 `total` 确认没有漏读。',
+          '注入故障时 `path` 不带查询串；被影响的那一行在 api 终端行尾带「注入故障」。',
         ],
       },
       {
