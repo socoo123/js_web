@@ -1767,6 +1767,8 @@
         "src/services/api-repository.js",
         "src/services/data-source.js",
         "src/react/InventoryProvider.jsx",
+        "src/react/App.jsx",
+        "src/react/ProductEditor.jsx",
         "vite.config.js",
         "notes/debug.md"
       ],
@@ -1844,9 +1846,9 @@
       "startCheckpoint": "C46",
       "endCheckpoint": "C47",
       "files": [
+        "src/react/App.jsx",
         "tests/react/regression.test.jsx",
         "tests/e2e/api.spec.js",
-        "src/react/App.jsx",
         "notes/test-plan.md"
       ],
       "task": "按风险补3–5条回归（坏快照保护、422映射、409冲突、失败重试、连续输入）和1条真实后端浏览器流程，修复真实连续输入时机",
@@ -1886,6 +1888,7 @@
       "endCheckpoint": "C48",
       "files": [
         "src/react/App.jsx",
+        "src/react/query-options.js",
         "src/services/inventory-repository.js",
         "tests/react/final-filter.test.jsx",
         "notes/final-review.md"
